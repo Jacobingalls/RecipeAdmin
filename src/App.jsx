@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Header from './components/Header'
-import Footer from './components/Footer'
 import { ErrorBoundary } from './components/common'
 import LookupPage from './pages/LookupPage'
 import ProductsPage from './pages/ProductsPage'
@@ -25,7 +24,6 @@ export default function App() {
                         </Routes>
                     </div>
                 </ErrorBoundary>
-                <Footer />
             </div>
         </BrowserRouter>
     )

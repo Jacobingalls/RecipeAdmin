@@ -31,20 +31,25 @@ export function formatSignificant(value) {
 
 /**
  * Format a serving size for display, returning primary label and resolved breakdown.
+ * Works with both Preperation and ProductGroup objects.
  *
  * @param {ServingSize} servingSize - The serving size to format
- * @param {Preperation} prep - The preparation for context
+ * @param {Preperation|ProductGroup} prepOrGroup - The preparation or group for context
  * @returns {{ primary: string|null, resolved: string|null }}
  */
-export function formatServingSize(servingSize, prep) {
-    if (!servingSize || !prep) return { primary: null, resolved: null }
+export function formatServingSize(servingSize, prepOrGroup) {
+    if (!servingSize || !prepOrGroup) return { primary: null, resolved: null }
 
     let scalar
     try {
-        scalar = prep.scalar(servingSize)
+        scalar = prepOrGroup.scalar(servingSize)
     } catch {
         return { primary: null, resolved: null }
     }
+
+    // Get mass/volume - for ProductGroup, check oneServing if not explicit
+    const mass = prepOrGroup.mass || prepOrGroup.oneServing?.mass
+    const volume = prepOrGroup.volume || prepOrGroup.oneServing?.volume
 
     // Primary description based on type
     let primary = null
@@ -67,13 +72,13 @@ export function formatServingSize(servingSize, prep) {
     if (servingSize.type !== 'servings') {
         resolved.push(`${formatSignificant(scalar)} serving${scalar !== 1 ? 's' : ''}`)
     }
-    if (prep.mass && servingSize.type !== 'mass') {
-        const mass = prep.mass.amount * scalar
-        resolved.push(`${formatSignificant(mass)}${prep.mass.unit}`)
+    if (mass && servingSize.type !== 'mass') {
+        const massAmount = mass.amount * scalar
+        resolved.push(`${formatSignificant(massAmount)}${mass.unit}`)
     }
-    if (prep.volume && servingSize.type !== 'volume') {
-        const volume = prep.volume.amount * scalar
-        resolved.push(`${formatSignificant(volume)}${prep.volume.unit}`)
+    if (volume && servingSize.type !== 'volume') {
+        const volumeAmount = volume.amount * scalar
+        resolved.push(`${formatSignificant(volumeAmount)}${volume.unit}`)
     }
 
     return { primary, resolved: resolved.join(', ') }

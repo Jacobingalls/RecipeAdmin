@@ -47,3 +47,7 @@ export async function listGroups() {
 export async function getGroup(id) {
     return apiFetch(`/groups/${encodeURIComponent(id)}`);
 }
+
+export async function getVersion() {
+    return apiFetch('/version');
+}

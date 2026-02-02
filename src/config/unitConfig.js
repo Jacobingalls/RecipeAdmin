@@ -37,12 +37,20 @@ export const energyUnits = [
 ]
 
 /**
- * Build option groups for the serving size selector based on preparation capabilities.
- * @param {Preperation} prep - The preparation object
+ * Build option groups for the serving size selector based on preparation/group capabilities.
+ * Works with both Preperation and ProductGroup objects.
+ * @param {Preperation|ProductGroup} prepOrGroup - The preparation or group object
  * @returns {Array} Array of option groups with their options
  */
-export function buildOptionGroups(prep) {
+export function buildOptionGroups(prepOrGroup) {
     const groups = []
+
+    // Get mass/volume - for ProductGroup, check oneServing if not explicit
+    const mass = prepOrGroup.mass || prepOrGroup.oneServing?.mass
+    const volume = prepOrGroup.volume || prepOrGroup.oneServing?.volume
+
+    // Get calories - Preperation has nutritionalInformation, ProductGroup has oneServing.nutrition
+    const calories = prepOrGroup.nutritionalInformation?.calories || prepOrGroup.oneServing?.nutrition?.calories
 
     // Servings - always available
     groups.push({
@@ -52,11 +60,11 @@ export function buildOptionGroups(prep) {
         ]
     })
 
-    // Custom Sizes - only if prep has custom sizes
-    if (prep.customSizes && prep.customSizes.length > 0) {
+    // Custom Sizes - only if has custom sizes
+    if (prepOrGroup.customSizes && prepOrGroup.customSizes.length > 0) {
         groups.push({
             label: 'Custom Sizes',
-            options: prep.customSizes.map(cs => ({
+            options: prepOrGroup.customSizes.map(cs => ({
                 type: 'customSize',
                 value: cs.name,
                 label: cs.name,
@@ -65,8 +73,8 @@ export function buildOptionGroups(prep) {
         })
     }
 
-    // Mass - only if prep has mass defined
-    if (prep.mass) {
+    // Mass - only if has mass defined
+    if (mass) {
         groups.push({
             label: 'Mass',
             options: massUnits.map(u => ({
@@ -78,8 +86,8 @@ export function buildOptionGroups(prep) {
         })
     }
 
-    // Volume - only if prep has volume defined
-    if (prep.volume) {
+    // Volume - only if has volume defined
+    if (volume) {
         groups.push({
             label: 'Volume',
             options: volumeUnits.map(u => ({
@@ -91,8 +99,8 @@ export function buildOptionGroups(prep) {
         })
     }
 
-    // Energy - only if prep has calories defined
-    if (prep.nutritionalInformation?.calories) {
+    // Energy - only if has calories defined
+    if (calories) {
         groups.push({
             label: 'Energy',
             options: energyUnits.map(u => ({

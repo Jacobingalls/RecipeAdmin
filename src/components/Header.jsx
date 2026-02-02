@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import VersionBadge from './VersionBadge'
 
 export default function Header() {
     const [barcode, setBarcode] = useState('')
@@ -19,9 +20,12 @@ export default function Header() {
     return (
         <nav className="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm">
             <div className="container">
-                <NavLink className="navbar-brand fw-semibold" to="/">
-                    Recipe Admin
-                </NavLink>
+                <div className="d-flex flex-column">
+                    <NavLink className="navbar-brand fw-semibold mb-0 fs-6" to="/">
+                        Recipe Admin
+                    </NavLink>
+                    <VersionBadge />
+                </div>
                 <button
                     className="navbar-toggler"
                     type="button"

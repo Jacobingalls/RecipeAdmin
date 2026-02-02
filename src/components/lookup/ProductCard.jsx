@@ -1,12 +1,38 @@
 import { Link } from 'react-router-dom'
+import { Preperation, ServingSize } from '../../domain'
+import { formatSignificant } from '../../utils/formatters'
 
 /**
  * Card display for a product lookup result.
  */
-export default function ProductCard({ item }) {
+export default function ProductCard({ item, barcode }) {
     const p = item.product
-    const prep = p.preperations.find(pr => pr.id === item.preperationID) || p.preperations[0]
-    const calories = prep?.nutritionalInformation?.calories?.amount ?? '?'
+    const prepData = p.preperations.find(pr => pr.id === item.preperationID) || p.preperations[0]
+    const prep = prepData ? new Preperation(prepData) : null
+
+    // Find the matching barcode and get its serving size
+    const matchingBarcode = barcode ? p.barcodes?.find(bc => bc.code === barcode) : null
+    const servingSize = matchingBarcode?.servingSize
+        ? ServingSize.fromObject(matchingBarcode.servingSize) || ServingSize.servings(1)
+        : ServingSize.servings(1)
+
+    // Calculate nutrition for this serving size
+    let nutrition = null
+    let scalar = 1
+    if (prep) {
+        try {
+            nutrition = prep.nutritionalInformationFor(servingSize)
+            scalar = prep.scalar(servingSize)
+        } catch {
+            nutrition = prep.nutritionalInformation
+        }
+    }
+
+    const calories = nutrition?.calories?.amount
+    const mass = prep?.mass ? prep.mass.amount * scalar : null
+    const massUnit = prep?.mass?.unit
+    const volume = prep?.volume ? prep.volume.amount * scalar : null
+    const volumeUnit = prep?.volume?.unit
 
     return (
         <div className="card mb-2">
@@ -16,7 +42,23 @@ export default function ProductCard({ item }) {
                     <Link to={`/products/${p.id}`}>{p.name}</Link>
                 </h5>
                 <p className="card-text text-secondary mb-1">{p.brand}</p>
-                <span className="text-primary">{calories} cal</span>
+                <div className="text-secondary small mb-1">
+                    {servingSize.toString()}
+                </div>
+                <div className="d-flex flex-wrap gap-2">
+                    {calories != null && (
+                        <span className="text-primary">{formatSignificant(calories)} cal</span>
+                    )}
+                    {mass != null && (
+                        <span className="text-secondary">{formatSignificant(mass)}{massUnit}</span>
+                    )}
+                    {volume != null && (
+                        <span className="text-secondary">{formatSignificant(volume)}{volumeUnit}</span>
+                    )}
+                    {scalar !== 1 && (
+                        <span className="text-secondary">({formatSignificant(scalar)} serving{scalar !== 1 ? 's' : ''})</span>
+                    )}
+                </div>
             </div>
         </div>
     )

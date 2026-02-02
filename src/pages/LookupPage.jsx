@@ -31,7 +31,7 @@ export default function LookupPage() {
             )}
             {results && results.length > 0 && (
                 <div>
-                    {results.map((item, i) => <LookupResultItem key={i} item={item} />)}
+                    {results.map((item, i) => <LookupResultItem key={i} item={item} barcode={barcode} />)}
                 </div>
             )}
         </>
