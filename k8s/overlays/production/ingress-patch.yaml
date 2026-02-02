@@ -3,6 +3,10 @@ kind: Ingress
 metadata:
   name: recipe-admin
 spec:
+  tls:
+    - hosts:
+      - recipe-admin.apps.jacobingalls.info
+      secretName: wildcard-apps-jacobingalls-info-tls
   rules:
     - host: recipe-admin.apps.jacobingalls.info
       http:
