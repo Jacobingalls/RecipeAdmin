@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: recipe-admin
+spec:
+  rules:
+    - host: recipe-admin.apps.jacobingalls.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: recipe-admin
+                port:
+                  number: 80

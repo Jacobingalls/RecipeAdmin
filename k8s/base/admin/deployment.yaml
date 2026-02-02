@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recipe-admin
+  labels:
+    app.kubernetes.io/name: recipe-admin
+    app.kubernetes.io/component: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: recipe-admin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: recipe-admin
+        app.kubernetes.io/component: admin
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: recipe-admin
+          image: ghcr.io/jacobingalls/recipe-admin:latest
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          env:
+            - name: UPSTREAM_API_URL
+              value: "http://recipe-api:8080"
+            - name: API_DISPLAY_URL
+              value: "recipe-api (internal)"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
