@@ -1,0 +1,4 @@
+window.__RUNTIME_CONFIG__ = {
+  API_BASE_URL: '__API_BASE_URL__',
+  API_DISPLAY_URL: '__API_DISPLAY_URL__'
+};
