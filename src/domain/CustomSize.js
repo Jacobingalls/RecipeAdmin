@@ -1,4 +1,5 @@
 import { ServingSize } from './ServingSize'
+import { formatSignificant } from '../utils/formatters'
 
 /**
  * Represents a custom serving size (e.g., "1 cookie", "1 bottle").
@@ -33,11 +34,11 @@ export class CustomSize {
         switch (this.servingSize.type) {
             case 'servings':
                 const count = this.servingSize.value
-                return `${count} serving${count !== 1 ? 's' : ''}`
+                return `${formatSignificant(count)} serving${count !== 1 ? 's' : ''}`
             case 'mass':
             case 'volume':
             case 'energy':
-                return `${this.servingSize.value.amount}${this.servingSize.value.unit}`
+                return `${formatSignificant(this.servingSize.value.amount)}${this.servingSize.value.unit}`
             default:
                 return null
         }
