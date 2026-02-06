@@ -1,4 +1,4 @@
-import { Preperation } from '../../domain'
+import { Preparation } from '../../domain'
 import NutritionLabel from '../NutritionLabel'
 import ServingSizeSelector from '../ServingSizeSelector'
 import CustomSizesSection from '../CustomSizesSection'
@@ -9,7 +9,7 @@ import NotesDisplay from '../NotesDisplay'
  * serving size selector, custom sizes, and notes.
  */
 export default function PreparationDetails({ prep: prepData, servingSize, onServingSizeChange }) {
-    const prep = new Preperation(prepData)
+    const prep = new Preparation(prepData)
 
     let nutritionInfo = null
     let error = null

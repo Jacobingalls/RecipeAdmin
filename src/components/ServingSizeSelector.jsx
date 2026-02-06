@@ -6,7 +6,7 @@ import { buildOptionGroups, filterGroups } from '../config/unitConfig'
  * A serving size selector with amount stepper and searchable grouped unit dropdown.
  *
  * @param {Object} props
- * @param {Preperation} props.prep - The preparation object
+ * @param {Preparation} props.prep - The preparation object
  * @param {ServingSize} props.value - Current serving size value
  * @param {Function} props.onChange - Callback when serving size changes
  */

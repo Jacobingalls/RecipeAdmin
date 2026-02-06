@@ -2,7 +2,7 @@ import { NutritionInformation } from './NutritionInformation'
 import { NutritionUnit } from './NutritionUnit'
 import { ServingSize } from './ServingSize'
 import { CustomSize } from './CustomSize'
-import { Preperation } from './Preperation'
+import { Preparation } from './Preparation'
 
 /**
  * Represents a product group containing multiple items.
@@ -48,10 +48,10 @@ export class ProductGroup {
 
         if (item.product) {
             const p = item.product
-            const prepData = p.preperations?.find(pr => pr.id === item.preperationID) || p.preperations?.[0]
+            const prepData = p.preparations?.find(pr => pr.id === item.preparationID) || p.preparations?.[0]
             if (!prepData) return null
 
-            const prep = new Preperation(prepData)
+            const prep = new Preparation(prepData)
 
             // Calculate nutrition for this item's serving size, not just 1 serving
             try {

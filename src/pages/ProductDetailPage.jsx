@@ -6,6 +6,7 @@ import { ServingSize } from '../domain'
 import { LoadingState, ErrorState, EmptyState, BackButton } from '../components/common'
 import { PreparationDetails } from '../components/product'
 import BarcodeSection from '../components/BarcodeSection'
+import NotesDisplay from '../components/NotesDisplay'
 
 export default function ProductDetailPage() {
     const { id } = useParams()
@@ -15,7 +16,7 @@ export default function ProductDetailPage() {
 
     useEffect(() => {
         if (product) {
-            setActivePrep(product.defaultPreperationID || product.preperations[0]?.id)
+            setActivePrep(product.defaultPreparationID || product.preparations[0]?.id)
         }
     }, [product])
 
@@ -23,7 +24,7 @@ export default function ProductDetailPage() {
     if (error) return <ErrorState message={error} />
     if (!product) return <EmptyState message="Product not found" />
 
-    const currentPrep = product.preperations.find(p => p.id === activePrep)
+    const currentPrep = product.preparations.find(p => p.id === activePrep)
 
     return (
         <>
@@ -31,23 +32,29 @@ export default function ProductDetailPage() {
             <h1 className="mb-1">{product.name}</h1>
             <p className="text-secondary mb-3">{product.brand}</p>
 
+            {product.notes?.length > 0 && (
+                <div className="mb-3">
+                    <NotesDisplay notes={product.notes} />
+                </div>
+            )}
+
 			<br/>
 			<h6 className="text-secondary mb-2">
-				Preperation{product.preperations.length > 1 ? "s" : ""}
+				Preparation{product.preparations.length > 1 ? "s" : ""}
 			</h6>
-            {product.preperations.length > 0 && (
+            {product.preparations.length > 0 && (
                 <div className="card mb-3">
-                    {product.preperations.length > 1 && (
+                    {product.preparations.length > 1 && (
                         <div className="card-header">
                             <ul className="nav nav-tabs card-header-tabs">
-                                {product.preperations.map(prep => (
+                                {product.preparations.map(prep => (
                                     <li className="nav-item" key={prep.id}>
                                         <button
                                             className={`nav-link d-flex align-items-center ${activePrep === prep.id ? 'active' : ''}`}
                                             onClick={() => setActivePrep(prep.id)}
                                         >
                                             {prep.name}
-                                            {prep.id === product.defaultPreperationID && (
+                                            {prep.id === product.defaultPreparationID && (
                                                 <span className="badge bg-primary ms-2">Default</span>
                                             )}
                                         </button>

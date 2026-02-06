@@ -38,8 +38,8 @@ export const energyUnits = [
 
 /**
  * Build option groups for the serving size selector based on preparation/group capabilities.
- * Works with both Preperation and ProductGroup objects.
- * @param {Preperation|ProductGroup} prepOrGroup - The preparation or group object
+ * Works with both Preparation and ProductGroup objects.
+ * @param {Preparation|ProductGroup} prepOrGroup - The preparation or group object
  * @returns {Array} Array of option groups with their options
  */
 export function buildOptionGroups(prepOrGroup) {
@@ -49,7 +49,7 @@ export function buildOptionGroups(prepOrGroup) {
     const mass = prepOrGroup.mass || prepOrGroup.oneServing?.mass
     const volume = prepOrGroup.volume || prepOrGroup.oneServing?.volume
 
-    // Get calories - Preperation has nutritionalInformation, ProductGroup has oneServing.nutrition
+    // Get calories - Preparation has nutritionalInformation, ProductGroup has oneServing.nutrition
     const calories = prepOrGroup.nutritionalInformation?.calories || prepOrGroup.oneServing?.nutrition?.calories
 
     // Servings - always available

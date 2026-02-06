@@ -31,10 +31,10 @@ export function formatSignificant(value) {
 
 /**
  * Format a serving size for display, returning primary label and resolved breakdown.
- * Works with both Preperation and ProductGroup objects.
+ * Works with both Preparation and ProductGroup objects.
  *
  * @param {ServingSize} servingSize - The serving size to format
- * @param {Preperation|ProductGroup} prepOrGroup - The preparation or group for context
+ * @param {Preparation|ProductGroup} prepOrGroup - The preparation or group for context
  * @returns {{ primary: string|null, resolved: string|null }}
  */
 export function formatServingSize(servingSize, prepOrGroup) {

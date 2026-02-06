@@ -8,9 +8,9 @@ import { CustomSize } from './CustomSize'
  * Contains nutritional information for one serving and methods to calculate
  * nutrition for different serving sizes.
  *
- * Mirrors RecipeKit's Product.Preperation struct.
+ * Mirrors RecipeKit's Product.Preparation struct.
  */
-export class Preperation {
+export class Preparation {
     /**
      * @param {object} data - Plain object from API
      */
@@ -29,6 +29,9 @@ export class Preperation {
 
         // Custom sizes (e.g., "1 cookie", "1 slice")
         this.customSizes = (data.customSizes || []).map(cs => new CustomSize(cs))
+
+        // Human-readable serving size description (e.g., "1 tbsp (14g)")
+        this.servingSizeDescription = data.servingSizeDescription || null
 
         // Notes about the preparation
         this.notes = data.notes || []

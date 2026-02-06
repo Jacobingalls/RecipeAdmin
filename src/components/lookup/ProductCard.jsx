@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Preperation, ServingSize } from '../../domain'
+import { Preparation, ServingSize } from '../../domain'
 import { formatSignificant } from '../../utils/formatters'
 
 /**
@@ -7,8 +7,8 @@ import { formatSignificant } from '../../utils/formatters'
  */
 export default function ProductCard({ item, barcode }) {
     const p = item.product
-    const prepData = p.preperations.find(pr => pr.id === item.preperationID) || p.preperations[0]
-    const prep = prepData ? new Preperation(prepData) : null
+    const prepData = p.preparations.find(pr => pr.id === item.preparationID) || p.preparations[0]
+    const prep = prepData ? new Preparation(prepData) : null
 
     // Find the matching barcode and get its serving size
     const matchingBarcode = barcode ? p.barcodes?.find(bc => bc.code === barcode) : null

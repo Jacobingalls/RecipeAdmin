@@ -76,6 +76,9 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }) {
                     <span><span className="small">Serving size</span> <span className="fw-bold">{servingPrimary || '—'}</span></span>
                     {servingResolved && <span className="small">{servingResolved}</span>}
                 </div>
+                {prep?.servingSizeDescription && (
+                    <div className="small text-secondary">{prep.servingSizeDescription}</div>
+                )}
             </div>
             <div className="border-bottom border-dark border-4 py-1">
                 <div className="d-flex justify-content-between align-items-end">

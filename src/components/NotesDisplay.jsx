@@ -34,6 +34,20 @@ function NoteItem({ note }) {
         )
     }
 
+    // Warning note
+    if (note.warning) {
+        return (
+            <li className="text-warning">{note.warning.markdown || note.warning.text || JSON.stringify(note.warning)}</li>
+        )
+    }
+
+    // Severe note
+    if (note.severe) {
+        return (
+            <li className="text-danger">{note.severe.markdown || note.severe.text || JSON.stringify(note.severe)}</li>
+        )
+    }
+
     // Plain text note
     if (typeof note === 'string') {
         return <li>{note}</li>
