@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Custom hook for data fetching with automatic cleanup and request cancellation.
@@ -10,70 +10,70 @@ import { useState, useEffect, useCallback, useRef } from 'react'
  * @returns {{data: any, loading: boolean, error: string|null, refetch: Function}}
  */
 export function useApiQuery(fetchFn, deps = [], options = {}) {
-    const { enabled = true } = options
-    const [data, setData] = useState(null)
-    const [loading, setLoading] = useState(enabled)
-    const [error, setError] = useState(null)
-    const abortControllerRef = useRef(null)
-    const fetchFnRef = useRef(fetchFn)
+  const { enabled = true } = options;
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(enabled);
+  const [error, setError] = useState(null);
+  const abortControllerRef = useRef(null);
+  const fetchFnRef = useRef(fetchFn);
 
-    // Keep ref updated with latest fetchFn
-    fetchFnRef.current = fetchFn
+  // Keep ref updated with latest fetchFn
+  fetchFnRef.current = fetchFn;
 
-    const execute = useCallback(async (signal) => {
-        setLoading(true)
-        setError(null)
+  const execute = useCallback(async (signal) => {
+    setLoading(true);
+    setError(null);
 
-        try {
-            const result = await fetchFnRef.current(signal)
-            if (!signal?.aborted) {
-                setData(result)
-            }
-        } catch (err) {
-            if (!signal?.aborted) {
-                if (err.name !== 'AbortError') {
-                    setError(err.message)
-                }
-            }
-        } finally {
-            if (!signal?.aborted) {
-                setLoading(false)
-            }
+    try {
+      const result = await fetchFnRef.current(signal);
+      if (!signal?.aborted) {
+        setData(result);
+      }
+    } catch (err) {
+      if (!signal?.aborted) {
+        if (err.name !== 'AbortError') {
+          setError(err.message);
         }
-    }, [])
+      }
+    } finally {
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
-    useEffect(() => {
-        if (!enabled) {
-            setLoading(false)
-            return
-        }
+  useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
 
-        // Abort any in-flight request
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort()
-        }
+    // Abort any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-        const abortController = new AbortController()
-        abortControllerRef.current = abortController
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
-        execute(abortController.signal)
+    execute(abortController.signal);
 
-        return () => {
-            abortController.abort()
-        }
+    return () => {
+      abortController.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [enabled, execute, ...deps])
+  }, [enabled, execute, ...deps]);
 
-    const refetch = useCallback(() => {
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort()
-        }
+  const refetch = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-        const abortController = new AbortController()
-        abortControllerRef.current = abortController
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
-        execute(abortController.signal)
-    }, [execute])
+    execute(abortController.signal);
+  }, [execute]);
 
-    return { data, loading, error, refetch }
+  return { data, loading, error, refetch };
 }

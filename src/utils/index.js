@@ -1,1 +1,1 @@
-export { formatSignificant, formatServingSize } from './formatters'
+export { formatSignificant, formatServingSize } from './formatters';

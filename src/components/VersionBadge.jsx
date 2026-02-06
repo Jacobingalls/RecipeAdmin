@@ -1,27 +1,31 @@
-import { useApiQuery } from '../hooks'
-import { getVersion } from '../api'
+import { useApiQuery } from '../hooks';
+import { getVersion } from '../api';
 
 export default function VersionBadge() {
-    const { data, loading, error } = useApiQuery(getVersion, [])
+  const { data, loading, error } = useApiQuery(getVersion, []);
 
-    if (loading) {
-        return null
-    }
+  if (loading) {
+    return null;
+  }
 
-    if (error || !data) {
-        return (
-            <small className="text-danger d-block" style={{ fontSize: '0.7rem', marginTop: -4 }}>
-                Error loading version
-            </small>
-        )
-    }
-
-    const environment = data.debug ? 'Debug' : 'Production'
-    const version = data.version ? `v${data.version}` : null
-
+  if (error || !data) {
     return (
-        <small className="text-light d-block" style={{ fontSize: '0.55rem', marginTop: -8, opacity: 0.7 }}>
-            {environment}{version && `, ${version}`}
-        </small>
-    )
+      <small className="text-danger d-block" style={{ fontSize: '0.7rem', marginTop: -4 }}>
+        Error loading version
+      </small>
+    );
+  }
+
+  const environment = data.debug ? 'Debug' : 'Production';
+  const version = data.version ? `v${data.version}` : null;
+
+  return (
+    <small
+      className="text-light d-block"
+      style={{ fontSize: '0.55rem', marginTop: -8, opacity: 0.7 }}
+    >
+      {environment}
+      {version && `, ${version}`}
+    </small>
+  );
 }

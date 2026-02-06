@@ -1,68 +1,75 @@
-import { Link } from 'react-router-dom'
-import { ServingSize, ProductGroup } from '../../domain'
-import { formatSignificant } from '../../utils/formatters'
+import { Link } from 'react-router-dom';
+
+import { ServingSize, ProductGroup } from '../../domain';
+import { formatSignificant } from '../../utils/formatters';
 
 /**
  * Card display for a group lookup result.
  */
 export default function GroupCard({ item, barcode }) {
-    const g = item.group
-    const group = new ProductGroup(g)
+  const g = item.group;
+  const group = new ProductGroup(g);
 
-    // Find the matching barcode and get its serving size
-    const matchingBarcode = barcode ? g.barcodes?.find(bc => bc.code === barcode) : null
-    const servingSize = matchingBarcode?.servingSize
-        ? ServingSize.fromObject(matchingBarcode.servingSize) || ServingSize.servings(1)
-        : ServingSize.servings(1)
+  // Find the matching barcode and get its serving size
+  const matchingBarcode = barcode ? g.barcodes?.find((bc) => bc.code === barcode) : null;
+  const servingSize = matchingBarcode?.servingSize
+    ? ServingSize.fromObject(matchingBarcode.servingSize) || ServingSize.servings(1)
+    : ServingSize.servings(1);
 
-    // Calculate nutrition for this serving size
-    let serving = null
-    try {
-        serving = group.serving(servingSize)
-    } catch {
-        // Fall back to one serving if calculation fails
-        const oneServing = group.oneServing
-        serving = {
-            nutrition: oneServing.nutrition,
-            mass: oneServing.mass,
-            volume: oneServing.volume,
-            servings: 1
-        }
-    }
+  // Calculate nutrition for this serving size
+  let serving = null;
+  try {
+    serving = group.serving(servingSize);
+  } catch {
+    // Fall back to one serving if calculation fails
+    const { oneServing } = group;
+    serving = {
+      nutrition: oneServing.nutrition,
+      mass: oneServing.mass,
+      volume: oneServing.volume,
+      servings: 1,
+    };
+  }
 
-    const calories = serving.nutrition?.calories?.amount
-    const mass = serving.mass?.amount
-    const massUnit = serving.mass?.unit
-    const volume = serving.volume?.amount
-    const volumeUnit = serving.volume?.unit
-    const servings = serving.servings
+  const calories = serving.nutrition?.calories?.amount;
+  const mass = serving.mass?.amount;
+  const massUnit = serving.mass?.unit;
+  const volume = serving.volume?.amount;
+  const volumeUnit = serving.volume?.unit;
+  const { servings } = serving;
 
-    return (
-        <div className="card mb-2">
-            <div className="card-body">
-                <span className="badge bg-info mb-1">Group</span>
-                <h5 className="card-title mb-1">
-                    <Link to={`/groups/${g.id}`}>{g.name}</Link>
-                </h5>
-                <div className="text-secondary small mb-1">
-                    {servingSize.toString()}
-                </div>
-                <div className="d-flex flex-wrap gap-2">
-                    {calories != null && (
-                        <span className="text-primary">{formatSignificant(calories)} cal</span>
-                    )}
-                    {mass != null && (
-                        <span className="text-secondary">{formatSignificant(mass)}{massUnit}</span>
-                    )}
-                    {volume != null && (
-                        <span className="text-secondary">{formatSignificant(volume)}{volumeUnit}</span>
-                    )}
-                    {servings !== 1 && (
-                        <span className="text-secondary">({formatSignificant(servings)} serving{servings !== 1 ? 's' : ''})</span>
-                    )}
-                </div>
-                <div className="text-secondary small mt-1">{g.items.length} item(s)</div>
-            </div>
+  return (
+    <div className="card mb-2">
+      <div className="card-body">
+        <span className="badge bg-info mb-1">Group</span>
+        <h5 className="card-title mb-1">
+          <Link to={`/groups/${g.id}`}>{g.name}</Link>
+        </h5>
+        <div className="text-secondary small mb-1">{servingSize.toString()}</div>
+        <div className="d-flex flex-wrap gap-2">
+          {calories != null && (
+            <span className="text-primary">{formatSignificant(calories)} cal</span>
+          )}
+          {mass != null && (
+            <span className="text-secondary">
+              {formatSignificant(mass)}
+              {massUnit}
+            </span>
+          )}
+          {volume != null && (
+            <span className="text-secondary">
+              {formatSignificant(volume)}
+              {volumeUnit}
+            </span>
+          )}
+          {servings !== 1 && (
+            <span className="text-secondary">
+              ({formatSignificant(servings)} serving{servings !== 1 ? 's' : ''})
+            </span>
+          )}
         </div>
-    )
+        <div className="text-secondary small mt-1">{g.items.length} item(s)</div>
+      </div>
+    </div>
+  );
 }

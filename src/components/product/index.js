@@ -1,1 +1,1 @@
-export { default as PreparationDetails } from './PreparationDetails'
+export { default as PreparationDetails } from './PreparationDetails';

@@ -5,9 +5,15 @@ React admin interface for viewing RecipeKit nutrition data. Read-only viewer for
 ## Commands
 
 ```bash
-npm run dev      # Start dev server at http://localhost:3000
-npm run build    # Production build to dist/
+npm run dev          # Start dev server at http://localhost:3000
+npm run build        # Production build to dist/
+npm run lint         # Run ESLint on src/
+npm run lint:fix     # Run ESLint with auto-fix
+npm run format       # Format all src/ files with Prettier
+npm run format:check # Check formatting without writing
 ```
+
+**After making any code changes, always run `npm run lint:fix && npm run format` before committing.**
 
 ## Code Standards
 
