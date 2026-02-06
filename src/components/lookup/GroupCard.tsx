@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
 
+import type { ApiLookupItem } from '../../api';
 import { ServingSize, ProductGroup } from '../../domain';
 import { formatSignificant } from '../../utils/formatters';
 
-/**
- * Card display for a group lookup result.
- */
-export default function GroupCard({ item, barcode }) {
-  const g = item.group;
+interface GroupCardProps {
+  item: ApiLookupItem;
+  barcode?: string;
+}
+
+export default function GroupCard({ item, barcode }: GroupCardProps) {
+  const g = item.group!;
   const group = new ProductGroup(g);
 
   // Find the matching barcode and get its serving size
@@ -17,7 +20,7 @@ export default function GroupCard({ item, barcode }) {
     : ServingSize.servings(1);
 
   // Calculate nutrition for this serving size
-  let serving = null;
+  let serving = group.serving(ServingSize.servings(1));
   try {
     serving = group.serving(servingSize);
   } catch {
@@ -68,7 +71,7 @@ export default function GroupCard({ item, barcode }) {
             </span>
           )}
         </div>
-        <div className="text-secondary small mt-1">{g.items.length} item(s)</div>
+        <div className="text-secondary small mt-1">{g.items?.length ?? 0} item(s)</div>
       </div>
     </div>
   );

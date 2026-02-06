@@ -24,7 +24,7 @@ describe('ProductGroup', () => {
         mass: { amount: 40, unit: 'g' },
         volume: { amount: 60, unit: 'mL' },
         customSizes: [{ name: 'bag', servings: 3 }],
-        barcodes: ['12345', '67890'],
+        barcodes: [{ code: '12345' }, { code: '67890' }],
       };
       const group = new ProductGroup(data);
       expect(group.id).toBe('grp-1');
@@ -33,7 +33,7 @@ describe('ProductGroup', () => {
       expect(group.mass!.amount).toBe(40);
       expect(group.volume!.amount).toBe(60);
       expect(group.customSizes).toHaveLength(1);
-      expect(group.barcodes).toEqual(['12345', '67890']);
+      expect(group.barcodes).toEqual([{ code: '12345' }, { code: '67890' }]);
     });
 
     it('defaults to empty/null values', () => {

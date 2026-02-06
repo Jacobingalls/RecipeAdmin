@@ -1,13 +1,17 @@
 import { Link } from 'react-router-dom';
 
+import type { BarcodeData } from '../domain';
 import { ServingSize } from '../domain';
 
+import type { Note } from './NotesDisplay';
 import NotesDisplay from './NotesDisplay';
 
-/**
- * Displays a list of barcodes with their notes and optional serving size selection.
- */
-export default function BarcodeSection({ barcodes, onSelectSize }) {
+interface BarcodeSectionProps {
+  barcodes?: BarcodeData[];
+  onSelectSize?: (size: ServingSize) => void;
+}
+
+export default function BarcodeSection({ barcodes, onSelectSize }: BarcodeSectionProps) {
   if (!barcodes || barcodes.length === 0) return null;
 
   return (
@@ -22,13 +26,18 @@ export default function BarcodeSection({ barcodes, onSelectSize }) {
   );
 }
 
-function BarcodeItem({ barcode, onSelectSize }) {
+interface BarcodeItemProps {
+  barcode: BarcodeData;
+  onSelectSize?: (size: ServingSize) => void;
+}
+
+function BarcodeItem({ barcode, onSelectSize }: BarcodeItemProps) {
   const { code, notes, servingSize: servingSizeData } = barcode;
-  const servingSize = ServingSize.fromObject(servingSizeData) || ServingSize.servings(1);
+  const servingSize = ServingSize.fromObject(servingSizeData ?? null) || ServingSize.servings(1);
 
   const handleUse = () => {
     if (servingSize) {
-      onSelectSize(servingSize);
+      onSelectSize?.(servingSize);
     }
   };
 
@@ -65,7 +74,7 @@ function BarcodeItem({ barcode, onSelectSize }) {
 
       {hasNotes && (
         <div className="mt-1">
-          <NotesDisplay notes={notes} />
+          <NotesDisplay notes={notes as Note[]} />
         </div>
       )}
     </div>

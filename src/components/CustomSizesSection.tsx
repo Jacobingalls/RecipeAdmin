@@ -1,11 +1,15 @@
+import type { CustomSize } from '../domain';
 import { ServingSize } from '../domain';
 
+import type { Note } from './NotesDisplay';
 import NotesDisplay from './NotesDisplay';
 
-/**
- * Displays a list of custom sizes with their descriptions and a button to select each one.
- */
-export default function CustomSizesSection({ customSizes, onSelectSize }) {
+interface CustomSizesSectionProps {
+  customSizes?: CustomSize[];
+  onSelectSize?: (size: ServingSize) => void;
+}
+
+export default function CustomSizesSection({ customSizes, onSelectSize }: CustomSizesSectionProps) {
   if (!customSizes || customSizes.length === 0) return null;
 
   return (
@@ -16,7 +20,7 @@ export default function CustomSizesSection({ customSizes, onSelectSize }) {
           <CustomSizeItem
             key={cs.id || cs.name || index}
             customSize={cs}
-            onSelect={() => onSelectSize(ServingSize.customSize(cs.name, 1))}
+            onSelect={() => onSelectSize?.(ServingSize.customSize(cs.name, 1))}
           />
         ))}
       </div>
@@ -24,7 +28,12 @@ export default function CustomSizesSection({ customSizes, onSelectSize }) {
   );
 }
 
-function CustomSizeItem({ customSize, onSelect }) {
+interface CustomSizeItemProps {
+  customSize: CustomSize;
+  onSelect: () => void;
+}
+
+function CustomSizeItem({ customSize, onSelect }: CustomSizeItemProps) {
   const { name, description, notes } = customSize;
   const hasNotes = notes && notes.length > 0;
 
@@ -39,7 +48,7 @@ function CustomSizeItem({ customSize, onSelect }) {
         </div>
         {hasNotes && (
           <div className="mt-1">
-            <NotesDisplay notes={notes} />
+            <NotesDisplay notes={notes as Note[]} />
           </div>
         )}
       </div>

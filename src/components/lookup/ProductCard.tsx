@@ -1,14 +1,18 @@
 import { Link } from 'react-router-dom';
 
+import type { ApiLookupItem } from '../../api';
 import { Preparation, ServingSize } from '../../domain';
 import { formatSignificant } from '../../utils/formatters';
 
-/**
- * Card display for a product lookup result.
- */
-export default function ProductCard({ item, barcode }) {
-  const p = item.product;
-  const prepData = p.preparations.find((pr) => pr.id === item.preparationID) || p.preparations[0];
+interface ProductCardProps {
+  item: ApiLookupItem;
+  barcode?: string;
+}
+
+export default function ProductCard({ item, barcode }: ProductCardProps) {
+  const p = item.product!;
+  const prepData =
+    p.preparations?.find((pr) => pr.id === item.preparationID) || p.preparations?.[0];
   const prep = prepData ? new Preparation(prepData) : null;
 
   // Find the matching barcode and get its serving size
@@ -18,7 +22,7 @@ export default function ProductCard({ item, barcode }) {
     : ServingSize.servings(1);
 
   // Calculate nutrition for this serving size
-  let nutrition = null;
+  let nutrition = prep?.nutritionalInformation ?? null;
   let scalar = 1;
   if (prep) {
     try {

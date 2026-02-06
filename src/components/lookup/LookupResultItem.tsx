@@ -1,10 +1,14 @@
+import type { ApiLookupItem } from '../../api';
+
 import ProductCard from './ProductCard';
 import GroupCard from './GroupCard';
 
-/**
- * Renders a lookup result item, dispatching to ProductCard or GroupCard.
- */
-export default function LookupResultItem({ item, barcode }) {
+interface LookupResultItemProps {
+  item: ApiLookupItem;
+  barcode?: string;
+}
+
+export default function LookupResultItem({ item, barcode }: LookupResultItemProps) {
   if (item.product) {
     return <ProductCard item={item} barcode={barcode} />;
   } else if (item.group) {

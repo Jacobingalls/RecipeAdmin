@@ -14,4 +14,4 @@ export type { CustomSizeData } from './CustomSize';
 export { Preparation } from './Preparation';
 export type { PreparationData } from './Preparation';
 export { ProductGroup } from './ProductGroup';
-export type { ProductGroupData } from './ProductGroup';
+export type { BarcodeData, ProductGroupData } from './ProductGroup';

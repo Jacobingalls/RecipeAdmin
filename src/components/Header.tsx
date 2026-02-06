@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
@@ -7,10 +8,10 @@ export default function Header() {
   const [barcode, setBarcode] = useState('');
   const navigate = useNavigate();
 
-  const navLinkClass = ({ isActive }) =>
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `nav-link px-3 py-2 rounded ${isActive ? 'active bg-primary' : 'text-light'}`;
 
-  function handleSearch(e) {
+  function handleSearch(e: FormEvent) {
     e.preventDefault();
     if (barcode.trim()) {
       navigate(`/lookup/${encodeURIComponent(barcode.trim())}`);

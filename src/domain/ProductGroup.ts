@@ -8,6 +8,12 @@ import { CustomSize } from './CustomSize';
 import type { PreparationData } from './Preparation';
 import { Preparation } from './Preparation';
 
+export interface BarcodeData {
+  code: string;
+  notes?: unknown[];
+  servingSize?: ServingSizeData;
+}
+
 interface GroupItem {
   servingSize?: ServingSizeData;
   preparationID?: string;
@@ -24,7 +30,7 @@ export interface ProductGroupData {
   mass?: NutritionUnitData | null;
   volume?: NutritionUnitData | null;
   customSizes?: CustomSizeData[];
-  barcodes?: string[];
+  barcodes?: BarcodeData[];
 }
 
 interface ItemServing {
@@ -50,7 +56,7 @@ export class ProductGroup {
   mass: NutritionUnit | null;
   volume: NutritionUnit | null;
   customSizes: CustomSize[];
-  barcodes: string[];
+  barcodes: BarcodeData[];
 
   constructor(data: ProductGroupData = {}) {
     this.id = data.id;

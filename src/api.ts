@@ -1,4 +1,4 @@
-import type { PreparationData, ProductGroupData } from './domain';
+import type { BarcodeData, PreparationData, ProductGroupData } from './domain';
 
 export interface ApiProductSummary {
   id: string;
@@ -10,10 +10,10 @@ export interface ApiProduct {
   id: string;
   name: string;
   brand?: string;
-  barcodes?: string[];
+  barcodes?: BarcodeData[];
   preparations?: PreparationData[];
   defaultPreparationID?: string;
-  notes?: string[];
+  notes?: unknown[];
 }
 
 export interface ApiGroupSummary {
