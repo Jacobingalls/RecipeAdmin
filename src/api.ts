@@ -29,6 +29,7 @@ export interface ApiLookupItem {
 
 export interface ApiVersion {
   version: string;
+  debug?: boolean;
 }
 
 // Runtime config (Docker) or build-time config (local dev)

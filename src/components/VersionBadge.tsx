@@ -1,8 +1,9 @@
-import { useApiQuery } from '../hooks';
+import type { ApiVersion } from '../api';
 import { getVersion } from '../api';
+import { useApiQuery } from '../hooks';
 
 export default function VersionBadge() {
-  const { data, loading, error } = useApiQuery(getVersion, []);
+  const { data, loading, error } = useApiQuery<ApiVersion>(getVersion, []);
 
   if (loading) {
     return null;

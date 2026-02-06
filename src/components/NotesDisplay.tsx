@@ -1,8 +1,35 @@
+interface SourceNote {
+  source: { url: string; title?: string };
+}
+
+interface TextContent {
+  markdown?: string;
+  text?: string;
+}
+
+interface InformationNote {
+  information: TextContent;
+}
+
+interface WarningNote {
+  warning: TextContent;
+}
+
+interface SevereNote {
+  severe: TextContent;
+}
+
+export type Note = SourceNote | InformationNote | WarningNote | SevereNote | string;
+
+interface NotesDisplayProps {
+  notes?: Note[];
+}
+
 /**
  * A reusable component for displaying notes.
  * Handles different note types: source (url/title), information (markdown), and plain text.
  */
-export default function NotesDisplay({ notes }) {
+export default function NotesDisplay({ notes }: NotesDisplayProps) {
   if (!notes || notes.length === 0) return null;
 
   return (
@@ -14,9 +41,17 @@ export default function NotesDisplay({ notes }) {
   );
 }
 
-function NoteItem({ note }) {
+interface NoteItemProps {
+  note: Note;
+}
+
+function NoteItem({ note }: NoteItemProps) {
+  if (typeof note === 'string') {
+    return <li>{note}</li>;
+  }
+
   // Source note: has url and optional title
-  if (note.source) {
+  if ('source' in note) {
     const { url, title } = note.source;
     return (
       <li>
@@ -28,7 +63,7 @@ function NoteItem({ note }) {
   }
 
   // Information note: has markdown content
-  if (note.information) {
+  if ('information' in note) {
     return (
       <li>
         {note.information.markdown || note.information.text || JSON.stringify(note.information)}
@@ -37,7 +72,7 @@ function NoteItem({ note }) {
   }
 
   // Warning note
-  if (note.warning) {
+  if ('warning' in note) {
     return (
       <li className="text-warning">
         {note.warning.markdown || note.warning.text || JSON.stringify(note.warning)}
@@ -46,17 +81,12 @@ function NoteItem({ note }) {
   }
 
   // Severe note
-  if (note.severe) {
+  if ('severe' in note) {
     return (
       <li className="text-danger">
         {note.severe.markdown || note.severe.text || JSON.stringify(note.severe)}
       </li>
     );
-  }
-
-  // Plain text note
-  if (typeof note === 'string') {
-    return <li>{note}</li>;
   }
 
   // Unknown format - render as JSON for debugging
