@@ -1,17 +1,20 @@
 import { useParams } from 'react-router-dom';
 
+import type { ApiLookupItem } from '../api';
 import { lookupBarcode } from '../api';
 import { useApiQuery } from '../hooks';
 import { LoadingState, ErrorState, EmptyState } from '../components/common';
 import { LookupResultItem } from '../components/lookup';
 
 export default function LookupPage() {
-  const { barcode } = useParams();
+  const { barcode } = useParams<{ barcode: string }>();
   const {
     data: results,
     loading,
     error,
-  } = useApiQuery(() => lookupBarcode(barcode), [barcode], { enabled: !!barcode });
+  } = useApiQuery<ApiLookupItem[]>(() => lookupBarcode(barcode!), [barcode], {
+    enabled: !!barcode,
+  });
 
   return (
     <>

@@ -19,6 +19,7 @@ export interface ApiProduct {
 export interface ApiGroupSummary {
   id: string;
   name: string;
+  items: { id?: string; name?: string; product?: unknown; group?: unknown }[];
 }
 
 export interface ApiLookupItem {

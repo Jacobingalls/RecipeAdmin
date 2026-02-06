@@ -14,10 +14,13 @@ export interface BarcodeData {
   servingSize?: ServingSizeData;
 }
 
-interface GroupItem {
+export interface GroupItem {
   servingSize?: ServingSizeData;
   preparationID?: string;
   product?: {
+    id?: string;
+    name?: string;
+    brand?: string;
     preparations?: PreparationData[];
   };
   group?: ProductGroupData;

@@ -1,18 +1,21 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
+import type { ApiProductSummary } from '../api';
 import { listProducts } from '../api';
 import { useApiQuery } from '../hooks';
 import { LoadingState, ErrorState, EmptyState } from '../components/common';
 
 export default function ProductsPage() {
-  const { data: products, loading, error } = useApiQuery(listProducts, []);
+  const { data: products, loading, error } = useApiQuery<ApiProductSummary[]>(listProducts, []);
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
 
   const brands = useMemo(() => {
     if (!products) return [];
-    const uniqueBrands = [...new Set(products.map((p) => p.brand).filter(Boolean))];
+    const uniqueBrands = [
+      ...new Set(products.map((p) => p.brand).filter((b): b is string => Boolean(b))),
+    ];
     return uniqueBrands.sort((a, b) => a.localeCompare(b));
   }, [products]);
 

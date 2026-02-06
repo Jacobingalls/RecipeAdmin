@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
+import type { ApiGroupSummary } from '../api';
 import { listGroups } from '../api';
 import { useApiQuery } from '../hooks';
 import { LoadingState, ErrorState, EmptyState } from '../components/common';
 
 export default function GroupsPage() {
-  const { data: groups, loading, error } = useApiQuery(listGroups, []);
+  const { data: groups, loading, error } = useApiQuery<ApiGroupSummary[]>(listGroups, []);
   const [nameFilter, setNameFilter] = useState('');
 
   const filteredGroups = useMemo(() => {

@@ -1,0 +1,208 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+
+import type { UseApiQueryResult } from '../hooks/useApiQuery';
+import type { ApiProduct } from '../api';
+import { useApiQuery } from '../hooks';
+
+import ProductDetailPage from './ProductDetailPage';
+
+vi.mock('../hooks', () => ({
+  useApiQuery: vi.fn(),
+}));
+
+vi.mock('../components/common', () => ({
+  LoadingState: () => <div data-testid="loading-state" />,
+  ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
+  EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
+  BackButton: ({ to }: { to: string }) => (
+    <a data-testid="back-button" href={to}>
+      Back
+    </a>
+  ),
+}));
+
+vi.mock('../components/product', () => ({
+  PreparationDetails: ({ prep }: { prep: { name?: string } }) => (
+    <div data-testid="preparation-details">{prep.name}</div>
+  ),
+}));
+
+vi.mock('../components/BarcodeSection', () => ({
+  default: () => <div data-testid="barcode-section" />,
+}));
+
+vi.mock('../components/NotesDisplay', () => ({
+  default: ({ notes }: { notes: unknown[] }) => (
+    <div data-testid="notes-display">{notes.length} notes</div>
+  ),
+}));
+
+const mockUseApiQuery = vi.mocked(useApiQuery);
+
+function renderWithRoute(route: string) {
+  return render(
+    <MemoryRouter initialEntries={[route]}>
+      <Routes>
+        <Route path="/products/:id" element={<ProductDetailPage />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+function mockQuery(overrides: Partial<UseApiQueryResult<ApiProduct>>) {
+  mockUseApiQuery.mockReturnValue({
+    data: null,
+    loading: false,
+    error: null,
+    refetch: vi.fn(),
+    ...overrides,
+  } as UseApiQueryResult<ApiProduct>);
+}
+
+const sampleProduct: ApiProduct = {
+  id: 'p1',
+  name: 'Peanut Butter',
+  brand: 'NutCo',
+  preparations: [
+    {
+      id: 'prep1',
+      name: 'Standard',
+      nutritionalInformation: {
+        calories: { amount: 190, unit: 'kcal' },
+      },
+      mass: { amount: 32, unit: 'g' },
+    },
+    {
+      id: 'prep2',
+      name: 'Low Fat',
+      nutritionalInformation: {
+        calories: { amount: 150, unit: 'kcal' },
+      },
+    },
+  ],
+  defaultPreparationID: 'prep1',
+  barcodes: [{ code: '123456789' }],
+  notes: [{ information: { text: 'Some note' } }],
+};
+
+describe('ProductDetailPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders loading state', () => {
+    mockQuery({ loading: true });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+  });
+
+  it('renders error state', () => {
+    mockQuery({ error: 'Server error' });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('error-state')).toBeInTheDocument();
+    expect(screen.getByText('Server error')).toBeInTheDocument();
+  });
+
+  it('renders empty state when product is null', () => {
+    mockQuery({ data: null });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+  });
+
+  it('renders product name and brand', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByText('Peanut Butter')).toBeInTheDocument();
+    expect(screen.getByText('NutCo')).toBeInTheDocument();
+  });
+
+  it('renders back button to products', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/products');
+  });
+
+  it('renders preparation details for default prep', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    const details = screen.getByTestId('preparation-details');
+    expect(details).toBeInTheDocument();
+    expect(details).toHaveTextContent('Standard');
+  });
+
+  it('renders tab buttons when multiple preparations exist', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    const tabs = screen.getAllByRole('button');
+    expect(tabs).toHaveLength(2);
+    expect(tabs[0]).toHaveTextContent('Standard');
+    expect(tabs[1]).toHaveTextContent('Low Fat');
+  });
+
+  it('switches preparation on tab click', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    const lowFatTab = screen.getByText('Low Fat');
+    fireEvent.click(lowFatTab);
+    // After clicking, the prep details should show Low Fat
+    expect(screen.getByTestId('preparation-details')).toHaveTextContent('Low Fat');
+  });
+
+  it('renders default badge on default preparation', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByText('Default')).toBeInTheDocument();
+  });
+
+  it('does not render tabs for single preparation', () => {
+    const singlePrep: ApiProduct = {
+      ...sampleProduct,
+      preparations: [sampleProduct.preparations![0]],
+    };
+    mockQuery({ data: singlePrep });
+    renderWithRoute('/products/p1');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('preparation-details')).toBeInTheDocument();
+  });
+
+  it('renders barcode section when barcodes exist', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('barcode-section')).toBeInTheDocument();
+  });
+
+  it('does not render barcode section when no barcodes', () => {
+    mockQuery({ data: { ...sampleProduct, barcodes: [] } });
+    renderWithRoute('/products/p1');
+    expect(screen.queryByTestId('barcode-section')).not.toBeInTheDocument();
+  });
+
+  it('renders notes when present', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('notes-display')).toBeInTheDocument();
+  });
+
+  it('does not render notes when empty', () => {
+    mockQuery({ data: { ...sampleProduct, notes: [] } });
+    renderWithRoute('/products/p1');
+    expect(screen.queryByTestId('notes-display')).not.toBeInTheDocument();
+  });
+
+  it('renders heading with singular Preparation for single prep', () => {
+    const singlePrep: ApiProduct = {
+      ...sampleProduct,
+      preparations: [sampleProduct.preparations![0]],
+    };
+    mockQuery({ data: singlePrep });
+    renderWithRoute('/products/p1');
+    expect(screen.getByText('Preparation')).toBeInTheDocument();
+  });
+
+  it('renders heading with plural Preparations for multiple preps', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByText('Preparations')).toBeInTheDocument();
+  });
+});

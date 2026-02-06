@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 
 import { getGroup } from '../api';
 import { useApiQuery } from '../hooks';
+import type { GroupItem, ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
 import { LoadingState, ErrorState, EmptyState, BackButton } from '../components/common';
 import BarcodeSection from '../components/BarcodeSection';
@@ -10,9 +11,17 @@ import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
 import CustomSizesSection from '../components/CustomSizesSection';
 
+interface GroupItemRowProps {
+  item: GroupItem;
+}
+
 export default function GroupDetailPage() {
-  const { id } = useParams();
-  const { data: groupData, loading, error } = useApiQuery(() => getGroup(id), [id]);
+  const { id } = useParams<{ id: string }>();
+  const {
+    data: groupData,
+    loading,
+    error,
+  } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id]);
   const [servingSize, setServingSize] = useState(() => ServingSize.servings(1));
 
   if (loading) return <LoadingState />;
@@ -20,13 +29,15 @@ export default function GroupDetailPage() {
   if (!groupData) return <EmptyState message="Group not found" />;
 
   const group = new ProductGroup(groupData);
+  const items = groupData.items ?? [];
+  const barcodes = groupData.barcodes ?? [];
 
   let nutritionInfo = null;
   let nutritionError = null;
   try {
     nutritionInfo = group.serving(servingSize).nutrition;
-  } catch (e) {
-    nutritionError = e.message;
+  } catch (e: unknown) {
+    nutritionError = (e as Error).message;
   }
 
   return (
@@ -34,7 +45,7 @@ export default function GroupDetailPage() {
       <BackButton to="/groups" />
       <h1 className="mb-1">{groupData.name}</h1>
       <p className="text-secondary mb-3">
-        {groupData.items.length} item{groupData.items.length !== 1 ? 's' : ''}
+        {items.length} item{items.length !== 1 ? 's' : ''}
       </p>
 
       <br />
@@ -60,30 +71,30 @@ export default function GroupDetailPage() {
       )}
 
       <br />
-      <h6 className="text-secondary mb-2">Item{groupData.items.length !== 1 ? 's' : ''}</h6>
-      {groupData.items.length === 0 ? (
+      <h6 className="text-secondary mb-2">Item{items.length !== 1 ? 's' : ''}</h6>
+      {items.length === 0 ? (
         <p className="text-secondary">No items in this group</p>
       ) : (
         <div className="list-group mb-3">
-          {groupData.items.map((item, i) => (
+          {items.map((item, i) => (
             <GroupItemRow key={i} item={item} />
           ))}
         </div>
       )}
 
-      {groupData.barcodes.length > 0 && (
+      {barcodes.length > 0 && (
         <>
           <br />
-          <BarcodeSection barcodes={groupData.barcodes} onSelectSize={setServingSize} />
+          <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
         </>
       )}
     </>
   );
 }
 
-function GroupItemRow({ item }) {
-  const servingSize = item.servingSize ? ServingSize.fromObject(item.servingSize) : null;
-  const servingSizeDisplay = servingSize ? servingSize.toString() : null;
+function GroupItemRow({ item }: GroupItemRowProps) {
+  const servingSizeObj = item.servingSize ? ServingSize.fromObject(item.servingSize) : null;
+  const servingSizeDisplay = servingSizeObj ? servingSizeObj.toString() : null;
 
   if (item.product) {
     const { product } = item;
@@ -110,7 +121,7 @@ function GroupItemRow({ item }) {
             <span className="badge bg-secondary me-2">Group</span>
             <span className="fw-medium">{group.name}</span>
             <span className="text-secondary ms-2 small">
-              {group.items.length} item{group.items.length !== 1 ? 's' : ''}
+              {(group.items ?? []).length} item{(group.items ?? []).length !== 1 ? 's' : ''}
             </span>
           </div>
           {servingSizeDisplay && <span className="text-secondary small">{servingSizeDisplay}</span>}
