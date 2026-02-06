@@ -1,59 +1,63 @@
+import type { KeyboardEvent } from 'react';
 import { useState, useRef, useEffect } from 'react';
 
+import type {
+  CustomSizeValue,
+  NutritionUnit,
+  Preparation,
+  ProductGroup,
+  ServingSizeType,
+} from '../domain';
 import { ServingSize } from '../domain';
+import type { SelectOption } from '../config/unitConfig';
 import { buildOptionGroups, filterGroups } from '../config/unitConfig';
 
-/**
- * A serving size selector with amount stepper and searchable grouped unit dropdown.
- *
- * @param {Object} props
- * @param {Preparation} props.prep - The preparation object
- * @param {ServingSize} props.value - Current serving size value
- * @param {Function} props.onChange - Callback when serving size changes
- */
-export default function ServingSizeSelector({ prep, value, onChange }) {
+interface ServingSizeSelectorProps {
+  prep: Preparation | ProductGroup;
+  value: ServingSize;
+  onChange: (servingSize: ServingSize) => void;
+}
+
+export default function ServingSizeSelector({ prep, value, onChange }: ServingSizeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const dropdownRef = useRef(null);
-  const searchInputRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Build option groups based on prep capabilities
   const allGroups = buildOptionGroups(prep);
   const filteredGroups = filterGroups(allGroups, searchQuery);
 
   // Get current unit display label
-  const getCurrentLabel = () => {
+  const getCurrentLabel = (): string => {
     if (value.type === 'servings') {
       return 'servings';
     }
     if (value.type === 'customSize') {
-      return value.value.name;
+      return (value.value as CustomSizeValue).name;
     }
     // For mass, volume, energy - find the matching unit label
+    const unitValue = (value.value as NutritionUnit).unit;
     for (const group of allGroups) {
-      const option = group.options.find(
-        (o) => o.type === value.type && o.value === value.value.unit,
-      );
+      const option = group.options.find((o) => o.type === value.type && o.value === unitValue);
       if (option) return option.label;
     }
-    return value.value?.unit || 'unknown';
-  };
-
-  // Handle amount change
-  const handleAmountChange = (newAmount) => {
-    const amount = Math.max(0.01, newAmount);
-    onChange(createServingSize(value.type, getUnitValue(), amount));
+    return unitValue || 'unknown';
   };
 
   // Get the unit value (for mass/volume/energy) or name (for customSize)
-  const getUnitValue = () => {
+  const getUnitValue = (): string => {
     if (value.type === 'servings') return 'servings';
-    if (value.type === 'customSize') return value.value.name;
-    return value.value.unit;
+    if (value.type === 'customSize') return (value.value as CustomSizeValue).name;
+    return (value.value as NutritionUnit).unit;
   };
 
   // Create a new ServingSize based on type and unit
-  const createServingSize = (type, unitValue, amount) => {
+  const createServingSize = (
+    type: ServingSizeType,
+    unitValue: string,
+    amount: number,
+  ): ServingSize => {
     switch (type) {
       case 'servings':
         return ServingSize.servings(amount);
@@ -70,8 +74,14 @@ export default function ServingSizeSelector({ prep, value, onChange }) {
     }
   };
 
+  // Handle amount change
+  const handleAmountChange = (newAmount: number): void => {
+    const amount = Math.max(0.01, newAmount);
+    onChange(createServingSize(value.type, getUnitValue(), amount));
+  };
+
   // Handle unit selection
-  const handleUnitSelect = (option) => {
+  const handleUnitSelect = (option: SelectOption): void => {
     const currentAmount = value.amount || 1;
     onChange(createServingSize(option.type, option.value, currentAmount));
     setIsOpen(false);
@@ -80,8 +90,8 @@ export default function ServingSizeSelector({ prep, value, onChange }) {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSearchQuery('');
       }
@@ -99,7 +109,7 @@ export default function ServingSizeSelector({ prep, value, onChange }) {
   }, [isOpen]);
 
   // Handle keyboard navigation
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
       setIsOpen(false);
       setSearchQuery('');

@@ -1,13 +1,41 @@
 import convert from 'convert';
+import type { Unit } from 'convert';
 
+import type {
+  NutritionInformation,
+  NutritionInformationData,
+  NutritionUnit,
+  Preparation,
+  ProductGroup,
+  ServingSize,
+} from '../domain';
 import { DAILY_VALUES } from '../config/constants';
 import { formatSignificant, formatServingSize } from '../utils/formatters';
 
-/**
- * A reusable Nutrition Facts label component.
- * Takes a NutritionInformation object and renders an FDA-style nutrition label.
- */
-export default function NutritionLabel({ nutritionInfo, servingSize, prep }) {
+type NutrientKey = keyof NutritionInformationData;
+
+interface NutrientData {
+  formatted: string | null;
+  percentDV: number | null;
+  dvFormatted: string | null;
+}
+
+interface NutritionLabelProps {
+  nutritionInfo: NutritionInformation | null;
+  servingSize: ServingSize;
+  prep: Preparation | ProductGroup;
+}
+
+interface NutritionRowProps {
+  label: string;
+  nutrient: NutrientData;
+  bold?: boolean;
+  indent?: boolean;
+  doubleIndent?: boolean;
+  thick?: boolean;
+}
+
+export default function NutritionLabel({ nutritionInfo, servingSize, prep }: NutritionLabelProps) {
   if (!nutritionInfo) return null;
 
   const { primary: servingPrimary, resolved: servingResolved } = formatServingSize(
@@ -16,18 +44,18 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }) {
   );
 
   // Helper to get nutrient data with formatted amount and %DV
-  const getNutrient = (nutrientKey) => {
-    const nutrient = nutritionInfo[nutrientKey];
-    let formatted = null;
+  const getNutrient = (nutrientKey: NutrientKey): NutrientData => {
+    const nutrient = nutritionInfo[nutrientKey] as NutritionUnit | null;
+    let formatted: string | null = null;
     if (nutrient != null) {
       formatted = `${formatSignificant(nutrient.amount)}${nutrient.unit}`;
     }
 
     const dv = DAILY_VALUES[nutrientKey];
-    let percentDV = null;
-    let dvFormatted = null;
+    let percentDV: number | null = null;
+    let dvFormatted: string | null = null;
     if (nutrient != null && dv != null) {
-      const dvInNutrientUnit = convert(dv.amount, dv.unit).to(nutrient.unit);
+      const dvInNutrientUnit = convert(dv.amount, dv.unit as Unit).to(nutrient.unit as Unit);
       percentDV = Math.round((nutrient.amount / dvInNutrientUnit) * 100);
       dvFormatted = `${dv.amount}${dv.unit}`;
     }
@@ -89,7 +117,7 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }) {
           </span>
           {servingResolved && <span className="small">{servingResolved}</span>}
         </div>
-        {prep?.servingSizeDescription && (
+        {'servingSizeDescription' in prep && prep.servingSizeDescription && (
           <div className="small text-secondary">{prep.servingSizeDescription}</div>
         )}
       </div>
@@ -187,13 +215,13 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }) {
   );
 }
 
-function getIndentPadding(doubleIndent, indent) {
+function getIndentPadding(doubleIndent?: boolean, indent?: boolean): number {
   if (doubleIndent) return 24;
   if (indent) return 12;
   return 0;
 }
 
-function NutritionRow({ label, nutrient, bold, indent, doubleIndent, thick }) {
+function NutritionRow({ label, nutrient, bold, indent, doubleIndent, thick }: NutritionRowProps) {
   if (!nutrient || !nutrient.formatted) return null;
 
   const { formatted, percentDV, dvFormatted } = nutrient;
