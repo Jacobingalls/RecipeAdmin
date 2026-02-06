@@ -1,26 +1,36 @@
+import type { DependencyList } from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+
+interface UseApiQueryOptions {
+  enabled?: boolean;
+}
+
+export interface UseApiQueryResult<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
 
 /**
  * Custom hook for data fetching with automatic cleanup and request cancellation.
- *
- * @param {Function} fetchFn - Async function that performs the fetch. Receives AbortSignal as argument.
- * @param {Array} deps - Dependency array that triggers refetch when changed
- * @param {Object} options - Configuration options
- * @param {boolean} options.enabled - Whether to execute the fetch (default: true)
- * @returns {{data: any, loading: boolean, error: string|null, refetch: Function}}
  */
-export function useApiQuery(fetchFn, deps = [], options = {}) {
+export function useApiQuery<T = unknown>(
+  fetchFn: (signal?: AbortSignal) => Promise<T>,
+  deps: DependencyList = [],
+  options: UseApiQueryOptions = {},
+): UseApiQueryResult<T> {
   const { enabled = true } = options;
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState(null);
-  const abortControllerRef = useRef(null);
+  const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const fetchFnRef = useRef(fetchFn);
 
   // Keep ref updated with latest fetchFn
   fetchFnRef.current = fetchFn;
 
-  const execute = useCallback(async (signal) => {
+  const execute = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
     setError(null);
 
@@ -31,8 +41,10 @@ export function useApiQuery(fetchFn, deps = [], options = {}) {
       }
     } catch (err) {
       if (!signal?.aborted) {
-        if (err.name !== 'AbortError') {
+        if (err instanceof Error && err.name !== 'AbortError') {
           setError(err.message);
+        } else if (!(err instanceof Error)) {
+          setError(String(err));
         }
       }
     } finally {

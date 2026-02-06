@@ -3,9 +3,31 @@
  * Contains curated lists of nutrition-relevant units with search aliases.
  */
 
+import type { Preparation, ProductGroup, ServingSizeType } from '../domain';
+
+export interface UnitDefinition {
+  value: string;
+  label: string;
+  aliases: string[];
+}
+
+export interface SelectOption {
+  type: ServingSizeType;
+  value: string;
+  label: string;
+  aliases: string[];
+}
+
+export interface OptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+
+type PrepOrGroup = Preparation | ProductGroup;
+
 // Mass units with display labels and search aliases
 // Uses RecipeKit unit names as values
-export const massUnits = [
+export const massUnits: UnitDefinition[] = [
   { value: 'g', label: 'grams (g)', aliases: ['gram', 'grams', 'g'] },
   { value: 'mg', label: 'milligrams (mg)', aliases: ['milligram', 'milligrams', 'mg'] },
   {
@@ -20,7 +42,7 @@ export const massUnits = [
 
 // Volume units with display labels and search aliases
 // Uses RecipeKit unit names as values (e.g., 'fl oz (US)' not 'fl oz')
-export const volumeUnits = [
+export const volumeUnits: UnitDefinition[] = [
   { value: 'mL', label: 'milliliters (mL)', aliases: ['milliliter', 'milliliters', 'ml', 'mL'] },
   { value: 'L', label: 'liters (L)', aliases: ['liter', 'liters', 'l', 'L'] },
   { value: 'cup (US)', label: 'cups', aliases: ['cup', 'cups'] },
@@ -41,7 +63,7 @@ export const volumeUnits = [
 ];
 
 // Energy units with display labels and search aliases
-export const energyUnits = [
+export const energyUnits: UnitDefinition[] = [
   { value: 'kcal', label: 'calories (kcal)', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
   { value: 'kJ', label: 'kilojoules (kJ)', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
   { value: 'J', label: 'joules (J)', aliases: ['joule', 'joules', 'j', 'J'] },
@@ -51,19 +73,20 @@ export const energyUnits = [
 /**
  * Build option groups for the serving size selector based on preparation/group capabilities.
  * Works with both Preparation and ProductGroup objects.
- * @param {Preparation|ProductGroup} prepOrGroup - The preparation or group object
- * @returns {Array} Array of option groups with their options
  */
-export function buildOptionGroups(prepOrGroup) {
-  const groups = [];
+export function buildOptionGroups(prepOrGroup: PrepOrGroup): OptionGroup[] {
+  const groups: OptionGroup[] = [];
 
   // Get mass/volume - for ProductGroup, check oneServing if not explicit
-  const mass = prepOrGroup.mass || prepOrGroup.oneServing?.mass;
-  const volume = prepOrGroup.volume || prepOrGroup.oneServing?.volume;
+  const oneServing = 'oneServing' in prepOrGroup ? prepOrGroup.oneServing : null;
+  const mass = prepOrGroup.mass || oneServing?.mass;
+  const volume = prepOrGroup.volume || oneServing?.volume;
 
   // Get calories - Preparation has nutritionalInformation, ProductGroup has oneServing.nutrition
   const calories =
-    prepOrGroup.nutritionalInformation?.calories || prepOrGroup.oneServing?.nutrition?.calories;
+    'nutritionalInformation' in prepOrGroup
+      ? prepOrGroup.nutritionalInformation?.calories
+      : oneServing?.nutrition?.calories;
 
   // Servings - always available
   groups.push({
@@ -78,7 +101,7 @@ export function buildOptionGroups(prepOrGroup) {
     groups.push({
       label: 'Custom Sizes',
       options: prepOrGroup.customSizes.map((cs) => ({
-        type: 'customSize',
+        type: 'customSize' as ServingSizeType,
         value: cs.name,
         label: cs.name,
         aliases: [cs.name.toLowerCase()],
@@ -91,7 +114,7 @@ export function buildOptionGroups(prepOrGroup) {
     groups.push({
       label: 'Mass',
       options: massUnits.map((u) => ({
-        type: 'mass',
+        type: 'mass' as ServingSizeType,
         value: u.value,
         label: u.label,
         aliases: u.aliases,
@@ -104,7 +127,7 @@ export function buildOptionGroups(prepOrGroup) {
     groups.push({
       label: 'Volume',
       options: volumeUnits.map((u) => ({
-        type: 'volume',
+        type: 'volume' as ServingSizeType,
         value: u.value,
         label: u.label,
         aliases: u.aliases,
@@ -117,7 +140,7 @@ export function buildOptionGroups(prepOrGroup) {
     groups.push({
       label: 'Energy',
       options: energyUnits.map((u) => ({
-        type: 'energy',
+        type: 'energy' as ServingSizeType,
         value: u.value,
         label: u.label,
         aliases: u.aliases,
@@ -130,11 +153,9 @@ export function buildOptionGroups(prepOrGroup) {
 
 /**
  * Filter option groups by search query.
- * @param {Array} groups - Array of option groups
- * @param {string} query - Search query
- * @returns {Array} Filtered option groups (groups with no matches are excluded)
+ * Groups with no matching options are excluded.
  */
-export function filterGroups(groups, query) {
+export function filterGroups(groups: OptionGroup[], query: string): OptionGroup[] {
   if (!query || query.trim() === '') {
     return groups;
   }

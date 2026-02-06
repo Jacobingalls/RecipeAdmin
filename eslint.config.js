@@ -122,6 +122,21 @@ export default [
     },
   },
   {
+    files: ['src/**/*.test.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        vi: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+  },
+  {
     ignores: ['dist/', 'node_modules/'],
   },
 ]

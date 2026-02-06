@@ -1,0 +1,90 @@
+import type { PreparationData, ProductGroupData } from './domain';
+
+export interface ApiProductSummary {
+  id: string;
+  name: string;
+  brand?: string;
+}
+
+export interface ApiProduct {
+  id: string;
+  name: string;
+  brand?: string;
+  barcodes?: string[];
+  preparations?: PreparationData[];
+  defaultPreparationID?: string;
+  notes?: string[];
+}
+
+export interface ApiGroupSummary {
+  id: string;
+  name: string;
+}
+
+export interface ApiLookupItem {
+  product?: ApiProduct;
+  preparationID?: string;
+  group?: ProductGroupData;
+}
+
+export interface ApiVersion {
+  version: string;
+}
+
+// Runtime config (Docker) or build-time config (local dev)
+const getApiBase = (): string => {
+  if (
+    typeof window !== 'undefined' &&
+    window.__RUNTIME_CONFIG__?.API_BASE_URL &&
+    window.__RUNTIME_CONFIG__.API_BASE_URL !== '__API_BASE_URL__'
+  ) {
+    return window.__RUNTIME_CONFIG__.API_BASE_URL;
+  }
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+};
+
+const getApiDisplayUrl = (): string => {
+  if (
+    typeof window !== 'undefined' &&
+    window.__RUNTIME_CONFIG__?.API_DISPLAY_URL &&
+    window.__RUNTIME_CONFIG__.API_DISPLAY_URL !== '__API_DISPLAY_URL__'
+  ) {
+    return window.__RUNTIME_CONFIG__.API_DISPLAY_URL;
+  }
+  return getApiBase();
+};
+
+export const API_BASE = getApiBase();
+export const API_DISPLAY_URL = getApiDisplayUrl();
+
+async function apiFetch<T>(endpoint: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${endpoint}`);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export async function lookupBarcode(barcode: string): Promise<ApiLookupItem[]> {
+  return apiFetch<ApiLookupItem[]>(`/lookup/${encodeURIComponent(barcode)}`);
+}
+
+export async function listProducts(): Promise<ApiProductSummary[]> {
+  return apiFetch<ApiProductSummary[]>('/products');
+}
+
+export async function getProduct(id: string): Promise<ApiProduct> {
+  return apiFetch<ApiProduct>(`/products/${encodeURIComponent(id)}`);
+}
+
+export async function listGroups(): Promise<ApiGroupSummary[]> {
+  return apiFetch<ApiGroupSummary[]>('/groups');
+}
+
+export async function getGroup(id: string): Promise<ProductGroupData> {
+  return apiFetch<ProductGroupData>(`/groups/${encodeURIComponent(id)}`);
+}
+
+export async function getVersion(): Promise<ApiVersion> {
+  return apiFetch<ApiVersion>('/version');
+}

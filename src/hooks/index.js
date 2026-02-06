@@ -1,1 +1,0 @@
-export { useApiQuery } from './useApiQuery';
