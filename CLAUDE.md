@@ -9,6 +9,45 @@ npm run dev      # Start dev server at http://localhost:3000
 npm run build    # Production build to dist/
 ```
 
+## Code Standards
+
+### Engineering Philosophy
+
+- Follow the [React documentation](https://react.dev/) and [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) conventions
+- Prefer TypeScript with real types over `any`, JSDoc, or untyped JavaScript — migrate existing files when touching them
+- Prefer modern JavaScript: ES modules, async/await, optional chaining, destructuring
+- Functional components with hooks — no class components
+- Prefer small, reusable components and modules with clear interfaces — one component or class per file
+- Code should be testable by design: pure functions, minimal side effects, clear inputs and outputs
+- Avoid unsafe patterns: `dangerouslySetInnerHTML`, direct DOM manipulation, `eval`
+
+### Documentation
+
+- Code should be self-documenting first
+- Public API must be documented (exported functions, hooks, component props)
+- Documentation explains **why** or **how to use**, never **what** it does internally
+- If you find yourself describing what code does, refactor for clarity instead
+- Document unintuitive code as a last resort (prefer refactoring)
+
+**Anti-patterns to avoid:**
+- Don't encode current usage patterns (document the capability, not how callers currently use it)
+- Don't describe implementation details (readers can read the code for that)
+- Don't restate what the signature already tells you
+
+### Testing
+
+- All new code must have tests
+- Target 99% or better code coverage
+- **Never write tests that work around bugs.** If you discover unexpected behavior while testing:
+  1. Write a test that fails demonstrating the issue
+  2. Bring it to the user's attention before proceeding
+  3. Ask whether to fix it (it may be a misunderstanding of the code, or an actual bug)
+
+### File Responsibilities
+
+- `README.md` - User-focused: how to use the app
+- `CLAUDE.md` - Maintainer-focused: architecture, build commands, engineering standards
+
 ## Project Structure
 
 ```
