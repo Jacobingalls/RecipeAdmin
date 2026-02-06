@@ -1,6 +1,0 @@
-export { NutritionUnit } from './NutritionUnit';
-export { NutritionInformation } from './NutritionInformation';
-export { ServingSize } from './ServingSize';
-export { CustomSize } from './CustomSize';
-export { Preparation } from './Preparation';
-export { ProductGroup } from './ProductGroup';

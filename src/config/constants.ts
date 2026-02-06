@@ -2,7 +2,12 @@
 // Reference: https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels
 // Units: amounts are in the units shown, matching FDA reference
 
-export const DAILY_VALUES = {
+export interface DailyValue {
+  amount: number;
+  unit: string;
+}
+
+export const DAILY_VALUES: Record<string, DailyValue | null> = {
   // Energy
   calories: { amount: 2000, unit: 'kcal' },
 

@@ -1,10 +1,16 @@
 import convert from 'convert';
+import type { Unit } from 'convert';
+
+export interface NutritionUnitData {
+  amount: number;
+  unit: string;
+}
 
 /**
  * Maps RecipeKit unit names to convert library unit names.
  * Only includes units that differ between the two systems.
  */
-const UNIT_TO_CONVERT = {
+const UNIT_TO_CONVERT: Record<string, string> = {
   // Volume - RecipeKit uses descriptive names
   'fl oz (US)': 'fl oz',
   'fl oz (Imperial)': 'imp fl oz',
@@ -29,7 +35,7 @@ const UNIT_TO_CONVERT = {
  * Energy units that need custom conversion (convert library doesn't support calories).
  * Values are in joules per unit.
  */
-const ENERGY_TO_JOULES = {
+const ENERGY_TO_JOULES: Record<string, number> = {
   kcal: 4184,
   cal: 4.184,
   kJ: 1000,
@@ -37,25 +43,16 @@ const ENERGY_TO_JOULES = {
   Wh: 3600,
 };
 
-/**
- * Check if a unit is an energy unit we handle specially.
- */
-function isEnergyUnit(unit) {
+function isEnergyUnit(unit: string): boolean {
   return unit in ENERGY_TO_JOULES;
 }
 
-/**
- * Convert between energy units (since convert library doesn't support kcal).
- */
-function convertEnergy(amount, fromUnit, toUnit) {
+function convertEnergy(amount: number, fromUnit: string, toUnit: string): number {
   const joules = amount * ENERGY_TO_JOULES[fromUnit];
   return joules / ENERGY_TO_JOULES[toUnit];
 }
 
-/**
- * Translate a RecipeKit unit to the convert library's expected unit name.
- */
-function toConvertUnit(unit) {
+function toConvertUnit(unit: string): string {
   return UNIT_TO_CONVERT[unit] || unit;
 }
 
@@ -64,15 +61,15 @@ function toConvertUnit(unit) {
  * Supports conversion, scaling, and addition.
  */
 export class NutritionUnit {
-  constructor(amount, unit) {
+  amount: number;
+  unit: string;
+
+  constructor(amount: number, unit: string) {
     this.amount = amount;
     this.unit = unit;
   }
 
-  /**
-   * Convert to a different unit
-   */
-  converted(toUnit) {
+  converted(toUnit: string): NutritionUnit {
     if (this.unit === toUnit) {
       return new NutritionUnit(this.amount, this.unit);
     }
@@ -86,36 +83,24 @@ export class NutritionUnit {
     // Translate units and use convert library
     const fromUnit = toConvertUnit(this.unit);
     const targetUnit = toConvertUnit(toUnit);
-    const convertedAmount = convert(this.amount, fromUnit).to(targetUnit);
+    const convertedAmount = convert(this.amount, fromUnit as Unit).to(targetUnit as Unit);
     return new NutritionUnit(convertedAmount, toUnit);
   }
 
-  /**
-   * Scale the amount by a factor
-   */
-  scaled(factor) {
+  scaled(factor: number): NutritionUnit {
     return new NutritionUnit(this.amount * factor, this.unit);
   }
 
-  /**
-   * Add another NutritionUnit, converting to this unit first
-   */
-  add(other) {
+  add(other: NutritionUnit): NutritionUnit {
     const otherConverted = other.converted(this.unit);
     return new NutritionUnit(this.amount + otherConverted.amount, this.unit);
   }
 
-  /**
-   * Format as string (e.g., "100mg")
-   */
-  toString() {
+  toString(): string {
     return `${this.amount}${this.unit}`;
   }
 
-  /**
-   * Create from plain object { amount, unit }
-   */
-  static fromObject(obj) {
+  static fromObject(obj: NutritionUnitData | null | undefined): NutritionUnit | null {
     if (obj == null) return null;
     return new NutritionUnit(obj.amount, obj.unit);
   }

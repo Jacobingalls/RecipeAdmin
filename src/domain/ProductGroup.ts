@@ -1,8 +1,41 @@
 import { NutritionInformation } from './NutritionInformation';
+import type { NutritionUnitData } from './NutritionUnit';
 import { NutritionUnit } from './NutritionUnit';
+import type { CustomSizeValue, ServingSizeData } from './ServingSize';
 import { ServingSize } from './ServingSize';
+import type { CustomSizeData } from './CustomSize';
 import { CustomSize } from './CustomSize';
+import type { PreparationData } from './Preparation';
 import { Preparation } from './Preparation';
+
+interface GroupItem {
+  servingSize?: ServingSizeData;
+  preparationID?: string;
+  product?: {
+    preparations?: PreparationData[];
+  };
+  group?: ProductGroupData;
+}
+
+export interface ProductGroupData {
+  id?: string;
+  name?: string;
+  items?: GroupItem[];
+  mass?: NutritionUnitData | null;
+  volume?: NutritionUnitData | null;
+  customSizes?: CustomSizeData[];
+  barcodes?: string[];
+}
+
+interface ItemServing {
+  nutrition: NutritionInformation;
+  mass: NutritionUnit | null;
+  volume: NutritionUnit | null;
+}
+
+interface GroupServing extends ItemServing {
+  servings: number;
+}
 
 /**
  * Represents a product group containing multiple items.
@@ -11,10 +44,15 @@ import { Preparation } from './Preparation';
  * Mirrors RecipeKit's ProductGroup struct.
  */
 export class ProductGroup {
-  /**
-   * @param {object} data - Plain object from API (the group object)
-   */
-  constructor(data = {}) {
+  id: string | undefined;
+  name: string | undefined;
+  items: GroupItem[];
+  mass: NutritionUnit | null;
+  volume: NutritionUnit | null;
+  customSizes: CustomSize[];
+  barcodes: string[];
+
+  constructor(data: ProductGroupData = {}) {
     this.id = data.id;
     this.name = data.name;
 
@@ -40,7 +78,7 @@ export class ProductGroup {
    *
    * Returns { nutrition, mass, volume } or null if cannot calculate.
    */
-  static getItemServing(item) {
+  static getItemServing(item: GroupItem): ItemServing | null {
     // Get the item's serving size (how much of this item is in one serving of the group)
     const itemServingSize = item.servingSize
       ? ServingSize.fromObject(item.servingSize) || ServingSize.servings(1)
@@ -93,14 +131,12 @@ export class ProductGroup {
    * Get one serving of the entire group.
    * Sums nutritional information from all items.
    * Uses explicit mass/volume if set, otherwise sums from items.
-   *
-   * @returns {{ nutrition: NutritionInformation, mass: NutritionUnit|null, volume: NutritionUnit|null }}
    */
-  get oneServing() {
+  get oneServing(): ItemServing {
     // Get one serving from each item
     const itemServings = this.items
       .map((item) => ProductGroup.getItemServing(item))
-      .filter((s) => s != null);
+      .filter((s): s is ItemServing => s != null);
 
     // Sum nutritional information
     let nutrition = NutritionInformation.zero();
@@ -115,9 +151,9 @@ export class ProductGroup {
     if (!mass && itemServings.length > 0) {
       const allHaveMass = itemServings.every((s) => s.mass != null);
       if (allHaveMass) {
-        mass = itemServings.reduce((acc, s) => {
+        mass = itemServings.reduce<NutritionUnit | null>((acc, s) => {
           if (!acc) return s.mass;
-          return acc.add(s.mass);
+          return acc.add(s.mass!);
         }, null);
       }
     }
@@ -127,9 +163,9 @@ export class ProductGroup {
     if (!volume && itemServings.length > 0) {
       const allHaveVolume = itemServings.every((s) => s.volume != null);
       if (allHaveVolume) {
-        volume = itemServings.reduce((acc, s) => {
+        volume = itemServings.reduce<NutritionUnit | null>((acc, s) => {
           if (!acc) return s.volume;
-          return acc.add(s.volume);
+          return acc.add(s.volume!);
         }, null);
       }
     }
@@ -139,22 +175,19 @@ export class ProductGroup {
 
   /**
    * Calculate the scalar (multiplier) for a given serving size.
-   *
-   * @param {ServingSize} servingSize
-   * @returns {number}
    */
-  scalar(servingSize) {
+  scalar(servingSize: ServingSize): number {
     const { oneServing } = this;
 
     switch (servingSize.type) {
       case 'servings':
-        return servingSize.value;
+        return servingSize.value as number;
 
       case 'mass': {
         if (!oneServing.mass) {
           throw new Error('Cannot calculate serving by mass: group has no mass defined');
         }
-        const requestedMass = servingSize.value.converted(oneServing.mass.unit);
+        const requestedMass = (servingSize.value as NutritionUnit).converted(oneServing.mass.unit);
         return requestedMass.amount / oneServing.mass.amount;
       }
 
@@ -162,7 +195,9 @@ export class ProductGroup {
         if (!oneServing.volume) {
           throw new Error('Cannot calculate serving by volume: group has no volume defined');
         }
-        const requestedVolume = servingSize.value.converted(oneServing.volume.unit);
+        const requestedVolume = (servingSize.value as NutritionUnit).converted(
+          oneServing.volume.unit,
+        );
         return requestedVolume.amount / oneServing.volume.amount;
       }
 
@@ -170,16 +205,19 @@ export class ProductGroup {
         if (!oneServing.nutrition.calories) {
           throw new Error('Cannot calculate serving by energy: group has no calories defined');
         }
-        const requestedEnergy = servingSize.value.converted(oneServing.nutrition.calories.unit);
+        const requestedEnergy = (servingSize.value as NutritionUnit).converted(
+          oneServing.nutrition.calories.unit,
+        );
         return requestedEnergy.amount / oneServing.nutrition.calories.amount;
       }
 
       case 'customSize': {
-        const customSize = this.customSizes.find((cs) => cs.name === servingSize.value.name);
+        const { name, amount } = servingSize.value as CustomSizeValue;
+        const customSize = this.customSizes.find((cs) => cs.name === name);
         if (!customSize) {
-          throw new Error(`Unknown custom size: ${servingSize.value.name}`);
+          throw new Error(`Unknown custom size: ${name}`);
         }
-        return this.scalar(customSize.servingSize.scaled(servingSize.value.amount));
+        return this.scalar(customSize.servingSize.scaled(amount));
       }
 
       default:
@@ -189,11 +227,8 @@ export class ProductGroup {
 
   /**
    * Get nutritional information for a given serving size.
-   *
-   * @param {ServingSize} servingSize
-   * @returns {{ nutrition: NutritionInformation, mass: NutritionUnit|null, volume: NutritionUnit|null, servings: number }}
    */
-  serving(servingSize) {
+  serving(servingSize: ServingSize): GroupServing {
     const { oneServing } = this;
     const factor = this.scalar(servingSize);
 

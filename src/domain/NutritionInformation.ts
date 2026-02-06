@@ -1,19 +1,76 @@
+import type { NutritionUnitData } from './NutritionUnit';
 import { NutritionUnit } from './NutritionUnit';
 
-/**
- * Helper to add two optional NutritionUnits
- */
-function addOptional(a, b) {
+type OptionalNutritionUnitData = NutritionUnitData | null;
+
+export interface NutritionInformationData {
+  // Energy
+  calories?: OptionalNutritionUnitData;
+  caloriesFromFat?: OptionalNutritionUnitData;
+
+  // Fats
+  totalFat?: OptionalNutritionUnitData;
+  saturatedFat?: OptionalNutritionUnitData;
+  transFat?: OptionalNutritionUnitData;
+  polyunsaturatedFat?: OptionalNutritionUnitData;
+  monounsaturatedFat?: OptionalNutritionUnitData;
+
+  // Cholesterol & Sodium
+  cholesterol?: OptionalNutritionUnitData;
+  sodium?: OptionalNutritionUnitData;
+
+  // Carbohydrates
+  totalCarbohydrate?: OptionalNutritionUnitData;
+  dietaryFiber?: OptionalNutritionUnitData;
+  solubleFiber?: OptionalNutritionUnitData;
+  insolubleFiber?: OptionalNutritionUnitData;
+  totalSugars?: OptionalNutritionUnitData;
+  addedSugars?: OptionalNutritionUnitData;
+  sugarAlcohol?: OptionalNutritionUnitData;
+
+  // Protein
+  protein?: OptionalNutritionUnitData;
+
+  // Vitamins
+  vitaminA?: OptionalNutritionUnitData;
+  vitaminC?: OptionalNutritionUnitData;
+  vitaminD?: OptionalNutritionUnitData;
+  vitaminE?: OptionalNutritionUnitData;
+  vitaminK?: OptionalNutritionUnitData;
+  thiamin?: OptionalNutritionUnitData;
+  riboflavin?: OptionalNutritionUnitData;
+  niacin?: OptionalNutritionUnitData;
+  vitaminB6?: OptionalNutritionUnitData;
+  folate?: OptionalNutritionUnitData;
+  vitaminB12?: OptionalNutritionUnitData;
+  biotin?: OptionalNutritionUnitData;
+  pantothenicAcid?: OptionalNutritionUnitData;
+  choline?: OptionalNutritionUnitData;
+
+  // Minerals
+  calcium?: OptionalNutritionUnitData;
+  iron?: OptionalNutritionUnitData;
+  phosphorus?: OptionalNutritionUnitData;
+  iodine?: OptionalNutritionUnitData;
+  magnesium?: OptionalNutritionUnitData;
+  zinc?: OptionalNutritionUnitData;
+  selenium?: OptionalNutritionUnitData;
+  copper?: OptionalNutritionUnitData;
+  manganese?: OptionalNutritionUnitData;
+  chromium?: OptionalNutritionUnitData;
+  molybdenum?: OptionalNutritionUnitData;
+  chloride?: OptionalNutritionUnitData;
+  potassium?: OptionalNutritionUnitData;
+}
+
+function addOptional(a: NutritionUnit | null, b: NutritionUnit | null): NutritionUnit | null {
   if (a == null && b == null) return null;
   if (a == null) return b;
   if (b == null) return a;
   return a.add(b);
 }
 
-/**
- * Helper to scale an optional NutritionUnit
- */
-function scaleOptional(nu, factor) {
+function scaleOptional(nu: NutritionUnit | null, factor: number): NutritionUnit | null {
   if (nu == null) return null;
   return nu.scaled(factor);
 }
@@ -23,7 +80,65 @@ function scaleOptional(nu, factor) {
  * Supports adding together and scaling.
  */
 export class NutritionInformation {
-  constructor(data = {}) {
+  // Energy
+  calories: NutritionUnit | null;
+  caloriesFromFat: NutritionUnit | null;
+
+  // Fats
+  totalFat: NutritionUnit | null;
+  saturatedFat: NutritionUnit | null;
+  transFat: NutritionUnit | null;
+  polyunsaturatedFat: NutritionUnit | null;
+  monounsaturatedFat: NutritionUnit | null;
+
+  // Cholesterol & Sodium
+  cholesterol: NutritionUnit | null;
+  sodium: NutritionUnit | null;
+
+  // Carbohydrates
+  totalCarbohydrate: NutritionUnit | null;
+  dietaryFiber: NutritionUnit | null;
+  solubleFiber: NutritionUnit | null;
+  insolubleFiber: NutritionUnit | null;
+  totalSugars: NutritionUnit | null;
+  addedSugars: NutritionUnit | null;
+  sugarAlcohol: NutritionUnit | null;
+
+  // Protein
+  protein: NutritionUnit | null;
+
+  // Vitamins
+  vitaminA: NutritionUnit | null;
+  vitaminC: NutritionUnit | null;
+  vitaminD: NutritionUnit | null;
+  vitaminE: NutritionUnit | null;
+  vitaminK: NutritionUnit | null;
+  thiamin: NutritionUnit | null;
+  riboflavin: NutritionUnit | null;
+  niacin: NutritionUnit | null;
+  vitaminB6: NutritionUnit | null;
+  folate: NutritionUnit | null;
+  vitaminB12: NutritionUnit | null;
+  biotin: NutritionUnit | null;
+  pantothenicAcid: NutritionUnit | null;
+  choline: NutritionUnit | null;
+
+  // Minerals
+  calcium: NutritionUnit | null;
+  iron: NutritionUnit | null;
+  phosphorus: NutritionUnit | null;
+  iodine: NutritionUnit | null;
+  magnesium: NutritionUnit | null;
+  zinc: NutritionUnit | null;
+  selenium: NutritionUnit | null;
+  copper: NutritionUnit | null;
+  manganese: NutritionUnit | null;
+  chromium: NutritionUnit | null;
+  molybdenum: NutritionUnit | null;
+  chloride: NutritionUnit | null;
+  potassium: NutritionUnit | null;
+
+  constructor(data: NutritionInformationData = {}) {
     // Energy
     this.calories = NutritionUnit.fromObject(data.calories);
     this.caloriesFromFat = NutritionUnit.fromObject(data.caloriesFromFat);
@@ -83,10 +198,7 @@ export class NutritionInformation {
     this.potassium = NutritionUnit.fromObject(data.potassium);
   }
 
-  /**
-   * Scale all nutritional values by a factor
-   */
-  scaled(factor) {
+  scaled(factor: number): NutritionInformation {
     const result = new NutritionInformation();
 
     // Energy
@@ -150,10 +262,7 @@ export class NutritionInformation {
     return result;
   }
 
-  /**
-   * Add another NutritionInformation to this one
-   */
-  add(other) {
+  add(other: NutritionInformation): NutritionInformation {
     const result = new NutritionInformation();
 
     // Energy
@@ -217,10 +326,7 @@ export class NutritionInformation {
     return result;
   }
 
-  /**
-   * Create a zero NutritionInformation (all values null except calories at 0)
-   */
-  static zero() {
+  static zero(): NutritionInformation {
     return new NutritionInformation({
       calories: { amount: 0, unit: 'kcal' },
     });
