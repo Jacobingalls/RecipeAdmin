@@ -58,41 +58,57 @@ npm run format:check # Check formatting without writing
 
 ```
 src/
-├── api.js                 # API client (uses VITE_API_BASE_URL env var)
-├── App.jsx                # Root component with routing
+├── api.ts                 # API client (uses VITE_API_BASE_URL env var)
+├── App.tsx                # Root component with routing
+├── main.tsx               # Entry point
 ├── components/
 │   ├── common/            # Shared UI components
+│   │   ├── index.ts       # Barrel exports
 │   │   ├── BackButton     # Navigation back button
 │   │   ├── EmptyState     # "No items found" display
 │   │   ├── ErrorBoundary  # Catches render errors
 │   │   ├── ErrorState     # Error message display
 │   │   └── LoadingState   # Loading indicator
 │   ├── lookup/            # Barcode lookup components
+│   │   ├── index.ts       # Barrel exports
 │   │   ├── GroupCard      # Group result card
 │   │   ├── LookupResultItem # Dispatches to Product/GroupCard
 │   │   └── ProductCard    # Product result card
 │   ├── product/           # Product detail components
+│   │   ├── index.ts       # Barrel exports
 │   │   └── PreparationDetails # Nutrition label + serving selector
-│   └── [other components] # NutritionLabel, ServingSizeSelector, etc.
+│   ├── BarcodeSection     # Barcode list with serving size links
+│   ├── CustomSizesSection # Custom size buttons
+│   ├── Footer             # App footer
+│   ├── Header             # App header with nav
+│   ├── NotesDisplay       # Product/barcode notes
+│   ├── NutritionLabel     # FDA-style nutrition facts label
+│   ├── ServingSizeSelector # Serving size input controls
+│   └── VersionBadge       # API version display
 ├── config/
-│   ├── constants.js       # FDA daily values
-│   └── unitConfig.js      # Unit definitions for serving selector
+│   ├── constants.ts       # FDA daily values
+│   └── unitConfig.ts      # Unit definitions for serving selector
 ├── domain/                # Business logic classes
-│   ├── CustomSize.js      # Custom serving size (e.g., "1 cookie")
-│   ├── NutritionInformation.js # Complete nutrition data
-│   ├── NutritionUnit.js   # Amount + unit with conversion
-│   ├── Preperation.js     # Product preparation with nutrition calc
-│   └── ServingSize.js     # Serving size types (mass, volume, etc.)
+│   ├── index.ts           # Barrel exports
+│   ├── CustomSize.ts      # Custom serving size (e.g., "1 cookie")
+│   ├── NutritionInformation.ts # Complete nutrition data
+│   ├── NutritionUnit.ts   # Amount + unit with conversion
+│   ├── Preparation.ts     # Product preparation with nutrition calc
+│   ├── ProductGroup.ts    # Product group with aggregate nutrition
+│   └── ServingSize.ts     # Serving size types (mass, volume, etc.)
 ├── hooks/
-│   └── useApiQuery.js     # Data fetching with cancellation
+│   ├── index.ts           # Barrel exports
+│   └── useApiQuery.ts     # Data fetching with cancellation
 ├── pages/                 # Route components
+│   ├── index.ts           # Barrel exports
 │   ├── GroupDetailPage    # /groups/:id
 │   ├── GroupsPage         # /groups
 │   ├── LookupPage         # /lookup/:barcode?
 │   ├── ProductDetailPage  # /products/:id
 │   └── ProductsPage       # /products
 └── utils/
-    └── formatters.js      # formatSignificant, formatServingSize
+    ├── index.ts           # Barrel exports
+    └── formatters.ts      # formatSignificant, formatServingSize
 ```
 
 ## Key Patterns
@@ -101,7 +117,7 @@ src/
 
 All pages use the `useApiQuery` hook for data fetching:
 
-```jsx
+```tsx
 // Simple usage
 const { data, loading, error } = useApiQuery(listProducts, [])
 
@@ -122,7 +138,7 @@ The hook handles loading states, errors, and request cancellation automatically.
 
 Use components from `src/components/common/` for consistent UI:
 
-```jsx
+```tsx
 import { LoadingState, ErrorState, EmptyState, BackButton } from '../components/common'
 
 if (loading) return <LoadingState />
@@ -134,7 +150,7 @@ if (!data) return <EmptyState message="Not found" />
 
 Domain classes in `src/domain/` handle nutrition calculations:
 
-- `Preperation` - Call `prep.nutritionalInformationFor(servingSize)` to get scaled nutrition
+- `Preparation` - Call `prep.nutritionalInformationFor(servingSize)` to get scaled nutrition
 - `ServingSize` - Create with `ServingSize.servings(n)`, `.mass(amount, unit)`, `.volume()`, `.energy()`, `.customSize()`
 - `NutritionUnit` - Handles unit conversion via `.converted(unit)`
 
@@ -142,9 +158,9 @@ Domain classes in `src/domain/` handle nutrition calculations:
 
 Import from index files:
 
-```jsx
+```tsx
 import { useApiQuery } from '../hooks'
-import { ServingSize, Preperation } from '../domain'
+import { ServingSize, Preparation } from '../domain'
 import { LoadingState, ErrorState } from '../components/common'
 ```
 

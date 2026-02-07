@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ProductGroupData } from '../domain';
+import { ServingSize } from '../domain';
 import { useApiQuery } from '../hooks';
 
 import GroupDetailPage from './GroupDetailPage';
@@ -26,8 +27,12 @@ vi.mock('../components/NutritionLabel', () => ({
   default: () => <div data-testid="nutrition-label" />,
 }));
 
+const mockServingSizeSelectorOnChange = vi.fn();
 vi.mock('../components/ServingSizeSelector', () => ({
-  default: () => <div data-testid="serving-size-selector" />,
+  default: ({ onChange }: { onChange: (ss: unknown) => void }) => {
+    mockServingSizeSelectorOnChange.mockImplementation(onChange);
+    return <div data-testid="serving-size-selector" />;
+  },
 }));
 
 vi.mock('../components/CustomSizesSection', () => ({
@@ -185,5 +190,59 @@ describe('GroupDetailPage', () => {
     renderWithRoute('/groups/g1');
     const groupLink = screen.getByText('Fruit Mix').closest('a');
     expect(groupLink).toHaveAttribute('href', '/groups/g2');
+  });
+
+  it('displays nutrition error when serving calculation throws', () => {
+    // Group with no mass — requesting by mass will throw
+    const noMassGroup: ProductGroupData = {
+      id: 'g-err',
+      name: 'Error Group',
+      items: [
+        {
+          product: {
+            id: 'p1',
+            name: 'Item',
+            preparations: [
+              {
+                id: 'prep1',
+                nutritionalInformation: {
+                  calories: { amount: 100, unit: 'kcal' },
+                },
+              },
+            ],
+          },
+          preparationID: 'prep1',
+        },
+      ],
+    };
+    mockQuery({ data: noMassGroup });
+    renderWithRoute('/groups/g-err');
+    // Initially renders with servings(1) — no error
+    expect(screen.getByTestId('nutrition-label')).toBeInTheDocument();
+
+    // Now trigger a mass-based serving size via the selector mock
+    act(() => {
+      mockServingSizeSelectorOnChange(ServingSize.mass(100, 'g'));
+    });
+
+    // The nutrition error should now be displayed
+    expect(screen.getByText(/Cannot calculate serving by mass/)).toBeInTheDocument();
+    // Nutrition label should no longer render (nutritionInfo is null)
+    expect(screen.queryByTestId('nutrition-label')).not.toBeInTheDocument();
+  });
+
+  it('renders null for GroupItemRow with neither product nor group', () => {
+    const groupWithEmptyItem: ProductGroupData = {
+      id: 'g-null',
+      name: 'Null Item Group',
+      items: [{}, { product: { id: 'p1', name: 'Real Product' } }],
+    };
+    mockQuery({ data: groupWithEmptyItem });
+    renderWithRoute('/groups/g-null');
+    // The empty item renders null (no DOM), but the real product still renders
+    expect(screen.getByText('Real Product')).toBeInTheDocument();
+    // Only one list-group-item link should exist (for the product, not the empty item)
+    const listItems = document.querySelectorAll('.list-group-item');
+    expect(listItems).toHaveLength(1);
   });
 });

@@ -33,6 +33,62 @@ describe('API_BASE and API_DISPLAY_URL', () => {
   it('defaults to localhost when no runtime config', () => {
     expect(API_BASE).toBe('http://localhost:8080');
   });
+
+  it('uses runtime config API_BASE_URL when set', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: 'https://runtime.example.com',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+    };
+    try {
+      vi.resetModules();
+      const mod = await import('./api');
+      expect(mod.API_BASE).toBe('https://runtime.example.com');
+    } finally {
+      delete window.__RUNTIME_CONFIG__;
+    }
+  });
+
+  it('ignores runtime config when API_BASE_URL is placeholder', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+    };
+    try {
+      vi.resetModules();
+      const mod = await import('./api');
+      expect(mod.API_BASE).toBe('http://localhost:8080');
+    } finally {
+      delete window.__RUNTIME_CONFIG__;
+    }
+  });
+
+  it('uses runtime config API_DISPLAY_URL when set', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: 'https://runtime.example.com',
+      API_DISPLAY_URL: 'https://display.example.com',
+    };
+    try {
+      vi.resetModules();
+      const mod = await import('./api');
+      expect(mod.API_DISPLAY_URL).toBe('https://display.example.com');
+    } finally {
+      delete window.__RUNTIME_CONFIG__;
+    }
+  });
+
+  it('falls back API_DISPLAY_URL to API_BASE when display URL is placeholder', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: 'https://runtime.example.com',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+    };
+    try {
+      vi.resetModules();
+      const mod = await import('./api');
+      expect(mod.API_DISPLAY_URL).toBe('https://runtime.example.com');
+    } finally {
+      delete window.__RUNTIME_CONFIG__;
+    }
+  });
 });
 
 describe('listProducts', () => {

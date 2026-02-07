@@ -205,4 +205,34 @@ describe('ProductDetailPage', () => {
     renderWithRoute('/products/p1');
     expect(screen.getByText('Preparations')).toBeInTheDocument();
   });
+
+  it('handles product with undefined preparations', () => {
+    const noPreps: ApiProduct = {
+      id: 'p-noprep',
+      name: 'No Preps Product',
+      brand: 'Test',
+    };
+    mockQuery({ data: noPreps });
+    renderWithRoute('/products/p-noprep');
+    expect(screen.getByText('No Preps Product')).toBeInTheDocument();
+    // Should not render preparation details or tabs
+    expect(screen.queryByTestId('preparation-details')).not.toBeInTheDocument();
+  });
+
+  it('handles clicking a prep tab with null id', () => {
+    const product: ApiProduct = {
+      ...sampleProduct,
+      preparations: [
+        { id: undefined, name: 'No ID Prep', nutritionalInformation: {} },
+        sampleProduct.preparations![1],
+      ],
+    };
+    mockQuery({ data: product });
+    renderWithRoute('/products/p1');
+    // Click the tab with undefined id
+    const noIdTab = screen.getByText('No ID Prep');
+    fireEvent.click(noIdTab);
+    // Should not crash — setSelectedPrep(null) is called
+    expect(screen.getByText('No ID Prep')).toBeInTheDocument();
+  });
 });

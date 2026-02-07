@@ -1,6 +1,6 @@
 import { NutritionUnit } from './NutritionUnit';
 import { ServingSize } from './ServingSize';
-import type { CustomSizeValue, ServingSizeData } from './ServingSize';
+import type { CustomSizeValue, ServingSizeData, ServingSizeType } from './ServingSize';
 
 describe('ServingSize', () => {
   describe('static constructors', () => {
@@ -208,6 +208,21 @@ describe('ServingSize', () => {
     });
   });
 
+  describe('amount getter - default branch', () => {
+    it('returns 0 for unknown type', () => {
+      const ss = new ServingSize('unknown' as ServingSizeType, 0);
+      expect(ss.amount).toBe(0);
+    });
+  });
+
+  describe('scaled - default branch', () => {
+    it('returns self for unknown type', () => {
+      const ss = new ServingSize('unknown' as ServingSizeType, 42);
+      const result = ss.scaled(2);
+      expect(result).toBe(ss);
+    });
+  });
+
   describe('toString', () => {
     it('formats singular serving', () => {
       expect(ServingSize.servings(1).toString()).toBe('1 serving');
@@ -239,6 +254,11 @@ describe('ServingSize', () => {
 
     it('formats plural customSize', () => {
       expect(ServingSize.customSize('cookie', 3).toString()).toBe('3 cookies');
+    });
+
+    it('returns empty string for unknown type', () => {
+      const ss = new ServingSize('unknown' as ServingSizeType, 0);
+      expect(ss.toString()).toBe('');
     });
   });
 });

@@ -127,6 +127,31 @@ describe('ProductGroup', () => {
       expect(result!.nutrition.calories!.amount).toBe(100);
     });
 
+    it('falls back to oneServing when group item serving calculation throws', () => {
+      // Nested group with mass-based servingSize but the inner group has no mass
+      const item = {
+        servingSize: { kind: 'mass', amount: { amount: 100, unit: 'g' } },
+        group: {
+          items: [
+            {
+              product: {
+                preparations: [
+                  makePrepData({
+                    mass: null,
+                    nutritionalInformation: { calories: { amount: 75, unit: 'kcal' } },
+                  }),
+                ],
+              },
+            },
+          ],
+        },
+      };
+      const result = ProductGroup.getItemServing(item);
+      expect(result).not.toBeNull();
+      // Falls back to oneServing (unscaled)
+      expect(result!.nutrition.calories!.amount).toBe(75);
+    });
+
     it('falls back to unscaled serving when scalar throws for product item', () => {
       // Mass-based servingSize but product has no mass
       const item = {
@@ -323,6 +348,12 @@ describe('ProductGroup', () => {
       expect(() => group.scalar(ServingSize.customSize('nonexistent', 1))).toThrow(
         'Unknown custom size: nonexistent',
       );
+    });
+
+    it('throws for unknown serving size type', () => {
+      const group = new ProductGroup(groupData);
+      const unknownSS = new ServingSize('unknown' as never, 1);
+      expect(() => group.scalar(unknownSS)).toThrow('Unknown serving size type');
     });
   });
 

@@ -89,4 +89,11 @@ describe('NotesDisplay', () => {
     expect(screen.getByRole('link', { name: 'Link' })).toBeInTheDocument();
     expect(screen.getByText('Info')).toBeInTheDocument();
   });
+
+  it('renders unknown note type as JSON', () => {
+    const notes = [{ unknownField: 'value' }] as unknown as Note[];
+    render(<NotesDisplay notes={notes} />);
+    const item = screen.getByText('{"unknownField":"value"}');
+    expect(item.closest('li')?.className).toContain('text-muted');
+  });
 });

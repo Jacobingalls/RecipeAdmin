@@ -185,4 +185,60 @@ describe('NutritionLabel', () => {
     // Resolved should show equivalent servings
     expect(screen.getByText(/2 servings/)).toBeInTheDocument();
   });
+
+  it('renders dash when servingPrimary is null', () => {
+    // Use a prep with no mass and request by mass → formatServingSize returns null primary
+    const prep = new Preparation({
+      nutritionalInformation: {
+        calories: { amount: 100, unit: 'kcal' },
+      },
+    });
+    const nutritionInfo = prep.nutritionalInformationFor(ServingSize.servings(1));
+    // Pass a mass-based serving size, but the prep has no mass → primary will be null
+    // Actually, formatServingSize returns { primary: null } when scalar throws.
+    // But scalar won't throw for servings(1). Let's just verify the '—' fallback in the rendering.
+    // We need formatServingSize to return null primary. The easiest way: pass undefined prep.
+    // Actually, looking at the code: servingPrimary || '—'
+    // formatServingSize only returns null for primary when scalar throws.
+    // Use a serving type that will cause scalar to throw (mass, but prep has no mass)
+    const massSS = ServingSize.mass(100, 'g');
+    renderLabel({ nutritionInfo, servingSize: massSS, prep });
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('renders double-indented rows', () => {
+    const prep = makePrep({
+      nutritionalInformation: {
+        calories: { amount: 100, unit: 'kcal' },
+        dietaryFiber: { amount: 5, unit: 'g' },
+        solubleFiber: { amount: 2, unit: 'g' },
+      },
+    });
+    const nutritionInfo = prep.nutritionalInformationFor(ServingSize.servings(1));
+    renderLabel({ nutritionInfo, prep });
+    const solubleFiberLabel = screen.getByText('Soluble Fiber');
+    expect(solubleFiberLabel).toHaveStyle({ paddingLeft: '24px' });
+  });
+
+  it('renders %DV tooltip with formatted daily value', () => {
+    renderLabel();
+    // Dietary Fiber: 5g / 28g DV = 18%
+    const dvCell = screen.getByTitle('18% of 28g');
+    expect(dvCell).toBeInTheDocument();
+    expect(dvCell).toHaveTextContent('18%');
+  });
+
+  it('does not render %DV or tooltip for nutrients without daily values', () => {
+    const prep = makePrep({
+      nutritionalInformation: {
+        calories: { amount: 100, unit: 'kcal' },
+        transFat: { amount: 1, unit: 'g' },
+      },
+    });
+    const nutritionInfo = prep.nutritionalInformationFor(ServingSize.servings(1));
+    renderLabel({ nutritionInfo, prep });
+    // Trans Fat has no daily value
+    const transFatRow = screen.getByText('Trans Fat').closest('.nutrition-row');
+    expect(transFatRow?.querySelector('[title]')).toBeNull();
+  });
 });

@@ -132,4 +132,16 @@ describe('useApiQuery', () => {
       expect(result.current.data).toBe('loaded');
     });
   });
+
+  it('sets error as string for non-Error rejection', async () => {
+    const fetchFn = () => Promise.reject('string error');
+    const { result } = renderHook(() => useApiQuery(fetchFn));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('string error');
+    expect(result.current.data).toBeNull();
+  });
 });

@@ -157,4 +157,33 @@ describe('ProductCard', () => {
     renderWithRouter(<ProductCard item={item} />);
     expect(screen.getByText(/150/)).toBeInTheDocument();
   });
+
+  it('falls back to base nutrition when nutritionalInformationFor throws', () => {
+    // Mass-based barcode serving size on a product with no mass → throws, falls back
+    const item: ApiLookupItem = {
+      product: {
+        id: 'prod-catch',
+        name: 'Catch Product',
+        barcodes: [
+          {
+            code: 'FAIL',
+            servingSize: { kind: 'mass', amount: { amount: 100, unit: 'g' } },
+          },
+        ],
+        preparations: [
+          {
+            id: 'prep-1',
+            nutritionalInformation: {
+              calories: { amount: 120, unit: 'kcal' },
+            },
+          },
+        ],
+      },
+      preparationID: 'prep-1',
+    };
+    renderWithRouter(<ProductCard item={item} barcode="FAIL" />);
+    // Falls back to unscaled base nutrition
+    expect(screen.getByText(/120/)).toBeInTheDocument();
+    expect(screen.getByText(/cal/)).toBeInTheDocument();
+  });
 });

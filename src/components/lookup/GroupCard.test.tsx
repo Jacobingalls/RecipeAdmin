@@ -125,4 +125,39 @@ describe('GroupCard', () => {
     expect(screen.getByText('No Items')).toBeInTheDocument();
     expect(screen.getByText('0 item(s)')).toBeInTheDocument();
   });
+
+  it('falls back to oneServing when serving calculation throws', () => {
+    // Mass-based barcode serving size on a group with no mass defined → throws, falls back
+    const item: ApiLookupItem = {
+      group: {
+        id: 'grp-fallback',
+        name: 'Fallback Group',
+        items: [
+          {
+            product: {
+              preparations: [
+                {
+                  id: 'prep-1',
+                  nutritionalInformation: {
+                    calories: { amount: 80, unit: 'kcal' },
+                  },
+                },
+              ],
+            },
+            preparationID: 'prep-1',
+          },
+        ],
+        barcodes: [
+          {
+            code: 'FAIL',
+            servingSize: { kind: 'mass', amount: { amount: 100, unit: 'g' } },
+          },
+        ],
+      },
+    };
+    renderWithRouter(<GroupCard item={item} barcode="FAIL" />);
+    // Falls back to oneServing nutrition
+    expect(screen.getByText(/80/)).toBeInTheDocument();
+    expect(screen.getByText(/cal/)).toBeInTheDocument();
+  });
 });

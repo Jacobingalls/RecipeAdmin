@@ -131,6 +131,33 @@ describe('formatServingSize', () => {
     expect(result.resolved).toContain('serving');
   });
 
+  it('formats energy type with resolved servings and mass', () => {
+    const prep = new Preparation(basePrep);
+    const ss = ServingSize.energy(400, 'kcal');
+    const result = formatServingSize(ss, prep);
+
+    expect(result.primary).toBe('400kcal');
+    expect(result.resolved).toContain('serving');
+    expect(result.resolved).toContain('g');
+    expect(result.resolved).toContain('mL');
+  });
+
+  it('omits volume from resolved when volume is the primary type', () => {
+    const prep = new Preparation(basePrep);
+    const ss = ServingSize.volume(60, 'mL');
+    const result = formatServingSize(ss, prep);
+
+    expect(result.resolved).not.toMatch(/\dmL/);
+  });
+
+  it('includes servings in resolved for non-servings types', () => {
+    const prep = new Preparation(basePrep);
+    const ss = ServingSize.mass(56, 'g');
+    const result = formatServingSize(ss, prep);
+
+    expect(result.resolved).toContain('serving');
+  });
+
   it('returns nulls when scalar() throws', () => {
     // No mass defined, request by mass
     const prep = new Preparation({ nutritionalInformation: {} });
