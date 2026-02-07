@@ -73,7 +73,7 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
 
   return (
     <div
-      className="nutrition-label border border-dark p-3"
+      className="nutrition-label border p-3"
       style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
       <style>{`
@@ -103,13 +103,10 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
                     border-bottom-color: transparent !important;
                 }
             `}</style>
-      <div className="fw-bold fs-3 border-bottom border-dark" style={{ letterSpacing: '-1px' }}>
+      <div className="fw-bold fs-3 border-bottom" style={{ letterSpacing: '-1px' }}>
         Nutrition Facts
       </div>
-      <div
-        className="border-bottom border-dark py-1"
-        style={{ borderBottomWidth: '8px !important' }}
-      >
+      <div className="border-bottom py-1" style={{ borderBottomWidth: '8px !important' }}>
         <div className="d-flex justify-content-between align-items-center">
           <span>
             <span className="small">Serving size</span>{' '}
@@ -121,7 +118,7 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
           <div className="small text-secondary">{prep.servingSizeDescription}</div>
         )}
       </div>
-      <div className="border-bottom border-dark border-4 py-1">
+      <div className="border-bottom border-4 py-1">
         <div className="d-flex justify-content-between align-items-end">
           <span className="fw-bold fs-5">Calories</span>
           <span className="fw-bold" style={{ fontSize: '2rem' }}>
@@ -176,7 +173,7 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
       <NutritionRow label="Protein" nutrient={getNutrient('protein')} bold thick />
 
       {/* Vitamins & Minerals */}
-      <div className="border-bottom border-dark border-4" />
+      <div className="border-bottom border-4" />
       <NutritionRow label="Vitamin A" nutrient={getNutrient('vitaminA')} />
       <NutritionRow label="Vitamin C" nutrient={getNutrient('vitaminC')} />
       <NutritionRow label="Vitamin D" nutrient={getNutrient('vitaminD')} />
@@ -227,9 +224,7 @@ function NutritionRow({ label, nutrient, bold, indent, doubleIndent, thick }: Nu
   const { formatted, percentDV, dvFormatted } = nutrient;
 
   return (
-    <div
-      className={`nutrition-row d-flex py-1 border-bottom ${thick ? 'border-dark border-4' : ''}`}
-    >
+    <div className={`nutrition-row d-flex py-1 border-bottom ${thick ? 'border-4' : ''}`}>
       <span
         className={bold ? 'fw-bold' : ''}
         style={{ flex: 1, paddingLeft: getIndentPadding(doubleIndent, indent) }}
