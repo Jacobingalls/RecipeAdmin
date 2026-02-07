@@ -189,7 +189,7 @@ describe('getVersion', () => {
 });
 
 describe('logEntry', () => {
-  it('POSTs to /log with correct headers and body', async () => {
+  it('POSTs to /logs with IndirectItem product format', async () => {
     const response = { id: 'log-1' };
     mockFetch.mockResolvedValue(mockResponse(response));
 
@@ -200,27 +200,35 @@ describe('logEntry', () => {
     };
     const result = await logEntry(entry);
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/log`, {
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/logs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
+      body: JSON.stringify({
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep1',
+        servingSize: { kind: 'servings', amount: 2 },
+      }),
     });
     expect(result).toEqual(response);
   });
 
-  it('POSTs with groupId', async () => {
+  it('POSTs with IndirectItem group format', async () => {
     mockFetch.mockResolvedValue(mockResponse({ id: 'log-2' }));
 
-    const entry = {
+    await logEntry({
       groupId: 'g1',
       servingSize: { kind: 'servings', amount: 1 },
-    };
-    await logEntry(entry);
+    });
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/log`, {
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/logs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
+      body: JSON.stringify({
+        kind: 'group',
+        groupID: 'g1',
+        servingSize: { kind: 'servings', amount: 1 },
+      }),
     });
   });
 

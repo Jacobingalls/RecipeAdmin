@@ -115,5 +115,13 @@ export async function getVersion(): Promise<ApiVersion> {
 }
 
 export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse> {
-  return apiPost<LogEntryRequest, LogEntryResponse>('/log', entry);
+  const body = entry.groupId
+    ? { kind: 'group', groupID: entry.groupId, servingSize: entry.servingSize }
+    : {
+        kind: 'product',
+        productID: entry.productId,
+        preparationID: entry.preparationId,
+        servingSize: entry.servingSize,
+      };
+  return apiPost<typeof body, LogEntryResponse>('/logs', body);
 }
