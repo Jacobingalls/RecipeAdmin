@@ -26,6 +26,7 @@ npm run format:check # Check formatting without writing
 - Prefer small, reusable components and modules with clear interfaces — one component or class per file
 - Code should be testable by design: pure functions, minimal side effects, clear inputs and outputs
 - Avoid unsafe patterns: `dangerouslySetInnerHTML`, direct DOM manipulation, `eval`
+- Avoid `eslint-disable` comments — fix the underlying issue instead of suppressing the warning
 
 ### Documentation
 

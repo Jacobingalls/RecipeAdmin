@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type { PreparationData, ServingSize } from '../../domain';
 import { Preparation } from '../../domain';
 import NutritionLabel from '../NutritionLabel';
@@ -9,6 +11,7 @@ interface PreparationDetailsProps {
   prep: PreparationData;
   servingSize: ServingSize;
   onServingSizeChange: (size: ServingSize) => void;
+  actionSlot?: ReactNode;
 }
 
 /**
@@ -19,6 +22,7 @@ export default function PreparationDetails({
   prep: prepData,
   servingSize,
   onServingSizeChange,
+  actionSlot,
 }: PreparationDetailsProps) {
   const prep = new Preparation(prepData);
 
@@ -32,8 +36,9 @@ export default function PreparationDetails({
 
   return (
     <>
-      <div className="mb-3">
+      <div className="d-flex align-items-end mb-3">
         <ServingSizeSelector prep={prep} value={servingSize} onChange={onServingSizeChange} />
+        {actionSlot && <div className="ms-auto">{actionSlot}</div>}
       </div>
 
       {error && <div className="text-danger small mb-3">{error}</div>}

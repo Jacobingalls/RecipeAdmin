@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { ApiLookupItem } from '../../api';
@@ -156,6 +156,25 @@ describe('ProductCard', () => {
     };
     renderWithRouter(<ProductCard item={item} />);
     expect(screen.getByText(/150/)).toBeInTheDocument();
+  });
+
+  it('renders Log button when onLog is provided', () => {
+    const onLog = vi.fn();
+    renderWithRouter(<ProductCard item={makeItem()} onLog={onLog} />);
+    const logButton = screen.getByRole('button', { name: 'Log' });
+    expect(logButton).toBeInTheDocument();
+  });
+
+  it('does not render Log button when onLog is not provided', () => {
+    renderWithRouter(<ProductCard item={makeItem()} />);
+    expect(screen.queryByRole('button', { name: 'Log' })).not.toBeInTheDocument();
+  });
+
+  it('calls onLog when Log button is clicked', () => {
+    const onLog = vi.fn();
+    renderWithRouter(<ProductCard item={makeItem()} onLog={onLog} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+    expect(onLog).toHaveBeenCalledTimes(1);
   });
 
   it('falls back to base nutrition when nutritionalInformationFor throws', () => {

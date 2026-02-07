@@ -5,6 +5,7 @@ import {
   listGroups,
   getGroup,
   getVersion,
+  logEntry,
   API_BASE,
   API_DISPLAY_URL,
 } from './api';
@@ -184,6 +185,51 @@ describe('getVersion', () => {
 
     expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/version`);
     expect(result).toEqual(version);
+  });
+});
+
+describe('logEntry', () => {
+  it('POSTs to /log with correct headers and body', async () => {
+    const response = { id: 'log-1' };
+    mockFetch.mockResolvedValue(mockResponse(response));
+
+    const entry = {
+      productId: 'p1',
+      preparationId: 'prep1',
+      servingSize: { kind: 'servings', amount: 2 },
+    };
+    const result = await logEntry(entry);
+
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/log`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+    expect(result).toEqual(response);
+  });
+
+  it('POSTs with groupId', async () => {
+    mockFetch.mockResolvedValue(mockResponse({ id: 'log-2' }));
+
+    const entry = {
+      groupId: 'g1',
+      servingSize: { kind: 'servings', amount: 1 },
+    };
+    await logEntry(entry);
+
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/log`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+  });
+
+  it('throws on non-ok response', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null, false, 422));
+
+    await expect(logEntry({ servingSize: { kind: 'servings', amount: 1 } })).rejects.toThrow(
+      'HTTP 422',
+    );
   });
 });
 

@@ -147,4 +147,27 @@ describe('PreparationDetails', () => {
     );
     expect(screen.getByTestId('nutrition-label')).toBeInTheDocument();
   });
+
+  it('renders actionSlot when provided', () => {
+    render(
+      <PreparationDetails
+        prep={basePrepData}
+        servingSize={defaultServingSize}
+        onServingSizeChange={onChange}
+        actionSlot={<button data-testid="action-slot-btn">Log</button>}
+      />,
+    );
+    expect(screen.getByTestId('action-slot-btn')).toBeInTheDocument();
+  });
+
+  it('does not render actionSlot wrapper when not provided', () => {
+    const { container } = render(
+      <PreparationDetails
+        prep={basePrepData}
+        servingSize={defaultServingSize}
+        onServingSizeChange={onChange}
+      />,
+    );
+    expect(container.querySelector('.ms-auto')).not.toBeInTheDocument();
+  });
 });

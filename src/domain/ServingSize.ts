@@ -125,6 +125,26 @@ export class ServingSize {
     }
   }
 
+  /** Serialize to plain object format (inverse of fromObject). */
+  toObject(): ServingSizeData {
+    switch (this.type) {
+      case 'servings':
+        return { kind: 'servings', amount: this.value as number };
+      case 'mass':
+      case 'volume':
+      case 'energy': {
+        const nu = this.value as NutritionUnit;
+        return { kind: this.type, amount: { amount: nu.amount, unit: nu.unit } };
+      }
+      case 'customSize': {
+        const { name, amount } = this.value as CustomSizeValue;
+        return { kind: 'customSize', name, amount };
+      }
+      default:
+        return {};
+    }
+  }
+
   toString(): string {
     switch (this.type) {
       case 'servings': {

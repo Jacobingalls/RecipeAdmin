@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { ApiLookupItem } from '../../api';
@@ -77,6 +77,27 @@ describe('LookupResultItem', () => {
     };
     renderWithRouter(<LookupResultItem item={item} barcode="12345" />);
     expect(screen.getByText('2 servings')).toBeInTheDocument();
+  });
+
+  it('passes onLog to ProductCard', () => {
+    const onLog = vi.fn();
+    renderWithRouter(<LookupResultItem item={productItem} onLog={onLog} />);
+    const logButton = screen.getByRole('button', { name: 'Log' });
+    fireEvent.click(logButton);
+    expect(onLog).toHaveBeenCalledWith(productItem);
+  });
+
+  it('passes onLog to GroupCard', () => {
+    const onLog = vi.fn();
+    renderWithRouter(<LookupResultItem item={groupItem} onLog={onLog} />);
+    const logButton = screen.getByRole('button', { name: 'Log' });
+    fireEvent.click(logButton);
+    expect(onLog).toHaveBeenCalledWith(groupItem);
+  });
+
+  it('does not render Log button when onLog is not provided', () => {
+    renderWithRouter(<LookupResultItem item={productItem} />);
+    expect(screen.queryByRole('button', { name: 'Log' })).not.toBeInTheDocument();
   });
 
   it('passes barcode to GroupCard', () => {

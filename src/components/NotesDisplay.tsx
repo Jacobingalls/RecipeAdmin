@@ -34,9 +34,11 @@ export default function NotesDisplay({ notes }: NotesDisplayProps) {
 
   return (
     <ul className="list-unstyled mb-0 small text-secondary">
+      {/* eslint-disable react/no-array-index-key -- Notes lack stable IDs and are never reordered */}
       {notes.map((note, index) => (
         <NoteItem key={index} note={note} />
       ))}
+      {/* eslint-enable react/no-array-index-key */}
     </ul>
   );
 }

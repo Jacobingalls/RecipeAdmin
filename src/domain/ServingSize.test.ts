@@ -223,6 +223,89 @@ describe('ServingSize', () => {
     });
   });
 
+  describe('toObject', () => {
+    it('serializes servings', () => {
+      expect(ServingSize.servings(2).toObject()).toEqual({ kind: 'servings', amount: 2 });
+    });
+
+    it('serializes mass', () => {
+      expect(ServingSize.mass(100, 'g').toObject()).toEqual({
+        kind: 'mass',
+        amount: { amount: 100, unit: 'g' },
+      });
+    });
+
+    it('serializes volume', () => {
+      expect(ServingSize.volume(250, 'mL').toObject()).toEqual({
+        kind: 'volume',
+        amount: { amount: 250, unit: 'mL' },
+      });
+    });
+
+    it('serializes energy', () => {
+      expect(ServingSize.energy(200, 'kcal').toObject()).toEqual({
+        kind: 'energy',
+        amount: { amount: 200, unit: 'kcal' },
+      });
+    });
+
+    it('serializes customSize', () => {
+      expect(ServingSize.customSize('cookie', 3).toObject()).toEqual({
+        kind: 'customSize',
+        name: 'cookie',
+        amount: 3,
+      });
+    });
+
+    it('returns empty object for unknown type', () => {
+      const ss = new ServingSize('unknown' as ServingSizeType, 0);
+      expect(ss.toObject()).toEqual({});
+    });
+
+    it('round-trips with fromObject for servings', () => {
+      const original = ServingSize.servings(2);
+      const restored = ServingSize.fromObject(original.toObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe(original.type);
+      expect(restored!.value).toBe(original.value);
+    });
+
+    it('round-trips with fromObject for mass', () => {
+      const original = ServingSize.mass(100, 'g');
+      const restored = ServingSize.fromObject(original.toObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe('mass');
+      expect((restored!.value as NutritionUnit).amount).toBe(100);
+      expect((restored!.value as NutritionUnit).unit).toBe('g');
+    });
+
+    it('round-trips with fromObject for volume', () => {
+      const original = ServingSize.volume(250, 'mL');
+      const restored = ServingSize.fromObject(original.toObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe('volume');
+      expect((restored!.value as NutritionUnit).amount).toBe(250);
+    });
+
+    it('round-trips with fromObject for energy', () => {
+      const original = ServingSize.energy(200, 'kcal');
+      const restored = ServingSize.fromObject(original.toObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe('energy');
+      expect((restored!.value as NutritionUnit).amount).toBe(200);
+    });
+
+    it('round-trips with fromObject for customSize', () => {
+      const original = ServingSize.customSize('cookie', 3);
+      const restored = ServingSize.fromObject(original.toObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe('customSize');
+      const val = restored!.value as CustomSizeValue;
+      expect(val.name).toBe('cookie');
+      expect(val.amount).toBe(3);
+    });
+  });
+
   describe('toString', () => {
     it('formats singular serving', () => {
       expect(ServingSize.servings(1).toString()).toBe('1 serving');

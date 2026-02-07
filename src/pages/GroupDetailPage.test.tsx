@@ -43,6 +43,10 @@ vi.mock('../components/BarcodeSection', () => ({
   default: () => <div data-testid="barcode-section" />,
 }));
 
+vi.mock('../components/AddToLogButton', () => ({
+  default: () => <div data-testid="add-to-log-button" />,
+}));
+
 const mockUseApiQuery = vi.mocked(useApiQuery);
 
 function renderWithRoute(route: string) {
@@ -138,6 +142,12 @@ describe('GroupDetailPage', () => {
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('nutrition-label')).toBeInTheDocument();
     expect(screen.getByTestId('serving-size-selector')).toBeInTheDocument();
+  });
+
+  it('renders AddToLogButton', () => {
+    mockQuery({ data: sampleGroup });
+    renderWithRoute('/groups/g1');
+    expect(screen.getByTestId('add-to-log-button')).toBeInTheDocument();
   });
 
   it('renders item rows with product badge', () => {

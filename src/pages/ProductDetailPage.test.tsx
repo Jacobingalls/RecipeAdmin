@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
@@ -23,8 +24,17 @@ vi.mock('../components/common', () => ({
 }));
 
 vi.mock('../components/product', () => ({
-  PreparationDetails: ({ prep }: { prep: { name?: string } }) => (
-    <div data-testid="preparation-details">{prep.name}</div>
+  PreparationDetails: ({
+    prep,
+    actionSlot,
+  }: {
+    prep: { name?: string };
+    actionSlot?: ReactNode;
+  }) => (
+    <div data-testid="preparation-details">
+      {prep.name}
+      {actionSlot && <div data-testid="action-slot">{actionSlot}</div>}
+    </div>
   ),
 }));
 
@@ -36,6 +46,10 @@ vi.mock('../components/NotesDisplay', () => ({
   default: ({ notes }: { notes: unknown[] }) => (
     <div data-testid="notes-display">{notes.length} notes</div>
   ),
+}));
+
+vi.mock('../components/AddToLogButton', () => ({
+  default: () => <div data-testid="add-to-log-button" />,
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -134,10 +148,8 @@ describe('ProductDetailPage', () => {
   it('renders tab buttons when multiple preparations exist', () => {
     mockQuery({ data: sampleProduct });
     renderWithRoute('/products/p1');
-    const tabs = screen.getAllByRole('button');
-    expect(tabs).toHaveLength(2);
-    expect(tabs[0]).toHaveTextContent('Standard');
-    expect(tabs[1]).toHaveTextContent('Low Fat');
+    expect(screen.getByRole('button', { name: /Standard/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Low Fat/ })).toBeInTheDocument();
   });
 
   it('switches preparation on tab click', () => {
@@ -162,7 +174,8 @@ describe('ProductDetailPage', () => {
     };
     mockQuery({ data: singlePrep });
     renderWithRoute('/products/p1');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    // No tab buttons should exist
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
     expect(screen.getByTestId('preparation-details')).toBeInTheDocument();
   });
 
@@ -217,6 +230,14 @@ describe('ProductDetailPage', () => {
     expect(screen.getByText('No Preps Product')).toBeInTheDocument();
     // Should not render preparation details or tabs
     expect(screen.queryByTestId('preparation-details')).not.toBeInTheDocument();
+  });
+
+  it('renders AddToLogButton inside PreparationDetails', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('add-to-log-button')).toBeInTheDocument();
+    // Verify it's inside the action slot
+    expect(screen.getByTestId('action-slot')).toBeInTheDocument();
   });
 
   it('handles clicking a prep tab with null id', () => {

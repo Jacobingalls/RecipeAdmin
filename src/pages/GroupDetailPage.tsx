@@ -10,6 +10,7 @@ import BarcodeSection from '../components/BarcodeSection';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
 import CustomSizesSection from '../components/CustomSizesSection';
+import AddToLogButton from '../components/AddToLogButton';
 
 interface GroupItemRowProps {
   item: GroupItem;
@@ -52,8 +53,11 @@ export default function GroupDetailPage() {
       <h6 className="text-secondary mb-2">Nutrition Estimate</h6>
       <div className="card mb-3">
         <div className="card-body">
-          <div className="mb-3">
+          <div className="d-flex align-items-end mb-3">
             <ServingSizeSelector prep={group} value={servingSize} onChange={setServingSize} />
+            <div className="ms-auto">
+              <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+            </div>
           </div>
 
           {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
@@ -76,8 +80,8 @@ export default function GroupDetailPage() {
         <p className="text-secondary">No items in this group</p>
       ) : (
         <div className="list-group mb-3">
-          {items.map((item, i) => (
-            <GroupItemRow key={i} item={item} />
+          {items.map((item) => (
+            <GroupItemRow key={item.product?.id ?? item.group?.id} item={item} />
           ))}
         </div>
       )}

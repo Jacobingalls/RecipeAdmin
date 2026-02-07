@@ -23,6 +23,12 @@ vi.mock('../components/lookup', () => ({
   ),
 }));
 
+vi.mock('../components/LogModal', () => ({
+  default: ({ target }: { target: unknown }) => (
+    <div data-testid="log-modal">{target ? 'open' : 'closed'}</div>
+  ),
+}));
+
 const mockUseApiQuery = vi.mocked(useApiQuery);
 
 function renderWithRoute(route: string) {
@@ -47,7 +53,7 @@ function mockQuery(overrides: Partial<UseApiQueryResult<ApiLookupItem[]>>) {
 
 const sampleResults: ApiLookupItem[] = [
   { product: { id: 'p1', name: 'Apple' } },
-  { group: { name: 'Fruit Mix' } },
+  { group: { id: 'g1', name: 'Fruit Mix' } },
 ];
 
 describe('LookupPage', () => {
@@ -113,5 +119,11 @@ describe('LookupPage', () => {
     expect(mockUseApiQuery).toHaveBeenCalledWith(expect.any(Function), [undefined], {
       enabled: false,
     });
+  });
+
+  it('renders LogModal in closed state', () => {
+    mockQuery({ data: sampleResults });
+    renderWithRoute('/lookup/123456');
+    expect(screen.getByTestId('log-modal')).toHaveTextContent('closed');
   });
 });

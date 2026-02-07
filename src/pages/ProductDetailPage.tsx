@@ -10,6 +10,7 @@ import { PreparationDetails } from '../components/product';
 import BarcodeSection from '../components/BarcodeSection';
 import NotesDisplay from '../components/NotesDisplay';
 import type { Note } from '../components/NotesDisplay';
+import AddToLogButton from '../components/AddToLogButton';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -72,6 +73,13 @@ export default function ProductDetailPage() {
                 prep={currentPrep}
                 servingSize={servingSize}
                 onServingSizeChange={setServingSize}
+                actionSlot={
+                  <AddToLogButton
+                    productId={product.id}
+                    preparationId={currentPrep.id}
+                    servingSize={servingSize}
+                  />
+                }
               />
             </div>
           )}

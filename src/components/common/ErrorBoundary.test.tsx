@@ -10,13 +10,12 @@ function ThrowingComponent({ shouldThrow }: { shouldThrow: boolean }) {
 }
 
 describe('ErrorBoundary', () => {
-  // Suppress console.error for expected errors in tests
-  const originalError = console.error;
+  let errorSpy: ReturnType<typeof vi.spyOn>;
   beforeAll(() => {
-    console.error = vi.fn();
+    errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
   afterAll(() => {
-    console.error = originalError;
+    errorSpy.mockRestore();
   });
 
   it('renders children when no error', () => {
@@ -79,7 +78,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    expect(console.error).toHaveBeenCalledWith(
+    expect(errorSpy).toHaveBeenCalledWith(
       'ErrorBoundary caught an error:',
       expect.any(Error),
       expect.objectContaining({ componentStack: expect.any(String) }),

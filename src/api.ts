@@ -1,4 +1,4 @@
-import type { BarcodeData, PreparationData, ProductGroupData } from './domain';
+import type { BarcodeData, PreparationData, ProductGroupData, ServingSizeData } from './domain';
 
 export interface ApiProductSummary {
   id: string;
@@ -67,6 +67,29 @@ async function apiFetch<T>(endpoint: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json() as Promise<TRes>;
+}
+
+export interface LogEntryRequest {
+  productId?: string;
+  groupId?: string;
+  preparationId?: string;
+  servingSize: ServingSizeData;
+}
+
+export interface LogEntryResponse {
+  id: string;
+}
+
 export async function lookupBarcode(barcode: string): Promise<ApiLookupItem[]> {
   return apiFetch<ApiLookupItem[]>(`/lookup/${encodeURIComponent(barcode)}`);
 }
@@ -89,4 +112,8 @@ export async function getGroup(id: string): Promise<ProductGroupData> {
 
 export async function getVersion(): Promise<ApiVersion> {
   return apiFetch<ApiVersion>('/version');
+}
+
+export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse> {
+  return apiPost<LogEntryRequest, LogEntryResponse>('/log', entry);
 }
