@@ -12,12 +12,12 @@ import GroupDetailPage from './pages/GroupDetailPage';
 import HistoryPage from './pages/HistoryPage';
 
 export default function App() {
-  const { theme, toggleTheme } = useTheme();
+  useTheme();
 
   return (
     <BrowserRouter>
       <div className="min-vh-100 bg-body-tertiary d-flex flex-column">
-        <Header theme={theme} onToggleTheme={toggleTheme} />
+        <Header />
         <ErrorBoundary>
           <div className="container py-4 flex-grow-1" style={{ maxWidth: 600, marginBottom: 50 }}>
             <Routes>

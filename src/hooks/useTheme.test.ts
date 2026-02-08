@@ -38,7 +38,6 @@ function fireMediaChange(matches: boolean) {
 
 describe('useTheme', () => {
   beforeEach(() => {
-    localStorage.clear();
     document.documentElement.removeAttribute('data-bs-theme');
     darkModeMatches = false;
     window.matchMedia = createMockMatchMedia() as typeof window.matchMedia;
@@ -47,52 +46,15 @@ describe('useTheme', () => {
   it('defaults to light when system preference is light', () => {
     darkModeMatches = false;
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('light');
+    expect(result.current).toBe('light');
     expect(document.documentElement.getAttribute('data-bs-theme')).toBe('light');
   });
 
   it('defaults to dark when system preference is dark', () => {
     darkModeMatches = true;
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('dark');
+    expect(result.current).toBe('dark');
     expect(document.documentElement.getAttribute('data-bs-theme')).toBe('dark');
-  });
-
-  it('reads saved theme from localStorage', () => {
-    localStorage.setItem('theme', 'dark');
-    darkModeMatches = false;
-    const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('dark');
-  });
-
-  it('prefers localStorage over system preference', () => {
-    localStorage.setItem('theme', 'light');
-    darkModeMatches = true;
-    const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('light');
-  });
-
-  it('toggles from light to dark', () => {
-    const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('light');
-
-    act(() => result.current.toggleTheme());
-
-    expect(result.current.theme).toBe('dark');
-    expect(document.documentElement.getAttribute('data-bs-theme')).toBe('dark');
-    expect(localStorage.getItem('theme')).toBe('dark');
-  });
-
-  it('toggles from dark to light', () => {
-    darkModeMatches = true;
-    const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('dark');
-
-    act(() => result.current.toggleTheme());
-
-    expect(result.current.theme).toBe('light');
-    expect(document.documentElement.getAttribute('data-bs-theme')).toBe('light');
-    expect(localStorage.getItem('theme')).toBe('light');
   });
 
   it('sets data-bs-theme attribute on document element', () => {
@@ -100,24 +62,14 @@ describe('useTheme', () => {
     expect(document.documentElement.getAttribute('data-bs-theme')).toBe('light');
   });
 
-  it('responds to system preference changes when no saved preference', () => {
+  it('responds to system preference changes', () => {
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('light');
+    expect(result.current).toBe('light');
 
     act(() => fireMediaChange(true));
 
-    expect(result.current.theme).toBe('dark');
+    expect(result.current).toBe('dark');
     expect(document.documentElement.getAttribute('data-bs-theme')).toBe('dark');
-  });
-
-  it('does not respond to system preference changes when preference is saved', () => {
-    localStorage.setItem('theme', 'light');
-    const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('light');
-
-    act(() => fireMediaChange(true));
-
-    expect(result.current.theme).toBe('light');
   });
 
   it('cleans up media query listener on unmount', () => {
@@ -129,12 +81,5 @@ describe('useTheme', () => {
 
     const listenersAfter = matchMediaListeners.get('(prefers-color-scheme: dark)') ?? [];
     expect(listenersAfter).toHaveLength(0);
-  });
-
-  it('ignores invalid localStorage values', () => {
-    localStorage.setItem('theme', 'invalid');
-    darkModeMatches = true;
-    const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('dark');
   });
 });

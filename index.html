@@ -3,22 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="/src/styles/vendor.css" />
+    <style>
+      html,
+      body {
+        background-color: #f8f9fa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html,
+        body {
+          background-color: #212529;
+        }
+      }
+    </style>
     <title>Recipe Admin</title>
     <script src="/config.js"></script>
-  </head>
-  <body>
     <script>
       (function () {
-        var saved = localStorage.getItem('theme');
-        var theme =
-          saved === 'light' || saved === 'dark'
-            ? saved
-            : window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light';
+        var theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-bs-theme', theme);
       })();
     </script>
+    <script type="module" src="/src/bootstrap.ts"></script>
+  </head>
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

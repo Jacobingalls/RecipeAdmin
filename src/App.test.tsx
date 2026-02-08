@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 vi.mock('./hooks', () => ({
-  useTheme: () => ({ theme: 'light', toggleTheme: vi.fn() }),
+  useTheme: () => 'light',
 }));
 
 vi.mock('./components/Header', () => ({
