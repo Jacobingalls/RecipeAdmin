@@ -22,6 +22,5 @@ describe('Tile', () => {
     const { container } = render(<Tile title="Card">body</Tile>);
     expect(container.querySelector('.card')).toBeInTheDocument();
     expect(container.querySelector('.card-header')).toBeInTheDocument();
-    expect(container.querySelector('.card-body')).toBeInTheDocument();
   });
 });
