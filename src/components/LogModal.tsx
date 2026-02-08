@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import type { Preparation, ProductGroup, ServingSize } from '../domain';
-import { logEntry } from '../api';
+import { logEntry, updateLogEntryServingSize } from '../api';
 
 import NutritionLabel from './NutritionLabel';
 import ServingSizeSelector from './ServingSizeSelector';
@@ -14,23 +14,38 @@ export interface LogTarget {
   productId?: string;
   groupId?: string;
   preparationId?: string;
+  editEntryId?: string;
 }
 
 interface LogModalProps {
   target: LogTarget | null;
   onClose: () => void;
+  onSaved?: () => void;
 }
 
 type LogState = 'idle' | 'logging' | 'success';
 
-function getButtonLabel(state: LogState): string {
+function getButtonLabel(state: LogState, isEdit: boolean): string {
+  if (isEdit) {
+    if (state === 'logging') return 'Saving...';
+    if (state === 'success') return 'Saved!';
+    return 'Save';
+  }
   if (state === 'logging') return 'Logging...';
   if (state === 'success') return 'Logged!';
   return 'Add to Log';
 }
 
 /** Inner component that resets state when key changes. */
-function LogModalInner({ target, onClose }: { target: LogTarget; onClose: () => void }) {
+function LogModalInner({
+  target,
+  onClose,
+  onSaved,
+}: {
+  target: LogTarget;
+  onClose: () => void;
+  onSaved?: () => void;
+}) {
   const [servingSize, setServingSize] = useState(() => target.initialServingSize);
   const [logState, setLogState] = useState<LogState>('idle');
   const [logError, setLogError] = useState<string | null>(null);
@@ -56,17 +71,24 @@ function LogModalInner({ target, onClose }: { target: LogTarget; onClose: () => 
     return () => el.removeEventListener('mousedown', handleMouseDown);
   }, [onClose]);
 
+  const isEdit = !!target.editEntryId;
+
   const handleLog = useCallback(async () => {
     setLogState('logging');
     setLogError(null);
 
     try {
-      await logEntry({
-        productId: target.productId,
-        groupId: target.groupId,
-        preparationId: target.preparationId,
-        servingSize: servingSize.toObject(),
-      });
+      if (target.editEntryId) {
+        await updateLogEntryServingSize(target.editEntryId, servingSize.toObject());
+        onSaved?.();
+      } else {
+        await logEntry({
+          productId: target.productId,
+          groupId: target.groupId,
+          preparationId: target.preparationId,
+          servingSize: servingSize.toObject(),
+        });
+      }
       setLogState('success');
       setTimeout(() => {
         onClose();
@@ -75,7 +97,7 @@ function LogModalInner({ target, onClose }: { target: LogTarget; onClose: () => 
       setLogError((e as Error).message);
       setLogState('idle');
     }
-  }, [target, servingSize, onClose]);
+  }, [target, servingSize, onClose, onSaved]);
 
   const { prepOrGroup } = target;
 
@@ -125,7 +147,7 @@ function LogModalInner({ target, onClose }: { target: LogTarget; onClose: () => 
                     onClick={handleLog}
                     disabled={logState !== 'idle'}
                   >
-                    {getButtonLabel(logState)}
+                    {getButtonLabel(logState, isEdit)}
                   </button>
                 </div>
               </div>
@@ -150,7 +172,7 @@ function LogModalInner({ target, onClose }: { target: LogTarget; onClose: () => 
 }
 
 /** Renders nothing when target is null; uses key to reset state on target change. */
-export default function LogModal({ target, onClose }: LogModalProps) {
+export default function LogModal({ target, onClose, onSaved }: LogModalProps) {
   if (!target) return null;
-  return <LogModalInner key={target.name} target={target} onClose={onClose} />;
+  return <LogModalInner key={target.name} target={target} onClose={onClose} onSaved={onSaved} />;
 }

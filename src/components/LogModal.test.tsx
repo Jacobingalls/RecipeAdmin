@@ -1,13 +1,14 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import { Preparation, ServingSize } from '../domain';
-import { logEntry } from '../api';
+import { logEntry, updateLogEntryServingSize } from '../api';
 
 import type { LogTarget } from './LogModal';
 import LogModal from './LogModal';
 
 vi.mock('../api', () => ({
   logEntry: vi.fn(),
+  updateLogEntryServingSize: vi.fn(),
 }));
 
 vi.mock('./NutritionLabel', () => ({
@@ -25,6 +26,7 @@ vi.mock('./ServingSizeSelector', () => ({
 }));
 
 const mockLogEntry = vi.mocked(logEntry);
+const mockUpdateLogEntry = vi.mocked(updateLogEntryServingSize);
 
 function makeTarget(overrides: Partial<LogTarget> = {}): LogTarget {
   return {
@@ -213,5 +215,106 @@ describe('LogModal', () => {
     expect(screen.getByText('New Product')).toBeInTheDocument();
     expect(screen.queryByText('fail')).not.toBeInTheDocument();
     expect(screen.getByText('Add to Log')).not.toBeDisabled();
+  });
+
+  describe('edit mode', () => {
+    it('shows Save button when editEntryId is set', () => {
+      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+      expect(screen.getByText('Save')).toBeInTheDocument();
+      expect(screen.queryByText('Add to Log')).not.toBeInTheDocument();
+    });
+
+    it('calls updateLogEntryServingSize on save', async () => {
+      mockUpdateLogEntry.mockResolvedValue({
+        id: 'entry-1',
+        timestamp: 1000,
+        userID: 'u1',
+        item: {
+          kind: 'product',
+          productID: 'prod-1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
+      });
+      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Saved!')).toBeInTheDocument();
+      });
+
+      expect(mockUpdateLogEntry).toHaveBeenCalledWith('entry-1', {
+        kind: 'servings',
+        amount: 1,
+      });
+      expect(mockLogEntry).not.toHaveBeenCalled();
+    });
+
+    it('shows Saving... while update is in progress', async () => {
+      let resolveUpdate: (value: unknown) => void;
+      mockUpdateLogEntry.mockReturnValue(
+        new Promise((resolve) => {
+          resolveUpdate = resolve;
+        }),
+      );
+
+      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+      fireEvent.click(screen.getByText('Save'));
+
+      expect(screen.getByText('Saving...')).toBeDisabled();
+
+      await act(async () => {
+        resolveUpdate!({
+          id: 'entry-1',
+          timestamp: 1000,
+          userID: 'u1',
+          item: {
+            kind: 'product',
+            productID: 'prod-1',
+            servingSize: { kind: 'servings', amount: 1 },
+          },
+        });
+      });
+    });
+
+    it('fires onSaved callback on successful edit', async () => {
+      mockUpdateLogEntry.mockResolvedValue({
+        id: 'entry-1',
+        timestamp: 1000,
+        userID: 'u1',
+        item: {
+          kind: 'product',
+          productID: 'prod-1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
+      });
+      const onSaved = vi.fn();
+      render(
+        <LogModal
+          target={makeTarget({ editEntryId: 'entry-1' })}
+          onClose={vi.fn()}
+          onSaved={onSaved}
+        />,
+      );
+
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(onSaved).toHaveBeenCalled();
+      });
+    });
+
+    it('shows error when update fails', async () => {
+      mockUpdateLogEntry.mockRejectedValue(new Error('HTTP 500'));
+      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(screen.getByText('HTTP 500')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Save')).not.toBeDisabled();
+    });
   });
 });

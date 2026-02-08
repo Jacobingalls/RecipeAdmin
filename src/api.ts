@@ -79,6 +79,18 @@ async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> 
   return res.json() as Promise<TRes>;
 }
 
+async function apiPut<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json() as Promise<TRes>;
+}
+
 export interface ApiLogItem {
   kind: string;
   productID?: string;
@@ -147,4 +159,14 @@ export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse
         servingSize: entry.servingSize,
       };
   return apiPost<typeof body, LogEntryResponse>('/logs', body);
+}
+
+export async function updateLogEntryServingSize(
+  id: string,
+  servingSize: ServingSizeData,
+): Promise<ApiLogEntry> {
+  return apiPut<ServingSizeData, ApiLogEntry>(
+    `/logs/${encodeURIComponent(id)}/serving-size`,
+    servingSize,
+  );
 }
