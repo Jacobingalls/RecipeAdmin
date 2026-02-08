@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../../hooks/useApiQuery';
 import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../../api';
+import * as api from '../../api';
 import { useApiQuery } from '../../hooks';
 
 import HistoryTile from './HistoryTile';
@@ -12,13 +13,69 @@ vi.mock('../../hooks', () => ({
   useApiQuery: vi.fn(),
 }));
 
+vi.mock('../../api', async () => {
+  const actual = await vi.importActual('../../api');
+  return {
+    ...actual,
+    getProduct: vi.fn(),
+    getGroup: vi.fn(),
+  };
+});
+
 vi.mock('../common', () => ({
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
   EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
 }));
 
+vi.mock('../HistoryEntryRow', () => ({
+  default: ({
+    entry,
+    name,
+    onEdit,
+    editLoading,
+  }: {
+    entry: ApiLogEntry;
+    name: string;
+    onEdit: (entry: ApiLogEntry) => void;
+    editLoading: boolean;
+  }) => (
+    <div data-testid={`entry-row-${entry.id}`} data-name={name} data-edit-loading={editLoading}>
+      <span>{name}</span>
+      <button data-testid={`edit-${entry.id}`} onClick={() => onEdit(entry)}>
+        Edit
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('../LogModal', () => ({
+  default: ({
+    target,
+    onClose,
+    onSaved,
+  }: {
+    target: unknown;
+    onClose: () => void;
+    onSaved?: () => void;
+  }) =>
+    target ? (
+      <div data-testid="log-modal">
+        <button data-testid="modal-close" onClick={onClose}>
+          Close
+        </button>
+        {onSaved && (
+          <button data-testid="modal-saved" onClick={onSaved}>
+            Saved
+          </button>
+        )}
+      </div>
+    ) : null,
+}));
+
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockGetProduct = vi.mocked(api.getProduct);
+const mockGetGroup = vi.mocked(api.getGroup);
 
 function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -130,48 +187,26 @@ describe('HistoryTile', () => {
     expect(screen.getByText('Breakfast Bowl')).toBeInTheDocument();
   });
 
-  it('renders serving size descriptions', () => {
+  it('renders HistoryEntryRow for each entry', () => {
     mockQueries({
       logs: { data: sampleLogs },
       products: { data: sampleProducts },
       groups: { data: sampleGroups },
     });
     renderWithRouter(<HistoryTile />);
-    expect(screen.getByText('2 servings')).toBeInTheDocument();
-    expect(screen.getByText('1 serving')).toBeInTheDocument();
+    expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    expect(screen.getByTestId('entry-row-log2')).toBeInTheDocument();
   });
 
-  it('renders relative timestamps', () => {
+  it('passes resolved names to HistoryEntryRow', () => {
     mockQueries({
       logs: { data: sampleLogs },
       products: { data: sampleProducts },
       groups: { data: sampleGroups },
     });
     renderWithRouter(<HistoryTile />);
-    expect(screen.getByText('5m ago')).toBeInTheDocument();
-    expect(screen.getByText('2h ago')).toBeInTheDocument();
-  });
-
-  it('links product entries to product detail page', () => {
-    mockQueries({
-      logs: { data: sampleLogs },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
-    renderWithRouter(<HistoryTile />);
-    const links = screen.getAllByRole('link');
-    expect(links[0]).toHaveAttribute('href', '/products/p1');
-  });
-
-  it('links group entries to group detail page', () => {
-    mockQueries({
-      logs: { data: sampleLogs },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
-    renderWithRouter(<HistoryTile />);
-    const links = screen.getAllByRole('link');
-    expect(links[1]).toHaveAttribute('href', '/groups/g1');
+    expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
+    expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
   });
 
   it('shows "Unknown Product" when product not found', () => {
@@ -237,5 +272,147 @@ describe('HistoryTile', () => {
     renderWithRouter(<HistoryTile />);
     const viewAllLink = screen.getByRole('link', { name: /View all/ });
     expect(viewAllLink).toHaveAttribute('href', '/history');
+  });
+
+  it('opens edit modal after clicking Edit on a product entry', async () => {
+    mockQueries({
+      logs: { data: sampleLogs },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryTile />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    expect(mockGetProduct).toHaveBeenCalledWith('p1');
+  });
+
+  it('opens edit modal after clicking Edit on a group entry', async () => {
+    mockQueries({
+      logs: { data: sampleLogs },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetGroup.mockResolvedValue({
+      id: 'g1',
+      name: 'Breakfast Bowl',
+      items: [],
+    });
+
+    renderWithRouter(<HistoryTile />);
+
+    fireEvent.click(screen.getByTestId('edit-log2'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    expect(mockGetGroup).toHaveBeenCalledWith('g1');
+  });
+
+  it('calls refetch when onSaved is triggered', async () => {
+    const refetchLogs = vi.fn();
+    mockUseApiQuery.mockImplementation((fetchFn) => {
+      const fnName = fetchFn.name || fetchFn.toString();
+      if (fnName.includes('getLogs') || fnName === 'getLogs') {
+        return {
+          data: sampleLogs,
+          loading: false,
+          error: null,
+          refetch: refetchLogs,
+        } as UseApiQueryResult<unknown>;
+      }
+      if (fnName.includes('listProducts') || fnName === 'listProducts') {
+        return {
+          data: sampleProducts,
+          loading: false,
+          error: null,
+          refetch: vi.fn(),
+        } as UseApiQueryResult<unknown>;
+      }
+      if (fnName.includes('listGroups') || fnName === 'listGroups') {
+        return {
+          data: sampleGroups,
+          loading: false,
+          error: null,
+          refetch: vi.fn(),
+        } as UseApiQueryResult<unknown>;
+      }
+      return defaultResult as UseApiQueryResult<unknown>;
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryTile />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('modal-saved'));
+    expect(refetchLogs).toHaveBeenCalled();
+  });
+
+  it('closes modal when onClose is triggered', async () => {
+    mockQueries({
+      logs: { data: sampleLogs },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryTile />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('modal-close'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('log-modal')).not.toBeInTheDocument();
+    });
   });
 });

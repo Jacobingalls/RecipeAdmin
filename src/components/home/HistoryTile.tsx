@@ -1,19 +1,25 @@
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
-import { getLogs, listProducts, listGroups } from '../../api';
+import type { ApiLogEntry, ApiProduct } from '../../api';
+import { getLogs, listProducts, listGroups, getProduct, getGroup } from '../../api';
+import type { ProductGroupData } from '../../domain';
 import { useApiQuery } from '../../hooks';
-import {
-  formatRelativeTime,
-  resolveEntryName,
-  entryDetailPath,
-  formatServingSizeDescription,
-} from '../../utils/logEntryHelpers';
+import { resolveEntryName, buildLogTarget } from '../../utils/logEntryHelpers';
 import { LoadingState, ErrorState, EmptyState } from '../common';
+import LogModal from '../LogModal';
+import type { LogTarget } from '../LogModal';
+import HistoryEntryRow from '../HistoryEntryRow';
 
 import Tile from './Tile';
 
 export default function HistoryTile() {
-  const { data: logs, loading: logsLoading, error: logsError } = useApiQuery(getLogs, []);
+  const {
+    data: logs,
+    loading: logsLoading,
+    error: logsError,
+    refetch: refetchLogs,
+  } = useApiQuery(getLogs, []);
   const {
     data: products,
     loading: productsLoading,
@@ -21,8 +27,40 @@ export default function HistoryTile() {
   } = useApiQuery(listProducts, []);
   const { data: groups, loading: groupsLoading, error: groupsError } = useApiQuery(listGroups, []);
 
+  const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+
   const loading = logsLoading || productsLoading || groupsLoading;
   const error = logsError || productsError || groupsError;
+
+  const handleEditClick = useCallback(async (entry: ApiLogEntry) => {
+    setEditLoading(true);
+    try {
+      let product: ApiProduct | null = null;
+      let groupData: ProductGroupData | null = null;
+
+      if (entry.item.kind === 'product' && entry.item.productID) {
+        product = await getProduct(entry.item.productID);
+      } else if (entry.item.kind === 'group' && entry.item.groupID) {
+        groupData = await getGroup(entry.item.groupID);
+      }
+
+      const target = buildLogTarget(entry, product, groupData);
+      if (target) {
+        setLogTarget(target);
+      }
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const handleSaved = useCallback(() => {
+    refetchLogs();
+  }, [refetchLogs]);
+
+  const handleModalClose = useCallback(() => {
+    setLogTarget(null);
+  }, []);
 
   let content;
   if (loading) {
@@ -33,36 +71,30 @@ export default function HistoryTile() {
     content = <EmptyState message="No recent log entries" />;
   } else {
     content = (
-      <ul className="list-group list-group-flush">
+      <div className="list-group list-group-flush">
         {logs.map((entry) => (
-          <li key={entry.id} className="list-group-item px-0">
-            <Link to={entryDetailPath(entry)} className="text-decoration-none">
-              <div className="d-flex justify-content-between align-items-start">
-                <div>
-                  <div className="fw-medium">{resolveEntryName(entry, products!, groups!)}</div>
-                  <small className="text-body-secondary">
-                    {formatServingSizeDescription(entry)}
-                  </small>
-                </div>
-                <small className="text-body-secondary text-nowrap ms-2">
-                  {formatRelativeTime(entry.timestamp)}
-                </small>
-              </div>
-            </Link>
-          </li>
+          <HistoryEntryRow
+            key={entry.id}
+            entry={entry}
+            name={resolveEntryName(entry, products!, groups!)}
+            onEdit={handleEditClick}
+            editLoading={editLoading}
+          />
         ))}
-      </ul>
+      </div>
     );
   }
 
+  const historyLink = (
+    <Link to="/history" className="text-decoration-none small">
+      View all &rarr;
+    </Link>
+  );
+
   return (
-    <Tile title="History">
+    <Tile title="History" titleRight={historyLink}>
       {content}
-      <div className="text-end mt-2">
-        <Link to="/history" className="text-decoration-none small">
-          View all &rarr;
-        </Link>
-      </div>
+      <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
     </Tile>
   );
 }

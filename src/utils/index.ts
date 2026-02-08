@@ -5,4 +5,5 @@ export {
   resolveEntryName,
   entryDetailPath,
   formatServingSizeDescription,
+  buildLogTarget,
 } from './logEntryHelpers';

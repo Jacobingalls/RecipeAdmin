@@ -1,5 +1,7 @@
-import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../api';
-import { ServingSize } from '../domain';
+import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
+import type { LogTarget } from '../components/LogModal';
+import type { ProductGroupData } from '../domain';
+import { Preparation, ProductGroup, ServingSize } from '../domain';
 
 /** Formats a Unix epoch timestamp (seconds) as a relative time string. */
 export function formatRelativeTime(timestamp: number): string {
@@ -46,4 +48,42 @@ export function entryDetailPath(entry: ApiLogEntry): string {
 export function formatServingSizeDescription(entry: ApiLogEntry): string {
   const ss = ServingSize.fromObject(entry.item.servingSize);
   return ss?.toString() ?? '';
+}
+
+export function buildLogTarget(
+  entry: ApiLogEntry,
+  product: ApiProduct | null,
+  groupData: ProductGroupData | null,
+): LogTarget | null {
+  const initialServingSize =
+    ServingSize.fromObject(entry.item.servingSize) ?? ServingSize.servings(1);
+
+  if (entry.item.kind === 'product' && product) {
+    const prepData =
+      product.preparations?.find((p) => p.id === entry.item.preparationID) ??
+      product.preparations?.[0];
+    if (!prepData) return null;
+
+    return {
+      name: product.name,
+      brand: product.brand,
+      prepOrGroup: new Preparation(prepData),
+      initialServingSize,
+      productId: product.id,
+      preparationId: prepData.id,
+      editEntryId: entry.id,
+    };
+  }
+
+  if (entry.item.kind === 'group' && groupData) {
+    return {
+      name: groupData.name ?? 'Group',
+      prepOrGroup: new ProductGroup(groupData),
+      initialServingSize,
+      groupId: groupData.id,
+      editEntryId: entry.id,
+    };
+  }
+
+  return null;
 }

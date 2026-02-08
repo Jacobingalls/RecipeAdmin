@@ -1,0 +1,135 @@
+import type { ReactElement } from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
+
+import type { ApiLogEntry } from '../api';
+
+import HistoryEntryRow from './HistoryEntryRow';
+
+const mockNavigate = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+function renderWithRouter(ui: ReactElement) {
+  return render(
+    <MemoryRouter initialEntries={['/test']}>
+      <Routes>
+        <Route path="/test" element={ui} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+function makeEntry(overrides?: Partial<ApiLogEntry>): ApiLogEntry {
+  return {
+    id: 'log1',
+    timestamp: Date.now() / 1000 - 5 * 60,
+    userID: 'u1',
+    item: {
+      kind: 'product',
+      productID: 'p1',
+      servingSize: { kind: 'servings', amount: 2 },
+    },
+    ...overrides,
+  };
+}
+
+describe('HistoryEntryRow', () => {
+  const defaultProps = {
+    entry: makeEntry(),
+    name: 'Oats',
+    onEdit: vi.fn(),
+    editLoading: false,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders name, serving size, and relative time', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    expect(screen.getByText('Oats')).toBeInTheDocument();
+    expect(screen.getByText(/2 servings/)).toBeInTheDocument();
+    expect(screen.getByText(/5m ago/)).toBeInTheDocument();
+  });
+
+  it('navigates to detail page on click', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const row = screen.getByRole('button', { name: /Oats/i });
+    fireEvent.click(row);
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+  });
+
+  it('navigates on Enter key press', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const row = screen.getByRole('button', { name: /Oats/i });
+    fireEvent.keyDown(row, { key: 'Enter' });
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+  });
+
+  it('navigates on Space key press', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const row = screen.getByRole('button', { name: /Oats/i });
+    fireEvent.keyDown(row, { key: ' ' });
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+  });
+
+  it('navigates to group detail for group entries', () => {
+    const groupEntry = makeEntry({
+      item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
+    });
+    renderWithRouter(
+      <HistoryEntryRow {...defaultProps} entry={groupEntry} name="Breakfast Bowl" />,
+    );
+    const row = screen.getByRole('button', { name: /Breakfast Bowl/i });
+    fireEvent.click(row);
+    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1');
+  });
+
+  it('renders the overflow menu button', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    expect(screen.getByLabelText('Entry actions')).toBeInTheDocument();
+  });
+
+  it('renders a round overflow button', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const btn = screen.getByLabelText('Entry actions');
+    expect(btn).toHaveClass('rounded-circle');
+    expect(btn).toHaveStyle({ width: '2rem', height: '2rem' });
+  });
+
+  it('does not navigate when overflow menu button is clicked', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText('Entry actions'));
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('renders Edit menu item', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+  });
+
+  it('calls onEdit with the entry when Edit is clicked', () => {
+    const onEdit = vi.fn();
+    renderWithRouter(<HistoryEntryRow {...defaultProps} onEdit={onEdit} />);
+    fireEvent.click(screen.getByText('Edit'));
+    expect(onEdit).toHaveBeenCalledWith(defaultProps.entry);
+  });
+
+  it('does not navigate when Edit is clicked', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    fireEvent.click(screen.getByText('Edit'));
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('disables Edit when editLoading is true', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} editLoading />);
+    expect(screen.getByText('Edit')).toBeDisabled();
+  });
+});

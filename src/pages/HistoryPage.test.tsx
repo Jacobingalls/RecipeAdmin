@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../api';
+import * as api from '../api';
 import { useApiQuery } from '../hooks';
 
 import HistoryPage from './HistoryPage';
@@ -11,6 +12,15 @@ import HistoryPage from './HistoryPage';
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
 }));
+
+vi.mock('../api', async () => {
+  const actual = await vi.importActual('../api');
+  return {
+    ...actual,
+    getProduct: vi.fn(),
+    getGroup: vi.fn(),
+  };
+});
 
 vi.mock('../components/common', () => ({
   BackButton: ({ to }: { to: string }) => (
@@ -23,7 +33,54 @@ vi.mock('../components/common', () => ({
   EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
 }));
 
+vi.mock('../components/HistoryEntryRow', () => ({
+  default: ({
+    entry,
+    name,
+    onEdit,
+    editLoading,
+  }: {
+    entry: ApiLogEntry;
+    name: string;
+    onEdit: (entry: ApiLogEntry) => void;
+    editLoading: boolean;
+  }) => (
+    <div data-testid={`entry-row-${entry.id}`} data-name={name} data-edit-loading={editLoading}>
+      <span>{name}</span>
+      <button data-testid={`edit-${entry.id}`} onClick={() => onEdit(entry)}>
+        Edit
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('../components/LogModal', () => ({
+  default: ({
+    target,
+    onClose,
+    onSaved,
+  }: {
+    target: unknown;
+    onClose: () => void;
+    onSaved?: () => void;
+  }) =>
+    target ? (
+      <div data-testid="log-modal">
+        <button data-testid="modal-close" onClick={onClose}>
+          Close
+        </button>
+        {onSaved && (
+          <button data-testid="modal-saved" onClick={onSaved}>
+            Saved
+          </button>
+        )}
+      </div>
+    ) : null,
+}));
+
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockGetProduct = vi.mocked(api.getProduct);
+const mockGetGroup = vi.mocked(api.getGroup);
 
 function renderWithRouter(ui: ReactElement) {
   return render(
@@ -143,7 +200,7 @@ describe('HistoryPage', () => {
     });
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('Today')).toBeInTheDocument();
-    expect(screen.getByText('Oats')).toBeInTheDocument();
+    expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
   });
 
   it('groups entries by day with "Yesterday" heading', () => {
@@ -178,79 +235,214 @@ describe('HistoryPage', () => {
     expect(screen.getByText(oldDate.toLocaleDateString())).toBeInTheDocument();
   });
 
-  it('renders entries under correct day groups', () => {
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
+  it('passes resolved name to HistoryEntryRow', () => {
     const todayEntry = makeEntry({
       id: 'log1',
-      timestamp: today.getTime() / 1000,
-      item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 2 } },
+      timestamp: Date.now() / 1000,
     });
-    const yesterdayEntry = makeEntry({
+    mockQueries({
+      logs: { data: [todayEntry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    renderWithRouter(<HistoryPage />);
+    expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
+  });
+
+  it('passes group name to HistoryEntryRow for group entries', () => {
+    const today = new Date();
+    const groupEntry = makeEntry({
       id: 'log2',
-      timestamp: yesterday.getTime() / 1000,
-      item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
-    });
-
-    mockQueries({
-      logs: { data: [todayEntry, yesterdayEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
-    renderWithRouter(<HistoryPage />);
-
-    expect(screen.getByText('Today')).toBeInTheDocument();
-    expect(screen.getByText('Oats')).toBeInTheDocument();
-    expect(screen.getByText('Yesterday')).toBeInTheDocument();
-    expect(screen.getByText('Breakfast Bowl')).toBeInTheDocument();
-  });
-
-  it('renders serving size descriptions', () => {
-    const entry = makeEntry({
-      id: 'log1',
-      timestamp: Date.now() / 1000,
-      item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 3 } },
-    });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
-    renderWithRouter(<HistoryPage />);
-    expect(screen.getByText('3 servings')).toBeInTheDocument();
-  });
-
-  it('links entries to their detail pages', () => {
-    const entry = makeEntry({
-      id: 'log1',
-      timestamp: Date.now() / 1000,
-      item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
-    });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
-    renderWithRouter(<HistoryPage />);
-    const link = screen.getByRole('link', { name: /Oats/ });
-    expect(link).toHaveAttribute('href', '/products/p1');
-  });
-
-  it('resolves group entry names and links', () => {
-    const entry = makeEntry({
-      id: 'log1',
-      timestamp: Date.now() / 1000,
+      timestamp: today.getTime() / 1000,
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     });
     mockQueries({
-      logs: { data: [entry] },
+      logs: { data: [groupEntry] },
       products: { data: sampleProducts },
       groups: { data: sampleGroups },
     });
     renderWithRouter(<HistoryPage />);
-    const link = screen.getByRole('link', { name: /Breakfast Bowl/ });
-    expect(link).toHaveAttribute('href', '/groups/g1');
+    expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
+  });
+
+  it('opens edit modal after clicking Edit on a product entry', async () => {
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep-1',
+        servingSize: { kind: 'servings', amount: 2 },
+      },
+    });
+    mockQueries({
+      logs: { data: [entry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep-1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    expect(mockGetProduct).toHaveBeenCalledWith('p1');
+  });
+
+  it('opens edit modal after clicking Edit on a group entry', async () => {
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'group',
+        groupID: 'g1',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    });
+    mockQueries({
+      logs: { data: [entry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetGroup.mockResolvedValue({
+      id: 'g1',
+      name: 'Breakfast Bowl',
+      items: [],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    expect(mockGetGroup).toHaveBeenCalledWith('g1');
+  });
+
+  it('calls refetch when onSaved is triggered', async () => {
+    const refetchLogs = vi.fn();
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep-1',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    });
+    mockUseApiQuery.mockImplementation((fetchFn) => {
+      const fnName = fetchFn.name || fetchFn.toString();
+      if (fnName.includes('getLogs') || fnName === 'getLogs') {
+        return {
+          data: [entry],
+          loading: false,
+          error: null,
+          refetch: refetchLogs,
+        } as UseApiQueryResult<unknown>;
+      }
+      if (fnName.includes('listProducts') || fnName === 'listProducts') {
+        return {
+          data: sampleProducts,
+          loading: false,
+          error: null,
+          refetch: vi.fn(),
+        } as UseApiQueryResult<unknown>;
+      }
+      if (fnName.includes('listGroups') || fnName === 'listGroups') {
+        return {
+          data: sampleGroups,
+          loading: false,
+          error: null,
+          refetch: vi.fn(),
+        } as UseApiQueryResult<unknown>;
+      }
+      return defaultResult as UseApiQueryResult<unknown>;
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep-1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('modal-saved'));
+    expect(refetchLogs).toHaveBeenCalled();
+  });
+
+  it('closes modal when onClose is triggered', async () => {
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep-1',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    });
+    mockQueries({
+      logs: { data: [entry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep-1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('edit-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('modal-close'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('log-modal')).not.toBeInTheDocument();
+    });
   });
 });
