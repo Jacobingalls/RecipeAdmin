@@ -28,9 +28,6 @@ export default function ProductsPage() {
     });
   }, [products, nameFilter, brandFilter]);
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-
   return (
     <>
       <h1 className="mb-4">Products</h1>
@@ -59,13 +56,16 @@ export default function ProductsPage() {
           </select>
         </div>
       </div>
-      {filteredProducts.length === 0 ? (
+      {loading && <LoadingState />}
+      {error && <ErrorState message={error} />}
+      {!loading && !error && filteredProducts.length === 0 && (
         <ContentUnavailableView
           icon="bi-box-seam"
           title="No Products"
           description="Try adjusting your search or filters"
         />
-      ) : (
+      )}
+      {!loading && !error && filteredProducts.length > 0 && (
         <div className="list-group">
           {filteredProducts.map((p) => (
             <Link

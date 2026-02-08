@@ -47,17 +47,21 @@ describe('GroupsPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state', () => {
+  it('renders loading state with page chrome', () => {
     mockQuery({ loading: true });
     renderWithRouter(<GroupsPage />);
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+    expect(screen.getByText('Groups')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
   });
 
-  it('renders error state', () => {
+  it('renders error state with page chrome', () => {
     mockQuery({ error: 'Network error' });
     renderWithRouter(<GroupsPage />);
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Network error')).toBeInTheDocument();
+    expect(screen.getByText('Groups')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
   });
 
   it('renders empty state when no groups match', () => {

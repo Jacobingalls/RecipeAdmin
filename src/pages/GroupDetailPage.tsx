@@ -25,71 +25,82 @@ export default function GroupDetailPage() {
   } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id]);
   const [servingSize, setServingSize] = useState(() => ServingSize.servings(1));
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (!groupData) return <ContentUnavailableView icon="bi-collection" title="Group Not Found" />;
-
-  const group = new ProductGroup(groupData);
-  const items = groupData.items ?? [];
-  const barcodes = groupData.barcodes ?? [];
+  const group = groupData ? new ProductGroup(groupData) : null;
+  const items = groupData?.items ?? [];
+  const barcodes = groupData?.barcodes ?? [];
 
   let nutritionInfo = null;
   let nutritionError = null;
-  try {
-    nutritionInfo = group.serving(servingSize).nutrition;
-  } catch (e: unknown) {
-    nutritionError = (e as Error).message;
+  if (group) {
+    try {
+      nutritionInfo = group.serving(servingSize).nutrition;
+    } catch (e: unknown) {
+      nutritionError = (e as Error).message;
+    }
   }
 
   return (
     <>
       <BackButton to="/groups" />
-      <h1 className="mb-1">{groupData.name}</h1>
-      <p className="text-secondary mb-3">
-        {items.length} item{items.length !== 1 ? 's' : ''}
-      </p>
+      {loading && <LoadingState />}
+      {error && <ErrorState message={error} />}
+      {!loading && !error && !groupData && (
+        <ContentUnavailableView icon="bi-collection" title="Group Not Found" />
+      )}
+      {!loading && !error && groupData && (
+        <>
+          <h1 className="mb-1">{groupData.name}</h1>
+          <p className="text-secondary mb-3">
+            {items.length} item{items.length !== 1 ? 's' : ''}
+          </p>
 
-      <br />
-      <h6 className="text-secondary mb-2">Nutrition Estimate</h6>
-      <div className="card mb-3">
-        <div className="card-body">
-          <div className="d-flex align-items-end mb-3">
-            <ServingSizeSelector prep={group} value={servingSize} onChange={setServingSize} />
-            <div className="ms-auto">
-              <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+          <br />
+          <h6 className="text-secondary mb-2">Nutrition Estimate</h6>
+          <div className="card mb-3">
+            <div className="card-body">
+              <div className="d-flex align-items-end mb-3">
+                <ServingSizeSelector prep={group!} value={servingSize} onChange={setServingSize} />
+                <div className="ms-auto">
+                  <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+                </div>
+              </div>
+
+              {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
+              {nutritionInfo && (
+                <NutritionLabel
+                  nutritionInfo={nutritionInfo}
+                  servingSize={servingSize}
+                  prep={group!}
+                />
+              )}
             </div>
           </div>
 
-          {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
-          {nutritionInfo && (
-            <NutritionLabel nutritionInfo={nutritionInfo} servingSize={servingSize} prep={group} />
+          {group!.customSizes.length > 0 && (
+            <>
+              <br />
+              <CustomSizesSection customSizes={group!.customSizes} onSelectSize={setServingSize} />
+            </>
           )}
-        </div>
-      </div>
 
-      {group.customSizes.length > 0 && (
-        <>
           <br />
-          <CustomSizesSection customSizes={group.customSizes} onSelectSize={setServingSize} />
-        </>
-      )}
+          <h6 className="text-secondary mb-2">Item{items.length !== 1 ? 's' : ''}</h6>
+          {items.length === 0 ? (
+            <p className="text-secondary">No items in this group</p>
+          ) : (
+            <div className="list-group mb-3">
+              {items.map((item) => (
+                <GroupItemRow key={item.product?.id ?? item.group?.id} item={item} />
+              ))}
+            </div>
+          )}
 
-      <br />
-      <h6 className="text-secondary mb-2">Item{items.length !== 1 ? 's' : ''}</h6>
-      {items.length === 0 ? (
-        <p className="text-secondary">No items in this group</p>
-      ) : (
-        <div className="list-group mb-3">
-          {items.map((item) => (
-            <GroupItemRow key={item.product?.id ?? item.group?.id} item={item} />
-          ))}
-        </div>
-      )}
-
-      {barcodes.length > 0 && (
-        <>
-          <br />
-          <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
+          {barcodes.length > 0 && (
+            <>
+              <br />
+              <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
+            </>
+          )}
         </>
       )}
     </>

@@ -107,17 +107,19 @@ describe('ProductDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state', () => {
+  it('renders loading state with back button', () => {
     mockQuery({ loading: true });
     renderWithRoute('/products/p1');
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/products');
   });
 
-  it('renders error state', () => {
+  it('renders error state with back button', () => {
     mockQuery({ error: 'Server error' });
     renderWithRoute('/products/p1');
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Server error')).toBeInTheDocument();
+    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/products');
   });
 
   it('renders empty state when product is null', () => {

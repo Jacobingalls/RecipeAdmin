@@ -16,9 +16,6 @@ export default function GroupsPage() {
     return groups.filter((g) => g.name.toLowerCase().includes(nameFilter.toLowerCase()));
   }, [groups, nameFilter]);
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-
   return (
     <>
       <h1 className="mb-4">Groups</h1>
@@ -31,13 +28,16 @@ export default function GroupsPage() {
           onChange={(e) => setNameFilter(e.target.value)}
         />
       </div>
-      {filteredGroups.length === 0 ? (
+      {loading && <LoadingState />}
+      {error && <ErrorState message={error} />}
+      {!loading && !error && filteredGroups.length === 0 && (
         <ContentUnavailableView
           icon="bi-collection"
           title="No Groups"
           description="Try adjusting your search"
         />
-      ) : (
+      )}
+      {!loading && !error && filteredGroups.length > 0 && (
         <div className="list-group">
           {filteredGroups.map((g) => (
             <Link

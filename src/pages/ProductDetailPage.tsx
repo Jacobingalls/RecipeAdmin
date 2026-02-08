@@ -24,72 +24,77 @@ export default function ProductDetailPage() {
       ? selectedPrep
       : defaultPrepId;
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (!product) return <ContentUnavailableView icon="bi-box-seam" title="Product Not Found" />;
-
-  const preparations = product.preparations ?? [];
-  const barcodes = product.barcodes ?? [];
+  const preparations = product?.preparations ?? [];
+  const barcodes = product?.barcodes ?? [];
   const currentPrep = preparations.find((p) => p.id === activePrep);
 
   return (
     <>
       <BackButton to="/products" />
-      <h1 className="mb-1">{product.name}</h1>
-      <p className="text-secondary mb-3">{product.brand}</p>
-
-      {(product.notes as Note[] | undefined)?.length ? (
-        <div className="mb-3">
-          <NotesDisplay notes={product.notes as Note[]} />
-        </div>
-      ) : null}
-
-      <br />
-      <h6 className="text-secondary mb-2">Preparation{preparations.length > 1 ? 's' : ''}</h6>
-      {preparations.length > 0 && (
-        <div className="card mb-3">
-          {preparations.length > 1 && (
-            <div className="card-header">
-              <ul className="nav nav-tabs card-header-tabs">
-                {preparations.map((prep) => (
-                  <li className="nav-item" key={prep.id}>
-                    <button
-                      className={`nav-link d-flex align-items-center ${activePrep === prep.id ? 'active' : ''}`}
-                      onClick={() => setSelectedPrep(prep.id ?? null)}
-                    >
-                      {prep.name}
-                      {prep.id === product.defaultPreparationID && (
-                        <span className="badge bg-primary ms-2">Default</span>
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {currentPrep && (
-            <div className="card-body">
-              <PreparationDetails
-                prep={currentPrep}
-                servingSize={servingSize}
-                onServingSizeChange={setServingSize}
-                actionSlot={
-                  <AddToLogButton
-                    productId={product.id}
-                    preparationId={currentPrep.id}
-                    servingSize={servingSize}
-                  />
-                }
-              />
-            </div>
-          )}
-        </div>
+      {loading && <LoadingState />}
+      {error && <ErrorState message={error} />}
+      {!loading && !error && !product && (
+        <ContentUnavailableView icon="bi-box-seam" title="Product Not Found" />
       )}
-
-      {barcodes.length > 0 && (
+      {!loading && !error && product && (
         <>
+          <h1 className="mb-1">{product.name}</h1>
+          <p className="text-secondary mb-3">{product.brand}</p>
+
+          {(product.notes as Note[] | undefined)?.length ? (
+            <div className="mb-3">
+              <NotesDisplay notes={product.notes as Note[]} />
+            </div>
+          ) : null}
+
           <br />
-          <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
+          <h6 className="text-secondary mb-2">Preparation{preparations.length > 1 ? 's' : ''}</h6>
+          {preparations.length > 0 && (
+            <div className="card mb-3">
+              {preparations.length > 1 && (
+                <div className="card-header">
+                  <ul className="nav nav-tabs card-header-tabs">
+                    {preparations.map((prep) => (
+                      <li className="nav-item" key={prep.id}>
+                        <button
+                          className={`nav-link d-flex align-items-center ${activePrep === prep.id ? 'active' : ''}`}
+                          onClick={() => setSelectedPrep(prep.id ?? null)}
+                        >
+                          {prep.name}
+                          {prep.id === product.defaultPreparationID && (
+                            <span className="badge bg-primary ms-2">Default</span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {currentPrep && (
+                <div className="card-body">
+                  <PreparationDetails
+                    prep={currentPrep}
+                    servingSize={servingSize}
+                    onServingSizeChange={setServingSize}
+                    actionSlot={
+                      <AddToLogButton
+                        productId={product.id}
+                        preparationId={currentPrep.id}
+                        servingSize={servingSize}
+                      />
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {barcodes.length > 0 && (
+            <>
+              <br />
+              <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
+            </>
+          )}
         </>
       )}
     </>

@@ -48,17 +48,22 @@ describe('ProductsPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state', () => {
+  it('renders loading state with page chrome', () => {
     mockQuery({ loading: true });
     renderWithRouter(<ProductsPage />);
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+    expect(screen.getByText('Products')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 
-  it('renders error state', () => {
+  it('renders error state with page chrome', () => {
     mockQuery({ error: 'Server error' });
     renderWithRouter(<ProductsPage />);
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Server error')).toBeInTheDocument();
+    expect(screen.getByText('Products')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
   });
 
   it('renders empty state when no products', () => {

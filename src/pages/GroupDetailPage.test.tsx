@@ -107,17 +107,19 @@ describe('GroupDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state', () => {
+  it('renders loading state with back button', () => {
     mockQuery({ loading: true });
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/groups');
   });
 
-  it('renders error state', () => {
+  it('renders error state with back button', () => {
     mockQuery({ error: 'Failed to load' });
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Failed to load')).toBeInTheDocument();
+    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/groups');
   });
 
   it('renders empty state when data is null', () => {
