@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/name: recipe-admin
     app.kubernetes.io/component: admin
 spec:
+  revisionHistoryLimit: 1
   replicas: 1
   selector:
     matchLabels:

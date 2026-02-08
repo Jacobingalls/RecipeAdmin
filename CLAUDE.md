@@ -15,6 +15,8 @@ npm run format:check # Check formatting without writing
 
 **After making any code changes, always run `npm run lint:fix && npm run format` before committing.**
 
+**When asked to commit, use the `commit-writer` agent.**
+
 ## Code Standards
 
 ### Engineering Philosophy
