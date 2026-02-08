@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback } from 'react';
 import type { ApiLogEntry, ApiProduct } from '../api';
 import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
 import type { ProductGroupData } from '../domain';
-import { BackButton, LoadingState, ErrorState, EmptyState } from '../components/common';
+import { BackButton, LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 import { useApiQuery } from '../hooks';
 import LogModal from '../components/LogModal';
 import type { LogTarget } from '../components/LogModal';
@@ -135,7 +135,7 @@ export default function HistoryPage() {
       <BackButton to="/" />
       <h2 className="mb-4">History</h2>
       {dayGroups.size === 0 ? (
-        <EmptyState message="No log entries" />
+        <ContentUnavailableView icon="bi-clock-history" title="No History" />
       ) : (
         Array.from(dayGroups.entries()).map(([day, entries]) => (
           <div key={day} className="mb-4">

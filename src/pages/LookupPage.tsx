@@ -5,7 +5,7 @@ import type { ApiLookupItem } from '../api';
 import { lookupBarcode } from '../api';
 import { useApiQuery } from '../hooks';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
-import { LoadingState, ErrorState, EmptyState } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 import { LookupResultItem } from '../components/lookup';
 import LogModal from '../components/LogModal';
 import type { LogTarget } from '../components/LogModal';
@@ -78,7 +78,13 @@ export default function LookupPage() {
 
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
-      {results && results.length === 0 && <EmptyState message="No results found" />}
+      {results && results.length === 0 && (
+        <ContentUnavailableView
+          icon="bi-upc-scan"
+          title="No Results"
+          description="No products or groups match this barcode"
+        />
+      )}
       {results && results.length > 0 && (
         <div>
           {results.map((item) => (

@@ -6,7 +6,7 @@ import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } fr
 import type { ProductGroupData } from '../../domain';
 import { useApiQuery } from '../../hooks';
 import { resolveEntryName, buildLogTarget } from '../../utils/logEntryHelpers';
-import { LoadingState, ErrorState, EmptyState } from '../common';
+import { LoadingState, ErrorState, ContentUnavailableView } from '../common';
 import LogModal from '../LogModal';
 import type { LogTarget } from '../LogModal';
 import HistoryEntryRow from '../HistoryEntryRow';
@@ -105,7 +105,7 @@ export default function HistoryTile() {
   } else if (error) {
     content = <ErrorState message={error} />;
   } else if (!logs || logs.length === 0) {
-    content = <EmptyState message="No recent log entries" />;
+    content = <ContentUnavailableView icon="bi-clock-history" title="No Recent History" />;
   } else {
     content = (
       <div className="list-group list-group-flush">

@@ -14,7 +14,9 @@ vi.mock('../hooks', () => ({
 vi.mock('../components/common', () => ({
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
+  ContentUnavailableView: ({ title }: { title: string }) => (
+    <div data-testid="content-unavailable-view">{title}</div>
+  ),
 }));
 
 vi.mock('../components/lookup', () => ({
@@ -83,7 +85,7 @@ describe('LookupPage', () => {
   it('renders empty state when results are empty', () => {
     mockQuery({ data: [] });
     renderWithRoute('/lookup/123456');
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('displays the barcode in results text', () => {

@@ -5,7 +5,7 @@ import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
 import { useApiQuery } from '../hooks';
 import { ServingSize } from '../domain';
-import { LoadingState, ErrorState, EmptyState, BackButton } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView, BackButton } from '../components/common';
 import { PreparationDetails } from '../components/product';
 import BarcodeSection from '../components/BarcodeSection';
 import NotesDisplay from '../components/NotesDisplay';
@@ -26,7 +26,7 @@ export default function ProductDetailPage() {
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
-  if (!product) return <EmptyState message="Product not found" />;
+  if (!product) return <ContentUnavailableView icon="bi-box-seam" title="Product Not Found" />;
 
   const preparations = product.preparations ?? [];
   const barcodes = product.barcodes ?? [];

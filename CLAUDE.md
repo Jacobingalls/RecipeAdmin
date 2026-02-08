@@ -15,7 +15,7 @@ npm run format:check # Check formatting without writing
 
 **After making any code changes, always run `npm run lint:fix && npm run format` before committing.**
 
-**When asked to commit, use the `commit-writer` agent.**
+**Do not commit unless explicitly asked.** When asked to commit, use the `commit-writer` agent.
 
 ## Code Standards
 
@@ -68,7 +68,7 @@ src/
 │   ├── common/            # Shared UI components
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── BackButton     # Navigation back button
-│   │   ├── EmptyState     # "No items found" display
+│   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
 │   │   ├── ErrorBoundary  # Catches render errors
 │   │   ├── ErrorState     # Error message display
 │   │   └── LoadingState   # Loading indicator
@@ -142,11 +142,11 @@ The hook handles loading states, errors, and request cancellation automatically.
 Use components from `src/components/common/` for consistent UI:
 
 ```tsx
-import { LoadingState, ErrorState, EmptyState, BackButton } from '../components/common'
+import { LoadingState, ErrorState, ContentUnavailableView, BackButton } from '../components/common'
 
 if (loading) return <LoadingState />
 if (error) return <ErrorState message={error} />
-if (!data) return <EmptyState message="Not found" />
+if (!data) return <ContentUnavailableView icon="bi-box-seam" title="Not Found" />
 ```
 
 ### Domain Models

@@ -15,7 +15,9 @@ vi.mock('../hooks', () => ({
 vi.mock('../components/common', () => ({
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
+  ContentUnavailableView: ({ title }: { title: string }) => (
+    <div data-testid="content-unavailable-view">{title}</div>
+  ),
   BackButton: ({ to }: { to: string }) => (
     <a data-testid="back-button" href={to}>
       Back
@@ -121,7 +123,7 @@ describe('ProductDetailPage', () => {
   it('renders empty state when product is null', () => {
     mockQuery({ data: null });
     renderWithRoute('/products/p1');
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders product name and brand', () => {

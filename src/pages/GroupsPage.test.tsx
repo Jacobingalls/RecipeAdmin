@@ -15,7 +15,9 @@ vi.mock('../hooks', () => ({
 vi.mock('../components/common', () => ({
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
+  ContentUnavailableView: ({ title }: { title: string }) => (
+    <div data-testid="content-unavailable-view">{title}</div>
+  ),
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -61,7 +63,7 @@ describe('GroupsPage', () => {
   it('renders empty state when no groups match', () => {
     mockQuery({ data: [] });
     renderWithRouter(<GroupsPage />);
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders groups with item counts', () => {
@@ -98,7 +100,7 @@ describe('GroupsPage', () => {
     renderWithRouter(<GroupsPage />);
     const input = screen.getByPlaceholderText('Search by name...');
     fireEvent.change(input, { target: { value: 'zzzzz' } });
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('filter is case-insensitive', () => {

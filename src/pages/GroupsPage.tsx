@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import type { ApiGroupSummary } from '../api';
 import { listGroups } from '../api';
 import { useApiQuery } from '../hooks';
-import { LoadingState, ErrorState, EmptyState } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 
 export default function GroupsPage() {
   const { data: groups, loading, error } = useApiQuery<ApiGroupSummary[]>(listGroups, []);
@@ -32,7 +32,11 @@ export default function GroupsPage() {
         />
       </div>
       {filteredGroups.length === 0 ? (
-        <EmptyState message="No groups found" />
+        <ContentUnavailableView
+          icon="bi-collection"
+          title="No Groups"
+          description="Try adjusting your search"
+        />
       ) : (
         <div className="list-group">
           {filteredGroups.map((g) => (

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import type { ApiProductSummary } from '../api';
 import { listProducts } from '../api';
 import { useApiQuery } from '../hooks';
-import { LoadingState, ErrorState, EmptyState } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 
 export default function ProductsPage() {
   const { data: products, loading, error } = useApiQuery<ApiProductSummary[]>(listProducts, []);
@@ -60,7 +60,11 @@ export default function ProductsPage() {
         </div>
       </div>
       {filteredProducts.length === 0 ? (
-        <EmptyState message="No products found" />
+        <ContentUnavailableView
+          icon="bi-box-seam"
+          title="No Products"
+          description="Try adjusting your search or filters"
+        />
       ) : (
         <div className="list-group">
           {filteredProducts.map((p) => (

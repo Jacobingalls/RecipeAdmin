@@ -5,7 +5,7 @@ import { getGroup } from '../api';
 import { useApiQuery } from '../hooks';
 import type { GroupItem, ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
-import { LoadingState, ErrorState, EmptyState, BackButton } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView, BackButton } from '../components/common';
 import BarcodeSection from '../components/BarcodeSection';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
@@ -27,7 +27,7 @@ export default function GroupDetailPage() {
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
-  if (!groupData) return <EmptyState message="Group not found" />;
+  if (!groupData) return <ContentUnavailableView icon="bi-collection" title="Group Not Found" />;
 
   const group = new ProductGroup(groupData);
   const items = groupData.items ?? [];

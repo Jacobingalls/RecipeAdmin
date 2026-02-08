@@ -31,7 +31,9 @@ vi.mock('../components/common', () => ({
   ),
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
+  ContentUnavailableView: ({ title }: { title: string }) => (
+    <div data-testid="content-unavailable-view">{title}</div>
+  ),
 }));
 
 vi.mock('../components/HistoryEntryRow', () => ({
@@ -190,7 +192,7 @@ describe('HistoryPage', () => {
       groups: { data: sampleGroups },
     });
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders back button pointing to home', () => {

@@ -15,7 +15,9 @@ vi.mock('../hooks', () => ({
 vi.mock('../components/common', () => ({
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  EmptyState: ({ message }: { message: string }) => <div data-testid="empty-state">{message}</div>,
+  ContentUnavailableView: ({ title }: { title: string }) => (
+    <div data-testid="content-unavailable-view">{title}</div>
+  ),
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -62,7 +64,7 @@ describe('ProductsPage', () => {
   it('renders empty state when no products', () => {
     mockQuery({ data: [] });
     renderWithRouter(<ProductsPage />);
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders product list with names and brands', () => {
@@ -127,7 +129,7 @@ describe('ProductsPage', () => {
     renderWithRouter(<ProductsPage />);
     const input = screen.getByPlaceholderText('Search by name...');
     fireEvent.change(input, { target: { value: 'zzzzz' } });
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders the heading', () => {
