@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -99,13 +100,26 @@ export default function HistoryTile() {
     setLogTarget(null);
   }, []);
 
+  const centeredWrapper = (child: ReactNode) => (
+    <div className="d-flex align-items-center justify-content-center flex-grow-1">{child}</div>
+  );
+
   let content;
   if (loading) {
-    content = <LoadingState />;
+    content = centeredWrapper(<LoadingState />);
   } else if (error) {
-    content = <ErrorState message={error} />;
+    content = centeredWrapper(<ErrorState message={error} />);
+    content = centeredWrapper(
+      <ContentUnavailableView
+        icon="bi-clock-history"
+        title="Unable to load history"
+        description={error}
+      />,
+    );
   } else if (!logs || logs.length === 0) {
-    content = <ContentUnavailableView icon="bi-clock-history" title="No Recent History" />;
+    content = centeredWrapper(
+      <ContentUnavailableView icon="bi-clock-history" title="No Recent History" />,
+    );
   } else {
     content = (
       <div className="list-group list-group-flush">
@@ -134,7 +148,9 @@ export default function HistoryTile() {
 
   return (
     <Tile title="History" titleRight={historyLink}>
-      {content}
+      <div style={{ minHeight: '20rem' }} className="d-flex flex-column">
+        {content}
+      </div>
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
     </Tile>
   );

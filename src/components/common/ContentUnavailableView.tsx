@@ -1,3 +1,5 @@
+import StatusView from './StatusView';
+
 interface ContentUnavailableViewProps {
   icon: string;
   title: string;
@@ -14,10 +16,10 @@ export default function ContentUnavailableView({
   description,
 }: ContentUnavailableViewProps) {
   return (
-    <div className="text-center py-5">
-      <i className={`bi ${icon} fs-1 text-secondary`} />
-      <h5 className="fw-semibold mt-2">{title}</h5>
-      {description && <p className="text-secondary mb-0">{description}</p>}
-    </div>
+    <StatusView
+      symbol={<i className={`bi ${icon} fs-1 text-secondary`} />}
+      title={title}
+      description={description}
+    />
   );
 }

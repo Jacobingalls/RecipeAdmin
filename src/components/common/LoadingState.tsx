@@ -1,3 +1,5 @@
+import StatusView from './StatusView';
+
 interface LoadingStateProps {
   title?: string;
   description?: string;
@@ -9,12 +11,10 @@ interface LoadingStateProps {
  */
 export default function LoadingState({ title = 'Loading...', description }: LoadingStateProps) {
   return (
-    <div className="text-center py-5">
-      <div className="spinner-border text-secondary" role="status">
-        <span className="visually-hidden">{title}</span>
-      </div>
-      <h5 className="fw-semibold mt-2 text-secondary">{title}</h5>
-      {description && <p className="text-secondary mb-0">{description}</p>}
-    </div>
+    <StatusView
+      symbol={<i className="spinner-border fs-1 text-secondary" style={{ borderWidth: '0.1em' }} />}
+      title={title}
+      description={description}
+    />
   );
 }
