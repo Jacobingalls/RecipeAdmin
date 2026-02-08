@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -e
 
 container="ghcr.io/jacobingalls/recipe-admin"
 if [ -z "$1" ]; then

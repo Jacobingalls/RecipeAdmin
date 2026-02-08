@@ -1,6 +1,6 @@
 # Stage 1: Build the React application
 FROM node:20-alpine AS builder
-LABEL org.opencontainers.image.source https://github.com/Jacobingalls/RecipeAdmin
+LABEL org.opencontainers.image.source=https://github.com/Jacobingalls/RecipeAdmin
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
