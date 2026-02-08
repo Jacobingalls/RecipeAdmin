@@ -80,7 +80,6 @@ function LogModalInner({
     try {
       if (target.editEntryId) {
         await updateLogEntryServingSize(target.editEntryId, servingSize.toObject());
-        onSaved?.();
       } else {
         await logEntry({
           productId: target.productId,
@@ -89,6 +88,7 @@ function LogModalInner({
           servingSize: servingSize.toObject(),
         });
       }
+      onSaved?.();
       setLogState('success');
       setTimeout(() => {
         onClose();

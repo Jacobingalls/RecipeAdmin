@@ -169,6 +169,18 @@ describe('LogModal', () => {
     expect(screen.getByText('Add to Log')).not.toBeDisabled();
   });
 
+  it('fires onSaved callback on successful create', async () => {
+    mockLogEntry.mockResolvedValue({ id: 'log-1' });
+    const onSaved = vi.fn();
+    render(<LogModal target={makeTarget()} onClose={vi.fn()} onSaved={onSaved} />);
+
+    fireEvent.click(screen.getByText('Add to Log'));
+
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalled();
+    });
+  });
+
   it('disables Log button while logging', async () => {
     let resolveLog: (value: { id: string }) => void;
     mockLogEntry.mockReturnValue(
