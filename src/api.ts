@@ -79,6 +79,21 @@ async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> 
   return res.json() as Promise<TRes>;
 }
 
+export interface ApiLogItem {
+  kind: string;
+  productID?: string;
+  groupID?: string;
+  preparationID?: string;
+  servingSize: ServingSizeData;
+}
+
+export interface ApiLogEntry {
+  id: string;
+  timestamp: number;
+  userID: string;
+  item: ApiLogItem;
+}
+
 export interface LogEntryRequest {
   productId?: string;
   groupId?: string;
@@ -112,6 +127,14 @@ export async function getGroup(id: string): Promise<ProductGroupData> {
 
 export async function getVersion(): Promise<ApiVersion> {
   return apiFetch<ApiVersion>('/version');
+}
+
+export async function getLogs(from?: number, to?: number): Promise<ApiLogEntry[]> {
+  const params = new URLSearchParams();
+  if (from !== undefined) params.set('from', String(from));
+  if (to !== undefined) params.set('to', String(to));
+  const query = params.toString();
+  return apiFetch<ApiLogEntry[]>(`/logs${query ? `?${query}` : ''}`);
 }
 
 export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse> {

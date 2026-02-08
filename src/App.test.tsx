@@ -30,16 +30,30 @@ vi.mock('./pages/GroupDetailPage', () => ({
   default: () => <div data-testid="group-detail-page" />,
 }));
 
+vi.mock('./pages/HomePage', () => ({
+  default: () => <div data-testid="home-page" />,
+}));
+
+vi.mock('./pages/HistoryPage', () => ({
+  default: () => <div data-testid="history-page" />,
+}));
+
 describe('App', () => {
   it('renders the header', () => {
     render(<App />);
     expect(screen.getByTestId('header')).toBeInTheDocument();
   });
 
-  it('redirects unknown routes to /lookup', () => {
+  it('redirects unknown routes to /', () => {
     window.history.pushState({}, '', '/unknown-route');
     render(<App />);
-    expect(screen.getByTestId('lookup-page')).toBeInTheDocument();
+    expect(screen.getByTestId('home-page')).toBeInTheDocument();
+  });
+
+  it('renders home page on /', () => {
+    window.history.pushState({}, '', '/');
+    render(<App />);
+    expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });
 
   it('renders lookup page on /lookup', () => {
@@ -76,5 +90,11 @@ describe('App', () => {
     window.history.pushState({}, '', '/lookup/12345');
     render(<App />);
     expect(screen.getByTestId('lookup-page')).toBeInTheDocument();
+  });
+
+  it('renders history page on /history', () => {
+    window.history.pushState({}, '', '/history');
+    render(<App />);
+    expect(screen.getByTestId('history-page')).toBeInTheDocument();
   });
 });

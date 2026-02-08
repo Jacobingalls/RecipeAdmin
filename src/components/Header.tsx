@@ -44,6 +44,11 @@ export default function Header({ theme, onToggleTheme }: HeaderProps) {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
             <li className="nav-item">
+              <NavLink className={navLinkClass} to="/" end>
+                Home
+              </NavLink>
+            </li>
+            <li className="nav-item">
               <NavLink className={navLinkClass} to="/products">
                 Products
               </NavLink>

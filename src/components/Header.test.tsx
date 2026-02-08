@@ -40,10 +40,18 @@ describe('Header', () => {
     expect(screen.getByTestId('version-badge')).toBeInTheDocument();
   });
 
-  it('renders Products and Groups nav links', () => {
+  it('renders Home, Products, and Groups nav links', () => {
     renderWithRouter(<Header {...defaultProps} />);
+    expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Products')).toBeInTheDocument();
     expect(screen.getByText('Groups')).toBeInTheDocument();
+  });
+
+  it('highlights the Home nav link on /', () => {
+    renderWithRouter(<Header {...defaultProps} />, { route: '/' });
+    const homeLink = screen.getByText('Home');
+    expect(homeLink.className).toContain('active');
+    expect(homeLink.className).toContain('bg-primary');
   });
 
   it('renders the barcode search form', () => {
