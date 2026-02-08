@@ -44,6 +44,7 @@ describe('HistoryEntryRow', () => {
   const defaultProps = {
     entry: makeEntry(),
     name: 'Oats',
+    calories: 320,
     onLogAgain: vi.fn(),
     logAgainLoading: false,
     onEdit: vi.fn(),
@@ -61,6 +62,12 @@ describe('HistoryEntryRow', () => {
     expect(screen.getByText('Oats')).toBeInTheDocument();
     expect(screen.getByText(/2 servings/)).toBeInTheDocument();
     expect(screen.getByText(/5m ago/)).toBeInTheDocument();
+    expect(screen.getByText('320 kcal')).toBeInTheDocument();
+  });
+
+  it('renders placeholder calories when unavailable', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} calories={null} />);
+    expect(screen.getByText('-- kcal')).toBeInTheDocument();
   });
 
   it('navigates to detail page on click', () => {

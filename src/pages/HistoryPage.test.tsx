@@ -39,6 +39,7 @@ vi.mock('../components/HistoryEntryRow', () => ({
   default: ({
     entry,
     name,
+    calories,
     onLogAgain,
     logAgainLoading,
     onEdit,
@@ -48,6 +49,7 @@ vi.mock('../components/HistoryEntryRow', () => ({
   }: {
     entry: ApiLogEntry;
     name: string;
+    calories: number | null;
     onLogAgain: (entry: ApiLogEntry) => void;
     logAgainLoading: boolean;
     onEdit: (entry: ApiLogEntry) => void;
@@ -58,6 +60,7 @@ vi.mock('../components/HistoryEntryRow', () => ({
     <div
       data-testid={`entry-row-${entry.id}`}
       data-name={name}
+      data-calories={calories === null ? 'null' : String(calories)}
       data-edit-loading={editLoading}
       data-delete-loading={deleteLoading}
       data-log-again-loading={logAgainLoading}
@@ -101,6 +104,16 @@ vi.mock('../components/LogModal', () => ({
         )}
       </div>
     ) : null,
+}));
+
+vi.mock('../components/DayNutritionModal', () => ({
+  default: ({ dayLabel, onClose }: { dayLabel: string; onClose: () => void }) => (
+    <div data-testid="day-nutrition-modal" data-day-label={dayLabel}>
+      <button data-testid="close-day-nutrition-modal" onClick={onClose}>
+        Close
+      </button>
+    </div>
+  ),
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -277,6 +290,48 @@ describe('HistoryPage', () => {
     });
     renderWithRouter(<HistoryPage />);
     expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
+  });
+
+  it('shows per-entry kcal, day total kcal, and opens day nutrition modal', async () => {
+    const todayEntry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep-1',
+        servingSize: { kind: 'servings', amount: 2 },
+      },
+    });
+
+    mockQueries({
+      logs: { data: [todayEntry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep-1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('200 kcal total')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-calories', '200');
+
+    fireEvent.click(screen.getByRole('button', { name: /View nutrition/i }));
+    expect(screen.getByTestId('day-nutrition-modal')).toHaveAttribute(
+      'data-day-label',
+      expect.stringContaining('Today'),
+    );
   });
 
   it('passes group name to HistoryEntryRow for group entries', () => {

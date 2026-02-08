@@ -35,6 +35,7 @@ vi.mock('../HistoryEntryRow', () => ({
   default: ({
     entry,
     name,
+    calories,
     onLogAgain,
     logAgainLoading,
     onEdit,
@@ -44,6 +45,7 @@ vi.mock('../HistoryEntryRow', () => ({
   }: {
     entry: ApiLogEntry;
     name: string;
+    calories: number | null;
     onLogAgain: (entry: ApiLogEntry) => void;
     logAgainLoading: boolean;
     onEdit: (entry: ApiLogEntry) => void;
@@ -54,6 +56,7 @@ vi.mock('../HistoryEntryRow', () => ({
     <div
       data-testid={`entry-row-${entry.id}`}
       data-name={name}
+      data-calories={calories === null ? 'null' : String(calories)}
       data-edit-loading={editLoading}
       data-delete-loading={deleteLoading}
       data-log-again-loading={logAgainLoading}
@@ -233,6 +236,30 @@ describe('HistoryTile', () => {
     renderWithRouter(<HistoryTile />);
     expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
     expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
+  });
+
+  it('passes calculated calories to HistoryEntryRow on home tile', async () => {
+    mockQueries({
+      logs: { data: [sampleLogs[0]] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryTile />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-calories', '200');
+    });
   });
 
   it('shows "Unknown Product" when product not found', () => {
