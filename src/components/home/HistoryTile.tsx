@@ -28,11 +28,34 @@ export default function HistoryTile() {
   const { data: groups, loading: groupsLoading, error: groupsError } = useApiQuery(listGroups, []);
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
+  const [logAgainLoading, setLogAgainLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const loading = logsLoading || productsLoading || groupsLoading;
   const error = logsError || productsError || groupsError;
+
+  const handleLogAgainClick = useCallback(async (entry: ApiLogEntry) => {
+    setLogAgainLoading(true);
+    try {
+      let product: ApiProduct | null = null;
+      let groupData: ProductGroupData | null = null;
+
+      if (entry.item.kind === 'product' && entry.item.productID) {
+        product = await getProduct(entry.item.productID);
+      } else if (entry.item.kind === 'group' && entry.item.groupID) {
+        groupData = await getGroup(entry.item.groupID);
+      }
+
+      const target = buildLogTarget(entry, product, groupData);
+      if (target) {
+        const { editEntryId: _, ...createTarget } = target;
+        setLogTarget(createTarget);
+      }
+    } finally {
+      setLogAgainLoading(false);
+    }
+  }, []);
 
   const handleEditClick = useCallback(async (entry: ApiLogEntry) => {
     setEditLoading(true);
@@ -91,6 +114,8 @@ export default function HistoryTile() {
             key={entry.id}
             entry={entry}
             name={resolveEntryName(entry, products!, groups!)}
+            onLogAgain={handleLogAgainClick}
+            logAgainLoading={logAgainLoading}
             onEdit={handleEditClick}
             editLoading={editLoading}
             onDelete={handleDeleteClick}

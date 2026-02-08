@@ -38,6 +38,8 @@ vi.mock('../components/HistoryEntryRow', () => ({
   default: ({
     entry,
     name,
+    onLogAgain,
+    logAgainLoading,
     onEdit,
     editLoading,
     onDelete,
@@ -45,6 +47,8 @@ vi.mock('../components/HistoryEntryRow', () => ({
   }: {
     entry: ApiLogEntry;
     name: string;
+    onLogAgain: (entry: ApiLogEntry) => void;
+    logAgainLoading: boolean;
     onEdit: (entry: ApiLogEntry) => void;
     editLoading: boolean;
     onDelete: (entry: ApiLogEntry) => void;
@@ -55,8 +59,12 @@ vi.mock('../components/HistoryEntryRow', () => ({
       data-name={name}
       data-edit-loading={editLoading}
       data-delete-loading={deleteLoading}
+      data-log-again-loading={logAgainLoading}
     >
       <span>{name}</span>
+      <button data-testid={`log-again-${entry.id}`} onClick={() => onLogAgain(entry)}>
+        Log again
+      </button>
       <button data-testid={`edit-${entry.id}`} onClick={() => onEdit(entry)}>
         Edit
       </button>
@@ -73,12 +81,15 @@ vi.mock('../components/LogModal', () => ({
     onClose,
     onSaved,
   }: {
-    target: unknown;
+    target: Record<string, unknown> | null;
     onClose: () => void;
     onSaved?: () => void;
   }) =>
     target ? (
-      <div data-testid="log-modal">
+      <div
+        data-testid="log-modal"
+        data-has-edit-entry-id={String('editEntryId' in target && !!target.editEntryId)}
+      >
         <button data-testid="modal-close" onClick={onClose}>
           Close
         </button>
@@ -348,6 +359,80 @@ describe('HistoryPage', () => {
       expect(screen.getByTestId('log-modal')).toBeInTheDocument();
     });
 
+    expect(mockGetGroup).toHaveBeenCalledWith('g1');
+  });
+
+  it('opens log-again modal without editEntryId on a product entry', async () => {
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep-1',
+        servingSize: { kind: 'servings', amount: 2 },
+      },
+    });
+    mockQueries({
+      logs: { data: [entry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Oats',
+      preparations: [
+        {
+          id: 'prep-1',
+          nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+          mass: { amount: 40, unit: 'g' },
+          customSizes: [],
+        },
+      ],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('log-again-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('log-modal')).toHaveAttribute('data-has-edit-entry-id', 'false');
+    expect(mockGetProduct).toHaveBeenCalledWith('p1');
+  });
+
+  it('opens log-again modal without editEntryId on a group entry', async () => {
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+      item: {
+        kind: 'group',
+        groupID: 'g1',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    });
+    mockQueries({
+      logs: { data: [entry] },
+      products: { data: sampleProducts },
+      groups: { data: sampleGroups },
+    });
+    mockGetGroup.mockResolvedValue({
+      id: 'g1',
+      name: 'Breakfast Bowl',
+      items: [],
+    });
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('log-again-log1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('log-modal')).toHaveAttribute('data-has-edit-entry-id', 'false');
     expect(mockGetGroup).toHaveBeenCalledWith('g1');
   });
 

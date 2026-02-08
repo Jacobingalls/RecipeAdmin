@@ -11,6 +11,8 @@ import {
 interface HistoryEntryRowProps {
   entry: ApiLogEntry;
   name: string;
+  onLogAgain: (entry: ApiLogEntry) => void;
+  logAgainLoading: boolean;
   onEdit: (entry: ApiLogEntry) => void;
   editLoading: boolean;
   onDelete: (entry: ApiLogEntry) => void;
@@ -20,6 +22,8 @@ interface HistoryEntryRowProps {
 export default function HistoryEntryRow({
   entry,
   name,
+  onLogAgain,
+  logAgainLoading,
   onEdit,
   editLoading,
   onDelete,
@@ -68,6 +72,22 @@ export default function HistoryEntryRow({
             <i className="bi bi-three-dots" />
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
+            <li>
+              <button
+                type="button"
+                className="dropdown-item"
+                disabled={logAgainLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLogAgain(entry);
+                }}
+              >
+                Log again
+              </button>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
             <li>
               <button
                 type="button"

@@ -44,6 +44,8 @@ describe('HistoryEntryRow', () => {
   const defaultProps = {
     entry: makeEntry(),
     name: 'Oats',
+    onLogAgain: vi.fn(),
+    logAgainLoading: false,
     onEdit: vi.fn(),
     editLoading: false,
     onDelete: vi.fn(),
@@ -110,6 +112,36 @@ describe('HistoryEntryRow', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     fireEvent.click(screen.getByLabelText('Entry actions'));
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('renders Log again menu item', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    expect(screen.getByText('Log again')).toBeInTheDocument();
+  });
+
+  it('calls onLogAgain with the entry when Log again is clicked', () => {
+    const onLogAgain = vi.fn();
+    renderWithRouter(<HistoryEntryRow {...defaultProps} onLogAgain={onLogAgain} />);
+    fireEvent.click(screen.getByText('Log again'));
+    expect(onLogAgain).toHaveBeenCalledWith(defaultProps.entry);
+  });
+
+  it('does not navigate when Log again is clicked', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    fireEvent.click(screen.getByText('Log again'));
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('disables Log again when logAgainLoading is true', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoading />);
+    expect(screen.getByText('Log again')).toBeDisabled();
+  });
+
+  it('renders a divider between Log again and Edit', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const menu = screen.getByText('Log again').closest('ul')!;
+    const items = Array.from(menu.querySelectorAll('li'));
+    expect(items[1].querySelector('hr.dropdown-divider')).toBeInTheDocument();
   });
 
   it('renders Edit menu item', () => {
