@@ -31,7 +31,7 @@ docker push $container:latest
 sed -i '' "s|image: $container:.*|image: $container:$version|" k8s/base/admin/deployment.yaml
 
 # Commit, tag, and push
-git add k8s/base/api/deployment.yaml
+git add k8s/base/admin/deployment.yaml
 git commit -m "Deploy $version"
 git tag "$version"
 git push
