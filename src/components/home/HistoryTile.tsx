@@ -89,7 +89,7 @@ export default function HistoryTile() {
         logs
           .filter((entry) => entry.item.kind === 'product' && !!entry.item.productID)
           .map((entry) => entry.item.productID!)
-          .filter((id) => !productDetails[id]),
+          .filter((id) => !(id in productDetails)),
       ),
     );
 
@@ -98,7 +98,7 @@ export default function HistoryTile() {
         logs
           .filter((entry) => entry.item.kind === 'group' && !!entry.item.groupID)
           .map((entry) => entry.item.groupID!)
-          .filter((id) => !groupDetails[id]),
+          .filter((id) => !(id in groupDetails)),
       ),
     );
 

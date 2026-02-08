@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
+import { Outlet } from 'react-router-dom';
 
 import App from './App';
 
@@ -6,8 +8,28 @@ vi.mock('./hooks', () => ({
   useTheme: () => 'light',
 }));
 
+vi.mock('./contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useAuth: () => ({
+    isAuthenticated: true,
+    user: { id: '1', username: 'test', isAdmin: true, hasPasskeys: true },
+    isLoading: false,
+    login: vi.fn(),
+    loginWithPasskey: vi.fn(),
+    logout: vi.fn(),
+  }),
+}));
+
 vi.mock('./components/Header', () => ({
   default: () => <div data-testid="header" />,
+}));
+
+vi.mock('./components/common/RequireAuth', () => ({
+  default: () => <Outlet />,
+}));
+
+vi.mock('./components/common/RequireAdmin', () => ({
+  default: () => <Outlet />,
 }));
 
 vi.mock('./pages/LookupPage', () => ({
@@ -38,22 +60,38 @@ vi.mock('./pages/HistoryPage', () => ({
   default: () => <div data-testid="history-page" />,
 }));
 
+vi.mock('./pages/LoginPage', () => ({
+  default: () => <div data-testid="login-page" />,
+}));
+
+vi.mock('./pages/SettingsPage', () => ({
+  default: () => <div data-testid="settings-page" />,
+}));
+
+vi.mock('./pages/AdminUsersPage', () => ({
+  default: () => <div data-testid="admin-users-page" />,
+}));
+
+vi.mock('./pages/AdminUserDetailPage', () => ({
+  default: () => <div data-testid="admin-user-detail-page" />,
+}));
+
 describe('App', () => {
   it('renders the header', () => {
     render(<App />);
     expect(screen.getByTestId('header')).toBeInTheDocument();
   });
 
-  it('redirects unknown routes to /', () => {
-    window.history.pushState({}, '', '/unknown-route');
-    render(<App />);
-    expect(screen.getByTestId('home-page')).toBeInTheDocument();
-  });
-
   it('renders home page on /', () => {
     window.history.pushState({}, '', '/');
     render(<App />);
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
+  });
+
+  it('renders login page on /login', () => {
+    window.history.pushState({}, '', '/login');
+    render(<App />);
+    expect(screen.getByTestId('login-page')).toBeInTheDocument();
   });
 
   it('renders lookup page on /lookup', () => {
@@ -96,5 +134,11 @@ describe('App', () => {
     window.history.pushState({}, '', '/history');
     render(<App />);
     expect(screen.getByTestId('history-page')).toBeInTheDocument();
+  });
+
+  it('redirects unknown routes to /', () => {
+    window.history.pushState({}, '', '/unknown-route');
+    render(<App />);
+    expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });
 });

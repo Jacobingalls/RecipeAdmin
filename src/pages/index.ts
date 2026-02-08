@@ -1,7 +1,11 @@
+export { default as AdminUserDetailPage } from './AdminUserDetailPage';
+export { default as AdminUsersPage } from './AdminUsersPage';
 export { default as GroupDetailPage } from './GroupDetailPage';
 export { default as GroupsPage } from './GroupsPage';
 export { default as HistoryPage } from './HistoryPage';
 export { default as HomePage } from './HomePage';
+export { default as LoginPage } from './LoginPage';
 export { default as LookupPage } from './LookupPage';
 export { default as ProductDetailPage } from './ProductDetailPage';
 export { default as ProductsPage } from './ProductsPage';
+export { default as SettingsPage } from './SettingsPage';

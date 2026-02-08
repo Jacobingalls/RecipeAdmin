@@ -323,11 +323,11 @@ describe('HistoryPage', () => {
     renderWithRouter(<HistoryPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('200 kcal total')).toBeInTheDocument();
+      expect(screen.getByText(/200 kcal total/)).toBeInTheDocument();
     });
     expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-calories', '200');
 
-    fireEvent.click(screen.getByRole('button', { name: /View nutrition/i }));
+    fireEvent.click(screen.getByRole('button', { name: /View full nutrition/i }));
     expect(screen.getByTestId('day-nutrition-modal')).toHaveAttribute(
       'data-day-label',
       expect.stringContaining('Today'),

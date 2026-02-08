@@ -325,22 +325,22 @@ export default function HistoryPage() {
         Array.from(dayGroups.entries()).map(([day, entries]) => (
           <div key={day} className="mb-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
-			  <h5 className="text-body-secondary mb-0">{formatDayHeading(day)}</h5>
+              <h5 className="text-body-secondary mb-0">{formatDayHeading(day)}</h5>
 
-				<div className="d-flex align-items-center">
-				  <span className="text-body-secondary small fw-medium mb-0">
-					{formatSignificant(dayNutritionByDay.get(day)?.calories?.amount ?? 0)} kcal total, &nbsp;
-				  </span>
-				  
-				  <button
-					  type="button"
-					  className="btn btn-link text-decoration-none small p-0"
-					  onClick={() => setSelectedDay(day)}
-					>
-					  View full nutrition &rarr;
-				  </button>
-				  </div>
-			  
+              <div className="d-flex align-items-center">
+                <span className="text-body-secondary small fw-medium mb-0">
+                  {formatSignificant(dayNutritionByDay.get(day)?.calories?.amount ?? 0)} kcal total,
+                  &nbsp;
+                </span>
+
+                <button
+                  type="button"
+                  className="btn btn-link text-decoration-none small p-0"
+                  onClick={() => setSelectedDay(day)}
+                >
+                  View full nutrition &rarr;
+                </button>
+              </div>
             </div>
             <div className="list-group">
               {entries.map((entry) => (

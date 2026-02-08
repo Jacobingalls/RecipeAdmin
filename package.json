@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.2.2",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.13.1",
     "convert": "^6.0.0",

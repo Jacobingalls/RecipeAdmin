@@ -172,6 +172,8 @@ function mockQueries(overrides: {
 describe('HistoryTile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetProduct.mockRejectedValue(new Error('not mocked'));
+    mockGetGroup.mockRejectedValue(new Error('not mocked'));
   });
 
   it('renders loading state when logs are loading', () => {

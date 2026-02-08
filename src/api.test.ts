@@ -99,7 +99,7 @@ describe('listProducts', () => {
 
     const result = await listProducts();
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/products`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/products`, { credentials: 'include' });
     expect(result).toEqual(products);
   });
 });
@@ -111,7 +111,7 @@ describe('getProduct', () => {
 
     const result = await getProduct('42');
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/products/42`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/products/42`, { credentials: 'include' });
     expect(result).toEqual(product);
   });
 
@@ -120,7 +120,9 @@ describe('getProduct', () => {
 
     await getProduct('foo/bar');
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/products/foo%2Fbar`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/products/foo%2Fbar`, {
+      credentials: 'include',
+    });
   });
 });
 
@@ -131,7 +133,7 @@ describe('listGroups', () => {
 
     const result = await listGroups();
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/groups`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/groups`, { credentials: 'include' });
     expect(result).toEqual(groups);
   });
 });
@@ -143,7 +145,7 @@ describe('getGroup', () => {
 
     const result = await getGroup('5');
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/groups/5`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/groups/5`, { credentials: 'include' });
     expect(result).toEqual(group);
   });
 
@@ -152,7 +154,9 @@ describe('getGroup', () => {
 
     await getGroup('a b');
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/groups/a%20b`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/groups/a%20b`, {
+      credentials: 'include',
+    });
   });
 });
 
@@ -163,7 +167,9 @@ describe('lookupBarcode', () => {
 
     const result = await lookupBarcode('123456');
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/lookup/123456`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/lookup/123456`, {
+      credentials: 'include',
+    });
     expect(result).toEqual(items);
   });
 
@@ -172,7 +178,9 @@ describe('lookupBarcode', () => {
 
     await lookupBarcode('bar/code');
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/lookup/bar%2Fcode`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/lookup/bar%2Fcode`, {
+      credentials: 'include',
+    });
   });
 });
 
@@ -183,7 +191,7 @@ describe('getVersion', () => {
 
     const result = await getVersion();
 
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/version`);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/version`, { credentials: 'include' });
     expect(result).toEqual(version);
   });
 });
@@ -209,6 +217,7 @@ describe('logEntry', () => {
         preparationID: 'prep1',
         servingSize: { kind: 'servings', amount: 2 },
       }),
+      credentials: 'include',
     });
     expect(result).toEqual(response);
   });
@@ -229,6 +238,7 @@ describe('logEntry', () => {
         groupID: 'g1',
         servingSize: { kind: 'servings', amount: 1 },
       }),
+      credentials: 'include',
     });
   });
 

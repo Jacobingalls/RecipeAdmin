@@ -1,6 +1,6 @@
 # RecipeAdmin
 
-React admin interface for viewing RecipeKit nutrition data. Read-only viewer for products, groups, and barcode lookups.
+React admin interface for RecipeKit nutrition data. Supports viewing products, groups, barcode lookups, food logging, and user/credential administration.
 
 ## Commands
 
@@ -61,8 +61,8 @@ npm run format:check # Check formatting without writing
 
 ```
 src/
-├── api.ts                 # API client (uses VITE_API_BASE_URL env var)
-├── App.tsx                # Root component with routing
+├── api.ts                 # API client (credentials:'include', 401 handling, auth/admin APIs)
+├── App.tsx                # Root component with AuthProvider + routing
 ├── main.tsx               # Entry point
 ├── components/
 │   ├── common/            # Shared UI components
@@ -71,7 +71,11 @@ src/
 │   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
 │   │   ├── ErrorBoundary  # Catches render errors
 │   │   ├── ErrorState     # Error message display
-│   │   └── LoadingState   # Loading indicator
+│   │   ├── LoadingState   # Loading indicator
+│   │   ├── PasskeySetupPrompt # Banner prompting users without passkeys to register one
+│   │   ├── RequireAdmin   # Route guard: redirects non-admins to /
+│   │   ├── RequireAuth    # Route guard: redirects unauthenticated to /login, shows PasskeySetupPrompt
+│   │   └── StatusView
 │   ├── lookup/            # Barcode lookup components
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── GroupCard      # Group result card
@@ -83,7 +87,7 @@ src/
 │   ├── BarcodeSection     # Barcode list with serving size links
 │   ├── CustomSizesSection # Custom size buttons
 │   ├── Footer             # App footer
-│   ├── Header             # App header with nav
+│   ├── Header             # App header with nav, user dropdown, admin link
 │   ├── NotesDisplay       # Product/barcode notes
 │   ├── NutritionLabel     # FDA-style nutrition facts label
 │   ├── ServingSizeSelector # Serving size input controls
@@ -91,6 +95,8 @@ src/
 ├── config/
 │   ├── constants.ts       # FDA daily values
 │   └── unitConfig.ts      # Unit definitions for serving selector
+├── contexts/
+│   └── AuthContext.tsx     # Auth state, login/logout/passkey methods
 ├── domain/                # Business logic classes
 │   ├── index.ts           # Barrel exports
 │   ├── CustomSize.ts      # Custom serving size (e.g., "1 cookie")
@@ -104,15 +110,86 @@ src/
 │   └── useApiQuery.ts     # Data fetching with cancellation
 ├── pages/                 # Route components
 │   ├── index.ts           # Barrel exports
+│   ├── AdminUserDetailPage # /admin/users/:id — credential management
+│   ├── AdminUsersPage     # /admin/users — user list + create
 │   ├── GroupDetailPage    # /groups/:id
 │   ├── GroupsPage         # /groups
+│   ├── HistoryPage        # /history
+│   ├── HomePage           # /
+│   ├── LoginPage          # /login — passkey + API key login
 │   ├── LookupPage         # /lookup/:barcode?
 │   ├── ProductDetailPage  # /products/:id
-│   └── ProductsPage       # /products
+│   ├── ProductsPage       # /products
+│   └── SettingsPage       # /settings — own passkeys + API keys
 └── utils/
     ├── index.ts           # Barrel exports
     └── formatters.ts      # formatSignificant, formatServingSize
 ```
+
+## Authentication
+
+### Overview
+
+The app uses cookie-based authentication with the RecipeAPI backend. All fetch calls include `credentials: 'include'` so the `recipe-token` httpOnly cookie is sent automatically.
+
+### AuthContext (`src/contexts/AuthContext.tsx`)
+
+`AuthProvider` wraps the entire app (inside `BrowserRouter`). It provides:
+
+```tsx
+const { isAuthenticated, user, isLoading, login, loginWithPasskey, logout } = useAuth();
+```
+
+- On mount: calls `GET /auth/me` to check existing session (cookie)
+- `login(username, password)` — API key login via `POST /auth/login`
+- `loginWithPasskey(username?)` — WebAuthn login via begin/finish flow using `@simplewebauthn/browser`
+- `logout()` — calls `POST /auth/logout`, clears state
+- Listens for `auth:unauthorized` custom event (dispatched by `api.ts` on 401) to clear auth state
+
+### Route Protection
+
+Routes are protected using layout route components:
+
+```tsx
+<Route path="/login" element={<LoginPage />} />
+<Route element={<RequireAuth />}>
+  {/* All authenticated routes */}
+  <Route element={<RequireAdmin />}>
+    {/* Admin-only routes */}
+  </Route>
+</Route>
+```
+
+- **RequireAuth** — redirects to `/login` if not authenticated, shows `PasskeySetupPrompt` for users without passkeys
+- **RequireAdmin** — redirects to `/` if `user.isAdmin` is false
+
+### PasskeySetupPrompt
+
+Shown to authenticated users who have `hasPasskeys === false`:
+- Prominent banner at top of protected pages
+- "Set up now" triggers WebAuthn registration via `@simplewebauthn/browser`'s `startRegistration`
+- "Remind me later" dismisses to `sessionStorage` (reappears next session)
+
+### API Client Auth Functions (`src/api.ts`)
+
+All API functions automatically include credentials. On 401 responses, a `CustomEvent('auth:unauthorized')` is dispatched before throwing.
+
+Auth functions: `authLogin`, `authLoginBegin`, `authLoginFinish`, `authMe`, `authLogout`, `authListPasskeys`, `authAddPasskeyBegin`, `authAddPasskeyFinish`, `authDeletePasskey`, `authListAPIKeys`, `authCreateAPIKey`, `authRevokeAPIKey`
+
+Admin functions: `adminListUsers`, `adminCreateUser`, `adminUpdateUser`, `adminDeleteUser`, `adminListUserPasskeys`, `adminDeleteUserPasskey`, `adminListUserAPIKeys`, `adminDeleteUserAPIKey`, `adminCreateUserAPIKey`
+
+### Auth Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| LoginPage | `/login` | Two sections: passkey sign-in button + username/API key form |
+| SettingsPage | `/settings` | Manage own passkeys and API keys |
+| AdminUsersPage | `/admin/users` | List/create users, shows one-time temp API key on create |
+| AdminUserDetailPage | `/admin/users/:id` | Edit user, manage their passkeys and API keys |
+
+### Header
+
+When authenticated: shows nav links, barcode search, and a user dropdown (username, Settings link, Sign out). Admins see an "Admin" nav link. When not authenticated: shows only the brand.
 
 ## Key Patterns
 

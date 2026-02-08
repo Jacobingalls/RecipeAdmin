@@ -1,0 +1,164 @@
+import { render, screen, act } from '@testing-library/react';
+
+import * as api from '../api';
+
+import { AuthProvider, useAuth } from './AuthContext';
+
+vi.mock('../api', () => ({
+  authMe: vi.fn(),
+  authLogin: vi.fn(),
+  authLoginBegin: vi.fn(),
+  authLoginFinish: vi.fn(),
+  authLogout: vi.fn(),
+}));
+
+vi.mock('@simplewebauthn/browser', () => ({
+  startAuthentication: vi.fn().mockResolvedValue({ id: 'cred-1' }),
+}));
+
+const mockAuthMe = vi.mocked(api.authMe);
+const mockAuthLogin = vi.mocked(api.authLogin);
+const mockAuthLogout = vi.mocked(api.authLogout);
+const mockAuthLoginBegin = vi.mocked(api.authLoginBegin);
+const mockAuthLoginFinish = vi.mocked(api.authLoginFinish);
+
+const testUser = {
+  id: '1',
+  username: 'testuser',
+  isAdmin: false,
+  hasPasskeys: true,
+};
+
+function TestConsumer() {
+  const { isAuthenticated, user, isLoading, login, logout, loginWithPasskey } = useAuth();
+  return (
+    <div>
+      <span data-testid="loading">{String(isLoading)}</span>
+      <span data-testid="authenticated">{String(isAuthenticated)}</span>
+      <span data-testid="username">{user?.username ?? 'none'}</span>
+      <button data-testid="login" onClick={() => login('user', 'pass')} type="button" />
+      <button data-testid="logout" onClick={() => logout()} type="button" />
+      <button data-testid="passkey" onClick={() => loginWithPasskey()} type="button" />
+    </div>
+  );
+}
+
+describe('AuthContext', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('checks auth on mount and sets user', async () => {
+    mockAuthMe.mockResolvedValue(testUser);
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+    expect(screen.getByTestId('username')).toHaveTextContent('testuser');
+  });
+
+  it('sets unauthenticated when authMe fails', async () => {
+    mockAuthMe.mockRejectedValue(new Error('HTTP 401'));
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+    expect(screen.getByTestId('username')).toHaveTextContent('none');
+  });
+
+  it('login calls API and sets user', async () => {
+    mockAuthMe.mockRejectedValue(new Error('not authed'));
+    mockAuthLogin.mockResolvedValue({
+      token: 'tok',
+      user: testUser,
+      isTemporaryKey: false,
+    });
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+    await act(async () => {
+      screen.getByTestId('login').click();
+    });
+    expect(mockAuthLogin).toHaveBeenCalledWith('user', 'pass');
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+  });
+
+  it('logout calls API and clears user', async () => {
+    mockAuthMe.mockResolvedValue(testUser);
+    mockAuthLogout.mockResolvedValue(undefined);
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+    await act(async () => {
+      screen.getByTestId('logout').click();
+    });
+    expect(mockAuthLogout).toHaveBeenCalled();
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+  });
+
+  it('handles auth:unauthorized event', async () => {
+    mockAuthMe.mockResolvedValue(testUser);
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+    await act(async () => {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+  });
+
+  it('loginWithPasskey calls begin, startAuthentication, finish', async () => {
+    mockAuthMe.mockRejectedValue(new Error('not authed'));
+    mockAuthLoginBegin.mockResolvedValue({
+      options: { challenge: 'abc' },
+      sessionID: 'sess-1',
+    });
+    mockAuthLoginFinish.mockResolvedValue({
+      token: 'tok',
+      user: testUser,
+      isTemporaryKey: false,
+    });
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    await act(async () => {
+      screen.getByTestId('passkey').click();
+    });
+    expect(mockAuthLoginBegin).toHaveBeenCalled();
+    expect(mockAuthLoginFinish).toHaveBeenCalledWith('sess-1', { id: 'cred-1' });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+  });
+
+  it('throws when useAuth is used outside AuthProvider', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => render(<TestConsumer />)).toThrow('useAuth must be used within an AuthProvider');
+    spy.mockRestore();
+  });
+});
