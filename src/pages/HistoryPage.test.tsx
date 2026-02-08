@@ -19,6 +19,7 @@ vi.mock('../api', async () => {
     ...actual,
     getProduct: vi.fn(),
     getGroup: vi.fn(),
+    deleteLog: vi.fn(),
   };
 });
 
@@ -39,16 +40,28 @@ vi.mock('../components/HistoryEntryRow', () => ({
     name,
     onEdit,
     editLoading,
+    onDelete,
+    deleteLoading,
   }: {
     entry: ApiLogEntry;
     name: string;
     onEdit: (entry: ApiLogEntry) => void;
     editLoading: boolean;
+    onDelete: (entry: ApiLogEntry) => void;
+    deleteLoading: boolean;
   }) => (
-    <div data-testid={`entry-row-${entry.id}`} data-name={name} data-edit-loading={editLoading}>
+    <div
+      data-testid={`entry-row-${entry.id}`}
+      data-name={name}
+      data-edit-loading={editLoading}
+      data-delete-loading={deleteLoading}
+    >
       <span>{name}</span>
       <button data-testid={`edit-${entry.id}`} onClick={() => onEdit(entry)}>
         Edit
+      </button>
+      <button data-testid={`delete-${entry.id}`} onClick={() => onDelete(entry)}>
+        Delete
       </button>
     </div>
   ),
@@ -81,6 +94,7 @@ vi.mock('../components/LogModal', () => ({
 const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockGetProduct = vi.mocked(api.getProduct);
 const mockGetGroup = vi.mocked(api.getGroup);
+const mockDeleteLog = vi.mocked(api.deleteLog);
 
 function renderWithRouter(ui: ReactElement) {
   return render(
@@ -400,6 +414,54 @@ describe('HistoryPage', () => {
 
     fireEvent.click(screen.getByTestId('modal-saved'));
     expect(refetchLogs).toHaveBeenCalled();
+  });
+
+  it('calls deleteLog and refetches when Delete is clicked', async () => {
+    const refetchLogs = vi.fn();
+    const entry = makeEntry({
+      id: 'log1',
+      timestamp: Date.now() / 1000,
+    });
+    mockUseApiQuery.mockImplementation((fetchFn) => {
+      const fnName = fetchFn.name || fetchFn.toString();
+      if (fnName.includes('getLogs') || fnName === 'getLogs') {
+        return {
+          data: [entry],
+          loading: false,
+          error: null,
+          refetch: refetchLogs,
+        } as UseApiQueryResult<unknown>;
+      }
+      if (fnName.includes('listProducts') || fnName === 'listProducts') {
+        return {
+          data: sampleProducts,
+          loading: false,
+          error: null,
+          refetch: vi.fn(),
+        } as UseApiQueryResult<unknown>;
+      }
+      if (fnName.includes('listGroups') || fnName === 'listGroups') {
+        return {
+          data: sampleGroups,
+          loading: false,
+          error: null,
+          refetch: vi.fn(),
+        } as UseApiQueryResult<unknown>;
+      }
+      return defaultResult as UseApiQueryResult<unknown>;
+    });
+    mockDeleteLog.mockResolvedValue(undefined);
+
+    renderWithRouter(<HistoryPage />);
+
+    fireEvent.click(screen.getByTestId('delete-log1'));
+
+    await waitFor(() => {
+      expect(mockDeleteLog).toHaveBeenCalledWith('log1');
+    });
+    await waitFor(() => {
+      expect(refetchLogs).toHaveBeenCalled();
+    });
   });
 
   it('closes modal when onClose is triggered', async () => {

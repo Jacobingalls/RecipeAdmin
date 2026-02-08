@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 
 import type { ApiLogEntry, ApiProduct } from '../api';
-import { getLogs, listProducts, listGroups, getProduct, getGroup } from '../api';
+import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
 import type { ProductGroupData } from '../domain';
 import { BackButton, LoadingState, ErrorState, EmptyState } from '../components/common';
 import { useApiQuery } from '../hooks';
@@ -52,6 +52,7 @@ export default function HistoryPage() {
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const loading = logsLoading || productsLoading || groupsLoading;
   const error = logsError || productsError || groupsError;
@@ -82,6 +83,19 @@ export default function HistoryPage() {
     }
   }, []);
 
+  const handleDeleteClick = useCallback(
+    async (entry: ApiLogEntry) => {
+      setDeleteLoading(true);
+      try {
+        await deleteLog(entry.id);
+        refetchLogs();
+      } finally {
+        setDeleteLoading(false);
+      }
+    },
+    [refetchLogs],
+  );
+
   const handleSaved = useCallback(() => {
     refetchLogs();
   }, [refetchLogs]);
@@ -111,6 +125,8 @@ export default function HistoryPage() {
                   name={resolveEntryName(entry, products!, groups!)}
                   onEdit={handleEditClick}
                   editLoading={editLoading}
+                  onDelete={handleDeleteClick}
+                  deleteLoading={deleteLoading}
                 />
               ))}
             </div>

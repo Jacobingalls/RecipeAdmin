@@ -79,6 +79,13 @@ async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> 
   return res.json() as Promise<TRes>;
 }
 
+async function apiDelete(endpoint: string): Promise<void> {
+  const res = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE' });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+}
+
 async function apiPut<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
   const res = await fetch(`${API_BASE}${endpoint}`, {
     method: 'PUT',
@@ -169,4 +176,8 @@ export async function updateLogEntryServingSize(
     `/logs/${encodeURIComponent(id)}/serving-size`,
     servingSize,
   );
+}
+
+export async function deleteLog(id: string): Promise<void> {
+  return apiDelete(`/logs/${encodeURIComponent(id)}`);
 }

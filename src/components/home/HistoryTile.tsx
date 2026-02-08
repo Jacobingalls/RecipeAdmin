@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { ApiLogEntry, ApiProduct } from '../../api';
-import { getLogs, listProducts, listGroups, getProduct, getGroup } from '../../api';
+import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../../api';
 import type { ProductGroupData } from '../../domain';
 import { useApiQuery } from '../../hooks';
 import { resolveEntryName, buildLogTarget } from '../../utils/logEntryHelpers';
@@ -29,6 +29,7 @@ export default function HistoryTile() {
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const loading = logsLoading || productsLoading || groupsLoading;
   const error = logsError || productsError || groupsError;
@@ -53,6 +54,19 @@ export default function HistoryTile() {
       setEditLoading(false);
     }
   }, []);
+
+  const handleDeleteClick = useCallback(
+    async (entry: ApiLogEntry) => {
+      setDeleteLoading(true);
+      try {
+        await deleteLog(entry.id);
+        refetchLogs();
+      } finally {
+        setDeleteLoading(false);
+      }
+    },
+    [refetchLogs],
+  );
 
   const handleSaved = useCallback(() => {
     refetchLogs();
@@ -79,6 +93,8 @@ export default function HistoryTile() {
             name={resolveEntryName(entry, products!, groups!)}
             onEdit={handleEditClick}
             editLoading={editLoading}
+            onDelete={handleDeleteClick}
+            deleteLoading={deleteLoading}
           />
         ))}
       </div>

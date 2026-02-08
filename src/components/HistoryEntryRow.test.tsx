@@ -46,6 +46,8 @@ describe('HistoryEntryRow', () => {
     name: 'Oats',
     onEdit: vi.fn(),
     editLoading: false,
+    onDelete: vi.fn(),
+    deleteLoading: false,
   };
 
   beforeEach(() => {
@@ -97,10 +99,10 @@ describe('HistoryEntryRow', () => {
     expect(screen.getByLabelText('Entry actions')).toBeInTheDocument();
   });
 
-  it('renders a round overflow button', () => {
+  it('renders a borderless round overflow button', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const btn = screen.getByLabelText('Entry actions');
-    expect(btn).toHaveClass('rounded-circle');
+    expect(btn).toHaveClass('rounded-circle', 'border-0', 'text-body-secondary');
     expect(btn).toHaveStyle({ width: '2rem', height: '2rem' });
   });
 
@@ -131,5 +133,30 @@ describe('HistoryEntryRow', () => {
   it('disables Edit when editLoading is true', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} editLoading />);
     expect(screen.getByText('Edit')).toBeDisabled();
+  });
+
+  it('renders Delete menu item with destructive styling', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const deleteBtn = screen.getByText('Delete');
+    expect(deleteBtn).toBeInTheDocument();
+    expect(deleteBtn).toHaveClass('text-danger');
+  });
+
+  it('calls onDelete with the entry when Delete is clicked', () => {
+    const onDelete = vi.fn();
+    renderWithRouter(<HistoryEntryRow {...defaultProps} onDelete={onDelete} />);
+    fireEvent.click(screen.getByText('Delete'));
+    expect(onDelete).toHaveBeenCalledWith(defaultProps.entry);
+  });
+
+  it('does not navigate when Delete is clicked', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    fireEvent.click(screen.getByText('Delete'));
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('disables Delete when deleteLoading is true', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} deleteLoading />);
+    expect(screen.getByText('Delete')).toBeDisabled();
   });
 });

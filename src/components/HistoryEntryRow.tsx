@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiLogEntry } from '../api';
@@ -12,6 +13,8 @@ interface HistoryEntryRowProps {
   name: string;
   onEdit: (entry: ApiLogEntry) => void;
   editLoading: boolean;
+  onDelete: (entry: ApiLogEntry) => void;
+  deleteLoading: boolean;
 }
 
 export default function HistoryEntryRow({
@@ -19,6 +22,8 @@ export default function HistoryEntryRow({
   name,
   onEdit,
   editLoading,
+  onDelete,
+  deleteLoading,
 }: HistoryEntryRowProps) {
   const navigate = useNavigate();
   const detailPath = entryDetailPath(entry);
@@ -46,14 +51,21 @@ export default function HistoryEntryRow({
         <div className="dropdown">
           <button
             type="button"
-            className="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
-            style={{ width: '2rem', height: '2rem' }}
+            className="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary"
+            style={
+              {
+                width: '2rem',
+                height: '2rem',
+                '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+                '--bs-btn-hover-border-color': 'transparent',
+              } as CSSProperties
+            }
             data-bs-toggle="dropdown"
             aria-label="Entry actions"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
-            &hellip;
+            <i className="bi bi-three-dots" />
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
@@ -67,6 +79,19 @@ export default function HistoryEntryRow({
                 }}
               >
                 Edit
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className="dropdown-item text-danger"
+                disabled={deleteLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(entry);
+                }}
+              >
+                Delete
               </button>
             </li>
           </ul>
