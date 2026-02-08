@@ -13,7 +13,7 @@ npm run format       # Format all src/ files with Prettier
 npm run format:check # Check formatting without writing
 ```
 
-**After making any code changes, always run `npm run lint:fix && npm run format` before committing.**
+**After making any code changes, always use the `lint-format-test-runner` agent to run linting, formatting, and tests.** Never run `npm run lint`, `npm run lint:fix`, `npm run format`, `npm run format:check`, or `npm test`/`npx vitest` directly — always delegate to the agent instead.
 
 **Do not commit unless explicitly asked.** When asked to commit, use the `commit-writer` agent.
 
