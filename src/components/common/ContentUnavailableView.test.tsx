@@ -34,7 +34,7 @@ describe('ContentUnavailableView', () => {
   it('centers content with vertical padding', () => {
     const { container } = render(<ContentUnavailableView icon="bi-box-seam" title="No Products" />);
     const wrapper = container.firstElementChild as HTMLElement;
-    expect(wrapper.className).toContain('text-center');
+    expect(wrapper.className).toContain('align-items-center');
     expect(wrapper.className).toContain('py-5');
   });
 });

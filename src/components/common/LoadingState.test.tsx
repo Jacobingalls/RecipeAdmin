@@ -3,10 +3,11 @@ import { render, screen } from '@testing-library/react';
 import LoadingState from './LoadingState';
 
 describe('LoadingState', () => {
-  it('renders the spinner with status role', () => {
-    render(<LoadingState />);
-    expect(screen.getByRole('status')).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveClass('spinner-border', 'text-secondary');
+  it('renders the spinner', () => {
+    const { container } = render(<LoadingState />);
+    const spinner = container.querySelector('.spinner-border');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass('spinner-border', 'text-secondary');
   });
 
   it('renders the default title', () => {
@@ -21,10 +22,9 @@ describe('LoadingState', () => {
     expect(screen.getByText('Please wait', { selector: 'h5' })).toBeInTheDocument();
   });
 
-  it('includes the title as visually-hidden text for accessibility', () => {
+  it('renders the title visibly', () => {
     render(<LoadingState title="Fetching data" />);
-    const hiddenText = screen.getByText('Fetching data', { selector: '.visually-hidden' });
-    expect(hiddenText).toBeInTheDocument();
+    expect(screen.getByText('Fetching data', { selector: 'h5' })).toBeInTheDocument();
   });
 
   it('renders the description when provided', () => {
@@ -40,7 +40,7 @@ describe('LoadingState', () => {
   it('centers content with vertical padding', () => {
     const { container } = render(<LoadingState />);
     const wrapper = container.firstElementChild as HTMLElement;
-    expect(wrapper.className).toContain('text-center');
+    expect(wrapper.className).toContain('align-items-center');
     expect(wrapper.className).toContain('py-5');
   });
 });

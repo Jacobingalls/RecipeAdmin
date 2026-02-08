@@ -189,8 +189,7 @@ describe('HistoryTile', () => {
   it('renders error state on logs error', () => {
     mockQueries({ logs: { error: 'Failed to fetch logs' } });
     renderWithRouter(<HistoryTile />);
-    expect(screen.getByTestId('error-state')).toBeInTheDocument();
-    expect(screen.getByText('Failed to fetch logs')).toBeInTheDocument();
+    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders empty state when no logs', () => {

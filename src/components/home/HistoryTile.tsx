@@ -7,7 +7,7 @@ import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } fr
 import type { ProductGroupData } from '../../domain';
 import { useApiQuery } from '../../hooks';
 import { resolveEntryName, buildLogTarget } from '../../utils/logEntryHelpers';
-import { LoadingState, ErrorState, ContentUnavailableView } from '../common';
+import { LoadingState, ContentUnavailableView } from '../common';
 import LogModal from '../LogModal';
 import type { LogTarget } from '../LogModal';
 import HistoryEntryRow from '../HistoryEntryRow';
@@ -108,7 +108,6 @@ export default function HistoryTile() {
   if (loading) {
     content = centeredWrapper(<LoadingState />);
   } else if (error) {
-    content = centeredWrapper(<ErrorState message={error} />);
     content = centeredWrapper(
       <ContentUnavailableView
         icon="bi-clock-history"
