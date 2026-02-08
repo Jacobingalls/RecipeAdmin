@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback } from 'react';
 import type { ApiLogEntry, ApiProduct } from '../api';
 import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
 import type { ProductGroupData } from '../domain';
-import { BackButton, LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
+import { BackButton, ErrorState, ContentUnavailableView } from '../components/common';
 import { useApiQuery } from '../hooks';
 import LogModal from '../components/LogModal';
 import type { LogTarget } from '../components/LogModal';
@@ -127,16 +127,40 @@ export default function HistoryPage() {
     setLogTarget(null);
   }, []);
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-
   return (
     <>
       <BackButton to="/" />
       <h2 className="mb-4">History</h2>
-      {dayGroups.size === 0 ? (
+      {loading && (
+        <div data-testid="history-placeholder">
+          <div className="mb-4">
+            <h5 className="text-body-secondary mb-3 placeholder-glow">
+              <span className="placeholder col-2" />
+            </h5>
+            <div className="list-group placeholder-glow">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="list-group-item">
+                  <div>
+                    <div className="mb-1">
+                      <span className="placeholder col-4" />
+                    </div>
+                    <small>
+                      <span className="placeholder col-3" />
+                    </small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {!loading && error && <ErrorState message={error} />}
+      {!loading && !error && dayGroups.size === 0 && (
         <ContentUnavailableView icon="bi-clock-history" title="No History" />
-      ) : (
+      )}
+      {!loading &&
+        !error &&
+        dayGroups.size > 0 &&
         Array.from(dayGroups.entries()).map(([day, entries]) => (
           <div key={day} className="mb-4">
             <h5 className="text-body-secondary mb-3">{formatDayHeading(day)}</h5>
@@ -156,8 +180,7 @@ export default function HistoryPage() {
               ))}
             </div>
           </div>
-        ))
-      )}
+        ))}
 
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
     </>
