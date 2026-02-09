@@ -18,9 +18,7 @@ export default function PasskeySetupPrompt() {
     setIsRegistering(true);
     try {
       const { options, sessionID } = await authAddPasskeyBegin();
-      const credential = await startRegistration(
-        options as Parameters<typeof startRegistration>[0],
-      );
+      const credential = await startRegistration({ optionsJSON: options });
       await authAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       setSuccess(true);
     } catch (err) {

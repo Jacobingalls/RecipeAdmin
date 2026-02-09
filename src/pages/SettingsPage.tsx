@@ -47,9 +47,7 @@ export default function SettingsPage() {
     setIsAddingPasskey(true);
     try {
       const { options, sessionID } = await authAddPasskeyBegin();
-      const credential = await startRegistration(
-        options as Parameters<typeof startRegistration>[0],
-      );
+      const credential = await startRegistration({ optionsJSON: options });
       await authAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       refetchPasskeys();
     } catch (err) {

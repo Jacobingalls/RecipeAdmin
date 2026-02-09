@@ -51,9 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithPasskey = useCallback(async (username?: string) => {
     const { options, sessionID } = await authLoginBegin(username);
-    const credential = await startAuthentication(
-      options as Parameters<typeof startAuthentication>[0],
-    );
+    const credential = await startAuthentication({ optionsJSON: options });
     const response = await authLoginFinish(sessionID, credential);
     setUser(response.user);
   }, []);
