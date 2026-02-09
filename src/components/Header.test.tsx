@@ -159,7 +159,7 @@ describe('Header', () => {
 
   it('renders navbar toggler button', () => {
     renderWithRouter(<Header />);
-    const toggler = screen.getByRole('button', { name: '' });
+    const toggler = screen.getByRole('button', { name: 'Toggle navigation' });
     expect(toggler.className).toContain('navbar-toggler');
   });
 

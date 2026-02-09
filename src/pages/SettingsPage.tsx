@@ -100,7 +100,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h4 className="mb-3">Settings</h4>
+      <h1 className="h4 mb-3">Settings</h1>
       <p className="text-body-secondary">
         Signed in as <strong>{user?.username}</strong>
       </p>

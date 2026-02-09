@@ -27,7 +27,10 @@ export default function App() {
         <div className="min-vh-100 bg-body-tertiary d-flex flex-column">
           <Header />
           <ErrorBoundary>
-            <div className="container py-4 flex-grow-1" style={{ maxWidth: 600, marginBottom: 50 }}>
+            <main
+              className="container py-4 flex-grow-1"
+              style={{ maxWidth: 600, marginBottom: 50 }}
+            >
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route element={<RequireAuth />}>
@@ -46,7 +49,7 @@ export default function App() {
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-            </div>
+            </main>
           </ErrorBoundary>
         </div>
       </AuthProvider>

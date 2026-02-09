@@ -53,7 +53,7 @@ export default function LoginPage() {
   return (
     <div className="row justify-content-center">
       <div className="col-12">
-        <h4 className="mb-4 text-center">Sign in to Recipe Admin</h4>
+        <h1 className="h4 mb-4 text-center">Sign in to Recipe Admin</h1>
 
         {error && (
           <div className="alert alert-danger" role="alert">

@@ -13,8 +13,8 @@ export default function CustomSizesSection({ customSizes, onSelectSize }: Custom
   if (!customSizes || customSizes.length === 0) return null;
 
   return (
-    <div className="mt-3">
-      <h6 className="text-secondary mb-2">Custom Sizes</h6>
+    <section className="mt-3">
+      <h2 className="h6 text-secondary mb-2">Custom Sizes</h2>
       <div className="list-group">
         {customSizes.map((cs, index) => (
           <CustomSizeItem
@@ -24,7 +24,7 @@ export default function CustomSizesSection({ customSizes, onSelectSize }: Custom
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 

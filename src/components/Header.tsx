@@ -41,6 +41,7 @@ export default function Header() {
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon" />
         </button>
@@ -72,9 +73,13 @@ export default function Header() {
                 )}
               </ul>
               <form className="d-flex me-3" role="search" onSubmit={handleSearch}>
+                <label htmlFor="barcode-search" className="visually-hidden">
+                  Barcode
+                </label>
                 <input
                   type="search"
                   className="form-control form-control-sm me-2"
+                  id="barcode-search"
                   placeholder="Barcode..."
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}

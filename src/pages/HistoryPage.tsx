@@ -291,7 +291,7 @@ export default function HistoryPage() {
   return (
     <>
       <BackButton to="/" />
-      <h2 className="mb-4">History</h2>
+      <h1 className="h2 mb-4">History</h1>
       {loading && (
         <div data-testid="history-placeholder">
           <div className="mb-4">
