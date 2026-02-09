@@ -20,9 +20,13 @@ export default function GroupsPage() {
     <>
       <h1 className="mb-4">Groups</h1>
       <div className="mb-4">
+        <label htmlFor="group-name-filter" className="visually-hidden">
+          Filter by name
+        </label>
         <input
           type="text"
           className="form-control"
+          id="group-name-filter"
           placeholder="Search by name..."
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}

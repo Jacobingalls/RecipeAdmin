@@ -15,14 +15,14 @@ export default function BarcodeSection({ barcodes, onSelectSize }: BarcodeSectio
   if (!barcodes || barcodes.length === 0) return null;
 
   return (
-    <div className="mt-3">
-      <h6 className="text-secondary mb-2">Barcodes</h6>
+    <section className="mt-3">
+      <h2 className="h6 text-secondary mb-2">Barcodes</h2>
       <div className="list-group">
         {barcodes.map((bc, index) => (
           <BarcodeItem key={bc.code || index} barcode={bc} onSelectSize={onSelectSize} />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 

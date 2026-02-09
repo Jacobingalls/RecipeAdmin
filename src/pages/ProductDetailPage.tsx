@@ -47,53 +47,53 @@ export default function ProductDetailPage() {
             </div>
           ) : null}
 
-          <br />
-          <h6 className="text-secondary mb-2">Preparation{preparations.length > 1 ? 's' : ''}</h6>
-          {preparations.length > 0 && (
-            <div className="card mb-3">
-              {preparations.length > 1 && (
-                <div className="card-header">
-                  <ul className="nav nav-tabs card-header-tabs">
-                    {preparations.map((prep) => (
-                      <li className="nav-item" key={prep.id}>
-                        <button
-                          className={`nav-link d-flex align-items-center ${activePrep === prep.id ? 'active' : ''}`}
-                          onClick={() => setSelectedPrep(prep.id ?? null)}
-                        >
-                          {prep.name}
-                          {prep.id === product.defaultPreparationID && (
-                            <span className="badge bg-primary ms-2">Default</span>
-                          )}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {currentPrep && (
-                <div className="card-body">
-                  <PreparationDetails
-                    prep={currentPrep}
-                    servingSize={servingSize}
-                    onServingSizeChange={setServingSize}
-                    actionSlot={
-                      <AddToLogButton
-                        productId={product.id}
-                        preparationId={currentPrep.id}
-                        servingSize={servingSize}
-                      />
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          )}
+          <section className="mt-4">
+            <h2 className="h6 text-secondary mb-2">
+              Preparation{preparations.length > 1 ? 's' : ''}
+            </h2>
+            {preparations.length > 0 && (
+              <div className="card mb-3">
+                {preparations.length > 1 && (
+                  <div className="card-header">
+                    <ul className="nav nav-tabs card-header-tabs">
+                      {preparations.map((prep) => (
+                        <li className="nav-item" key={prep.id}>
+                          <button
+                            className={`nav-link d-flex align-items-center ${activePrep === prep.id ? 'active' : ''}`}
+                            onClick={() => setSelectedPrep(prep.id ?? null)}
+                          >
+                            {prep.name}
+                            {prep.id === product.defaultPreparationID && (
+                              <span className="badge bg-primary ms-2">Default</span>
+                            )}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {currentPrep && (
+                  <div className="card-body">
+                    <PreparationDetails
+                      prep={currentPrep}
+                      servingSize={servingSize}
+                      onServingSizeChange={setServingSize}
+                      actionSlot={
+                        <AddToLogButton
+                          productId={product.id}
+                          preparationId={currentPrep.id}
+                          servingSize={servingSize}
+                        />
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
 
           {barcodes.length > 0 && (
-            <>
-              <br />
-              <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
-            </>
+            <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
           )}
         </>
       )}

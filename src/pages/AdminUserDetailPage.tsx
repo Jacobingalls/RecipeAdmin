@@ -113,10 +113,10 @@ export default function AdminUserDetailPage() {
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h4 className="mb-0">
+          <h1 className="h4 mb-0">
             {user.username}
             {user.isAdmin && <span className="badge bg-warning text-dark ms-2 fs-6">Admin</span>}
-          </h4>
+          </h1>
           {user.createdAt && (
             <small className="text-body-secondary">
               Created {new Date(user.createdAt * 1000).toLocaleDateString()}

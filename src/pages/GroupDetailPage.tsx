@@ -54,52 +54,52 @@ export default function GroupDetailPage() {
             {items.length} item{items.length !== 1 ? 's' : ''}
           </p>
 
-          <br />
-          <h6 className="text-secondary mb-2">Nutrition Estimate</h6>
-          <div className="card mb-3">
-            <div className="card-body">
-              <div className="d-flex align-items-end mb-3">
-                <ServingSizeSelector prep={group!} value={servingSize} onChange={setServingSize} />
-                <div className="ms-auto">
-                  <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+          <section className="mt-4">
+            <h2 className="h6 text-secondary mb-2">Nutrition Estimate</h2>
+            <div className="card mb-3">
+              <div className="card-body">
+                <div className="d-flex align-items-end mb-3">
+                  <ServingSizeSelector
+                    prep={group!}
+                    value={servingSize}
+                    onChange={setServingSize}
+                  />
+                  <div className="ms-auto">
+                    <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+                  </div>
                 </div>
-              </div>
 
-              {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
-              {nutritionInfo && (
-                <NutritionLabel
-                  nutritionInfo={nutritionInfo}
-                  servingSize={servingSize}
-                  prep={group!}
-                />
-              )}
+                {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
+                {nutritionInfo && (
+                  <NutritionLabel
+                    nutritionInfo={nutritionInfo}
+                    servingSize={servingSize}
+                    prep={group!}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          </section>
 
           {group!.customSizes.length > 0 && (
-            <>
-              <br />
-              <CustomSizesSection customSizes={group!.customSizes} onSelectSize={setServingSize} />
-            </>
+            <CustomSizesSection customSizes={group!.customSizes} onSelectSize={setServingSize} />
           )}
 
-          <br />
-          <h6 className="text-secondary mb-2">Item{items.length !== 1 ? 's' : ''}</h6>
-          {items.length === 0 ? (
-            <p className="text-secondary">No items in this group</p>
-          ) : (
-            <div className="list-group mb-3">
-              {items.map((item) => (
-                <GroupItemRow key={item.product?.id ?? item.group?.id} item={item} />
-              ))}
-            </div>
-          )}
+          <section className="mt-4">
+            <h2 className="h6 text-secondary mb-2">Item{items.length !== 1 ? 's' : ''}</h2>
+            {items.length === 0 ? (
+              <p className="text-secondary">No items in this group</p>
+            ) : (
+              <div className="list-group mb-3">
+                {items.map((item) => (
+                  <GroupItemRow key={item.product?.id ?? item.group?.id} item={item} />
+                ))}
+              </div>
+            )}
+          </section>
 
           {barcodes.length > 0 && (
-            <>
-              <br />
-              <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
-            </>
+            <BarcodeSection barcodes={barcodes} onSelectSize={setServingSize} />
           )}
         </>
       )}

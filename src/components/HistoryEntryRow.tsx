@@ -40,6 +40,7 @@ export default function HistoryEntryRow({
       role="button"
       tabIndex={0}
       className="list-group-item list-group-item-action"
+      aria-label={`View ${name}`}
       onClick={() => navigate(detailPath)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {

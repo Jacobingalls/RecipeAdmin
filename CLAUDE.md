@@ -30,6 +30,34 @@ npm run format:check # Check formatting without writing
 - Avoid unsafe patterns: `dangerouslySetInnerHTML`, direct DOM manipulation, `eval`
 - Avoid `eslint-disable` comments — fix the underlying issue instead of suppressing the warning
 
+### Design & Accessibility
+
+Follow the [Inclusive Design Principles](https://inclusivedesignprinciples.info/) for clean, intentional, responsive, accessible UI:
+
+**Accessibility (WCAG 2.2 AA compliance):**
+- Semantic HTML first — use `<nav>`, `<main>`, `<section>`, `<article>`, `<aside>`, `<header>`, `<footer>` over generic `<div>`
+- All interactive elements must be keyboard accessible with visible focus indicators
+- Images require meaningful `alt` text (or `alt=""` for decorative images)
+- Form inputs must have associated `<label>` elements (via `htmlFor`/`id`)
+- Color must not be the sole means of conveying information — pair with text, icons, or patterns
+- Maintain a minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text
+- Use ARIA attributes only when semantic HTML is insufficient — follow the [WAI-ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/)
+- Dynamic content updates must be announced to assistive technology (via `role="alert"`, `role="status"`, or `aria-live` regions)
+- `eslint-plugin-jsx-a11y` enforces accessibility rules at lint time — treat violations as errors
+
+**Responsive design:**
+- Mobile-first approach — design for small screens, then enhance for larger ones
+- Use Bootstrap's responsive grid (`container`, `row`, `col-*`) and breakpoint utilities (`col-md-*`, `d-md-*`)
+- Touch targets must be at least 44x44 CSS pixels
+- Avoid fixed widths — use relative units (`rem`, `%`) and `max-width` for readable line lengths
+- Test layouts at standard breakpoints: 320px, 768px, 1024px, 1440px
+
+**Clean, intentional UI:**
+- Prioritize content — every element should serve a clear purpose
+- Use Bootstrap 5 utility classes for styling; avoid custom CSS unless Bootstrap utilities cannot express the design
+- Maintain consistent spacing, typography, and component patterns across pages
+- Provide comparable experiences across devices and assistive technologies
+
 ### Documentation
 
 - Code should be self-documenting first
@@ -254,4 +282,4 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## Styling
 
-Uses Bootstrap 5 classes. No custom CSS files - all styling via utility classes.
+Uses Bootstrap 5 utility classes exclusively — no custom CSS files. All styling is applied via Bootstrap's utility classes and component classes. When Bootstrap utilities cannot express a design requirement, use inline `style` attributes sparingly for specific dimensions or one-off adjustments. Dark mode is supported via Bootstrap's `data-bs-theme` attribute with automatic detection of `prefers-color-scheme`.

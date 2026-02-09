@@ -33,17 +33,25 @@ export default function ProductsPage() {
       <h1 className="mb-4">Products</h1>
       <div className="row g-3 mb-4">
         <div className="col-md-6">
+          <label htmlFor="product-name-filter" className="visually-hidden">
+            Filter by name
+          </label>
           <input
             type="text"
             className="form-control"
+            id="product-name-filter"
             placeholder="Search by name..."
             value={nameFilter}
             onChange={(e) => setNameFilter(e.target.value)}
           />
         </div>
         <div className="col-md-6">
+          <label htmlFor="product-brand-filter" className="visually-hidden">
+            Filter by brand
+          </label>
           <select
             className="form-select"
+            id="product-brand-filter"
             value={brandFilter}
             onChange={(e) => setBrandFilter(e.target.value)}
           >
