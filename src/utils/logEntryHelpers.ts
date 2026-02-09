@@ -8,6 +8,20 @@ export function formatRelativeTime(timestamp: number): string {
   const now = Date.now();
   const thenMs = timestamp * 1000;
   const diffMs = now - thenMs;
+
+  if (diffMs < 0) {
+    const futurMs = -diffMs;
+    const futureMinutes = Math.floor(futurMs / 60_000);
+    const futureHours = Math.floor(futurMs / 3_600_000);
+    const futureDays = Math.floor(futurMs / 86_400_000);
+
+    if (futureMinutes < 1) return 'just now';
+    if (futureMinutes < 60) return `in ${futureMinutes}m`;
+    if (futureHours < 24) return `in ${futureHours}h`;
+    if (futureDays < 7) return `in ${futureDays}d`;
+    return new Date(thenMs).toLocaleDateString();
+  }
+
   const diffMinutes = Math.floor(diffMs / 60_000);
   const diffHours = Math.floor(diffMs / 3_600_000);
   const diffDays = Math.floor(diffMs / 86_400_000);

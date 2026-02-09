@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
 import { useState, useCallback } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 
@@ -15,6 +15,7 @@ import {
 import { LoadingState, ErrorState } from '../components/common';
 import { useAuth } from '../contexts/AuthContext';
 import { useApiQuery } from '../hooks';
+import { formatRelativeTime } from '../utils';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -106,50 +107,32 @@ export default function SettingsPage() {
         Signed in as <strong>{user?.username}</strong>
       </p>
 
-      <h5 className="mt-4 mb-3">Passkeys</h5>
+      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h5 className="mb-0">Credentials</h5>
+        <div className="d-flex gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm"
+            onClick={handleAddPasskey}
+            disabled={isAddingPasskey}
+          >
+            {isAddingPasskey ? 'Registering...' : 'Add Passkey'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => setShowCreateKey(!showCreateKey)}
+          >
+            Create API Key
+          </button>
+        </div>
+      </div>
+
       {passkeyError && (
         <div className="alert alert-danger py-2 small" role="alert">
           {passkeyError}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-outline-primary btn-sm mb-3"
-        onClick={handleAddPasskey}
-        disabled={isAddingPasskey}
-      >
-        {isAddingPasskey ? 'Registering...' : 'Add Passkey'}
-      </button>
-      {passkeys && passkeys.length > 0 ? (
-        <div className="list-group mb-3">
-          {passkeys.map((pk) => (
-            <div
-              key={pk.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <strong>{pk.name}</strong>
-                {pk.createdAt && (
-                  <small className="text-body-secondary ms-2">
-                    Created {new Date(pk.createdAt * 1000).toLocaleDateString()}
-                  </small>
-                )}
-              </div>
-              <button
-                type="button"
-                className="btn btn-outline-danger btn-sm"
-                onClick={() => handleDeletePasskey(pk.id)}
-              >
-                Delete
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-body-secondary small">No passkeys registered.</p>
-      )}
-
-      <h5 className="mt-4 mb-3">API Keys</h5>
 
       {createdKey && (
         <div className="alert alert-success" role="alert">
@@ -175,16 +158,6 @@ export default function SettingsPage() {
           </button>
         </div>
       )}
-
-      <div className="d-flex gap-2 mb-3">
-        <button
-          type="button"
-          className="btn btn-outline-primary btn-sm"
-          onClick={() => setShowCreateKey(!showCreateKey)}
-        >
-          Create API Key
-        </button>
-      </div>
 
       {showCreateKey && (
         <div className="card mb-3">
@@ -225,30 +198,72 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {apiKeys && apiKeys.length > 0 ? (
+      {(passkeys && passkeys.length > 0) || (apiKeys && apiKeys.length > 0) ? (
         <div className="list-group mb-3">
-          {apiKeys.map((ak) => (
-            <div
-              key={ak.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <strong>{ak.name}</strong>
-                <code className="ms-2">{ak.keyPrefix}...</code>
-                {ak.isTemporary && <span className="badge bg-secondary ms-2">Temporary</span>}
-              </div>
+          {passkeys?.map((pk) => (
+            <div key={pk.id} className="list-group-item d-flex align-items-center">
+              <i className="bi bi-fingerprint me-2" />
+              <strong>{pk.name}</strong>
+              {pk.createdAt && (
+                <small className="text-body-secondary ms-auto me-2">
+                  Created {formatRelativeTime(pk.createdAt)}
+                </small>
+              )}
               <button
                 type="button"
-                className="btn btn-outline-danger btn-sm"
+                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${pk.createdAt ? '' : ' ms-auto'}`}
+                style={
+                  {
+                    width: '2rem',
+                    height: '2rem',
+                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+                    '--bs-btn-hover-border-color': 'transparent',
+                  } as CSSProperties
+                }
+                aria-label={`Delete passkey ${pk.name}`}
+                onClick={() => handleDeletePasskey(pk.id)}
+              >
+                <i className="bi bi-trash" />
+              </button>
+            </div>
+          ))}
+          {apiKeys?.map((ak) => (
+            <div key={ak.id} className="list-group-item d-flex align-items-center">
+              <i className="bi bi-key me-2" />
+              <strong>{ak.name}</strong>
+              <code className="ms-2">{ak.keyPrefix}...</code>
+              {ak.isTemporary && ak.expiresAt ? (
+                <small className="text-body-secondary ms-auto me-2">
+                  Expires {formatRelativeTime(ak.expiresAt)}
+                </small>
+              ) : (
+                ak.createdAt && (
+                  <small className="text-body-secondary ms-auto me-2">
+                    Created {formatRelativeTime(ak.createdAt)}
+                  </small>
+                )
+              )}
+              <button
+                type="button"
+                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${!ak.createdAt && !(ak.isTemporary && ak.expiresAt) ? ' ms-auto' : ''}`}
+                style={
+                  {
+                    width: '2rem',
+                    height: '2rem',
+                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+                    '--bs-btn-hover-border-color': 'transparent',
+                  } as CSSProperties
+                }
+                aria-label={`Revoke API key ${ak.name}`}
                 onClick={() => handleRevokeAPIKey(ak.id)}
               >
-                Revoke
+                <i className="bi bi-trash" />
               </button>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No API keys.</p>
+        <p className="text-body-secondary small">No credentials.</p>
       )}
     </div>
   );

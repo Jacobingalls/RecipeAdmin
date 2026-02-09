@@ -37,6 +37,27 @@ describe('formatRelativeTime', () => {
     const result = formatRelativeTime(timestamp);
     expect(result).toBe(new Date(timestamp * 1000).toLocaleDateString());
   });
+
+  it('returns "in Xm" for minutes in the future', () => {
+    const timestamp = nowSeconds() + 15 * 60;
+    expect(formatRelativeTime(timestamp)).toBe('in 15m');
+  });
+
+  it('returns "in Xh" for hours in the future', () => {
+    const timestamp = nowSeconds() + 5 * 3600;
+    expect(formatRelativeTime(timestamp)).toBe('in 5h');
+  });
+
+  it('returns "in Xd" for days in the future', () => {
+    const timestamp = nowSeconds() + 3 * 86_400;
+    expect(formatRelativeTime(timestamp)).toBe('in 3d');
+  });
+
+  it('returns formatted date for a week or more in the future', () => {
+    const timestamp = nowSeconds() + 10 * 86_400;
+    const result = formatRelativeTime(timestamp);
+    expect(result).toBe(new Date(timestamp * 1000).toLocaleDateString());
+  });
 });
 
 describe('resolveEntryName', () => {

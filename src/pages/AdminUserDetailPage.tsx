@@ -1,38 +1,25 @@
-import type { FormEvent } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import type { AdminTempAPIKeyResponse } from '../api';
 import {
-  adminListUsers,
+  adminGetUser,
   adminUpdateUser,
   adminDeleteUser,
-  adminListUserPasskeys,
   adminDeleteUserPasskey,
-  adminListUserAPIKeys,
   adminDeleteUserAPIKey,
   adminCreateUserAPIKey,
 } from '../api';
 import { LoadingState, ErrorState, BackButton } from '../components/common';
 import { useApiQuery } from '../hooks';
+import { formatRelativeTime } from '../utils';
 
 export default function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: users, loading: usersLoading, error: usersError } = useApiQuery(adminListUsers, []);
-  const {
-    data: passkeys,
-    loading: passkeysLoading,
-    error: passkeysError,
-    refetch: refetchPasskeys,
-  } = useApiQuery(() => adminListUserPasskeys(id!), [id]);
-  const {
-    data: apiKeys,
-    loading: apiKeysLoading,
-    error: apiKeysError,
-    refetch: refetchApiKeys,
-  } = useApiQuery(() => adminListUserAPIKeys(id!), [id]);
+  const { data: user, loading, error, refetch } = useApiQuery(() => adminGetUser(id!), [id]);
 
   const [editUsername, setEditUsername] = useState('');
   const [editIsAdmin, setEditIsAdmin] = useState(false);
@@ -41,10 +28,7 @@ export default function AdminUserDetailPage() {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
   const [copied, setCopied] = useState(false);
-
-  const user = users?.find((u) => u.id === id);
-  const loading = usersLoading || passkeysLoading || apiKeysLoading;
-  const error = usersError || passkeysError || apiKeysError;
+  const [tempKeyModal, setTempKeyModal] = useState<'confirm' | 'result' | null>(null);
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -64,6 +48,7 @@ export default function AdminUserDetailPage() {
     try {
       await adminUpdateUser(id!, { username: editUsername, isAdmin: editIsAdmin });
       setIsEditFormOpen(false);
+      refetch();
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to update user');
     } finally {
@@ -82,17 +67,36 @@ export default function AdminUserDetailPage() {
 
   async function handleDeletePasskey(passkeyId: string) {
     await adminDeleteUserPasskey(id!, passkeyId);
-    refetchPasskeys();
+    refetch();
   }
 
   async function handleDeleteApiKey(keyId: string) {
     await adminDeleteUserAPIKey(id!, keyId);
-    refetchApiKeys();
+    refetch();
   }
 
-  async function handleGenerateTempKey() {
+  const hasTempKey = user?.apiKeys.some((ak) => ak.isTemporary) ?? false;
+
+  function handleGenerateTempKeyClick() {
+    if (hasTempKey) {
+      setTempKeyModal('confirm');
+      return;
+    }
+    generateTempKey();
+  }
+
+  async function generateTempKey() {
+    setTempKeyModal('result');
     const result = await adminCreateUserAPIKey(id!);
     setTempKey(result);
+    setCopied(false);
+    refetch();
+  }
+
+  function closeTempKeyModal() {
+    setTempKeyModal(null);
+    setTempKey(null);
+    setCopied(false);
   }
 
   async function handleCopyKey() {
@@ -181,94 +185,188 @@ export default function AdminUserDetailPage() {
         </div>
       )}
 
-      <h5 className="mt-4 mb-3">Passkeys</h5>
-      {passkeys && passkeys.length > 0 ? (
-        <div className="list-group mb-3">
-          {passkeys.map((pk) => (
-            <div
-              key={pk.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <strong>{pk.name}</strong>
-                {pk.createdAt && (
-                  <small className="text-body-secondary ms-2">
-                    Created {new Date(pk.createdAt * 1000).toLocaleDateString()}
-                  </small>
+      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h5 className="mb-0">Credentials</h5>
+        <button
+          type="button"
+          className="btn btn-outline-primary btn-sm"
+          onClick={handleGenerateTempKeyClick}
+        >
+          Generate Temporary API Key
+        </button>
+      </div>
+
+      {tempKeyModal && (
+        <>
+          <div className="modal-backdrop fade show" />
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-label="Temporary API key"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                {tempKeyModal === 'confirm' && (
+                  <>
+                    <div className="modal-header">
+                      <h5 className="modal-title">Replace Temporary API Key?</h5>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        aria-label="Close"
+                        onClick={closeTempKeyModal}
+                      />
+                    </div>
+                    <div className="modal-body">
+                      <p className="mb-0">
+                        <code>{user.username}</code> already has a temporary API key. Generating a
+                        new one will replace the existing key.
+                      </p>
+                    </div>
+                    <div className="modal-footer">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={closeTempKeyModal}
+                      >
+                        Cancel
+                      </button>
+                      <button type="button" className="btn btn-warning" onClick={generateTempKey}>
+                        Replace Key
+                      </button>
+                    </div>
+                  </>
+                )}
+                {tempKeyModal === 'result' && (
+                  <>
+                    <div className="modal-header">
+                      <h5 className="modal-title">Created Temporary API Key</h5>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        aria-label="Close"
+                        onClick={closeTempKeyModal}
+                      />
+                    </div>
+                    <div className="modal-body">
+                      {tempKey ? (
+                        <>
+                          <div className="mb-3">
+                            <label htmlFor="temp-key-value" className="form-label">
+                              API Key
+                            </label>
+                            <div className="input-group">
+                              <input
+                                type="text"
+                                className="form-control"
+                                id="temp-key-value"
+                                value={tempKey.key}
+                                readOnly
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={handleCopyKey}
+                              >
+                                {copied ? 'Copied!' : 'Copy'}
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-body-secondary small mb-0">
+                            Expires {new Date(tempKey.expiresAt * 1000).toLocaleString()}
+                          </p>
+                        </>
+                      ) : (
+                        <div className="text-center py-2">
+                          <div className="spinner-border spinner-border-sm" role="status">
+                            <span className="visually-hidden">Generating...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="modal-footer">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={closeTempKeyModal}
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {user.passkeys.length > 0 || user.apiKeys.length > 0 ? (
+        <div className="list-group mb-3">
+          {user.passkeys.map((pk) => (
+            <div key={pk.id} className="list-group-item d-flex align-items-center">
+              <i className="bi bi-fingerprint me-2" />
+              <strong>{pk.name}</strong>
+              {pk.createdAt && (
+                <small className="text-body-secondary ms-auto me-2">
+                  Created {formatRelativeTime(pk.createdAt)}
+                </small>
+              )}
               <button
                 type="button"
-                className="btn btn-outline-danger btn-sm"
+                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${pk.createdAt ? '' : ' ms-auto'}`}
+                style={
+                  {
+                    width: '2rem',
+                    height: '2rem',
+                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+                    '--bs-btn-hover-border-color': 'transparent',
+                  } as CSSProperties
+                }
+                aria-label={`Delete passkey ${pk.name}`}
                 onClick={() => handleDeletePasskey(pk.id)}
               >
-                Delete
+                <i className="bi bi-trash" />
               </button>
             </div>
           ))}
-        </div>
-      ) : (
-        <p className="text-body-secondary small">No passkeys registered.</p>
-      )}
-
-      <h5 className="mt-4 mb-3">API Keys</h5>
-
-      {tempKey && (
-        <div className="alert alert-success" role="alert">
-          <h6 className="alert-heading">Temporary API Key</h6>
-          <div className="d-flex gap-2 align-items-center">
-            <code className="flex-grow-1 text-break">{tempKey.key}</code>
-            <button
-              type="button"
-              className="btn btn-outline-success btn-sm"
-              onClick={handleCopyKey}
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <hr />
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => setTempKey(null)}
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      <button
-        type="button"
-        className="btn btn-outline-primary btn-sm mb-3"
-        onClick={handleGenerateTempKey}
-      >
-        Generate Temporary API Key
-      </button>
-
-      {apiKeys && apiKeys.length > 0 ? (
-        <div className="list-group mb-3">
-          {apiKeys.map((ak) => (
-            <div
-              key={ak.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <strong>{ak.name}</strong>
-                <code className="ms-2">{ak.keyPrefix}...</code>
-                {ak.isTemporary && <span className="badge bg-secondary ms-2">Temporary</span>}
-              </div>
+          {user.apiKeys.map((ak) => (
+            <div key={ak.id} className="list-group-item d-flex align-items-center">
+              <i className="bi bi-key me-2" />
+              <strong>{ak.name}</strong>
+              {ak.isTemporary && ak.expiresAt ? (
+                <small className="text-body-secondary ms-auto me-2">
+                  Expires {formatRelativeTime(ak.expiresAt)}
+                </small>
+              ) : (
+                ak.createdAt && (
+                  <small className="text-body-secondary ms-auto me-2">
+                    Created {formatRelativeTime(ak.createdAt)}
+                  </small>
+                )
+              )}
               <button
                 type="button"
-                className="btn btn-outline-danger btn-sm"
+                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${!ak.createdAt && !(ak.isTemporary && ak.expiresAt) ? ' ms-auto' : ''}`}
+                style={
+                  {
+                    width: '2rem',
+                    height: '2rem',
+                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+                    '--bs-btn-hover-border-color': 'transparent',
+                  } as CSSProperties
+                }
+                aria-label={`Revoke API key ${ak.name}`}
                 onClick={() => handleDeleteApiKey(ak.id)}
               >
-                Revoke
+                <i className="bi bi-trash" />
               </button>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No API keys.</p>
+        <p className="text-body-secondary small">No credentials.</p>
       )}
     </div>
   );

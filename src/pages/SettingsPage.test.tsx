@@ -135,7 +135,7 @@ describe('SettingsPage', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     await act(async () => {
-      fireEvent.click(screen.getAllByText('Delete')[0]);
+      fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Passkey' }));
     });
     expect(mockDeletePasskey).toHaveBeenCalledWith('pk1');
     expect(refetchPasskeys).toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe('SettingsPage', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     await act(async () => {
-      fireEvent.click(screen.getByText('Revoke'));
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke API key My Key' }));
     });
     expect(mockRevokeAPIKey).toHaveBeenCalledWith('ak1');
     expect(refetchApiKeys).toHaveBeenCalled();
@@ -189,15 +189,9 @@ describe('SettingsPage', () => {
     expect(refetchPasskeys).toHaveBeenCalled();
   });
 
-  it('shows empty state when no passkeys', () => {
-    setupMocks([], sampleAPIKeys);
+  it('shows empty state when no credentials', () => {
+    setupMocks([], []);
     render(<SettingsPage />);
-    expect(screen.getByText('No passkeys registered.')).toBeInTheDocument();
-  });
-
-  it('shows empty state when no API keys', () => {
-    setupMocks(samplePasskeys, []);
-    render(<SettingsPage />);
-    expect(screen.getByText('No API keys.')).toBeInTheDocument();
+    expect(screen.getByText('No credentials.')).toBeInTheDocument();
   });
 });

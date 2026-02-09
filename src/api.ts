@@ -250,10 +250,27 @@ export interface AdminCreateUserResponse {
   temporaryAPIKey: string;
 }
 
+export interface AdminAPIKeyInfo {
+  id: string;
+  name: string;
+  isTemporary: boolean;
+  createdAt: number | null;
+  lastUsedAt: number | null;
+  expiresAt: number | null;
+}
+
+export interface AdminUserDetail {
+  id: string;
+  username: string;
+  isAdmin: boolean;
+  createdAt: number | null;
+  passkeys: PasskeyInfo[];
+  apiKeys: AdminAPIKeyInfo[];
+}
+
 export interface AdminTempAPIKeyResponse {
   id: string;
   key: string;
-  keyPrefix: string;
   expiresAt: number;
 }
 
@@ -371,8 +388,8 @@ export async function adminDeleteUser(id: string): Promise<void> {
   return apiDelete(`/admin/users/${encodeURIComponent(id)}`);
 }
 
-export async function adminListUserPasskeys(userId: string): Promise<PasskeyInfo[]> {
-  return apiFetch<PasskeyInfo[]>(`/admin/users/${encodeURIComponent(userId)}/passkeys`);
+export async function adminGetUser(id: string): Promise<AdminUserDetail> {
+  return apiFetch<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`);
 }
 
 export async function adminDeleteUserPasskey(userId: string, passkeyId: string): Promise<void> {
@@ -381,19 +398,18 @@ export async function adminDeleteUserPasskey(userId: string, passkeyId: string):
   );
 }
 
-export async function adminListUserAPIKeys(userId: string): Promise<APIKeyInfo[]> {
-  return apiFetch<APIKeyInfo[]>(`/admin/users/${encodeURIComponent(userId)}/api-keys`);
-}
-
 export async function adminDeleteUserAPIKey(userId: string, keyId: string): Promise<void> {
   return apiDelete(
     `/admin/users/${encodeURIComponent(userId)}/api-keys/${encodeURIComponent(keyId)}`,
   );
 }
 
-export async function adminCreateUserAPIKey(userId: string): Promise<AdminTempAPIKeyResponse> {
-  return apiPost<Record<string, never>, AdminTempAPIKeyResponse>(
+export async function adminCreateUserAPIKey(
+  userId: string,
+  ttlHours?: number,
+): Promise<AdminTempAPIKeyResponse> {
+  return apiPost<{ ttlHours?: number }, AdminTempAPIKeyResponse>(
     `/admin/users/${encodeURIComponent(userId)}/api-keys`,
-    {},
+    ttlHours !== undefined ? { ttlHours } : {},
   );
 }
