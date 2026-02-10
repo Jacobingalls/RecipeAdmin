@@ -30,6 +30,8 @@ const sampleUsers: AdminUserListItem[] = [
   {
     id: 'u1',
     username: 'alice',
+    displayName: 'Alice',
+    email: 'alice@example.com',
     isAdmin: true,
     createdAt: 1700000000,
     passkeyCount: 2,
@@ -38,6 +40,8 @@ const sampleUsers: AdminUserListItem[] = [
   {
     id: 'u2',
     username: 'bob',
+    displayName: null,
+    email: null,
     isAdmin: false,
     createdAt: 1700000000,
     passkeyCount: 0,
@@ -79,7 +83,7 @@ describe('AdminUsersPage', () => {
   it('renders user list', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
-    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('bob')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
@@ -104,6 +108,8 @@ describe('AdminUsersPage', () => {
       user: {
         id: 'u3',
         username: 'charlie',
+        displayName: null,
+        email: null,
         isAdmin: false,
         createdAt: null,
         passkeyCount: 0,
@@ -120,7 +126,7 @@ describe('AdminUsersPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     });
 
-    expect(mockAdminCreateUser).toHaveBeenCalledWith('charlie', false);
+    expect(mockAdminCreateUser).toHaveBeenCalledWith('charlie', false, undefined, undefined);
     expect(screen.getByText('User created successfully')).toBeInTheDocument();
     expect(screen.getByText('temp-key-abc123')).toBeInTheDocument();
     expect(refetch).toHaveBeenCalled();

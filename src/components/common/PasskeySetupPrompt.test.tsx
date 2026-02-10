@@ -8,7 +8,14 @@ import PasskeySetupPrompt from './PasskeySetupPrompt';
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: true,
-    user: { id: '1', username: 'test', isAdmin: false, hasPasskeys: false },
+    user: {
+      id: '1',
+      username: 'test',
+      displayName: null,
+      email: null,
+      isAdmin: false,
+      hasPasskeys: false,
+    },
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
@@ -35,7 +42,14 @@ describe('PasskeySetupPrompt', () => {
     sessionStorage.clear();
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', username: 'test', isAdmin: false, hasPasskeys: false },
+      user: {
+        id: '1',
+        username: 'test',
+        displayName: null,
+        email: null,
+        isAdmin: false,
+        hasPasskeys: false,
+      },
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
@@ -51,7 +65,14 @@ describe('PasskeySetupPrompt', () => {
   it('hides when user has passkeys', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', username: 'test', isAdmin: false, hasPasskeys: true },
+      user: {
+        id: '1',
+        username: 'test',
+        displayName: null,
+        email: null,
+        isAdmin: false,
+        hasPasskeys: true,
+      },
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),

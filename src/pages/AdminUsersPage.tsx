@@ -11,6 +11,8 @@ export default function AdminUsersPage() {
   const { data: users, loading, error, refetch } = useApiQuery(adminListUsers, []);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newUsername, setNewUsername] = useState('');
+  const [newDisplayName, setNewDisplayName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [newIsAdmin, setNewIsAdmin] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -25,9 +27,16 @@ export default function AdminUsersPage() {
     setCreateError(null);
     setIsCreating(true);
     try {
-      const result = await adminCreateUser(newUsername, newIsAdmin);
+      const result = await adminCreateUser(
+        newUsername,
+        newIsAdmin,
+        newDisplayName || undefined,
+        newEmail || undefined,
+      );
       setCreatedResult(result);
       setNewUsername('');
+      setNewDisplayName('');
+      setNewEmail('');
       setNewIsAdmin(false);
       setShowCreateForm(false);
       refetch();
@@ -110,6 +119,30 @@ export default function AdminUsersPage() {
                   required
                 />
               </div>
+              <div className="mb-3">
+                <label htmlFor="new-display-name" className="form-label">
+                  Display Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="new-display-name"
+                  value={newDisplayName}
+                  onChange={(e) => setNewDisplayName(e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="new-email" className="form-label">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="new-email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+              </div>
               <div className="form-check mb-3">
                 <input
                   type="checkbox"
@@ -147,7 +180,8 @@ export default function AdminUsersPage() {
             className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
           >
             <div>
-              <strong>{u.username}</strong>
+              <strong>{u.displayName ?? u.username}</strong>
+              {u.displayName && <small className="text-body-secondary ms-2">{u.username}</small>}
               {u.isAdmin && <span className="badge bg-warning text-dark ms-2">Admin</span>}
             </div>
             <div className="text-body-secondary small">

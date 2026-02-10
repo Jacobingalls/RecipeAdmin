@@ -25,6 +25,8 @@ const mockAuthLoginFinish = vi.mocked(api.authLoginFinish);
 const testUser = {
   id: '1',
   username: 'testuser',
+  displayName: null,
+  email: null,
   isAdmin: false,
   hasPasskeys: true,
 };

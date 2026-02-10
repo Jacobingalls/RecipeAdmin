@@ -8,7 +8,14 @@ import RequireAuth from './RequireAuth';
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: true,
-    user: { id: '1', username: 'test', isAdmin: false, hasPasskeys: true },
+    user: {
+      id: '1',
+      username: 'test',
+      displayName: null,
+      email: null,
+      isAdmin: false,
+      hasPasskeys: true,
+    },
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
@@ -25,7 +32,16 @@ const mockUseAuth = vi.mocked(useAuth);
 function renderWithRouter(isAuthenticated: boolean, isLoading: boolean) {
   mockUseAuth.mockReturnValue({
     isAuthenticated,
-    user: isAuthenticated ? { id: '1', username: 'test', isAdmin: false, hasPasskeys: true } : null,
+    user: isAuthenticated
+      ? {
+          id: '1',
+          username: 'test',
+          displayName: null,
+          email: null,
+          isAdmin: false,
+          hasPasskeys: true,
+        }
+      : null,
     isLoading,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),

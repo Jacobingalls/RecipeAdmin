@@ -14,7 +14,14 @@ vi.mock('../hooks', () => ({
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: true,
-    user: { id: '1', username: 'testuser', isAdmin: false, hasPasskeys: true },
+    user: {
+      id: '1',
+      username: 'testuser',
+      displayName: null,
+      email: null,
+      isAdmin: false,
+      hasPasskeys: true,
+    },
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),

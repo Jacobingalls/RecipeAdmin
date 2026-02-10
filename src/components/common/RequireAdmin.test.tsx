@@ -8,7 +8,14 @@ import RequireAdmin from './RequireAdmin';
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: true,
-    user: { id: '1', username: 'test', isAdmin: true, hasPasskeys: true },
+    user: {
+      id: '1',
+      username: 'test',
+      displayName: null,
+      email: null,
+      isAdmin: true,
+      hasPasskeys: true,
+    },
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
@@ -25,7 +32,9 @@ const mockUseAuth = vi.mocked(useAuth);
 function renderWithRoutes(user: { isAdmin: boolean } | null, isLoading = false) {
   mockUseAuth.mockReturnValue({
     isAuthenticated: !!user,
-    user: user ? { id: '1', username: 'test', hasPasskeys: true, ...user } : null,
+    user: user
+      ? { id: '1', username: 'test', displayName: null, email: null, hasPasskeys: true, ...user }
+      : null,
     isLoading,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),

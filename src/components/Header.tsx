@@ -96,7 +96,7 @@ export default function Header() {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  {user?.username}
+                  {user?.displayName ?? user?.username}
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end">
                   <li>

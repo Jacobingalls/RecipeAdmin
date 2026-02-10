@@ -24,7 +24,14 @@ vi.mock('./VersionBadge', () => ({
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: true,
-    user: { id: '1', username: 'testuser', isAdmin: false, hasPasskeys: true },
+    user: {
+      id: '1',
+      username: 'testuser',
+      displayName: null,
+      email: null,
+      isAdmin: false,
+      hasPasskeys: true,
+    },
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
@@ -44,7 +51,14 @@ describe('Header', () => {
     mockLogout.mockClear();
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', username: 'testuser', isAdmin: false, hasPasskeys: true },
+      user: {
+        id: '1',
+        username: 'testuser',
+        displayName: null,
+        email: null,
+        isAdmin: false,
+        hasPasskeys: true,
+      },
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
@@ -188,7 +202,14 @@ describe('Header', () => {
   it('shows Admin link when user is admin', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', username: 'admin', isAdmin: true, hasPasskeys: true },
+      user: {
+        id: '1',
+        username: 'admin',
+        displayName: null,
+        email: null,
+        isAdmin: true,
+        hasPasskeys: true,
+      },
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),

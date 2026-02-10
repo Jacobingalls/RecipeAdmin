@@ -73,7 +73,14 @@ describe('LoginPage', () => {
   it('redirects when already authenticated', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', username: 'test', isAdmin: false, hasPasskeys: true },
+      user: {
+        id: '1',
+        username: 'test',
+        displayName: null,
+        email: null,
+        isAdmin: false,
+        hasPasskeys: true,
+      },
       isLoading: false,
       login: mockLogin,
       loginWithPasskey: mockLoginWithPasskey,

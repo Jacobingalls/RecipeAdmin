@@ -22,6 +22,8 @@ export default function AdminUserDetailPage() {
   const { data: user, loading, error, refetch } = useApiQuery(() => adminGetUser(id!), [id]);
 
   const [editUsername, setEditUsername] = useState('');
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
   const [editIsAdmin, setEditIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -36,6 +38,8 @@ export default function AdminUserDetailPage() {
 
   function openEditForm() {
     setEditUsername(user!.username);
+    setEditDisplayName(user!.displayName ?? '');
+    setEditEmail(user!.email ?? '');
     setEditIsAdmin(user!.isAdmin);
     setIsEditFormOpen(true);
     setEditError(null);
@@ -46,7 +50,12 @@ export default function AdminUserDetailPage() {
     setEditError(null);
     setIsEditing(true);
     try {
-      await adminUpdateUser(id!, { username: editUsername, isAdmin: editIsAdmin });
+      await adminUpdateUser(id!, {
+        username: editUsername,
+        displayName: editDisplayName,
+        email: editEmail,
+        isAdmin: editIsAdmin,
+      });
       setIsEditFormOpen(false);
       refetch();
     } catch (err) {
@@ -114,9 +123,18 @@ export default function AdminUserDetailPage() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h1 className="h4 mb-0">
-            {user.username}
+            {user.displayName ?? user.username}
             {user.isAdmin && <span className="badge bg-warning text-dark ms-2 fs-6">Admin</span>}
           </h1>
+          <div className="text-body-secondary small">
+            {user.displayName && <span>{user.username}</span>}
+            {user.email && (
+              <span>
+                {user.displayName && <span className="mx-1">&middot;</span>}
+                {user.email}
+              </span>
+            )}
+          </div>
           {user.createdAt && (
             <small className="text-body-secondary">
               Created {new Date(user.createdAt * 1000).toLocaleDateString()}
@@ -154,6 +172,30 @@ export default function AdminUserDetailPage() {
                   value={editUsername}
                   onChange={(e) => setEditUsername(e.target.value)}
                   required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="edit-display-name" className="form-label">
+                  Display Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="edit-display-name"
+                  value={editDisplayName}
+                  onChange={(e) => setEditDisplayName(e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="edit-email" className="form-label">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="edit-email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
                 />
               </div>
               <div className="form-check mb-3">

@@ -36,6 +36,8 @@ const mockCreateAPIKey = vi.mocked(api.adminCreateUserAPIKey);
 const sampleUser: AdminUserDetail = {
   id: 'u1',
   username: 'alice',
+  displayName: 'Alice',
+  email: 'alice@example.com',
   isAdmin: true,
   createdAt: 1700000000,
   passkeys: [{ id: 'pk1', name: 'My Key', createdAt: 1700000000, lastUsedAt: null }],
@@ -93,6 +95,7 @@ describe('AdminUserDetailPage', () => {
   it('renders user details', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
+    expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('alice')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });

@@ -12,7 +12,14 @@ vi.mock('./contexts/AuthContext', () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
   useAuth: () => ({
     isAuthenticated: true,
-    user: { id: '1', username: 'test', isAdmin: true, hasPasskeys: true },
+    user: {
+      id: '1',
+      username: 'test',
+      displayName: null,
+      email: null,
+      isAdmin: true,
+      hasPasskeys: true,
+    },
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),

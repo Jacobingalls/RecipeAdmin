@@ -201,6 +201,8 @@ export async function deleteLog(id: string): Promise<void> {
 export interface AuthUser {
   id: string;
   username: string;
+  displayName: string | null;
+  email: string | null;
   isAdmin: boolean;
   hasPasskeys: boolean;
 }
@@ -239,6 +241,8 @@ export interface CreateAPIKeyResponse {
 export interface AdminUserListItem {
   id: string;
   username: string;
+  displayName: string | null;
+  email: string | null;
   isAdmin: boolean;
   createdAt: number | null;
   passkeyCount: number;
@@ -262,6 +266,8 @@ export interface AdminAPIKeyInfo {
 export interface AdminUserDetail {
   id: string;
   username: string;
+  displayName: string | null;
+  email: string | null;
   isAdmin: boolean;
   createdAt: number | null;
   passkeys: PasskeyInfo[];
@@ -367,21 +373,28 @@ export async function adminListUsers(): Promise<AdminUserListItem[]> {
 export async function adminCreateUser(
   username: string,
   isAdmin: boolean,
+  displayName?: string,
+  email?: string,
 ): Promise<AdminCreateUserResponse> {
-  return apiPost<{ username: string; isAdmin: boolean }, AdminCreateUserResponse>('/admin/users', {
+  return apiPost<
+    { username: string; isAdmin: boolean; displayName?: string; email?: string },
+    AdminCreateUserResponse
+  >('/admin/users', {
     username,
     isAdmin,
+    ...(displayName !== undefined && { displayName }),
+    ...(email !== undefined && { email }),
   });
 }
 
 export async function adminUpdateUser(
   id: string,
-  data: { username?: string; isAdmin?: boolean },
+  data: { username?: string; displayName?: string; email?: string; isAdmin?: boolean },
 ): Promise<AdminUserListItem> {
-  return apiPut<{ username?: string; isAdmin?: boolean }, AdminUserListItem>(
-    `/admin/users/${encodeURIComponent(id)}`,
-    data,
-  );
+  return apiPut<
+    { username?: string; displayName?: string; email?: string; isAdmin?: boolean },
+    AdminUserListItem
+  >(`/admin/users/${encodeURIComponent(id)}`, data);
 }
 
 export async function adminDeleteUser(id: string): Promise<void> {
