@@ -40,8 +40,8 @@ const sampleUsers: AdminUserListItem[] = [
   {
     id: 'u2',
     username: 'bob',
-    displayName: null,
-    email: null,
+    displayName: 'Bob',
+    email: 'bob@example.com',
     isAdmin: false,
     createdAt: 1700000000,
     passkeyCount: 0,
@@ -84,7 +84,7 @@ describe('AdminUsersPage', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
     expect(screen.getByText('Alice')).toBeInTheDocument();
-    expect(screen.getByText('bob')).toBeInTheDocument();
+    expect(screen.getByText('Bob')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
@@ -108,8 +108,8 @@ describe('AdminUsersPage', () => {
       user: {
         id: 'u3',
         username: 'charlie',
-        displayName: null,
-        email: null,
+        displayName: 'Charlie',
+        email: 'charlie@example.com',
         isAdmin: false,
         createdAt: null,
         passkeyCount: 0,
@@ -122,11 +122,18 @@ describe('AdminUsersPage', () => {
     fireEvent.click(screen.getByText('Create User'));
 
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'charlie' } });
+    fireEvent.change(screen.getByLabelText('Display Name'), { target: { value: 'Charlie' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'charlie@example.com' } });
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     });
 
-    expect(mockAdminCreateUser).toHaveBeenCalledWith('charlie', false, undefined, undefined);
+    expect(mockAdminCreateUser).toHaveBeenCalledWith(
+      'charlie',
+      'Charlie',
+      'charlie@example.com',
+      false,
+    );
     expect(screen.getByText('User created successfully')).toBeInTheDocument();
     expect(screen.getByText('temp-key-abc123')).toBeInTheDocument();
     expect(refetch).toHaveBeenCalled();

@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { ApiVersion } from '../api';
+import type { ApiStatus } from '../api';
 
 import VersionBadge from './VersionBadge';
 
-const mockUseApiQuery = vi.fn<() => UseApiQueryResult<ApiVersion>>();
+const mockUseApiQuery = vi.fn<() => UseApiQueryResult<ApiStatus>>();
 
 vi.mock('../hooks', () => ({
   useApiQuery: (...args: unknown[]) => mockUseApiQuery(...args),
 }));
 
 vi.mock('../api', () => ({
-  getVersion: vi.fn(),
+  getStatus: vi.fn(),
 }));
 
 describe('VersionBadge', () => {
@@ -54,7 +54,7 @@ describe('VersionBadge', () => {
 
   it('renders Production environment when debug is false', () => {
     mockUseApiQuery.mockReturnValue({
-      data: { version: '1.2.3', debug: false },
+      data: { version: '1.2.3', environment: null, debug: false, user: null },
       loading: false,
       error: null,
       refetch: vi.fn(),
@@ -66,7 +66,7 @@ describe('VersionBadge', () => {
 
   it('renders Debug environment when debug is true', () => {
     mockUseApiQuery.mockReturnValue({
-      data: { version: '1.0.0', debug: true },
+      data: { version: '1.0.0', environment: null, debug: true, user: null },
       loading: false,
       error: null,
       refetch: vi.fn(),
@@ -76,9 +76,21 @@ describe('VersionBadge', () => {
     expect(screen.getByText('Debug, v1.0.0')).toBeInTheDocument();
   });
 
+  it('renders environment name from API when available', () => {
+    mockUseApiQuery.mockReturnValue({
+      data: { version: '1.0.0', environment: 'staging', debug: false, user: null },
+      loading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<VersionBadge />);
+    expect(screen.getByText('staging, v1.0.0')).toBeInTheDocument();
+  });
+
   it('renders without version when version is empty', () => {
     mockUseApiQuery.mockReturnValue({
-      data: { version: '', debug: true },
+      data: { version: '', environment: null, debug: true, user: null },
       loading: false,
       error: null,
       refetch: vi.fn(),

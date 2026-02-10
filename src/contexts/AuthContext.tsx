@@ -3,14 +3,14 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { startAuthentication } from '@simplewebauthn/browser';
 
 import type { AuthUser } from '../api';
-import { authMe, authLogin, authLoginBegin, authLoginFinish, authLogout } from '../api';
+import { getStatus, authLogin, authLoginBegin, authLoginFinish, authLogout } from '../api';
 
 interface AuthContextValue {
   isAuthenticated: boolean;
   user: AuthUser | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  loginWithPasskey: (username?: string) => Promise<void>;
+  login: (usernameOrEmail: string, password: string) => Promise<void>;
+  loginWithPasskey: (usernameOrEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -22,8 +22,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      const me = await authMe();
-      setUser(me);
+      const status = await getStatus();
+      setUser(status.user);
     } catch {
       setUser(null);
     } finally {
@@ -44,13 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const response = await authLogin(username, password);
+  const login = useCallback(async (usernameOrEmail: string, password: string) => {
+    const response = await authLogin(usernameOrEmail, password);
     setUser(response.user);
   }, []);
 
-  const loginWithPasskey = useCallback(async (username?: string) => {
-    const { options, sessionID } = await authLoginBegin(username);
+  const loginWithPasskey = useCallback(async (usernameOrEmail?: string) => {
+    const { options, sessionID } = await authLoginBegin(usernameOrEmail);
     const credential = await startAuthentication({ optionsJSON: options });
     const response = await authLoginFinish(sessionID, credential);
     setUser(response.user);

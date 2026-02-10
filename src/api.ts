@@ -33,6 +33,13 @@ export interface ApiVersion {
   debug?: boolean;
 }
 
+export interface ApiStatus {
+  version: string | null;
+  environment: string | null;
+  debug: boolean;
+  user: AuthUser | null;
+}
+
 // Runtime config (Docker) or build-time config (local dev)
 const getApiBase = (): string => {
   if (
@@ -162,6 +169,10 @@ export async function getVersion(): Promise<ApiVersion> {
   return apiFetch<ApiVersion>('/version');
 }
 
+export async function getStatus(): Promise<ApiStatus> {
+  return apiFetch<ApiStatus>('/status');
+}
+
 export async function getLogs(from?: number, to?: number): Promise<ApiLogEntry[]> {
   const params = new URLSearchParams();
   if (from !== undefined) params.set('from', String(from));
@@ -201,8 +212,8 @@ export async function deleteLog(id: string): Promise<void> {
 export interface AuthUser {
   id: string;
   username: string;
-  displayName: string | null;
-  email: string | null;
+  displayName: string;
+  email: string;
   isAdmin: boolean;
   hasPasskeys: boolean;
 }
@@ -241,8 +252,8 @@ export interface CreateAPIKeyResponse {
 export interface AdminUserListItem {
   id: string;
   username: string;
-  displayName: string | null;
-  email: string | null;
+  displayName: string;
+  email: string;
   isAdmin: boolean;
   createdAt: number | null;
   passkeyCount: number;
@@ -266,8 +277,8 @@ export interface AdminAPIKeyInfo {
 export interface AdminUserDetail {
   id: string;
   username: string;
-  displayName: string | null;
-  email: string | null;
+  displayName: string;
+  email: string;
   isAdmin: boolean;
   createdAt: number | null;
   passkeys: PasskeyInfo[];
@@ -282,19 +293,19 @@ export interface AdminTempAPIKeyResponse {
 
 // Auth API functions
 
-export async function authLogin(username: string, password: string): Promise<LoginResponse> {
-  return apiPost<{ username: string; password: string }, LoginResponse>('/auth/login', {
-    username,
+export async function authLogin(usernameOrEmail: string, password: string): Promise<LoginResponse> {
+  return apiPost<{ usernameOrEmail: string; password: string }, LoginResponse>('/auth/login', {
+    usernameOrEmail,
     password,
   });
 }
 
 export async function authLoginBegin(
-  username?: string,
+  usernameOrEmail?: string,
 ): Promise<{ options: unknown; sessionID: string }> {
-  return apiPost<{ username?: string }, { options: unknown; sessionID: string }>(
+  return apiPost<{ usernameOrEmail?: string }, { options: unknown; sessionID: string }>(
     '/auth/login/begin',
-    { username },
+    { usernameOrEmail },
   );
 }
 
@@ -364,6 +375,52 @@ export async function authRevokeAPIKey(id: string): Promise<void> {
   return apiDelete(`/auth/api-keys/${encodeURIComponent(id)}`);
 }
 
+// Settings API functions (replaces /auth/passkeys/* and /auth/api-keys/*)
+
+export async function settingsListPasskeys(): Promise<PasskeyInfo[]> {
+  return apiFetch<PasskeyInfo[]>('/settings/passkeys');
+}
+
+export async function settingsAddPasskeyBegin(): Promise<{ options: unknown; sessionID: string }> {
+  return apiPost<Record<string, never>, { options: unknown; sessionID: string }>(
+    '/settings/passkeys/begin',
+    {},
+  );
+}
+
+export async function settingsAddPasskeyFinish(
+  sessionID: string,
+  credential: unknown,
+  name: string,
+): Promise<PasskeyInfo> {
+  return apiPost<{ sessionID: string; credential: unknown; name: string }, PasskeyInfo>(
+    '/settings/passkeys/finish',
+    { sessionID, credential, name },
+  );
+}
+
+export async function settingsDeletePasskey(id: string): Promise<void> {
+  return apiDelete(`/settings/passkeys/${encodeURIComponent(id)}`);
+}
+
+export async function settingsListAPIKeys(): Promise<APIKeyInfo[]> {
+  return apiFetch<APIKeyInfo[]>('/settings/api-keys');
+}
+
+export async function settingsCreateAPIKey(
+  name: string,
+  expiresAt?: number,
+): Promise<CreateAPIKeyResponse> {
+  return apiPost<{ name: string; expiresAt?: number }, CreateAPIKeyResponse>('/settings/api-keys', {
+    name,
+    expiresAt,
+  });
+}
+
+export async function settingsRevokeAPIKey(id: string): Promise<void> {
+  return apiDelete(`/settings/api-keys/${encodeURIComponent(id)}`);
+}
+
 // Admin API functions
 
 export async function adminListUsers(): Promise<AdminUserListItem[]> {
@@ -372,18 +429,18 @@ export async function adminListUsers(): Promise<AdminUserListItem[]> {
 
 export async function adminCreateUser(
   username: string,
+  displayName: string,
+  email: string,
   isAdmin: boolean,
-  displayName?: string,
-  email?: string,
 ): Promise<AdminCreateUserResponse> {
   return apiPost<
-    { username: string; isAdmin: boolean; displayName?: string; email?: string },
+    { username: string; displayName: string; email: string; isAdmin: boolean },
     AdminCreateUserResponse
   >('/admin/users', {
     username,
+    displayName,
+    email,
     isAdmin,
-    ...(displayName !== undefined && { displayName }),
-    ...(email !== undefined && { email }),
   });
 }
 

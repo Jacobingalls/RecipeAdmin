@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { authAddPasskeyBegin, authAddPasskeyFinish } from '../../api';
+import { settingsAddPasskeyBegin, settingsAddPasskeyFinish } from '../../api';
 
 export default function PasskeySetupPrompt() {
   const { user } = useAuth();
@@ -17,9 +17,9 @@ export default function PasskeySetupPrompt() {
     setError(null);
     setIsRegistering(true);
     try {
-      const { options, sessionID } = await authAddPasskeyBegin();
+      const { options, sessionID } = await settingsAddPasskeyBegin();
       const credential = await startRegistration({ optionsJSON: options });
-      await authAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
+      await settingsAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to register passkey');

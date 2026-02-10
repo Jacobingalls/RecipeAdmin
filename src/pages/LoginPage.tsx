@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading, login, loginWithPasskey } = useAuth();
-  const [username, setUsername] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +42,7 @@ export default function LoginPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await login(username, password);
+      await login(usernameOrEmail, password);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -89,14 +89,14 @@ export default function LoginPage() {
             <form onSubmit={handleAPIKeyLogin}>
               <div className="mb-3">
                 <label htmlFor="username" className="form-label">
-                  Username
+                  Username or Email
                 </label>
                 <input
                   type="text"
                   className="form-control"
                   id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
                   required
                   autoComplete="username"
                 />

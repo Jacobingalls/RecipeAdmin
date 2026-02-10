@@ -4,13 +4,13 @@ import { startRegistration } from '@simplewebauthn/browser';
 
 import type { CreateAPIKeyResponse } from '../api';
 import {
-  authListPasskeys,
-  authAddPasskeyBegin,
-  authAddPasskeyFinish,
-  authDeletePasskey,
-  authListAPIKeys,
-  authCreateAPIKey,
-  authRevokeAPIKey,
+  settingsListPasskeys,
+  settingsAddPasskeyBegin,
+  settingsAddPasskeyFinish,
+  settingsDeletePasskey,
+  settingsListAPIKeys,
+  settingsCreateAPIKey,
+  settingsRevokeAPIKey,
 } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,13 +25,13 @@ export default function SettingsPage() {
     loading: passkeysLoading,
     error: passkeysError,
     refetch: refetchPasskeys,
-  } = useApiQuery(authListPasskeys, []);
+  } = useApiQuery(settingsListPasskeys, []);
   const {
     data: apiKeys,
     loading: apiKeysLoading,
     error: apiKeysError,
     refetch: refetchApiKeys,
-  } = useApiQuery(authListAPIKeys, []);
+  } = useApiQuery(settingsListAPIKeys, []);
 
   const [isAddingPasskey, setIsAddingPasskey] = useState(false);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
@@ -46,9 +46,9 @@ export default function SettingsPage() {
     setPasskeyError(null);
     setIsAddingPasskey(true);
     try {
-      const { options, sessionID } = await authAddPasskeyBegin();
+      const { options, sessionID } = await settingsAddPasskeyBegin();
       const credential = await startRegistration({ optionsJSON: options });
-      await authAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
+      await settingsAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       refetchPasskeys();
     } catch (err) {
       setPasskeyError(err instanceof Error ? err.message : 'Failed to register passkey');
@@ -58,7 +58,7 @@ export default function SettingsPage() {
   }, [refetchPasskeys]);
 
   async function handleDeletePasskey(id: string) {
-    await authDeletePasskey(id);
+    await settingsDeletePasskey(id);
     refetchPasskeys();
   }
 
@@ -67,7 +67,7 @@ export default function SettingsPage() {
     setCreateKeyError(null);
     setIsCreatingKey(true);
     try {
-      const result = await authCreateAPIKey(newKeyName);
+      const result = await settingsCreateAPIKey(newKeyName);
       setCreatedKey(result);
       setNewKeyName('');
       setShowCreateKey(false);
@@ -80,7 +80,7 @@ export default function SettingsPage() {
   }
 
   async function handleRevokeAPIKey(id: string) {
-    await authRevokeAPIKey(id);
+    await settingsRevokeAPIKey(id);
     refetchApiKeys();
   }
 

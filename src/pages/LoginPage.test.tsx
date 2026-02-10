@@ -51,7 +51,7 @@ describe('LoginPage', () => {
 
   it('renders API key form', () => {
     renderWithRouter(<LoginPage />);
-    expect(screen.getByLabelText('Username')).toBeInTheDocument();
+    expect(screen.getByLabelText('Username or Email')).toBeInTheDocument();
     expect(screen.getByLabelText('API Key')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
   });
@@ -76,8 +76,8 @@ describe('LoginPage', () => {
       user: {
         id: '1',
         username: 'test',
-        displayName: null,
-        email: null,
+        displayName: 'Test User',
+        email: 'test@example.com',
         isAdmin: false,
         hasPasskeys: true,
       },
@@ -111,7 +111,7 @@ describe('LoginPage', () => {
   it('calls login with username and password on form submit', async () => {
     mockLogin.mockResolvedValue(undefined);
     renderWithRouter(<LoginPage />);
-    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'myuser' } });
+    fireEvent.change(screen.getByLabelText('Username or Email'), { target: { value: 'myuser' } });
     fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'mykey' } });
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
@@ -122,7 +122,7 @@ describe('LoginPage', () => {
   it('displays error when API key login fails', async () => {
     mockLogin.mockRejectedValue(new Error('Invalid key'));
     renderWithRouter(<LoginPage />);
-    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'user' } });
+    fireEvent.change(screen.getByLabelText('Username or Email'), { target: { value: 'user' } });
     fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'bad' } });
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));

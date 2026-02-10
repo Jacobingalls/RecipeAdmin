@@ -38,8 +38,8 @@ export default function AdminUserDetailPage() {
 
   function openEditForm() {
     setEditUsername(user!.username);
-    setEditDisplayName(user!.displayName ?? '');
-    setEditEmail(user!.email ?? '');
+    setEditDisplayName(user!.displayName);
+    setEditEmail(user!.email);
     setEditIsAdmin(user!.isAdmin);
     setIsEditFormOpen(true);
     setEditError(null);
@@ -123,17 +123,13 @@ export default function AdminUserDetailPage() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h1 className="h4 mb-0">
-            {user.displayName ?? user.username}
+            {user.displayName}
             {user.isAdmin && <span className="badge bg-warning text-dark ms-2 fs-6">Admin</span>}
           </h1>
           <div className="text-body-secondary small">
-            {user.displayName && <span>{user.username}</span>}
-            {user.email && (
-              <span>
-                {user.displayName && <span className="mx-1">&middot;</span>}
-                {user.email}
-              </span>
-            )}
+            <span>{user.username}</span>
+            <span className="mx-1">&middot;</span>
+            <span>{user.email}</span>
           </div>
           {user.createdAt && (
             <small className="text-body-secondary">
@@ -184,6 +180,7 @@ export default function AdminUserDetailPage() {
                   id="edit-display-name"
                   value={editDisplayName}
                   onChange={(e) => setEditDisplayName(e.target.value)}
+                  required
                 />
               </div>
               <div className="mb-3">
@@ -196,6 +193,7 @@ export default function AdminUserDetailPage() {
                   id="edit-email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
+                  required
                 />
               </div>
               <div className="form-check mb-3">

@@ -5,7 +5,7 @@ import * as api from '../api';
 import { AuthProvider, useAuth } from './AuthContext';
 
 vi.mock('../api', () => ({
-  authMe: vi.fn(),
+  getStatus: vi.fn(),
   authLogin: vi.fn(),
   authLoginBegin: vi.fn(),
   authLoginFinish: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('@simplewebauthn/browser', () => ({
   startAuthentication: vi.fn().mockResolvedValue({ id: 'cred-1' }),
 }));
 
-const mockAuthMe = vi.mocked(api.authMe);
+const mockGetStatus = vi.mocked(api.getStatus);
 const mockAuthLogin = vi.mocked(api.authLogin);
 const mockAuthLogout = vi.mocked(api.authLogout);
 const mockAuthLoginBegin = vi.mocked(api.authLoginBegin);
@@ -25,8 +25,8 @@ const mockAuthLoginFinish = vi.mocked(api.authLoginFinish);
 const testUser = {
   id: '1',
   username: 'testuser',
-  displayName: null,
-  email: null,
+  displayName: 'Test User',
+  email: 'test@example.com',
   isAdmin: false,
   hasPasskeys: true,
 };
@@ -51,7 +51,12 @@ describe('AuthContext', () => {
   });
 
   it('checks auth on mount and sets user', async () => {
-    mockAuthMe.mockResolvedValue(testUser);
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
     await act(async () => {
       render(
         <AuthProvider>
@@ -63,8 +68,8 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('username')).toHaveTextContent('testuser');
   });
 
-  it('sets unauthenticated when authMe fails', async () => {
-    mockAuthMe.mockRejectedValue(new Error('HTTP 401'));
+  it('sets unauthenticated when getStatus returns null user', async () => {
+    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
     await act(async () => {
       render(
         <AuthProvider>
@@ -77,7 +82,7 @@ describe('AuthContext', () => {
   });
 
   it('login calls API and sets user', async () => {
-    mockAuthMe.mockRejectedValue(new Error('not authed'));
+    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
     mockAuthLogin.mockResolvedValue({
       token: 'tok',
       user: testUser,
@@ -99,7 +104,12 @@ describe('AuthContext', () => {
   });
 
   it('logout calls API and clears user', async () => {
-    mockAuthMe.mockResolvedValue(testUser);
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
     mockAuthLogout.mockResolvedValue(undefined);
     await act(async () => {
       render(
@@ -117,7 +127,12 @@ describe('AuthContext', () => {
   });
 
   it('handles auth:unauthorized event', async () => {
-    mockAuthMe.mockResolvedValue(testUser);
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
     await act(async () => {
       render(
         <AuthProvider>
@@ -133,7 +148,7 @@ describe('AuthContext', () => {
   });
 
   it('loginWithPasskey calls begin, startAuthentication, finish', async () => {
-    mockAuthMe.mockRejectedValue(new Error('not authed'));
+    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
     mockAuthLoginBegin.mockResolvedValue({
       options: { challenge: 'abc' },
       sessionID: 'sess-1',

@@ -11,8 +11,8 @@ vi.mock('../../contexts/AuthContext', () => ({
     user: {
       id: '1',
       username: 'test',
-      displayName: null,
-      email: null,
+      displayName: 'Test User',
+      email: 'test@example.com',
       isAdmin: true,
       hasPasskeys: true,
     },
@@ -33,7 +33,14 @@ function renderWithRoutes(user: { isAdmin: boolean } | null, isLoading = false) 
   mockUseAuth.mockReturnValue({
     isAuthenticated: !!user,
     user: user
-      ? { id: '1', username: 'test', displayName: null, email: null, hasPasskeys: true, ...user }
+      ? {
+          id: '1',
+          username: 'test',
+          displayName: 'Test User',
+          email: 'test@example.com',
+          hasPasskeys: true,
+          ...user,
+        }
       : null,
     isLoading,
     login: vi.fn(),

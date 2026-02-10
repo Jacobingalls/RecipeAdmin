@@ -11,8 +11,8 @@ vi.mock('../../contexts/AuthContext', () => ({
     user: {
       id: '1',
       username: 'test',
-      displayName: null,
-      email: null,
+      displayName: 'Test User',
+      email: 'test@example.com',
       isAdmin: false,
       hasPasskeys: false,
     },
@@ -24,8 +24,8 @@ vi.mock('../../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../../api', () => ({
-  authAddPasskeyBegin: vi.fn(),
-  authAddPasskeyFinish: vi.fn(),
+  settingsAddPasskeyBegin: vi.fn(),
+  settingsAddPasskeyFinish: vi.fn(),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -33,8 +33,8 @@ vi.mock('@simplewebauthn/browser', () => ({
 }));
 
 const mockUseAuth = vi.mocked(useAuth);
-const mockBegin = vi.mocked(api.authAddPasskeyBegin);
-const mockFinish = vi.mocked(api.authAddPasskeyFinish);
+const mockBegin = vi.mocked(api.settingsAddPasskeyBegin);
+const mockFinish = vi.mocked(api.settingsAddPasskeyFinish);
 
 describe('PasskeySetupPrompt', () => {
   beforeEach(() => {
@@ -45,8 +45,8 @@ describe('PasskeySetupPrompt', () => {
       user: {
         id: '1',
         username: 'test',
-        displayName: null,
-        email: null,
+        displayName: 'Test User',
+        email: 'test@example.com',
         isAdmin: false,
         hasPasskeys: false,
       },
@@ -68,8 +68,8 @@ describe('PasskeySetupPrompt', () => {
       user: {
         id: '1',
         username: 'test',
-        displayName: null,
-        email: null,
+        displayName: 'Test User',
+        email: 'test@example.com',
         isAdmin: false,
         hasPasskeys: true,
       },

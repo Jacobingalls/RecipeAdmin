@@ -5,6 +5,7 @@ import {
   listGroups,
   getGroup,
   getVersion,
+  getStatus,
   logEntry,
   API_BASE,
   API_DISPLAY_URL,
@@ -193,6 +194,18 @@ describe('getVersion', () => {
 
     expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/version`, { credentials: 'include' });
     expect(result).toEqual(version);
+  });
+});
+
+describe('getStatus', () => {
+  it('calls /status endpoint', async () => {
+    const status = { version: '1.2.3', environment: 'production', debug: false, user: null };
+    mockFetch.mockResolvedValue(mockResponse(status));
+
+    const result = await getStatus();
+
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/status`, { credentials: 'include' });
+    expect(result).toEqual(status);
   });
 });
 

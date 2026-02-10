@@ -11,8 +11,8 @@ vi.mock('../../contexts/AuthContext', () => ({
     user: {
       id: '1',
       username: 'test',
-      displayName: null,
-      email: null,
+      displayName: 'Test User',
+      email: 'test@example.com',
       isAdmin: false,
       hasPasskeys: true,
     },
@@ -36,8 +36,8 @@ function renderWithRouter(isAuthenticated: boolean, isLoading: boolean) {
       ? {
           id: '1',
           username: 'test',
-          displayName: null,
-          email: null,
+          displayName: 'Test User',
+          email: 'test@example.com',
           isAdmin: false,
           hasPasskeys: true,
         }

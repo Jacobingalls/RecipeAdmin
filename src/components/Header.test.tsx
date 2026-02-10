@@ -27,8 +27,8 @@ vi.mock('../contexts/AuthContext', () => ({
     user: {
       id: '1',
       username: 'testuser',
-      displayName: null,
-      email: null,
+      displayName: 'Test User',
+      email: 'test@example.com',
       isAdmin: false,
       hasPasskeys: true,
     },
@@ -54,8 +54,8 @@ describe('Header', () => {
       user: {
         id: '1',
         username: 'testuser',
-        displayName: null,
-        email: null,
+        displayName: 'Test User',
+        email: 'test@example.com',
         isAdmin: false,
         hasPasskeys: true,
       },
@@ -177,9 +177,9 @@ describe('Header', () => {
     expect(toggler.className).toContain('navbar-toggler');
   });
 
-  it('renders username in dropdown when authenticated', () => {
+  it('renders display name in dropdown when authenticated', () => {
     renderWithRouter(<Header />);
-    expect(screen.getByText('testuser')).toBeInTheDocument();
+    expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
   it('renders Settings link in dropdown', () => {
@@ -205,8 +205,8 @@ describe('Header', () => {
       user: {
         id: '1',
         username: 'admin',
-        displayName: null,
-        email: null,
+        displayName: 'Admin User',
+        email: 'admin@example.com',
         isAdmin: true,
         hasPasskeys: true,
       },

@@ -1,9 +1,9 @@
-import type { ApiVersion } from '../api';
-import { getVersion } from '../api';
+import type { ApiStatus } from '../api';
+import { getStatus } from '../api';
 import { useApiQuery } from '../hooks';
 
 export default function VersionBadge() {
-  const { data, loading, error } = useApiQuery<ApiVersion>(getVersion, []);
+  const { data, loading, error } = useApiQuery<ApiStatus>(getStatus, []);
 
   if (loading) {
     return null;
@@ -17,7 +17,7 @@ export default function VersionBadge() {
     );
   }
 
-  const environment = data.debug ? 'Debug' : 'Production';
+  const environment = data.environment ?? (data.debug ? 'Debug' : 'Production');
   const version = data.version ? `v${data.version}` : null;
 
   return (

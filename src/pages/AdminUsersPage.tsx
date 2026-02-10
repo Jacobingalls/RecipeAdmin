@@ -27,12 +27,7 @@ export default function AdminUsersPage() {
     setCreateError(null);
     setIsCreating(true);
     try {
-      const result = await adminCreateUser(
-        newUsername,
-        newIsAdmin,
-        newDisplayName || undefined,
-        newEmail || undefined,
-      );
+      const result = await adminCreateUser(newUsername, newDisplayName, newEmail, newIsAdmin);
       setCreatedResult(result);
       setNewUsername('');
       setNewDisplayName('');
@@ -129,6 +124,7 @@ export default function AdminUsersPage() {
                   id="new-display-name"
                   value={newDisplayName}
                   onChange={(e) => setNewDisplayName(e.target.value)}
+                  required
                 />
               </div>
               <div className="mb-3">
@@ -141,6 +137,7 @@ export default function AdminUsersPage() {
                   id="new-email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
+                  required
                 />
               </div>
               <div className="form-check mb-3">
@@ -180,8 +177,8 @@ export default function AdminUsersPage() {
             className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
           >
             <div>
-              <strong>{u.displayName ?? u.username}</strong>
-              {u.displayName && <small className="text-body-secondary ms-2">{u.username}</small>}
+              <strong>{u.displayName}</strong>
+              <small className="text-body-secondary ms-2">{u.username}</small>
               {u.isAdmin && <span className="badge bg-warning text-dark ms-2">Admin</span>}
             </div>
             <div className="text-body-secondary small">

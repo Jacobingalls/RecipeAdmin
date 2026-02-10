@@ -17,8 +17,8 @@ vi.mock('../contexts/AuthContext', () => ({
     user: {
       id: '1',
       username: 'testuser',
-      displayName: null,
-      email: null,
+      displayName: 'Test User',
+      email: 'test@example.com',
       isAdmin: false,
       hasPasskeys: true,
     },
@@ -30,13 +30,13 @@ vi.mock('../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../api', () => ({
-  authListPasskeys: vi.fn(),
-  authAddPasskeyBegin: vi.fn(),
-  authAddPasskeyFinish: vi.fn(),
-  authDeletePasskey: vi.fn(),
-  authListAPIKeys: vi.fn(),
-  authCreateAPIKey: vi.fn(),
-  authRevokeAPIKey: vi.fn(),
+  settingsListPasskeys: vi.fn(),
+  settingsAddPasskeyBegin: vi.fn(),
+  settingsAddPasskeyFinish: vi.fn(),
+  settingsDeletePasskey: vi.fn(),
+  settingsListAPIKeys: vi.fn(),
+  settingsCreateAPIKey: vi.fn(),
+  settingsRevokeAPIKey: vi.fn(),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -49,11 +49,11 @@ vi.mock('../components/common', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
-const mockDeletePasskey = vi.mocked(api.authDeletePasskey);
-const mockCreateAPIKey = vi.mocked(api.authCreateAPIKey);
-const mockRevokeAPIKey = vi.mocked(api.authRevokeAPIKey);
-const mockBegin = vi.mocked(api.authAddPasskeyBegin);
-const mockFinish = vi.mocked(api.authAddPasskeyFinish);
+const mockDeletePasskey = vi.mocked(api.settingsDeletePasskey);
+const mockCreateAPIKey = vi.mocked(api.settingsCreateAPIKey);
+const mockRevokeAPIKey = vi.mocked(api.settingsRevokeAPIKey);
+const mockBegin = vi.mocked(api.settingsAddPasskeyBegin);
+const mockFinish = vi.mocked(api.settingsAddPasskeyFinish);
 
 const samplePasskeys: PasskeyInfo[] = [
   { id: 'pk1', name: 'My Passkey', createdAt: 1700000000, lastUsedAt: null },
