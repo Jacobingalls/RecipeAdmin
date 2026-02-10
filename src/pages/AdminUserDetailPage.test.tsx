@@ -25,7 +25,6 @@ vi.mock('../api', () => ({
 vi.mock('../components/common', () => ({
   LoadingState: () => <div data-testid="loading-state" />,
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  BackButton: () => <button data-testid="back-button" type="button" />,
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -92,12 +91,14 @@ describe('AdminUserDetailPage', () => {
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
   });
 
-  it('renders user details', () => {
+  it('renders user details in edit form', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    expect(screen.getByText('Alice')).toBeInTheDocument();
-    expect(screen.getByText('alice')).toBeInTheDocument();
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByText('u1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('alice')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Alice')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('alice@example.com')).toBeInTheDocument();
+    expect(screen.getByLabelText('Administrator')).toBeChecked();
   });
 
   it('renders passkeys', () => {
@@ -225,10 +226,10 @@ describe('AdminUserDetailPage', () => {
     expect(screen.queryByDisplayValue('temp-key-xyz')).not.toBeInTheDocument();
   });
 
-  it('shows edit form when edit button clicked', () => {
+  it('renders user ID as code block', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    fireEvent.click(screen.getByText('Edit'));
-    expect(screen.getByText('Edit User')).toBeInTheDocument();
+    const idElement = screen.getByText('u1');
+    expect(idElement.tagName).toBe('CODE');
   });
 });

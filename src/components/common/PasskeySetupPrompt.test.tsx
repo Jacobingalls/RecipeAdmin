@@ -20,6 +20,7 @@ vi.mock('../../contexts/AuthContext', () => ({
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
     logout: vi.fn(),
+    updateUser: vi.fn(),
   })),
 }));
 
@@ -54,6 +55,7 @@ describe('PasskeySetupPrompt', () => {
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
   });
 
@@ -77,6 +79,7 @@ describe('PasskeySetupPrompt', () => {
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
     const { container } = render(<PasskeySetupPrompt />);
     expect(container.innerHTML).toBe('');
@@ -90,6 +93,7 @@ describe('PasskeySetupPrompt', () => {
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
     const { container } = render(<PasskeySetupPrompt />);
     expect(container.innerHTML).toBe('');

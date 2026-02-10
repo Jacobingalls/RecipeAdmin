@@ -421,6 +421,10 @@ export async function settingsRevokeAPIKey(id: string): Promise<void> {
   return apiDelete(`/settings/api-keys/${encodeURIComponent(id)}`);
 }
 
+export async function settingsUpdateProfile(data: { displayName?: string }): Promise<AuthUser> {
+  return apiPut<{ displayName?: string }, AuthUser>('/settings/profile', data);
+}
+
 // Admin API functions
 
 export async function adminListUsers(): Promise<AdminUserListItem[]> {

@@ -24,11 +24,6 @@ vi.mock('../api', async () => {
 });
 
 vi.mock('../components/common', () => ({
-  BackButton: ({ to }: { to: string }) => (
-    <a data-testid="back-button" href={to}>
-      Back
-    </a>
-  ),
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
@@ -184,18 +179,16 @@ describe('HistoryPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders header and placeholder content while loading', () => {
+  it('renders heading and placeholder content while loading', () => {
     mockQueries({ logs: { loading: true } });
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('back-button')).toBeInTheDocument();
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.getByTestId('history-placeholder')).toBeInTheDocument();
   });
 
-  it('renders header and error state below it', () => {
+  it('renders heading and error state below it', () => {
     mockQueries({ logs: { error: 'Network error' } });
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('back-button')).toBeInTheDocument();
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Network error')).toBeInTheDocument();
@@ -209,16 +202,6 @@ describe('HistoryPage', () => {
     });
     renderWithRouter(<HistoryPage />);
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
-  });
-
-  it('renders back button pointing to home', () => {
-    mockQueries({
-      logs: { data: [] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
-    renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/');
   });
 
   it('renders the History heading', () => {

@@ -3,9 +3,22 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { PasskeyInfo, APIKeyInfo } from '../api';
 import * as api from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { useApiQuery } from '../hooks';
 
 import SettingsPage from './SettingsPage';
+
+const mockNavigate = vi.fn();
+const mockLogout = vi.fn();
+const mockUpdateUser = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
@@ -25,7 +38,8 @@ vi.mock('../contexts/AuthContext', () => ({
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
-    logout: vi.fn(),
+    logout: mockLogout,
+    updateUser: mockUpdateUser,
   })),
 }));
 
@@ -37,6 +51,7 @@ vi.mock('../api', () => ({
   settingsListAPIKeys: vi.fn(),
   settingsCreateAPIKey: vi.fn(),
   settingsRevokeAPIKey: vi.fn(),
+  settingsUpdateProfile: vi.fn(),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -48,12 +63,14 @@ vi.mock('../components/common', () => ({
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
 }));
 
+const mockUseAuth = vi.mocked(useAuth);
 const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockDeletePasskey = vi.mocked(api.settingsDeletePasskey);
 const mockCreateAPIKey = vi.mocked(api.settingsCreateAPIKey);
 const mockRevokeAPIKey = vi.mocked(api.settingsRevokeAPIKey);
 const mockBegin = vi.mocked(api.settingsAddPasskeyBegin);
 const mockFinish = vi.mocked(api.settingsAddPasskeyFinish);
+const mockUpdateProfile = vi.mocked(api.settingsUpdateProfile);
 
 const samplePasskeys: PasskeyInfo[] = [
   { id: 'pk1', name: 'My Passkey', createdAt: 1700000000, lastUsedAt: null },
@@ -103,6 +120,22 @@ function setupMocks(
 describe('SettingsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: {
+        id: '1',
+        username: 'testuser',
+        displayName: 'Test User',
+        email: 'test@example.com',
+        isAdmin: false,
+        hasPasskeys: true,
+      },
+      isLoading: false,
+      login: vi.fn(),
+      loginWithPasskey: vi.fn(),
+      logout: mockLogout,
+      updateUser: mockUpdateUser,
+    });
   });
 
   it('renders loading state', () => {
@@ -117,11 +150,13 @@ describe('SettingsPage', () => {
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
   });
 
-  it('renders settings heading and username', () => {
+  it('renders settings heading and user info', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByText('testuser')).toBeInTheDocument();
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
   });
 
   it('renders passkeys', () => {
@@ -159,7 +194,7 @@ describe('SettingsPage', () => {
     expect(refetchApiKeys).toHaveBeenCalled();
   });
 
-  it('creates API key and shows key', async () => {
+  it('creates API key via modal and shows key', async () => {
     mockCreateAPIKey.mockResolvedValue({
       id: 'new-ak',
       name: 'New Key',
@@ -170,12 +205,68 @@ describe('SettingsPage', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     fireEvent.click(screen.getByText('Create API Key'));
+    expect(screen.getByText('Create API Key', { selector: '.modal-title' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Key Name'), { target: { value: 'New Key' } });
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     });
-    expect(mockCreateAPIKey).toHaveBeenCalledWith('New Key');
-    expect(screen.getByText('new-key-abc')).toBeInTheDocument();
+    expect(mockCreateAPIKey).toHaveBeenCalledWith('New Key', undefined);
+    expect(screen.getByDisplayValue('new-key-abc')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('creates API key with expiry', async () => {
+    mockCreateAPIKey.mockResolvedValue({
+      id: 'new-ak',
+      name: 'Expiring Key',
+      key: 'exp-key-abc',
+      keyPrefix: 'rk_exp',
+      expiresAt: 1700100000,
+    });
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByText('Create API Key'));
+    fireEvent.change(screen.getByLabelText('Key Name'), { target: { value: 'Expiring Key' } });
+    fireEvent.click(screen.getByLabelText('Set expiration'));
+    expect(screen.getByLabelText('Expires at')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Expires at'), {
+      target: { value: '2025-01-15T12:00' },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    });
+    const expectedTimestamp = Math.floor(new Date('2025-01-15T12:00').getTime() / 1000);
+    expect(mockCreateAPIKey).toHaveBeenCalledWith('Expiring Key', expectedTimestamp);
+  });
+
+  it('closes modal via cancel button', () => {
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByText('Create API Key'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('closes modal via close button', () => {
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByText('Create API Key'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('toggles expiry field visibility with checkbox', () => {
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByText('Create API Key'));
+    expect(screen.queryByLabelText('Expires at')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Set expiration'));
+    expect(screen.getByLabelText('Expires at')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Set expiration'));
+    expect(screen.queryByLabelText('Expires at')).not.toBeInTheDocument();
   });
 
   it('adds passkey and refetches', async () => {
@@ -200,5 +291,49 @@ describe('SettingsPage', () => {
     setupMocks([], []);
     render(<SettingsPage />);
     expect(screen.getByText('No credentials.')).toBeInTheDocument();
+  });
+
+  it('edits display name and shows success message', async () => {
+    const updatedUser = {
+      id: '1',
+      username: 'testuser',
+      displayName: 'New Name',
+      email: 'test@example.com',
+      isAdmin: false,
+      hasPasskeys: true,
+    };
+    mockUpdateProfile.mockResolvedValue(updatedUser);
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit display name' }));
+    const input = screen.getByDisplayValue('Test User');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    });
+    expect(mockUpdateProfile).toHaveBeenCalledWith({ displayName: 'New Name' });
+    expect(mockUpdateUser).toHaveBeenCalledWith(updatedUser);
+    expect(screen.getByRole('status')).toHaveTextContent(/signing out and back in/i);
+  });
+
+  it('cancels display name edit', () => {
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit display name' }));
+    expect(screen.getByDisplayValue('Test User')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByDisplayValue('Test User')).not.toBeInTheDocument();
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+  });
+
+  it('calls logout and navigates to login on sign out', async () => {
+    mockLogout.mockResolvedValue(undefined);
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    });
+    expect(mockLogout).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 });

@@ -5,7 +5,7 @@ import { getGroup } from '../api';
 import { useApiQuery } from '../hooks';
 import type { GroupItem, ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
-import { LoadingState, ErrorState, ContentUnavailableView, BackButton } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 import BarcodeSection from '../components/BarcodeSection';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
@@ -41,7 +41,6 @@ export default function GroupDetailPage() {
 
   return (
     <>
-      <BackButton to="/groups" />
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !groupData && (

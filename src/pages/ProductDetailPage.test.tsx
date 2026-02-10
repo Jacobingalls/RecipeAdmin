@@ -18,11 +18,6 @@ vi.mock('../components/common', () => ({
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
   ),
-  BackButton: ({ to }: { to: string }) => (
-    <a data-testid="back-button" href={to}>
-      Back
-    </a>
-  ),
 }));
 
 vi.mock('../components/product', () => ({
@@ -107,19 +102,17 @@ describe('ProductDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state with back button', () => {
+  it('renders loading state', () => {
     mockQuery({ loading: true });
     renderWithRoute('/products/p1');
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/products');
   });
 
-  it('renders error state with back button', () => {
+  it('renders error state', () => {
     mockQuery({ error: 'Server error' });
     renderWithRoute('/products/p1');
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Server error')).toBeInTheDocument();
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/products');
   });
 
   it('renders empty state when product is null', () => {
@@ -133,12 +126,6 @@ describe('ProductDetailPage', () => {
     renderWithRoute('/products/p1');
     expect(screen.getByText('Peanut Butter')).toBeInTheDocument();
     expect(screen.getByText('NutCo')).toBeInTheDocument();
-  });
-
-  it('renders back button to products', () => {
-    mockQuery({ data: sampleProduct });
-    renderWithRoute('/products/p1');
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/products');
   });
 
   it('renders preparation details for default prep', () => {

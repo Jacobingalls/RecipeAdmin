@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import VersionBadge from './VersionBadge';
 
 export default function Header() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [barcode, setBarcode] = useState('');
   const navigate = useNavigate();
 
@@ -20,11 +20,6 @@ export default function Header() {
       navigate(`/lookup/${encodeURIComponent(barcode.trim())}`);
       setBarcode('');
     }
-  }
-
-  async function handleLogout() {
-    await logout();
-    navigate('/login');
   }
 
   return (
@@ -72,48 +67,25 @@ export default function Header() {
                   </li>
                 )}
               </ul>
-              <form className="d-flex me-3" role="search" onSubmit={handleSearch}>
+              <form className="d-flex" role="search" onSubmit={handleSearch}>
                 <label htmlFor="barcode-search" className="visually-hidden">
                   Barcode
                 </label>
-                <input
-                  type="search"
-                  className="form-control form-control-sm me-2"
-                  id="barcode-search"
-                  placeholder="Barcode..."
-                  value={barcode}
-                  onChange={(e) => setBarcode(e.target.value)}
-                  style={{ width: 150 }}
-                />
-                <button type="submit" className="btn btn-outline-light btn-sm">
-                  Lookup
-                </button>
+                <div className="input-group input-group-sm">
+                  <span className="input-group-text">
+                    <i className="bi bi-upc-scan" aria-hidden="true" />
+                  </span>
+                  <input
+                    type="search"
+                    className="form-control"
+                    id="barcode-search"
+                    placeholder="Barcode..."
+                    value={barcode}
+                    onChange={(e) => setBarcode(e.target.value)}
+                    style={{ width: 150 }}
+                  />
+                </div>
               </form>
-              <div className="dropdown">
-                <button
-                  className="btn btn-outline-light btn-sm dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {user?.displayName}
-                </button>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <NavLink className="dropdown-item" to="/settings">
-                      Settings
-                    </NavLink>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <button type="button" className="dropdown-item" onClick={handleLogout}>
-                      Sign out
-                    </button>
-                  </li>
-                </ul>
-              </div>
             </>
           )}
         </div>

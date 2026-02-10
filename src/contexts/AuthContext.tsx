@@ -12,6 +12,7 @@ interface AuthContextValue {
   login: (usernameOrEmail: string, password: string) => Promise<void>;
   loginWithPasskey: (usernameOrEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: AuthUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -23,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = useCallback(async () => {
     try {
       const status = await getStatus();
-      setUser(status.user);
+      setUser(status.user ?? null);
     } catch {
       setUser(null);
     } finally {
@@ -61,6 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((updatedUser: AuthUser) => {
+    setUser(updatedUser);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -70,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         loginWithPasskey,
         logout: logoutFn,
+        updateUser,
       }}
     >
       {children}

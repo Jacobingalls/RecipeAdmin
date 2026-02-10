@@ -1,5 +1,5 @@
 import type { CSSProperties, FormEvent } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import type { AdminTempAPIKeyResponse } from '../api';
@@ -11,7 +11,7 @@ import {
   adminDeleteUserAPIKey,
   adminCreateUserAPIKey,
 } from '../api';
-import { LoadingState, ErrorState, BackButton } from '../components/common';
+import { LoadingState, ErrorState } from '../components/common';
 import { useApiQuery } from '../hooks';
 import { formatRelativeTime } from '../utils';
 
@@ -27,23 +27,22 @@ export default function AdminUserDetailPage() {
   const [editIsAdmin, setEditIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [tempKeyModal, setTempKeyModal] = useState<'confirm' | 'result' | null>(null);
 
+  useEffect(() => {
+    if (user) {
+      setEditUsername(user.username);
+      setEditDisplayName(user.displayName);
+      setEditEmail(user.email);
+      setEditIsAdmin(user.isAdmin);
+    }
+  }, [user]);
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
   if (!user) return <ErrorState message="User not found" />;
-
-  function openEditForm() {
-    setEditUsername(user!.username);
-    setEditDisplayName(user!.displayName);
-    setEditEmail(user!.email);
-    setEditIsAdmin(user!.isAdmin);
-    setIsEditFormOpen(true);
-    setEditError(null);
-  }
 
   async function handleUpdate(e: FormEvent) {
     e.preventDefault();
@@ -56,7 +55,6 @@ export default function AdminUserDetailPage() {
         email: editEmail,
         isAdmin: editIsAdmin,
       });
-      setIsEditFormOpen(false);
       refetch();
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to update user');
@@ -118,114 +116,94 @@ export default function AdminUserDetailPage() {
 
   return (
     <div>
-      <BackButton />
-
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h1 className="h4 mb-0">
-            {user.displayName}
-            {user.isAdmin && <span className="badge bg-warning text-dark ms-2 fs-6">Admin</span>}
-          </h1>
-          <div className="text-body-secondary small">
-            <span>{user.username}</span>
+      <div className="d-flex justify-content-between align-items-center mb-1">
+        <h1 className="h4 mb-0">{user.displayName || user.username}</h1>
+      </div>
+      <p className="text-body-secondary small mb-3">
+        <code>{user.id}</code>
+        {user.createdAt && (
+          <>
             <span className="mx-1">&middot;</span>
-            <span>{user.email}</span>
-          </div>
-          {user.createdAt && (
-            <small className="text-body-secondary">
-              Created {new Date(user.createdAt * 1000).toLocaleDateString()}
-            </small>
+            Created {new Date(user.createdAt * 1000).toLocaleDateString()}
+          </>
+        )}
+      </p>
+
+      <div className="d-flex justify-content-between align-items-center mt-5 mb-3">
+        <h5 className="mb-0">Profile</h5>
+        <button
+          type="submit"
+          form="edit-user-form"
+          className="btn btn-primary btn-sm"
+          disabled={isEditing}
+        >
+          {isEditing ? 'Saving...' : 'Save'}
+        </button>
+      </div>
+      <div className="card mb-4">
+        <div className="card-body">
+          {editError && (
+            <div className="alert alert-danger py-2 small" role="alert">
+              {editError}
+            </div>
           )}
-        </div>
-        <div className="d-flex gap-2">
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={openEditForm}>
-            Edit
-          </button>
-          <button type="button" className="btn btn-outline-danger btn-sm" onClick={handleDelete}>
-            Delete
-          </button>
+          <form id="edit-user-form" onSubmit={handleUpdate}>
+            <div className="mb-3">
+              <label htmlFor="edit-username" className="form-label">
+                Username
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="edit-username"
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="edit-display-name" className="form-label">
+                Display Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="edit-display-name"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="edit-email" className="form-label">
+                Email
+              </label>
+              <input
+                type="email"
+                className="form-control"
+                id="edit-email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-check mb-3">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="edit-is-admin"
+                checked={editIsAdmin}
+                onChange={(e) => setEditIsAdmin(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="edit-is-admin">
+                Administrator
+              </label>
+            </div>
+          </form>
         </div>
       </div>
 
-      {isEditFormOpen && (
-        <div className="card mb-3">
-          <div className="card-body">
-            <h6 className="card-title">Edit User</h6>
-            {editError && (
-              <div className="alert alert-danger py-2 small" role="alert">
-                {editError}
-              </div>
-            )}
-            <form onSubmit={handleUpdate}>
-              <div className="mb-3">
-                <label htmlFor="edit-username" className="form-label">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="edit-username"
-                  value={editUsername}
-                  onChange={(e) => setEditUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="edit-display-name" className="form-label">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="edit-display-name"
-                  value={editDisplayName}
-                  onChange={(e) => setEditDisplayName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="edit-email" className="form-label">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className="form-control"
-                  id="edit-email"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-check mb-3">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="edit-is-admin"
-                  checked={editIsAdmin}
-                  onChange={(e) => setEditIsAdmin(e.target.checked)}
-                />
-                <label className="form-check-label" htmlFor="edit-is-admin">
-                  Administrator
-                </label>
-              </div>
-              <div className="d-flex gap-2">
-                <button type="submit" className="btn btn-primary btn-sm" disabled={isEditing}>
-                  {isEditing ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={() => setIsEditFormOpen(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+      <div className="d-flex justify-content-between align-items-center mt-5 mb-3">
         <h5 className="mb-0">Credentials</h5>
         <button
           type="button"
@@ -408,6 +386,11 @@ export default function AdminUserDetailPage() {
       ) : (
         <p className="text-body-secondary small">No credentials.</p>
       )}
+
+      <hr className="my-5" />
+      <button type="button" className="btn btn-outline-danger w-100" onClick={handleDelete}>
+        Delete User
+      </button>
     </div>
   );
 }

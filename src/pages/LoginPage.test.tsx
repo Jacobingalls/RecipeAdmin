@@ -17,6 +17,7 @@ vi.mock('../contexts/AuthContext', () => ({
     login: mockLogin,
     loginWithPasskey: mockLoginWithPasskey,
     logout: vi.fn(),
+    updateUser: vi.fn(),
   })),
 }));
 
@@ -36,6 +37,7 @@ describe('LoginPage', () => {
       login: mockLogin,
       loginWithPasskey: mockLoginWithPasskey,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
   });
 
@@ -64,6 +66,7 @@ describe('LoginPage', () => {
       login: mockLogin,
       loginWithPasskey: mockLoginWithPasskey,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
     expect(screen.getByRole('status')).toBeInTheDocument();
@@ -85,6 +88,7 @@ describe('LoginPage', () => {
       login: mockLogin,
       loginWithPasskey: mockLoginWithPasskey,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
     expect(screen.queryByText('Sign in to Recipe Admin')).not.toBeInTheDocument();

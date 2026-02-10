@@ -5,7 +5,7 @@ import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
 import { useApiQuery } from '../hooks';
 import { ServingSize } from '../domain';
-import { LoadingState, ErrorState, ContentUnavailableView, BackButton } from '../components/common';
+import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 import { PreparationDetails } from '../components/product';
 import BarcodeSection from '../components/BarcodeSection';
 import NotesDisplay from '../components/NotesDisplay';
@@ -30,7 +30,6 @@ export default function ProductDetailPage() {
 
   return (
     <>
-      <BackButton to="/products" />
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !product && (

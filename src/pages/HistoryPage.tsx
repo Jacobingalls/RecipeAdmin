@@ -4,7 +4,7 @@ import type { ApiLogEntry, ApiProduct } from '../api';
 import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
 import { NutritionInformation, Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData } from '../domain';
-import { BackButton, ErrorState, ContentUnavailableView } from '../components/common';
+import { ErrorState, ContentUnavailableView } from '../components/common';
 import { useApiQuery } from '../hooks';
 import LogModal from '../components/LogModal';
 import type { LogTarget } from '../components/LogModal';
@@ -290,7 +290,6 @@ export default function HistoryPage() {
 
   return (
     <>
-      <BackButton to="/" />
       <h1 className="h2 mb-4">History</h1>
       {loading && (
         <div data-testid="history-placeholder">

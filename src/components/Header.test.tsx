@@ -36,6 +36,7 @@ vi.mock('../contexts/AuthContext', () => ({
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
     logout: mockLogout,
+    updateUser: vi.fn(),
   })),
 }));
 
@@ -63,6 +64,7 @@ describe('Header', () => {
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
+      updateUser: vi.fn(),
     });
   });
 
@@ -91,6 +93,7 @@ describe('Header', () => {
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
+      updateUser: vi.fn(),
     });
     renderWithRouter(<Header />);
     expect(screen.queryByText('Home')).not.toBeInTheDocument();
@@ -108,7 +111,7 @@ describe('Header', () => {
   it('renders the barcode search form when authenticated', () => {
     renderWithRouter(<Header />);
     expect(screen.getByPlaceholderText('Barcode...')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Lookup' })).toBeInTheDocument();
+    expect(document.querySelector('.bi-upc-scan')).toBeInTheDocument();
   });
 
   it('navigates to lookup page on search submit', () => {
@@ -177,28 +180,6 @@ describe('Header', () => {
     expect(toggler.className).toContain('navbar-toggler');
   });
 
-  it('renders display name in dropdown when authenticated', () => {
-    renderWithRouter(<Header />);
-    expect(screen.getByText('Test User')).toBeInTheDocument();
-  });
-
-  it('renders Settings link in dropdown', () => {
-    renderWithRouter(<Header />);
-    expect(screen.getByText('Settings')).toBeInTheDocument();
-  });
-
-  it('renders Sign out button in dropdown', () => {
-    renderWithRouter(<Header />);
-    expect(screen.getByText('Sign out')).toBeInTheDocument();
-  });
-
-  it('calls logout and navigates on sign out', async () => {
-    mockLogout.mockResolvedValue(undefined);
-    renderWithRouter(<Header />);
-    fireEvent.click(screen.getByText('Sign out'));
-    expect(mockLogout).toHaveBeenCalled();
-  });
-
   it('shows Admin link when user is admin', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
@@ -214,6 +195,7 @@ describe('Header', () => {
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
+      updateUser: vi.fn(),
     });
     renderWithRouter(<Header />);
     expect(screen.getByText('Admin')).toBeInTheDocument();

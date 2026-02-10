@@ -20,6 +20,7 @@ vi.mock('../../contexts/AuthContext', () => ({
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
     logout: vi.fn(),
+    updateUser: vi.fn(),
   })),
 }));
 
@@ -46,6 +47,7 @@ function renderWithRoutes(user: { isAdmin: boolean } | null, isLoading = false) 
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
     logout: vi.fn(),
+    updateUser: vi.fn(),
   });
 
   return render(

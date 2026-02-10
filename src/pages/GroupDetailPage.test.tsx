@@ -18,11 +18,6 @@ vi.mock('../components/common', () => ({
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
   ),
-  BackButton: ({ to }: { to: string }) => (
-    <a data-testid="back-button" href={to}>
-      Back
-    </a>
-  ),
 }));
 
 vi.mock('../components/NutritionLabel', () => ({
@@ -107,19 +102,17 @@ describe('GroupDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state with back button', () => {
+  it('renders loading state', () => {
     mockQuery({ loading: true });
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/groups');
   });
 
-  it('renders error state with back button', () => {
+  it('renders error state', () => {
     mockQuery({ error: 'Failed to load' });
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Failed to load')).toBeInTheDocument();
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/groups');
   });
 
   it('renders empty state when data is null', () => {
@@ -133,12 +126,6 @@ describe('GroupDetailPage', () => {
     renderWithRoute('/groups/g1');
     expect(screen.getByText('Breakfast Bowl')).toBeInTheDocument();
     expect(screen.getByText('2 items')).toBeInTheDocument();
-  });
-
-  it('renders back button to groups', () => {
-    mockQuery({ data: sampleGroup });
-    renderWithRoute('/groups/g1');
-    expect(screen.getByTestId('back-button')).toHaveAttribute('href', '/groups');
   });
 
   it('renders nutrition label and serving size selector', () => {

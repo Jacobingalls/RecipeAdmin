@@ -1,5 +1,6 @@
 import type { CSSProperties, FormEvent } from 'react';
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { startRegistration } from '@simplewebauthn/browser';
 
 import type { CreateAPIKeyResponse } from '../api';
@@ -11,6 +12,7 @@ import {
   settingsListAPIKeys,
   settingsCreateAPIKey,
   settingsRevokeAPIKey,
+  settingsUpdateProfile,
 } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,7 +20,8 @@ import { useApiQuery } from '../hooks';
 import { formatRelativeTime } from '../utils';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+  const navigate = useNavigate();
 
   const {
     data: passkeys,
@@ -33,14 +36,45 @@ export default function SettingsPage() {
     refetch: refetchApiKeys,
   } = useApiQuery(settingsListAPIKeys, []);
 
+  const [editingDisplayName, setEditingDisplayName] = useState(false);
+  const [displayNameInput, setDisplayNameInput] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSaved, setProfileSaved] = useState(false);
+
   const [isAddingPasskey, setIsAddingPasskey] = useState(false);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
-  const [showCreateKey, setShowCreateKey] = useState(false);
+  const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
+  const [hasExpiry, setHasExpiry] = useState(false);
+  const [newKeyExpiresAt, setNewKeyExpiresAt] = useState('');
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const [createdKey, setCreatedKey] = useState<CreateAPIKeyResponse | null>(null);
   const [copied, setCopied] = useState(false);
+
+  function startEditingDisplayName() {
+    setDisplayNameInput(user?.displayName ?? '');
+    setEditingDisplayName(true);
+    setProfileError(null);
+    setProfileSaved(false);
+  }
+
+  async function handleSaveDisplayName(e: FormEvent) {
+    e.preventDefault();
+    setProfileError(null);
+    setIsSavingProfile(true);
+    try {
+      const updated = await settingsUpdateProfile({ displayName: displayNameInput });
+      updateUser(updated);
+      setEditingDisplayName(false);
+      setProfileSaved(true);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Failed to update profile');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  }
 
   const handleAddPasskey = useCallback(async () => {
     setPasskeyError(null);
@@ -67,16 +101,28 @@ export default function SettingsPage() {
     setCreateKeyError(null);
     setIsCreatingKey(true);
     try {
-      const result = await settingsCreateAPIKey(newKeyName);
+      const expiresAt =
+        hasExpiry && newKeyExpiresAt
+          ? Math.floor(new Date(newKeyExpiresAt).getTime() / 1000)
+          : undefined;
+      const result = await settingsCreateAPIKey(newKeyName, expiresAt);
       setCreatedKey(result);
-      setNewKeyName('');
-      setShowCreateKey(false);
       refetchApiKeys();
     } catch (err) {
       setCreateKeyError(err instanceof Error ? err.message : 'Failed to create API key');
     } finally {
       setIsCreatingKey(false);
     }
+  }
+
+  function closeCreateKeyModal() {
+    setShowCreateKeyModal(false);
+    setNewKeyName('');
+    setHasExpiry(false);
+    setNewKeyExpiresAt('');
+    setCreatedKey(null);
+    setCreateKeyError(null);
+    setCopied(false);
   }
 
   async function handleRevokeAPIKey(id: string) {
@@ -92,6 +138,11 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleLogout() {
+    await logout();
+    navigate('/login');
+  }
+
   const loading = passkeysLoading || apiKeysLoading;
   const error = passkeysError || apiKeysError;
 
@@ -101,9 +152,70 @@ export default function SettingsPage() {
   return (
     <div>
       <h1 className="h4 mb-3">Settings</h1>
-      <p className="text-body-secondary">
-        Signed in as <strong>{user?.username}</strong>
-      </p>
+
+      {profileSaved && (
+        <div className="alert alert-success py-2 small" role="status">
+          Display name updated. It may take a moment to appear everywhere. Signing out and back in
+          will update it immediately.
+        </div>
+      )}
+
+      <div className="card mb-4">
+        <div className="card-body">
+          <dl className="row mb-0">
+            <dt className="col-sm-4 text-body-secondary">Username</dt>
+            <dd className="col-sm-8">{user?.username}</dd>
+            <dt className="col-sm-4 text-body-secondary">Display Name</dt>
+            <dd className="col-sm-8">
+              {editingDisplayName ? (
+                <form className="d-flex gap-2" onSubmit={handleSaveDisplayName}>
+                  {profileError && (
+                    <div className="alert alert-danger py-1 small w-100 mb-2" role="alert">
+                      {profileError}
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    className="form-control form-control-sm"
+                    id="edit-display-name"
+                    value={displayNameInput}
+                    onChange={(e) => setDisplayNameInput(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={isSavingProfile}
+                  >
+                    {isSavingProfile ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => setEditingDisplayName(false)}
+                  >
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <span className="d-flex align-items-center gap-2">
+                  {user?.displayName}
+                  <button
+                    type="button"
+                    className="btn btn-link btn-sm p-0 text-body-secondary"
+                    aria-label="Edit display name"
+                    onClick={startEditingDisplayName}
+                  >
+                    <i className="bi bi-pencil" aria-hidden="true" />
+                  </button>
+                </span>
+              )}
+            </dd>
+            <dt className="col-sm-4 text-body-secondary">Email</dt>
+            <dd className="col-sm-8 mb-0">{user?.email}</dd>
+          </dl>
+        </div>
+      </div>
 
       <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
         <h5 className="mb-0">Credentials</h5>
@@ -119,7 +231,7 @@ export default function SettingsPage() {
           <button
             type="button"
             className="btn btn-outline-primary btn-sm"
-            onClick={() => setShowCreateKey(!showCreateKey)}
+            onClick={() => setShowCreateKeyModal(true)}
           >
             Create API Key
           </button>
@@ -132,66 +244,134 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {createdKey && (
-        <div className="alert alert-success" role="alert">
-          <h6 className="alert-heading">API Key Created</h6>
-          <p className="mb-2 small">Save this key now. You will not be able to see it again.</p>
-          <div className="d-flex gap-2 align-items-center">
-            <code className="flex-grow-1 text-break">{createdKey.key}</code>
-            <button
-              type="button"
-              className="btn btn-outline-success btn-sm"
-              onClick={handleCopyKey}
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <hr />
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => setCreatedKey(null)}
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {showCreateKey && (
-        <div className="card mb-3">
-          <div className="card-body">
-            {createKeyError && (
-              <div className="alert alert-danger py-2 small" role="alert">
-                {createKeyError}
-              </div>
-            )}
-            <form onSubmit={handleCreateAPIKey}>
-              <div className="mb-3">
-                <label htmlFor="key-name" className="form-label">
-                  Key Name
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="key-name"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="d-flex gap-2">
-                <button type="submit" className="btn btn-primary btn-sm" disabled={isCreatingKey}>
-                  {isCreatingKey ? 'Creating...' : 'Create'}
-                </button>
+      {showCreateKeyModal && (
+        <div
+          className="modal d-block"
+          tabIndex={-1}
+          role="dialog"
+          aria-labelledby="create-api-key-title"
+          aria-modal="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="create-api-key-title">
+                  Create API Key
+                </h5>
                 <button
                   type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={() => setShowCreateKey(false)}
-                >
-                  Cancel
-                </button>
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={closeCreateKeyModal}
+                />
               </div>
-            </form>
+              <div className="modal-body">
+                {createdKey ? (
+                  <>
+                    <p className="small text-body-secondary">
+                      Save this key now. You will not be able to see it again.
+                    </p>
+                    <div className="mb-3">
+                      <label htmlFor="created-key" className="form-label">
+                        API Key
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="created-key"
+                        value={createdKey.key}
+                        readOnly
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm"
+                      onClick={handleCopyKey}
+                    >
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                    {createdKey.expiresAt && (
+                      <p className="small text-body-secondary mt-2 mb-0">
+                        Expires {formatRelativeTime(createdKey.expiresAt)}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <form id="create-api-key-form" onSubmit={handleCreateAPIKey}>
+                    {createKeyError && (
+                      <div className="alert alert-danger py-2 small" role="alert">
+                        {createKeyError}
+                      </div>
+                    )}
+                    <div className="mb-3">
+                      <label htmlFor="key-name" className="form-label">
+                        Key Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="key-name"
+                        value={newKeyName}
+                        onChange={(e) => setNewKeyName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-check mb-3">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id="has-expiry"
+                        checked={hasExpiry}
+                        onChange={(e) => setHasExpiry(e.target.checked)}
+                      />
+                      <label className="form-check-label" htmlFor="has-expiry">
+                        Set expiration
+                      </label>
+                    </div>
+                    {hasExpiry && (
+                      <div className="mb-3">
+                        <label htmlFor="key-expires-at" className="form-label">
+                          Expires at
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className="form-control"
+                          id="key-expires-at"
+                          value={newKeyExpiresAt}
+                          onChange={(e) => setNewKeyExpiresAt(e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
+                  </form>
+                )}
+              </div>
+              <div className="modal-footer">
+                {createdKey ? (
+                  <button type="button" className="btn btn-primary" onClick={closeCreateKeyModal}>
+                    Done
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={closeCreateKeyModal}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      form="create-api-key-form"
+                      className="btn btn-primary"
+                      disabled={isCreatingKey}
+                    >
+                      {isCreatingKey ? 'Creating...' : 'Create'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -263,6 +443,11 @@ export default function SettingsPage() {
       ) : (
         <p className="text-body-secondary small">No credentials.</p>
       )}
+
+      <hr className="my-4" />
+      <button type="button" className="btn btn-outline-danger w-100" onClick={handleLogout}>
+        Sign out
+      </button>
     </div>
   );
 }
