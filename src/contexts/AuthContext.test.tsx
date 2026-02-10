@@ -10,6 +10,7 @@ vi.mock('../api', () => ({
   authLoginBegin: vi.fn(),
   authLoginFinish: vi.fn(),
   authLogout: vi.fn(),
+  tryRefresh: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -21,6 +22,7 @@ const mockAuthLogin = vi.mocked(api.authLogin);
 const mockAuthLogout = vi.mocked(api.authLogout);
 const mockAuthLoginBegin = vi.mocked(api.authLoginBegin);
 const mockAuthLoginFinish = vi.mocked(api.authLoginFinish);
+const mockTryRefresh = vi.mocked(api.tryRefresh);
 
 const testUser = {
   id: '1',
@@ -32,15 +34,18 @@ const testUser = {
 };
 
 function TestConsumer() {
-  const { isAuthenticated, user, isLoading, login, logout, loginWithPasskey } = useAuth();
+  const { isAuthenticated, user, isLoading, login, logout, loginWithPasskey, refreshSession } =
+    useAuth();
   return (
     <div>
       <span data-testid="loading">{String(isLoading)}</span>
       <span data-testid="authenticated">{String(isAuthenticated)}</span>
       <span data-testid="username">{user?.username ?? 'none'}</span>
+      <span data-testid="display-name">{user?.displayName ?? 'none'}</span>
       <button data-testid="login" onClick={() => login('user', 'pass')} type="button" />
       <button data-testid="logout" onClick={() => logout()} type="button" />
       <button data-testid="passkey" onClick={() => loginWithPasskey()} type="button" />
+      <button data-testid="refresh-session" onClick={() => refreshSession()} type="button" />
     </div>
   );
 }
@@ -171,6 +176,39 @@ describe('AuthContext', () => {
     expect(mockAuthLoginBegin).toHaveBeenCalled();
     expect(mockAuthLoginFinish).toHaveBeenCalledWith('sess-1', { id: 'cred-1' });
     expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+  });
+
+  it('refreshSession calls tryRefresh and getStatus to update user', async () => {
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('display-name')).toHaveTextContent('Test User');
+
+    const updatedUser = { ...testUser, displayName: 'Updated Name' };
+    mockTryRefresh.mockResolvedValue(true);
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: updatedUser,
+    });
+
+    await act(async () => {
+      screen.getByTestId('refresh-session').click();
+    });
+    expect(mockTryRefresh).toHaveBeenCalled();
+    expect(mockGetStatus).toHaveBeenCalledTimes(2); // once on mount, once on refresh
+    expect(screen.getByTestId('display-name')).toHaveTextContent('Updated Name');
   });
 
   it('throws when useAuth is used outside AuthProvider', () => {

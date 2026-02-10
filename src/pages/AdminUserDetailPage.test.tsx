@@ -20,6 +20,7 @@ vi.mock('../api', () => ({
   adminDeleteUserPasskey: vi.fn(),
   adminDeleteUserAPIKey: vi.fn(),
   adminCreateUserAPIKey: vi.fn(),
+  adminRevokeUserSessions: vi.fn(),
 }));
 
 vi.mock('../components/common', () => ({
@@ -31,6 +32,7 @@ const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockDeletePasskey = vi.mocked(api.adminDeleteUserPasskey);
 const mockDeleteAPIKey = vi.mocked(api.adminDeleteUserAPIKey);
 const mockCreateAPIKey = vi.mocked(api.adminCreateUserAPIKey);
+const mockRevokeSessions = vi.mocked(api.adminRevokeUserSessions);
 
 const sampleUser: AdminUserDetail = {
   id: 'u1',
@@ -231,5 +233,27 @@ describe('AdminUserDetailPage', () => {
     renderPage(<AdminUserDetailPage />);
     const idElement = screen.getByText('u1');
     expect(idElement.tagName).toBe('CODE');
+  });
+
+  it('revokes all sessions for user', async () => {
+    mockRevokeSessions.mockResolvedValue(undefined);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    setupMocks(sampleUser);
+    renderPage(<AdminUserDetailPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke All Sessions' }));
+    });
+    expect(mockRevokeSessions).toHaveBeenCalledWith('u1');
+    expect(screen.getByRole('status')).toHaveTextContent('All sessions have been revoked.');
+  });
+
+  it('cancels revoke sessions when confirm is dismissed', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    setupMocks(sampleUser);
+    renderPage(<AdminUserDetailPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke All Sessions' }));
+    });
+    expect(mockRevokeSessions).not.toHaveBeenCalled();
   });
 });

@@ -66,8 +66,40 @@ const getApiDisplayUrl = (): string => {
 export const API_BASE = getApiBase();
 export const API_DISPLAY_URL = getApiDisplayUrl();
 
+// Transparent token refresh: intercepts 401s, refreshes via cookie, retries once
+let refreshPromise: Promise<boolean> | null = null;
+
+export async function tryRefresh(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchWithRefresh(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const res = await fetch(input, init);
+  if (res.status !== 401) return res;
+
+  // Deduplicate concurrent refresh calls
+  if (!refreshPromise) {
+    refreshPromise = tryRefresh().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  const refreshed = await refreshPromise;
+  if (!refreshed) return res;
+
+  // Retry the original request with the new access token cookie
+  return fetch(input, init);
+}
+
 async function apiFetch<T>(endpoint: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${endpoint}`, { credentials: 'include' });
+  const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, { credentials: 'include' });
   if (!res.ok) {
     if (res.status === 401) {
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
@@ -78,7 +110,7 @@ async function apiFetch<T>(endpoint: string): Promise<T> {
 }
 
 async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -94,7 +126,10 @@ async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> 
 }
 
 async function apiDelete(endpoint: string): Promise<void> {
-  const res = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE', credentials: 'include' });
+  const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
   if (!res.ok) {
     if (res.status === 401) {
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
@@ -104,7 +139,7 @@ async function apiDelete(endpoint: string): Promise<void> {
 }
 
 async function apiPut<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -220,6 +255,7 @@ export interface AuthUser {
 
 export interface LoginResponse {
   token: string;
+  refreshToken?: string;
   user: AuthUser;
   isTemporaryKey: boolean;
 }
@@ -425,6 +461,19 @@ export async function settingsUpdateProfile(data: { displayName?: string }): Pro
   return apiPut<{ displayName?: string }, AuthUser>('/settings/profile', data);
 }
 
+export async function settingsRevokeSessions(): Promise<void> {
+  const res = await fetchWithRefresh(`${API_BASE}/settings/revoke-sessions`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
+    throw new Error(`HTTP ${res.status}`);
+  }
+}
+
 // Admin API functions
 
 export async function adminListUsers(): Promise<AdminUserListItem[]> {
@@ -486,4 +535,20 @@ export async function adminCreateUserAPIKey(
     `/admin/users/${encodeURIComponent(userId)}/api-keys`,
     ttlHours !== undefined ? { ttlHours } : {},
   );
+}
+
+export async function adminRevokeUserSessions(userId: string): Promise<void> {
+  const res = await fetchWithRefresh(
+    `${API_BASE}/admin/users/${encodeURIComponent(userId)}/revoke-sessions`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
+  );
+  if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
+    throw new Error(`HTTP ${res.status}`);
+  }
 }

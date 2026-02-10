@@ -11,6 +11,7 @@ import SettingsPage from './SettingsPage';
 const mockNavigate = vi.fn();
 const mockLogout = vi.fn();
 const mockUpdateUser = vi.fn();
+const mockRefreshSession = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -40,6 +41,7 @@ vi.mock('../contexts/AuthContext', () => ({
     loginWithPasskey: vi.fn(),
     logout: mockLogout,
     updateUser: mockUpdateUser,
+    refreshSession: mockRefreshSession,
   })),
 }));
 
@@ -52,6 +54,7 @@ vi.mock('../api', () => ({
   settingsCreateAPIKey: vi.fn(),
   settingsRevokeAPIKey: vi.fn(),
   settingsUpdateProfile: vi.fn(),
+  settingsRevokeSessions: vi.fn(),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -71,6 +74,7 @@ const mockRevokeAPIKey = vi.mocked(api.settingsRevokeAPIKey);
 const mockBegin = vi.mocked(api.settingsAddPasskeyBegin);
 const mockFinish = vi.mocked(api.settingsAddPasskeyFinish);
 const mockUpdateProfile = vi.mocked(api.settingsUpdateProfile);
+const mockRevokeSessions = vi.mocked(api.settingsRevokeSessions);
 
 const samplePasskeys: PasskeyInfo[] = [
   { id: 'pk1', name: 'My Passkey', createdAt: 1700000000, lastUsedAt: null },
@@ -135,6 +139,7 @@ describe('SettingsPage', () => {
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
       updateUser: mockUpdateUser,
+      refreshSession: mockRefreshSession,
     });
   });
 
@@ -293,7 +298,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('No credentials.')).toBeInTheDocument();
   });
 
-  it('edits display name and shows success message', async () => {
+  it('edits display name, refreshes session, and shows success message', async () => {
     const updatedUser = {
       id: '1',
       username: 'testuser',
@@ -303,6 +308,7 @@ describe('SettingsPage', () => {
       hasPasskeys: true,
     };
     mockUpdateProfile.mockResolvedValue(updatedUser);
+    mockRefreshSession.mockResolvedValue(undefined);
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit display name' }));
@@ -313,7 +319,8 @@ describe('SettingsPage', () => {
     });
     expect(mockUpdateProfile).toHaveBeenCalledWith({ displayName: 'New Name' });
     expect(mockUpdateUser).toHaveBeenCalledWith(updatedUser);
-    expect(screen.getByRole('status')).toHaveTextContent(/signing out and back in/i);
+    expect(mockRefreshSession).toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('Display name updated.');
   });
 
   it('cancels display name edit', () => {
@@ -335,5 +342,29 @@ describe('SettingsPage', () => {
     });
     expect(mockLogout).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith('/login');
+  });
+
+  it('revokes all sessions and navigates to login', async () => {
+    mockRevokeSessions.mockResolvedValue(undefined);
+    mockLogout.mockResolvedValue(undefined);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
+    });
+    expect(mockRevokeSessions).toHaveBeenCalled();
+    expect(mockLogout).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
+  });
+
+  it('cancels revoke sessions when confirm is dismissed', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
+    });
+    expect(mockRevokeSessions).not.toHaveBeenCalled();
   });
 });

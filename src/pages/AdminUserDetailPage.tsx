@@ -10,6 +10,7 @@ import {
   adminDeleteUserPasskey,
   adminDeleteUserAPIKey,
   adminCreateUserAPIKey,
+  adminRevokeUserSessions,
 } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
 import { useApiQuery } from '../hooks';
@@ -30,6 +31,8 @@ export default function AdminUserDetailPage() {
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [tempKeyModal, setTempKeyModal] = useState<'confirm' | 'result' | null>(null);
+  const [isRevokingSessions, setIsRevokingSessions] = useState(false);
+  const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -98,6 +101,26 @@ export default function AdminUserDetailPage() {
     setTempKey(result);
     setCopied(false);
     refetch();
+  }
+
+  async function handleRevokeSessions() {
+    if (
+      !window.confirm(
+        `Revoke all sessions for ${user!.username}? They will be logged out of all devices.`,
+      )
+    ) {
+      return;
+    }
+    setIsRevokingSessions(true);
+    setRevokeSessionsSuccess(false);
+    try {
+      await adminRevokeUserSessions(id!);
+      setRevokeSessionsSuccess(true);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to revoke sessions');
+    } finally {
+      setIsRevokingSessions(false);
+    }
   }
 
   function closeTempKeyModal() {
@@ -385,6 +408,23 @@ export default function AdminUserDetailPage() {
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials.</p>
+      )}
+
+      <div className="d-flex justify-content-between align-items-center mt-5 mb-3">
+        <h5 className="mb-0">Sessions</h5>
+        <button
+          type="button"
+          className="btn btn-outline-warning btn-sm"
+          onClick={handleRevokeSessions}
+          disabled={isRevokingSessions}
+        >
+          {isRevokingSessions ? 'Revoking...' : 'Revoke All Sessions'}
+        </button>
+      </div>
+      {revokeSessionsSuccess && (
+        <div className="alert alert-success py-2 small" role="status">
+          All sessions have been revoked.
+        </div>
       )}
 
       <hr className="my-5" />

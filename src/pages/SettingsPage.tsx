@@ -13,6 +13,7 @@ import {
   settingsCreateAPIKey,
   settingsRevokeAPIKey,
   settingsUpdateProfile,
+  settingsRevokeSessions,
 } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,7 +21,7 @@ import { useApiQuery } from '../hooks';
 import { formatRelativeTime } from '../utils';
 
 export default function SettingsPage() {
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, updateUser, refreshSession } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -52,6 +53,7 @@ export default function SettingsPage() {
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const [createdKey, setCreatedKey] = useState<CreateAPIKeyResponse | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isRevokingSessions, setIsRevokingSessions] = useState(false);
 
   function startEditingDisplayName() {
     setDisplayNameInput(user?.displayName ?? '');
@@ -67,6 +69,7 @@ export default function SettingsPage() {
     try {
       const updated = await settingsUpdateProfile({ displayName: displayNameInput });
       updateUser(updated);
+      await refreshSession();
       setEditingDisplayName(false);
       setProfileSaved(true);
     } catch (err) {
@@ -138,6 +141,20 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleRevokeSessions() {
+    if (!window.confirm('This will sign you out of all devices, including this one. Continue?')) {
+      return;
+    }
+    setIsRevokingSessions(true);
+    try {
+      await settingsRevokeSessions();
+      await logout();
+      navigate('/login');
+    } catch {
+      setIsRevokingSessions(false);
+    }
+  }
+
   async function handleLogout() {
     await logout();
     navigate('/login');
@@ -155,8 +172,7 @@ export default function SettingsPage() {
 
       {profileSaved && (
         <div className="alert alert-success py-2 small" role="status">
-          Display name updated. It may take a moment to appear everywhere. Signing out and back in
-          will update it immediately.
+          Display name updated.
         </div>
       )}
 
@@ -445,9 +461,19 @@ export default function SettingsPage() {
       )}
 
       <hr className="my-4" />
-      <button type="button" className="btn btn-outline-danger w-100" onClick={handleLogout}>
-        Sign out
-      </button>
+      <div className="d-flex flex-column gap-2">
+        <button
+          type="button"
+          className="btn btn-outline-danger w-100"
+          onClick={handleRevokeSessions}
+          disabled={isRevokingSessions}
+        >
+          {isRevokingSessions ? 'Revoking...' : 'Sign out everywhere'}
+        </button>
+        <button type="button" className="btn btn-outline-secondary w-100" onClick={handleLogout}>
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }

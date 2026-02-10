@@ -3,7 +3,14 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { startAuthentication } from '@simplewebauthn/browser';
 
 import type { AuthUser } from '../api';
-import { getStatus, authLogin, authLoginBegin, authLoginFinish, authLogout } from '../api';
+import {
+  getStatus,
+  authLogin,
+  authLoginBegin,
+  authLoginFinish,
+  authLogout,
+  tryRefresh,
+} from '../api';
 
 interface AuthContextValue {
   isAuthenticated: boolean;
@@ -13,6 +20,7 @@ interface AuthContextValue {
   loginWithPasskey: (usernameOrEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: AuthUser) => void;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -66,6 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(updatedUser);
   }, []);
 
+  const refreshSession = useCallback(async () => {
+    await tryRefresh();
+    const status = await getStatus();
+    setUser(status.user ?? null);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -76,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithPasskey,
         logout: logoutFn,
         updateUser,
+        refreshSession,
       }}
     >
       {children}
