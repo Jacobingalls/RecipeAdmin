@@ -329,11 +329,19 @@ export interface AdminTempAPIKeyResponse {
 
 // Auth API functions
 
-export async function authLogin(usernameOrEmail: string, password: string): Promise<LoginResponse> {
-  return apiPost<{ usernameOrEmail: string; password: string }, LoginResponse>('/auth/login', {
-    usernameOrEmail,
-    password,
-  });
+export async function authLogin(
+  usernameOrEmail: string,
+  password: string,
+  deviceName: string,
+): Promise<LoginResponse> {
+  return apiPost<{ usernameOrEmail: string; password: string; deviceName: string }, LoginResponse>(
+    '/auth/login',
+    {
+      usernameOrEmail,
+      password,
+      deviceName,
+    },
+  );
 }
 
 export async function authLoginBegin(
@@ -348,11 +356,16 @@ export async function authLoginBegin(
 export async function authLoginFinish(
   sessionID: string,
   credential: unknown,
+  deviceName: string,
 ): Promise<LoginResponse> {
-  return apiPost<{ sessionID: string; credential: unknown }, LoginResponse>('/auth/login/finish', {
-    sessionID,
-    credential,
-  });
+  return apiPost<{ sessionID: string; credential: unknown; deviceName: string }, LoginResponse>(
+    '/auth/login/finish',
+    {
+      sessionID,
+      credential,
+      deviceName,
+    },
+  );
 }
 
 export async function authMe(): Promise<AuthUser> {
@@ -455,6 +468,22 @@ export async function settingsCreateAPIKey(
 
 export async function settingsRevokeAPIKey(id: string): Promise<void> {
   return apiDelete(`/settings/api-keys/${encodeURIComponent(id)}`);
+}
+
+export interface SessionInfo {
+  familyID: string;
+  deviceName: string;
+  sessionCreatedAt: number;
+  lastRefreshedAt: number | null;
+  expiresAt: number;
+}
+
+export async function settingsListSessions(): Promise<SessionInfo[]> {
+  return apiFetch<SessionInfo[]>('/settings/sessions');
+}
+
+export async function settingsRevokeSession(familyId: string): Promise<void> {
+  return apiDelete(`/settings/sessions/${encodeURIComponent(familyId)}`);
 }
 
 export async function settingsUpdateProfile(data: { displayName?: string }): Promise<AuthUser> {

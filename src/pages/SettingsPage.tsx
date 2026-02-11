@@ -14,6 +14,8 @@ import {
   settingsRevokeAPIKey,
   settingsUpdateProfile,
   settingsRevokeSessions,
+  settingsListSessions,
+  settingsRevokeSession,
 } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,6 +38,12 @@ export default function SettingsPage() {
     error: apiKeysError,
     refetch: refetchApiKeys,
   } = useApiQuery(settingsListAPIKeys, []);
+  const {
+    data: sessions,
+    loading: sessionsLoading,
+    error: sessionsError,
+    refetch: refetchSessions,
+  } = useApiQuery(settingsListSessions, []);
 
   const [editingDisplayName, setEditingDisplayName] = useState(false);
   const [displayNameInput, setDisplayNameInput] = useState('');
@@ -141,6 +149,11 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleRevokeSession(familyId: string) {
+    await settingsRevokeSession(familyId);
+    refetchSessions();
+  }
+
   async function handleRevokeSessions() {
     if (!window.confirm('This will sign you out of all devices, including this one. Continue?')) {
       return;
@@ -160,8 +173,8 @@ export default function SettingsPage() {
     navigate('/login');
   }
 
-  const loading = passkeysLoading || apiKeysLoading;
-  const error = passkeysError || apiKeysError;
+  const loading = passkeysLoading || apiKeysLoading || sessionsLoading;
+  const error = passkeysError || apiKeysError || sessionsError;
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -458,6 +471,46 @@ export default function SettingsPage() {
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials.</p>
+      )}
+
+      <h5 className="mt-4 mb-3">Sessions</h5>
+      {sessions && sessions.length > 0 ? (
+        <div className="list-group mb-3">
+          {sessions.map((session) => (
+            <div key={session.familyID} className="list-group-item d-flex align-items-center">
+              <i className="bi bi-display me-2" />
+              <div className="me-auto">
+                <strong>{session.deviceName}</strong>
+                <br />
+                <small className="text-body-secondary">
+                  Created {formatRelativeTime(session.sessionCreatedAt)}
+                  {session.lastRefreshedAt && (
+                    <> &middot; Last active {formatRelativeTime(session.lastRefreshedAt)}</>
+                  )}
+                  <> &middot; Expires {formatRelativeTime(session.expiresAt)}</>
+                </small>
+              </div>
+              <button
+                type="button"
+                className="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary"
+                style={
+                  {
+                    width: '2rem',
+                    height: '2rem',
+                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+                    '--bs-btn-hover-border-color': 'transparent',
+                  } as CSSProperties
+                }
+                aria-label={`Revoke session ${session.deviceName}`}
+                onClick={() => handleRevokeSession(session.familyID)}
+              >
+                <i className="bi bi-trash" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-body-secondary small">No active sessions.</p>
       )}
 
       <hr className="my-4" />

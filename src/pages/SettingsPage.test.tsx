@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { PasskeyInfo, APIKeyInfo } from '../api';
+import type { PasskeyInfo, APIKeyInfo, SessionInfo } from '../api';
 import * as api from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { useApiQuery } from '../hooks';
@@ -55,6 +55,8 @@ vi.mock('../api', () => ({
   settingsRevokeAPIKey: vi.fn(),
   settingsUpdateProfile: vi.fn(),
   settingsRevokeSessions: vi.fn(),
+  settingsListSessions: vi.fn(),
+  settingsRevokeSession: vi.fn(),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -75,6 +77,7 @@ const mockBegin = vi.mocked(api.settingsAddPasskeyBegin);
 const mockFinish = vi.mocked(api.settingsAddPasskeyFinish);
 const mockUpdateProfile = vi.mocked(api.settingsUpdateProfile);
 const mockRevokeSessions = vi.mocked(api.settingsRevokeSessions);
+const mockRevokeSession = vi.mocked(api.settingsRevokeSession);
 
 const samplePasskeys: PasskeyInfo[] = [
   { id: 'pk1', name: 'My Passkey', createdAt: 1700000000, lastUsedAt: null },
@@ -92,14 +95,26 @@ const sampleAPIKeys: APIKeyInfo[] = [
   },
 ];
 
+const sampleSessions: SessionInfo[] = [
+  {
+    familyID: 'fam-1',
+    deviceName: 'Chrome on macOS',
+    sessionCreatedAt: 1700000000,
+    lastRefreshedAt: 1700050000,
+    expiresAt: 1702592000,
+  },
+];
+
 const refetchPasskeys = vi.fn();
 const refetchApiKeys = vi.fn();
+const refetchSessions = vi.fn();
 
 function setupMocks(
   passkeys: PasskeyInfo[] | null,
   apiKeys: APIKeyInfo[] | null,
   loading = false,
   error: string | null = null,
+  sessions: SessionInfo[] | null = sampleSessions,
 ) {
   let callIndex = 0;
   mockUseApiQuery.mockImplementation(() => {
@@ -112,12 +127,20 @@ function setupMocks(
         refetch: refetchPasskeys,
       } as UseApiQueryResult<PasskeyInfo[]>;
     }
+    if (idx === 1) {
+      return {
+        data: apiKeys,
+        loading: false,
+        error: null,
+        refetch: refetchApiKeys,
+      } as UseApiQueryResult<APIKeyInfo[]>;
+    }
     return {
-      data: apiKeys,
+      data: sessions,
       loading: false,
       error: null,
-      refetch: refetchApiKeys,
-    } as UseApiQueryResult<APIKeyInfo[]>;
+      refetch: refetchSessions,
+    } as UseApiQueryResult<SessionInfo[]>;
   });
 }
 
@@ -366,5 +389,29 @@ describe('SettingsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
     });
     expect(mockRevokeSessions).not.toHaveBeenCalled();
+  });
+
+  it('renders sessions section with active sessions', () => {
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    expect(screen.getByText('Sessions')).toBeInTheDocument();
+    expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
+  });
+
+  it('revokes a session and refetches', async () => {
+    mockRevokeSession.mockResolvedValue(undefined);
+    setupMocks(samplePasskeys, sampleAPIKeys);
+    render(<SettingsPage />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke session Chrome on macOS' }));
+    });
+    expect(mockRevokeSession).toHaveBeenCalledWith('fam-1');
+    expect(refetchSessions).toHaveBeenCalled();
+  });
+
+  it('shows empty state when no sessions', () => {
+    setupMocks(samplePasskeys, sampleAPIKeys, false, null, []);
+    render(<SettingsPage />);
+    expect(screen.getByText('No active sessions.')).toBeInTheDocument();
   });
 });

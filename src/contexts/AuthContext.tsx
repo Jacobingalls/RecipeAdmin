@@ -54,14 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (usernameOrEmail: string, password: string) => {
-    const response = await authLogin(usernameOrEmail, password);
+    const deviceName = navigator.userAgent || 'Unknown device';
+    const response = await authLogin(usernameOrEmail, password, deviceName);
     setUser(response.user);
   }, []);
 
   const loginWithPasskey = useCallback(async (usernameOrEmail?: string) => {
     const { options, sessionID } = await authLoginBegin(usernameOrEmail);
     const credential = await startAuthentication({ optionsJSON: options });
-    const response = await authLoginFinish(sessionID, credential);
+    const deviceName = navigator.userAgent || 'Unknown device';
+    const response = await authLoginFinish(sessionID, credential, deviceName);
     setUser(response.user);
   }, []);
 

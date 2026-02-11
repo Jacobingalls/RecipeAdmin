@@ -104,7 +104,7 @@ describe('AuthContext', () => {
     await act(async () => {
       screen.getByTestId('login').click();
     });
-    expect(mockAuthLogin).toHaveBeenCalledWith('user', 'pass');
+    expect(mockAuthLogin).toHaveBeenCalledWith('user', 'pass', expect.any(String));
     expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
   });
 
@@ -174,7 +174,11 @@ describe('AuthContext', () => {
       screen.getByTestId('passkey').click();
     });
     expect(mockAuthLoginBegin).toHaveBeenCalled();
-    expect(mockAuthLoginFinish).toHaveBeenCalledWith('sess-1', { id: 'cred-1' });
+    expect(mockAuthLoginFinish).toHaveBeenCalledWith(
+      'sess-1',
+      { id: 'cred-1' },
+      expect.any(String),
+    );
     expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
   });
 
