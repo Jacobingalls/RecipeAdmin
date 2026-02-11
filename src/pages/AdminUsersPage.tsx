@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import type { AdminCreateUserResponse } from '../api';
 import { adminListUsers, adminCreateUser } from '../api';
-import { LoadingState, ErrorState } from '../components/common';
+import { LoadingState, ErrorState, CopyButton } from '../components/common';
 import { useApiQuery } from '../hooks';
 
 export default function AdminUsersPage() {
@@ -17,7 +17,6 @@ export default function AdminUsersPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [createdResult, setCreatedResult] = useState<AdminCreateUserResponse | null>(null);
-  const [copied, setCopied] = useState(false);
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -39,14 +38,6 @@ export default function AdminUsersPage() {
       setCreateError(err instanceof Error ? err.message : 'Failed to create user');
     } finally {
       setIsCreating(false);
-    }
-  }
-
-  async function handleCopyKey() {
-    if (createdResult) {
-      await navigator.clipboard.writeText(createdResult.temporaryAPIKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
   }
 
@@ -106,13 +97,10 @@ export default function AdminUsersPage() {
                           <code className="flex-grow-1 text-break">
                             {createdResult.temporaryAPIKey}
                           </code>
-                          <button
-                            type="button"
+                          <CopyButton
+                            text={createdResult.temporaryAPIKey}
                             className="btn btn-outline-success btn-sm"
-                            onClick={handleCopyKey}
-                          >
-                            {copied ? 'Copied!' : 'Copy'}
-                          </button>
+                          />
                         </div>
                       </div>
                     </div>

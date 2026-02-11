@@ -1,4 +1,4 @@
-import type { CSSProperties, FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -12,7 +12,14 @@ import {
   adminCreateUserAPIKey,
   adminRevokeUserSessions,
 } from '../api';
-import { LoadingState, ErrorState } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  ListRow,
+  DeleteButton,
+  CopyButton,
+  ConfirmationModal,
+} from '../components/common';
 import { useApiQuery } from '../hooks';
 import { formatRelativeTime } from '../utils';
 
@@ -29,19 +36,16 @@ export default function AdminUserDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
-  const [copied, setCopied] = useState(false);
   const [tempKeyModal, setTempKeyModal] = useState(false);
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteCredential, setDeleteCredential] = useState<{
     type: 'passkey' | 'apiKey';
     id: string;
     name: string;
   } | null>(null);
-  const [credentialConfirmText, setCredentialConfirmText] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -96,7 +100,6 @@ export default function AdminUserDetailPage() {
       await adminDeleteUserAPIKey(id!, deleteCredential.id);
     }
     setDeleteCredential(null);
-    setCredentialConfirmText('');
     refetch();
   }
 
@@ -104,7 +107,6 @@ export default function AdminUserDetailPage() {
     setTempKeyModal(true);
     const result = await adminCreateUserAPIKey(id!);
     setTempKey(result);
-    setCopied(false);
     refetch();
   }
 
@@ -131,15 +133,6 @@ export default function AdminUserDetailPage() {
   function closeTempKeyModal() {
     setTempKeyModal(false);
     setTempKey(null);
-    setCopied(false);
-  }
-
-  async function handleCopyKey() {
-    if (tempKey) {
-      await navigator.clipboard.writeText(tempKey.key);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
   }
 
   return (
@@ -281,13 +274,7 @@ export default function AdminUserDetailPage() {
                             value={tempKey.key}
                             readOnly
                           />
-                          <button
-                            type="button"
-                            className="btn btn-outline-secondary"
-                            onClick={handleCopyKey}
-                          >
-                            {copied ? 'Copied!' : 'Copy'}
-                          </button>
+                          <CopyButton text={tempKey.key} className="btn btn-outline-secondary" />
                         </div>
                       </div>
                       <p className="text-body-secondary small mb-0">
@@ -320,144 +307,66 @@ export default function AdminUserDetailPage() {
       {user.passkeys.length > 0 || user.apiKeys.length > 0 ? (
         <div className="list-group mb-3">
           {user.passkeys.map((pk) => (
-            <div key={pk.id} className="list-group-item d-flex align-items-center">
-              <i className="bi bi-fingerprint me-2" />
-              <strong>{pk.name}</strong>
-              {pk.createdAt && (
-                <small className="text-body-secondary ms-auto me-2">
-                  Created {formatRelativeTime(pk.createdAt)}
-                </small>
-              )}
-              <button
-                type="button"
-                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${pk.createdAt ? '' : ' ms-auto'}`}
-                style={
-                  {
-                    width: '2rem',
-                    height: '2rem',
-                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-                    '--bs-btn-hover-border-color': 'transparent',
-                  } as CSSProperties
-                }
-                aria-label={`Delete passkey ${pk.name}`}
-                onClick={() => {
-                  setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name });
-                  setCredentialConfirmText('');
-                }}
-              >
-                <i className="bi bi-trash" />
-              </button>
-            </div>
+            <ListRow
+              key={pk.id}
+              icon="bi-fingerprint"
+              content={<strong>{pk.name}</strong>}
+              secondary={pk.createdAt ? <>Created {formatRelativeTime(pk.createdAt)}</> : undefined}
+            >
+              <DeleteButton
+                ariaLabel={`Delete passkey ${pk.name}`}
+                onClick={() => setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name })}
+              />
+            </ListRow>
           ))}
-          {user.apiKeys.map((ak) => (
-            <div key={ak.id} className="list-group-item d-flex align-items-center">
-              <i className="bi bi-key me-2" />
-              <strong>{ak.name}</strong>
-              {ak.isTemporary && ak.expiresAt ? (
-                <small className="text-body-secondary ms-auto me-2">
-                  Expires {formatRelativeTime(ak.expiresAt)}
-                </small>
-              ) : (
-                ak.createdAt && (
-                  <small className="text-body-secondary ms-auto me-2">
-                    Created {formatRelativeTime(ak.createdAt)}
-                  </small>
-                )
-              )}
-              <button
-                type="button"
-                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${!ak.createdAt && !(ak.isTemporary && ak.expiresAt) ? ' ms-auto' : ''}`}
-                style={
-                  {
-                    width: '2rem',
-                    height: '2rem',
-                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-                    '--bs-btn-hover-border-color': 'transparent',
-                  } as CSSProperties
-                }
-                aria-label={`Revoke API key ${ak.name}`}
-                onClick={async () => {
-                  if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
-                    await adminDeleteUserAPIKey(id!, ak.id);
-                    refetch();
-                  } else {
-                    setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
-                    setCredentialConfirmText('');
-                  }
-                }}
+          {user.apiKeys.map((ak) => {
+            let secondary;
+            if (ak.isTemporary && ak.expiresAt) {
+              secondary = <>Expires {formatRelativeTime(ak.expiresAt)}</>;
+            } else if (ak.createdAt) {
+              secondary = <>Created {formatRelativeTime(ak.createdAt)}</>;
+            }
+
+            return (
+              <ListRow
+                key={ak.id}
+                icon="bi-key"
+                content={<strong>{ak.name}</strong>}
+                secondary={secondary}
               >
-                <i className="bi bi-trash" />
-              </button>
-            </div>
-          ))}
+                <DeleteButton
+                  ariaLabel={`Revoke API key ${ak.name}`}
+                  onClick={async () => {
+                    if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
+                      await adminDeleteUserAPIKey(id!, ak.id);
+                      refetch();
+                    } else {
+                      setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
+                    }
+                  }}
+                />
+              </ListRow>
+            );
+          })}
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials.</p>
       )}
 
-      {deleteCredential && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div
-            className="modal fade show d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-labelledby="delete-credential-title"
-            aria-modal="true"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="delete-credential-title">
-                    {deleteCredential.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Close"
-                    onClick={() => setDeleteCredential(null)}
-                  />
-                </div>
-                <div className="modal-body">
-                  <p>
-                    This will permanently{' '}
-                    {deleteCredential.type === 'passkey' ? 'delete' : 'revoke'}{' '}
-                    <strong>{deleteCredential.name}</strong>. This action cannot be undone.
-                  </p>
-                  <label htmlFor="delete-credential-confirm" className="form-label">
-                    Type <strong>{deleteCredential.name}</strong> to confirm
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="delete-credential-confirm"
-                    value={credentialConfirmText}
-                    onChange={(e) => setCredentialConfirmText(e.target.value)}
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setDeleteCredential(null)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    disabled={credentialConfirmText !== deleteCredential.name}
-                    onClick={handleConfirmDeleteCredential}
-                  >
-                    {deleteCredential.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <ConfirmationModal
+        isOpen={!!deleteCredential}
+        title={deleteCredential?.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
+        message={
+          <>
+            This will permanently {deleteCredential?.type === 'passkey' ? 'delete' : 'revoke'}{' '}
+            <strong>{deleteCredential?.name}</strong>. This action cannot be undone.
+          </>
+        }
+        itemName={deleteCredential?.name ?? ''}
+        confirmButtonText={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
+        onConfirm={handleConfirmDeleteCredential}
+        onCancel={() => setDeleteCredential(null)}
+      />
 
       <h5 className="mt-5 mb-3">Danger Zone</h5>
       {revokeSessionsSuccess && (
@@ -504,78 +413,28 @@ export default function AdminUserDetailPage() {
             type="button"
             className="btn btn-danger btn-sm flex-shrink-0"
             style={{ minWidth: '9rem' }}
-            onClick={() => {
-              setDeleteConfirmText('');
-              setShowDeleteModal(true);
-            }}
+            onClick={() => setShowDeleteModal(true)}
           >
             Delete user
           </button>
         </div>
       </div>
 
-      {showDeleteModal && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div
-            className="modal fade show d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-labelledby="delete-user-modal-title"
-            aria-modal="true"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="delete-user-modal-title">
-                    Delete User
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Close"
-                    onClick={() => setShowDeleteModal(false)}
-                  />
-                </div>
-                <div className="modal-body">
-                  <p>
-                    This will permanently delete <strong>{user.username}</strong>. This action
-                    cannot be undone.
-                  </p>
-                  <label htmlFor="delete-confirm-input" className="form-label">
-                    Type <strong>{user.username}</strong> to confirm
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="delete-confirm-input"
-                    value={deleteConfirmText}
-                    onChange={(e) => setDeleteConfirmText(e.target.value)}
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowDeleteModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    disabled={deleteConfirmText !== user.username || isDeleting}
-                    onClick={handleDelete}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete this user'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        title="Delete User"
+        message={
+          <>
+            This will permanently delete <strong>{user.username}</strong>. This action cannot be
+            undone.
+          </>
+        }
+        itemName={user.username}
+        confirmButtonText="Delete this user"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

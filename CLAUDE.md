@@ -25,10 +25,37 @@ npm run format:check # Check formatting without writing
 - Prefer TypeScript with real types over `any`, JSDoc, or untyped JavaScript — migrate existing files when touching them
 - Prefer modern JavaScript: ES modules, async/await, optional chaining, destructuring
 - Functional components with hooks — no class components
-- Prefer small, reusable components and modules with clear interfaces — one component or class per file
 - Code should be testable by design: pure functions, minimal side effects, clear inputs and outputs
 - Avoid unsafe patterns: `dangerouslySetInnerHTML`, direct DOM manipulation, `eval`
 - Avoid `eslint-disable` comments — fix the underlying issue instead of suppressing the warning
+
+### Component Architecture
+
+**Size limits:**
+- Components should not exceed 200 lines — if a component grows beyond this, decompose it
+- Page components orchestrate sections; they should not contain inline modal definitions or long lists of state variables
+- Extract each logical section of a page (e.g., profile, credentials, sessions) into its own component
+- Extract every modal into its own component file
+
+**Reuse shared components:**
+- Before building UI, check `src/components/common/` for existing primitives
+- When you see the same UI pattern in 2+ places, extract it to `src/components/common/`
+- Shared components live in `src/components/common/` with barrel exports via `index.ts`
+- See `REFACTORING_PLAN.md` for the current backlog of extraction opportunities
+
+**Available shared components** (use these instead of reimplementing):
+- `ListRow` — horizontal layout: `[icon] [content] [spacer] [secondary] [actions]`
+- `DeleteButton` — circular icon-only trash button for list row actions
+- `CopyButton` — button with "Copied!" feedback for clipboard operations
+- `ConfirmationModal` — "type name to confirm" modal for destructive actions
+- `LoadingState`, `ErrorState`, `ContentUnavailableView` — standard status displays
+- `RequireAuth`, `RequireAdmin` — route guards
+- `StatusView` — base layout for centered status displays
+
+**Composition patterns:**
+- Prefer `children` and explicit props over deeply nested prop drilling
+- One component or class per file — keep responsibilities clear
+- Colocate state with the component that owns it; lift only when two siblings need to share
 
 ### Design & Accessibility
 
@@ -95,10 +122,13 @@ src/
 ├── components/
 │   ├── common/            # Shared UI components
 │   │   ├── index.ts       # Barrel exports
-│   │   ├── BackButton     # Navigation back button
+│   │   ├── ConfirmationModal # "Type name to confirm" destructive action modal
 │   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
+│   │   ├── CopyButton     # Clipboard copy with "Copied!" feedback
+│   │   ├── DeleteButton   # Circular icon-only trash button for list rows
 │   │   ├── ErrorBoundary  # Catches render errors
 │   │   ├── ErrorState     # Error message display
+│   │   ├── ListRow        # [icon + content + spacer + secondary + actions] layout
 │   │   ├── LoadingState   # Loading indicator
 │   │   ├── PasskeySetupPrompt # Banner prompting users without passkeys to register one
 │   │   ├── RequireAdmin   # Route guard: redirects non-admins to /
@@ -247,11 +277,34 @@ The hook handles loading states, errors, and request cancellation automatically.
 Use components from `src/components/common/` for consistent UI:
 
 ```tsx
-import { LoadingState, ErrorState, ContentUnavailableView, BackButton } from '../components/common'
+import {
+  LoadingState, ErrorState, ContentUnavailableView,
+  ListRow, DeleteButton, CopyButton, ConfirmationModal,
+} from '../components/common'
 
+// Status displays
 if (loading) return <LoadingState />
 if (error) return <ErrorState message={error} />
 if (!data) return <ContentUnavailableView icon="bi-box-seam" title="Not Found" />
+
+// List rows with consistent layout
+<ListRow icon="bi-fingerprint" content={<strong>{name}</strong>} secondary={timestamp}>
+  <DeleteButton ariaLabel={`Delete ${name}`} onClick={handleDelete} />
+</ListRow>
+
+// Clipboard copy
+<CopyButton text={apiKey} />
+
+// Destructive confirmation
+<ConfirmationModal
+  isOpen={!!deleteTarget}
+  title="Delete Passkey"
+  message="This will permanently delete this passkey."
+  itemName={deleteTarget.name}
+  confirmButtonText="Delete passkey"
+  onConfirm={handleDelete}
+  onCancel={() => setDeleteTarget(null)}
+/>
 ```
 
 ### Domain Models

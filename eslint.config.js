@@ -56,6 +56,7 @@ const sharedRules = {
   'prefer-spread': 'error',
   'no-unneeded-ternary': 'error',
   'default-param-last': 'error',
+  'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
 
   // --- Import rules ---
   'import/order': ['error', {

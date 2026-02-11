@@ -1,4 +1,4 @@
-import type { CSSProperties, FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startRegistration } from '@simplewebauthn/browser';
@@ -17,7 +17,14 @@ import {
   settingsListSessions,
   settingsRevokeSession,
 } from '../api';
-import { LoadingState, ErrorState } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  ListRow,
+  DeleteButton,
+  CopyButton,
+  ConfirmationModal,
+} from '../components/common';
 import { useAuth } from '../contexts/AuthContext';
 import { useApiQuery } from '../hooks';
 import { formatRelativeTime, generateName } from '../utils';
@@ -62,14 +69,12 @@ export default function SettingsPage() {
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const [createdKey, setCreatedKey] = useState<CreateAPIKeyResponse | null>(null);
-  const [copied, setCopied] = useState(false);
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [deleteCredential, setDeleteCredential] = useState<{
     type: 'passkey' | 'apiKey';
     id: string;
     name: string;
   } | null>(null);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   function startEditingDisplayName() {
     setDisplayNameInput(user?.displayName ?? '');
@@ -120,7 +125,6 @@ export default function SettingsPage() {
       refetchApiKeys();
     }
     setDeleteCredential(null);
-    setDeleteConfirmText('');
   }
 
   async function handleCreateAPIKey(e: FormEvent) {
@@ -149,15 +153,6 @@ export default function SettingsPage() {
     setNewKeyExpiresAt('');
     setCreatedKey(null);
     setCreateKeyError(null);
-    setCopied(false);
-  }
-
-  async function handleCopyKey() {
-    if (createdKey) {
-      await navigator.clipboard.writeText(createdKey.key);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
   }
 
   async function handleRevokeSession(familyId: string) {
@@ -351,13 +346,7 @@ export default function SettingsPage() {
                           readOnly
                         />
                       </div>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={handleCopyKey}
-                      >
-                        {copied ? 'Copied!' : 'Copy'}
-                      </button>
+                      <CopyButton text={createdKey.key} />
                       {createdKey.expiresAt && (
                         <p className="small text-body-secondary mt-2 mb-0">
                           Expires {formatRelativeTime(createdKey.expiresAt)}
@@ -448,145 +437,71 @@ export default function SettingsPage() {
       {(passkeys && passkeys.length > 0) || (apiKeys && apiKeys.length > 0) ? (
         <div className="list-group mb-5">
           {passkeys?.map((pk) => (
-            <div key={pk.id} className="list-group-item d-flex align-items-center">
-              <i className="bi bi-fingerprint me-2" />
-              <strong>{pk.name}</strong>
-              {pk.createdAt && (
-                <small className="text-body-secondary ms-auto me-2">
-                  Created {formatRelativeTime(pk.createdAt)}
-                </small>
-              )}
-              <button
-                type="button"
-                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${pk.createdAt ? '' : ' ms-auto'}`}
-                style={
-                  {
-                    width: '2rem',
-                    height: '2rem',
-                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-                    '--bs-btn-hover-border-color': 'transparent',
-                  } as CSSProperties
-                }
-                aria-label={`Delete passkey ${pk.name}`}
-                onClick={() => {
-                  setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name });
-                  setDeleteConfirmText('');
-                }}
-              >
-                <i className="bi bi-trash" />
-              </button>
-            </div>
+            <ListRow
+              key={pk.id}
+              icon="bi-fingerprint"
+              content={<strong>{pk.name}</strong>}
+              secondary={pk.createdAt ? <>Created {formatRelativeTime(pk.createdAt)}</> : undefined}
+            >
+              <DeleteButton
+                ariaLabel={`Delete passkey ${pk.name}`}
+                onClick={() => setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name })}
+              />
+            </ListRow>
           ))}
-          {apiKeys?.map((ak) => (
-            <div key={ak.id} className="list-group-item d-flex align-items-center">
-              <i className="bi bi-key me-2" />
-              <strong>{ak.name}</strong>
-              <code className="ms-2">{ak.keyPrefix}...</code>
-              {ak.isTemporary && ak.expiresAt ? (
-                <small className="text-body-secondary ms-auto me-2">
-                  Expires {formatRelativeTime(ak.expiresAt)}
-                </small>
-              ) : (
-                ak.createdAt && (
-                  <small className="text-body-secondary ms-auto me-2">
-                    Created {formatRelativeTime(ak.createdAt)}
-                  </small>
-                )
-              )}
-              <button
-                type="button"
-                className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary${!ak.createdAt && !(ak.isTemporary && ak.expiresAt) ? ' ms-auto' : ''}`}
-                style={
-                  {
-                    width: '2rem',
-                    height: '2rem',
-                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-                    '--bs-btn-hover-border-color': 'transparent',
-                  } as CSSProperties
+          {apiKeys?.map((ak) => {
+            let secondary;
+            if (ak.isTemporary && ak.expiresAt) {
+              secondary = <>Expires {formatRelativeTime(ak.expiresAt)}</>;
+            } else if (ak.createdAt) {
+              secondary = <>Created {formatRelativeTime(ak.createdAt)}</>;
+            }
+
+            return (
+              <ListRow
+                key={ak.id}
+                icon="bi-key"
+                content={
+                  <>
+                    <strong>{ak.name}</strong>
+                    <code className="ms-2">{ak.keyPrefix}...</code>
+                  </>
                 }
-                aria-label={`Revoke API key ${ak.name}`}
-                onClick={async () => {
-                  if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
-                    await settingsRevokeAPIKey(ak.id);
-                    refetchApiKeys();
-                  } else {
-                    setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
-                    setDeleteConfirmText('');
-                  }
-                }}
+                secondary={secondary}
               >
-                <i className="bi bi-trash" />
-              </button>
-            </div>
-          ))}
+                <DeleteButton
+                  ariaLabel={`Revoke API key ${ak.name}`}
+                  onClick={async () => {
+                    if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
+                      await settingsRevokeAPIKey(ak.id);
+                      refetchApiKeys();
+                    } else {
+                      setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
+                    }
+                  }}
+                />
+              </ListRow>
+            );
+          })}
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials.</p>
       )}
 
-      {deleteCredential && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div
-            className="modal fade show d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-labelledby="delete-credential-title"
-            aria-modal="true"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="delete-credential-title">
-                    {deleteCredential.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Close"
-                    onClick={() => setDeleteCredential(null)}
-                  />
-                </div>
-                <div className="modal-body">
-                  <p>
-                    This will permanently{' '}
-                    {deleteCredential.type === 'passkey' ? 'delete' : 'revoke'}{' '}
-                    <strong>{deleteCredential.name}</strong>. This action cannot be undone.
-                  </p>
-                  <label htmlFor="delete-credential-confirm" className="form-label">
-                    Type <strong>{deleteCredential.name}</strong> to confirm
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="delete-credential-confirm"
-                    value={deleteConfirmText}
-                    onChange={(e) => setDeleteConfirmText(e.target.value)}
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setDeleteCredential(null)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    disabled={deleteConfirmText !== deleteCredential.name}
-                    onClick={handleConfirmDeleteCredential}
-                  >
-                    {deleteCredential.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <ConfirmationModal
+        isOpen={!!deleteCredential}
+        title={deleteCredential?.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
+        message={
+          <>
+            This will permanently {deleteCredential?.type === 'passkey' ? 'delete' : 'revoke'}{' '}
+            <strong>{deleteCredential?.name}</strong>. This action cannot be undone.
+          </>
+        }
+        itemName={deleteCredential?.name ?? ''}
+        confirmButtonText={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
+        onConfirm={handleConfirmDeleteCredential}
+        onCancel={() => setDeleteCredential(null)}
+      />
 
       <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
         <h5 className="mb-0">Sessions</h5>
@@ -619,36 +534,28 @@ export default function SettingsPage() {
       {sessions && sessions.length > 0 ? (
         <div className="list-group mb-3">
           {sessions.map((session) => (
-            <div key={session.familyID} className="list-group-item d-flex align-items-center">
-              <i className="bi bi-display me-2" />
-              <div className="me-auto">
-                <strong>{session.deviceName}</strong>
-                <br />
-                <small className="text-body-secondary">
-                  Created {formatRelativeTime(session.sessionCreatedAt)}
-                  {session.lastRefreshedAt && (
-                    <> &middot; Last active {formatRelativeTime(session.lastRefreshedAt)}</>
-                  )}
-                  <> &middot; Expires {formatRelativeTime(session.expiresAt)}</>
-                </small>
-              </div>
-              <button
-                type="button"
-                className="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary"
-                style={
-                  {
-                    width: '2rem',
-                    height: '2rem',
-                    '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-                    '--bs-btn-hover-border-color': 'transparent',
-                  } as CSSProperties
-                }
-                aria-label={`Revoke session ${session.deviceName}`}
+            <ListRow
+              key={session.familyID}
+              icon="bi-display"
+              content={
+                <>
+                  <strong>{session.deviceName}</strong>
+                  <br />
+                  <small className="text-body-secondary">
+                    Created {formatRelativeTime(session.sessionCreatedAt)}
+                    {session.lastRefreshedAt && (
+                      <> &middot; Last active {formatRelativeTime(session.lastRefreshedAt)}</>
+                    )}
+                    <> &middot; Expires {formatRelativeTime(session.expiresAt)}</>
+                  </small>
+                </>
+              }
+            >
+              <DeleteButton
+                ariaLabel={`Revoke session ${session.deviceName}`}
                 onClick={() => handleRevokeSession(session.familyID)}
-              >
-                <i className="bi bi-trash" />
-              </button>
-            </div>
+              />
+            </ListRow>
           ))}
         </div>
       ) : (
