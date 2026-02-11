@@ -67,32 +67,51 @@ export const API_BASE = getApiBase();
 export const API_DISPLAY_URL = getApiDisplayUrl();
 
 // Transparent token refresh: intercepts 401s, refreshes via cookie, retries once
-let refreshPromise: Promise<boolean> | null = null;
+let refreshPromise: Promise<number | null> | null = null;
 
-export async function tryRefresh(): Promise<boolean> {
+/** Decode a JWT's `exp` claim without a library. Returns epoch seconds or null. */
+export function getTokenExpiry(token: string): number | null {
   try {
-    const res = await fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    return res.ok;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof payload.exp === 'number' ? payload.exp : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+/**
+ * Attempt to refresh the access token via the refresh-token cookie.
+ * Returns the new token's expiry (epoch seconds) on success, or null on failure.
+ * Concurrent calls are deduplicated to a single in-flight request.
+ */
+export async function tryRefresh(): Promise<number | null> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) return null;
+      const data = (await res.json()) as LoginResponse;
+      return getTokenExpiry(data.token);
+    } catch {
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  return refreshPromise;
 }
 
 async function fetchWithRefresh(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const res = await fetch(input, init);
   if (res.status !== 401) return res;
 
-  // Deduplicate concurrent refresh calls
-  if (!refreshPromise) {
-    refreshPromise = tryRefresh().finally(() => {
-      refreshPromise = null;
-    });
-  }
-  const refreshed = await refreshPromise;
-  if (!refreshed) return res;
+  const expiry = await tryRefresh();
+  if (expiry === null) return res;
 
   // Retry the original request with the new access token cookie
   return fetch(input, init);

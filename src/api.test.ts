@@ -7,6 +7,7 @@ import {
   getVersion,
   getStatus,
   logEntry,
+  getTokenExpiry,
   API_BASE,
   API_DISPLAY_URL,
 } from './api';
@@ -261,6 +262,48 @@ describe('logEntry', () => {
     await expect(logEntry({ servingSize: { kind: 'servings', amount: 1 } })).rejects.toThrow(
       'HTTP 422',
     );
+  });
+});
+
+describe('getTokenExpiry', () => {
+  function makeJwt(payload: Record<string, unknown>): string {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const body = btoa(JSON.stringify(payload));
+    return `${header}.${body}.signature`;
+  }
+
+  it('returns exp from a valid JWT', () => {
+    const token = makeJwt({ sub: 'user-1', exp: 1700000000 });
+    expect(getTokenExpiry(token)).toBe(1700000000);
+  });
+
+  it('returns null for a token without exp claim', () => {
+    const token = makeJwt({ sub: 'user-1' });
+    expect(getTokenExpiry(token)).toBeNull();
+  });
+
+  it('returns null for an invalid token', () => {
+    expect(getTokenExpiry('not-a-jwt')).toBeNull();
+  });
+
+  it('returns null for a token with non-numeric exp', () => {
+    const token = makeJwt({ exp: 'not-a-number' });
+    expect(getTokenExpiry(token)).toBeNull();
+  });
+
+  it('handles base64url encoding with - and _ characters', () => {
+    // Create payload that would produce base64url chars
+    const payload = { sub: 'user-1', exp: 1700000000, data: '>>>???' };
+    const header = btoa(JSON.stringify({ alg: 'HS256' }))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+    const body = btoa(JSON.stringify(payload))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+    const token = `${header}.${body}.sig`;
+    expect(getTokenExpiry(token)).toBe(1700000000);
   });
 });
 

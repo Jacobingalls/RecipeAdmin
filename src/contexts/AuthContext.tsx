@@ -5,6 +5,7 @@ import { startAuthentication } from '@simplewebauthn/browser';
 import type { AuthUser } from '../api';
 import {
   getStatus,
+  getTokenExpiry,
   authLogin,
   authLoginBegin,
   authLoginFinish,
@@ -49,9 +50,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<number | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
+      const expiry = await tryRefresh();
+      setTokenExpiresAt(expiry);
       const status = await getStatus();
       setUser(status.user ?? null);
     } catch {
@@ -65,10 +69,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, [checkAuth]);
 
+  // Proactive refresh: schedule a refresh 5 seconds before the token expires
+  useEffect(() => {
+    if (tokenExpiresAt === null) return;
+    const delay = Math.max(0, tokenExpiresAt * 1000 - Date.now() - 5000);
+    const timer = setTimeout(async () => {
+      const newExpiry = await tryRefresh();
+      if (newExpiry !== null) {
+        setTokenExpiresAt(newExpiry);
+      } else {
+        setTokenExpiresAt(null);
+        setUser(null);
+      }
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [tokenExpiresAt]);
+
   useEffect(() => {
     const handleUnauthorized = () => {
       setUser(null);
       setIsLoading(false);
+      setTokenExpiresAt(null);
     };
     window.addEventListener('auth:unauthorized', handleUnauthorized);
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
@@ -78,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const deviceName = getDeviceName();
     const response = await authLogin(usernameOrEmail, password, deviceName);
     setUser(response.user);
+    setTokenExpiresAt(getTokenExpiry(response.token));
   }, []);
 
   const loginWithPasskey = useCallback(async (usernameOrEmail?: string) => {
@@ -86,11 +108,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const deviceName = getDeviceName();
     const response = await authLoginFinish(sessionID, credential, deviceName);
     setUser(response.user);
+    setTokenExpiresAt(getTokenExpiry(response.token));
   }, []);
 
   const logoutFn = useCallback(async () => {
     await authLogout();
     setUser(null);
+    setTokenExpiresAt(null);
   }, []);
 
   const updateUser = useCallback((updatedUser: AuthUser) => {
@@ -98,7 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshSession = useCallback(async () => {
-    await tryRefresh();
+    const expiry = await tryRefresh();
+    setTokenExpiresAt(expiry);
     const status = await getStatus();
     setUser(status.user ?? null);
   }, []);

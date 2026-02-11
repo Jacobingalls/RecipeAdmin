@@ -6,11 +6,12 @@ import { AuthProvider, useAuth, getDeviceName } from './AuthContext';
 
 vi.mock('../api', () => ({
   getStatus: vi.fn(),
+  getTokenExpiry: vi.fn().mockReturnValue(null),
   authLogin: vi.fn(),
   authLoginBegin: vi.fn(),
   authLoginFinish: vi.fn(),
   authLogout: vi.fn(),
-  tryRefresh: vi.fn().mockResolvedValue(true),
+  tryRefresh: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -18,6 +19,7 @@ vi.mock('@simplewebauthn/browser', () => ({
 }));
 
 const mockGetStatus = vi.mocked(api.getStatus);
+const mockGetTokenExpiry = vi.mocked(api.getTokenExpiry);
 const mockAuthLogin = vi.mocked(api.authLogin);
 const mockAuthLogout = vi.mocked(api.authLogout);
 const mockAuthLoginBegin = vi.mocked(api.authLoginBegin);
@@ -199,7 +201,7 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('display-name')).toHaveTextContent('Test User');
 
     const updatedUser = { ...testUser, displayName: 'Updated Name' };
-    mockTryRefresh.mockResolvedValue(true);
+    mockTryRefresh.mockResolvedValue(null);
     mockGetStatus.mockResolvedValue({
       version: null,
       environment: null,
@@ -213,6 +215,186 @@ describe('AuthContext', () => {
     expect(mockTryRefresh).toHaveBeenCalled();
     expect(mockGetStatus).toHaveBeenCalledTimes(2); // once on mount, once on refresh
     expect(screen.getByTestId('display-name')).toHaveTextContent('Updated Name');
+  });
+
+  it('checkAuth calls tryRefresh before getStatus', async () => {
+    const callOrder: string[] = [];
+    mockTryRefresh.mockImplementation(async () => {
+      callOrder.push('tryRefresh');
+      return null;
+    });
+    mockGetStatus.mockImplementation(async () => {
+      callOrder.push('getStatus');
+      return { version: null, environment: null, debug: false, user: testUser };
+    });
+
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+
+    expect(callOrder).toEqual(['tryRefresh', 'getStatus']);
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+  });
+
+  it('checkAuth works when tryRefresh returns null (dev mode / no refresh token)', async () => {
+    mockTryRefresh.mockResolvedValue(null);
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: true,
+      user: testUser,
+    });
+
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+  });
+
+  it('login sets token expiry from JWT', async () => {
+    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
+    mockGetTokenExpiry.mockReturnValue(1700000900);
+    mockAuthLogin.mockResolvedValue({
+      token: 'fake.jwt.token',
+      user: testUser,
+      isTemporaryKey: false,
+    });
+
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+
+    await act(async () => {
+      screen.getByTestId('login').click();
+    });
+
+    expect(mockGetTokenExpiry).toHaveBeenCalledWith('fake.jwt.token');
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+  });
+
+  it('proactive refresh fires and reschedules', async () => {
+    vi.useFakeTimers();
+    const futureExp = Math.floor(Date.now() / 1000) + 20; // 20s from now
+    const nextExp = futureExp + 900; // 15 min from the refresh
+
+    mockTryRefresh.mockResolvedValueOnce(futureExp); // initial checkAuth
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
+
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+
+    // The timer should fire at (futureExp * 1000 - Date.now() - 5000) ms = ~15s
+    mockTryRefresh.mockResolvedValueOnce(nextExp);
+
+    await act(async () => {
+      vi.advanceTimersByTime(16000);
+    });
+
+    // tryRefresh called: once on mount (checkAuth), once proactively
+    expect(mockTryRefresh).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+
+    vi.useRealTimers();
+  });
+
+  it('failed proactive refresh clears user', async () => {
+    vi.useFakeTimers();
+    const futureExp = Math.floor(Date.now() / 1000) + 10; // 10s from now
+
+    mockTryRefresh.mockResolvedValueOnce(futureExp); // initial checkAuth
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
+
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+
+    // Proactive refresh fails
+    mockTryRefresh.mockResolvedValueOnce(null);
+
+    await act(async () => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+
+    vi.useRealTimers();
+  });
+
+  it('logout clears timer (no refresh fires after logout)', async () => {
+    vi.useFakeTimers();
+    const futureExp = Math.floor(Date.now() / 1000) + 20;
+
+    mockTryRefresh.mockResolvedValueOnce(futureExp); // initial checkAuth
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
+    mockAuthLogout.mockResolvedValue(undefined);
+
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+
+    // Logout - should clear tokenExpiresAt, cancelling the timer
+    await act(async () => {
+      screen.getByTestId('logout').click();
+    });
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+
+    // Advance past when the timer would have fired - tryRefresh should NOT be called again
+    const refreshCallCount = mockTryRefresh.mock.calls.length;
+    await act(async () => {
+      vi.advanceTimersByTime(20000);
+    });
+
+    expect(mockTryRefresh).toHaveBeenCalledTimes(refreshCallCount);
+
+    vi.useRealTimers();
   });
 
   it('throws when useAuth is used outside AuthProvider', () => {
