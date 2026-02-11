@@ -76,10 +76,8 @@ describe('HomePage', () => {
     expect(screen.getByTestId('passkey-setup-prompt')).toBeInTheDocument();
   });
 
-  it('renders a settings gear link to /settings', () => {
+  it('does not render a settings link on the page', () => {
     renderWithRouter(<HomePage />);
-    const settingsLink = screen.getByRole('link', { name: 'Settings' });
-    expect(settingsLink).toHaveAttribute('href', '/settings');
-    expect(settingsLink.querySelector('.bi-gear')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument();
   });
 });

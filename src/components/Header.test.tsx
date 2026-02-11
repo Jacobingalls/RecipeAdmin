@@ -180,7 +180,7 @@ describe('Header', () => {
     expect(toggler.className).toContain('navbar-toggler');
   });
 
-  it('shows Admin link when user is admin', () => {
+  it('shows Admin link in dropdown when user is admin', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
       user: {
@@ -198,11 +198,67 @@ describe('Header', () => {
       updateUser: vi.fn(),
     });
     renderWithRouter(<Header />);
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    const adminLink = screen.getByRole('link', { name: /^admin$/i });
+    expect(adminLink).toHaveAttribute('href', '/admin/users');
   });
 
   it('does not show Admin link when user is not admin', () => {
     renderWithRouter(<Header />);
-    expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^admin$/i })).not.toBeInTheDocument();
+  });
+
+  it('renders user menu button when authenticated', () => {
+    renderWithRouter(<Header />);
+    expect(screen.getByRole('button', { name: 'User menu' })).toBeInTheDocument();
+  });
+
+  it('shows initials fallback in avatar', () => {
+    renderWithRouter(<Header />);
+    const btn = screen.getByRole('button', { name: 'User menu' });
+    expect(btn).toHaveTextContent('T');
+  });
+
+  it('renders gravatar image after hash computes', async () => {
+    renderWithRouter(<Header />);
+    const img = await screen.findByAltText('', { exact: true });
+    expect(img).toHaveAttribute('src', expect.stringContaining('gravatar.com/avatar/'));
+    expect(img).toHaveClass('rounded-circle');
+  });
+
+  it('displays user display name and username in dropdown', () => {
+    renderWithRouter(<Header />);
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+    expect(screen.getByText('testuser')).toBeInTheDocument();
+  });
+
+  it('renders settings link in dropdown', () => {
+    renderWithRouter(<Header />);
+    const settingsLink = screen.getByRole('link', { name: /settings/i });
+    expect(settingsLink).toHaveAttribute('href', '/settings');
+  });
+
+  it('renders sign out button in dropdown', () => {
+    renderWithRouter(<Header />);
+    expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
+  });
+
+  it('calls logout when sign out is clicked', () => {
+    renderWithRouter(<Header />);
+    fireEvent.click(screen.getByRole('button', { name: /sign out/i }));
+    expect(mockLogout).toHaveBeenCalled();
+  });
+
+  it('does not render user menu when not authenticated', () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: false,
+      login: vi.fn(),
+      loginWithPasskey: vi.fn(),
+      logout: mockLogout,
+      updateUser: vi.fn(),
+    });
+    renderWithRouter(<Header />);
+    expect(screen.queryByRole('button', { name: 'User menu' })).not.toBeInTheDocument();
   });
 });
