@@ -123,7 +123,7 @@ function LogModalInner({
         role="dialog"
         aria-label="Log modal"
       >
-        <div className="modal-dialog modal-dialog-scrollable">
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header d-block align-items-center">
               <div className="d-flex justify-content-between align-items-start">

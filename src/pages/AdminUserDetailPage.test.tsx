@@ -116,23 +116,35 @@ describe('AdminUserDetailPage', () => {
     expect(screen.getByText('Test Key')).toBeInTheDocument();
   });
 
-  it('deletes passkey and refetches', async () => {
+  it('deletes passkey after typing name to confirm', async () => {
     mockDeletePasskey.mockResolvedValue(undefined);
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Key' }));
+    expect(screen.getByText('Delete Passkey')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete passkey' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
+      target: { value: 'My Key' },
+    });
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Key' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete passkey' }));
     });
     expect(mockDeletePasskey).toHaveBeenCalledWith('u1', 'pk1');
     expect(refetch).toHaveBeenCalled();
   });
 
-  it('revokes API key and refetches', async () => {
+  it('revokes API key after typing name to confirm', async () => {
     mockDeleteAPIKey.mockResolvedValue(undefined);
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke API key Test Key' }));
+    expect(screen.getByText('Revoke API Key')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Revoke key' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
+      target: { value: 'Test Key' },
+    });
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Revoke API key Test Key' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke key' }));
     });
     expect(mockDeleteAPIKey).toHaveBeenCalledWith('u1', 'ak1');
     expect(refetch).toHaveBeenCalled();
@@ -149,67 +161,9 @@ describe('AdminUserDetailPage', () => {
     await act(async () => {
       fireEvent.click(screen.getByText('Generate Temporary API Key'));
     });
-    expect(screen.getByText('Created Temporary API Key')).toBeInTheDocument();
+    expect(screen.getByText('Temporary API Key')).toBeInTheDocument();
     expect(screen.getByDisplayValue('temp-key-xyz')).toBeInTheDocument();
     expect(screen.getByText('Done')).toBeInTheDocument();
-  });
-
-  it('shows confirmation modal when temp key exists, then transitions to result', async () => {
-    const userWithTempKey: AdminUserDetail = {
-      ...sampleUser,
-      apiKeys: [
-        {
-          id: 'ak1',
-          name: 'Temp Key',
-          isTemporary: true,
-          createdAt: 1700000000,
-          lastUsedAt: null,
-          expiresAt: 1700100000,
-        },
-      ],
-    };
-    mockCreateAPIKey.mockResolvedValue({
-      id: 'tk1',
-      key: 'new-temp-key',
-      expiresAt: 1700200000,
-    });
-    setupMocks(userWithTempKey);
-    renderPage(<AdminUserDetailPage />);
-
-    fireEvent.click(screen.getByText('Generate Temporary API Key'));
-    expect(screen.getByText('Replace Temporary API Key?')).toBeInTheDocument();
-    expect(mockCreateAPIKey).not.toHaveBeenCalled();
-
-    await act(async () => {
-      fireEvent.click(screen.getByText('Replace Key'));
-    });
-    expect(mockCreateAPIKey).toHaveBeenCalled();
-    expect(screen.getByText('Created Temporary API Key')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('new-temp-key')).toBeInTheDocument();
-  });
-
-  it('cancels confirmation modal for temp key replacement', () => {
-    const userWithTempKey: AdminUserDetail = {
-      ...sampleUser,
-      apiKeys: [
-        {
-          id: 'ak1',
-          name: 'Temp Key',
-          isTemporary: true,
-          createdAt: 1700000000,
-          lastUsedAt: null,
-          expiresAt: 1700100000,
-        },
-      ],
-    };
-    setupMocks(userWithTempKey);
-    renderPage(<AdminUserDetailPage />);
-
-    fireEvent.click(screen.getByText('Generate Temporary API Key'));
-    expect(screen.getByText('Replace Temporary API Key?')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Cancel'));
-    expect(screen.queryByText('Replace Temporary API Key?')).not.toBeInTheDocument();
   });
 
   it('closes result modal on Done', async () => {
@@ -242,10 +196,10 @@ describe('AdminUserDetailPage', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Revoke All Sessions' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
     });
     expect(mockRevokeSessions).toHaveBeenCalledWith('u1');
-    expect(screen.getByRole('status')).toHaveTextContent('All sessions have been revoked.');
+    expect(screen.getByRole('status')).toHaveTextContent('All Sessions Revoked');
   });
 
   it('cancels revoke sessions when confirm is dismissed', async () => {
@@ -253,7 +207,7 @@ describe('AdminUserDetailPage', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Revoke All Sessions' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
     });
     expect(mockRevokeSessions).not.toHaveBeenCalled();
   });
@@ -261,7 +215,7 @@ describe('AdminUserDetailPage', () => {
   it('shows delete confirmation modal when Delete User is clicked', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete user' }));
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
     expect(screen.getByText(/Type/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete this user' })).toBeDisabled();
@@ -270,7 +224,7 @@ describe('AdminUserDetailPage', () => {
   it('enables delete button only when username matches', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete user' }));
 
     const input = screen.getByLabelText(/Type .* to confirm/);
     const deleteBtn = screen.getByRole('button', { name: 'Delete this user' });
@@ -286,7 +240,7 @@ describe('AdminUserDetailPage', () => {
     mockDeleteUser.mockResolvedValue(undefined);
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete user' }));
 
     fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
       target: { value: 'alice' },
@@ -302,7 +256,7 @@ describe('AdminUserDetailPage', () => {
   it('closes delete modal on cancel', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete user' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));

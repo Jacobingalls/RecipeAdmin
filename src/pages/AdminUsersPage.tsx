@@ -81,7 +81,7 @@ export default function AdminUsersPage() {
             aria-labelledby="create-user-modal-title"
             aria-modal="true"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 {createdResult ? (
                   <>

@@ -116,31 +116,31 @@ function setupMocks(
   error: string | null = null,
   sessions: SessionInfo[] | null = sampleSessions,
 ) {
-  let callIndex = 0;
-  mockUseApiQuery.mockImplementation(() => {
-    const idx = callIndex++;
-    if (idx === 0) {
-      return {
-        data: passkeys,
-        loading,
-        error,
-        refetch: refetchPasskeys,
-      } as UseApiQueryResult<PasskeyInfo[]>;
-    }
-    if (idx === 1) {
-      return {
-        data: apiKeys,
-        loading: false,
-        error: null,
-        refetch: refetchApiKeys,
-      } as UseApiQueryResult<APIKeyInfo[]>;
-    }
-    return {
+  const results = [
+    {
+      data: passkeys,
+      loading,
+      error,
+      refetch: refetchPasskeys,
+    } as UseApiQueryResult<PasskeyInfo[]>,
+    {
+      data: apiKeys,
+      loading: false,
+      error: null,
+      refetch: refetchApiKeys,
+    } as UseApiQueryResult<APIKeyInfo[]>,
+    {
       data: sessions,
       loading: false,
       error: null,
       refetch: refetchSessions,
-    } as UseApiQueryResult<SessionInfo[]>;
+    } as UseApiQueryResult<SessionInfo[]>,
+  ];
+  let callIndex = 0;
+  mockUseApiQuery.mockImplementation(() => {
+    const idx = callIndex % results.length;
+    callIndex++;
+    return results[idx];
   });
 }
 
@@ -181,7 +181,8 @@ describe('SettingsPage', () => {
   it('renders settings heading and user info', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Profile' })).toBeInTheDocument();
     expect(screen.getByText('testuser')).toBeInTheDocument();
     expect(screen.getByText('Test User')).toBeInTheDocument();
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
@@ -200,23 +201,37 @@ describe('SettingsPage', () => {
     expect(screen.getByText('rk_abc...')).toBeInTheDocument();
   });
 
-  it('deletes passkey and refetches', async () => {
+  it('deletes passkey after typing name to confirm', async () => {
     mockDeletePasskey.mockResolvedValue(undefined);
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Passkey' }));
+    expect(screen.getByText('Delete Passkey')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete passkey' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
+      target: { value: 'My Passkey' },
+    });
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Passkey' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete passkey' }));
+      await new Promise((r) => setTimeout(r, 0));
     });
     expect(mockDeletePasskey).toHaveBeenCalledWith('pk1');
     expect(refetchPasskeys).toHaveBeenCalled();
   });
 
-  it('revokes API key and refetches', async () => {
+  it('revokes API key after typing name to confirm', async () => {
     mockRevokeAPIKey.mockResolvedValue(undefined);
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke API key My Key' }));
+    expect(screen.getByText('Revoke API Key')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Revoke key' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
+      target: { value: 'My Key' },
+    });
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Revoke API key My Key' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke key' }));
+      await new Promise((r) => setTimeout(r, 0));
     });
     expect(mockRevokeAPIKey).toHaveBeenCalledWith('ak1');
     expect(refetchApiKeys).toHaveBeenCalled();
@@ -232,7 +247,7 @@ describe('SettingsPage', () => {
     });
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    fireEvent.click(screen.getByText('Create API Key'));
+    fireEvent.click(screen.getByRole('button', { name: /API Key/ }));
     expect(screen.getByText('Create API Key', { selector: '.modal-title' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Key Name'), { target: { value: 'New Key' } });
     await act(async () => {
@@ -254,7 +269,7 @@ describe('SettingsPage', () => {
     });
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    fireEvent.click(screen.getByText('Create API Key'));
+    fireEvent.click(screen.getByRole('button', { name: /API Key/ }));
     fireEvent.change(screen.getByLabelText('Key Name'), { target: { value: 'Expiring Key' } });
     fireEvent.click(screen.getByLabelText('Set expiration'));
     expect(screen.getByLabelText('Expires at')).toBeInTheDocument();
@@ -271,7 +286,7 @@ describe('SettingsPage', () => {
   it('closes modal via cancel button', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    fireEvent.click(screen.getByText('Create API Key'));
+    fireEvent.click(screen.getByRole('button', { name: /API Key/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -280,7 +295,7 @@ describe('SettingsPage', () => {
   it('closes modal via close button', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    fireEvent.click(screen.getByText('Create API Key'));
+    fireEvent.click(screen.getByRole('button', { name: /API Key/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -289,7 +304,7 @@ describe('SettingsPage', () => {
   it('toggles expiry field visibility with checkbox', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    fireEvent.click(screen.getByText('Create API Key'));
+    fireEvent.click(screen.getByRole('button', { name: /API Key/ }));
     expect(screen.queryByLabelText('Expires at')).not.toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Set expiration'));
     expect(screen.getByLabelText('Expires at')).toBeInTheDocument();
@@ -308,7 +323,7 @@ describe('SettingsPage', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     await act(async () => {
-      fireEvent.click(screen.getByText('Add Passkey'));
+      fireEvent.click(screen.getByRole('button', { name: 'Passkey' }));
     });
     expect(mockBegin).toHaveBeenCalled();
     expect(mockFinish).toHaveBeenCalled();

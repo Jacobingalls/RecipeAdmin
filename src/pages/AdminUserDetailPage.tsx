@@ -30,12 +30,18 @@ export default function AdminUserDetailPage() {
   const [editError, setEditError] = useState<string | null>(null);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
   const [copied, setCopied] = useState(false);
-  const [tempKeyModal, setTempKeyModal] = useState<'confirm' | 'result' | null>(null);
+  const [tempKeyModal, setTempKeyModal] = useState(false);
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteCredential, setDeleteCredential] = useState<{
+    type: 'passkey' | 'apiKey';
+    id: string;
+    name: string;
+  } | null>(null);
+  const [credentialConfirmText, setCredentialConfirmText] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -82,28 +88,20 @@ export default function AdminUserDetailPage() {
     }
   }
 
-  async function handleDeletePasskey(passkeyId: string) {
-    await adminDeleteUserPasskey(id!, passkeyId);
-    refetch();
-  }
-
-  async function handleDeleteApiKey(keyId: string) {
-    await adminDeleteUserAPIKey(id!, keyId);
-    refetch();
-  }
-
-  const hasTempKey = user?.apiKeys.some((ak) => ak.isTemporary) ?? false;
-
-  function handleGenerateTempKeyClick() {
-    if (hasTempKey) {
-      setTempKeyModal('confirm');
-      return;
+  async function handleConfirmDeleteCredential() {
+    if (!deleteCredential) return;
+    if (deleteCredential.type === 'passkey') {
+      await adminDeleteUserPasskey(id!, deleteCredential.id);
+    } else {
+      await adminDeleteUserAPIKey(id!, deleteCredential.id);
     }
-    generateTempKey();
+    setDeleteCredential(null);
+    setCredentialConfirmText('');
+    refetch();
   }
 
   async function generateTempKey() {
-    setTempKeyModal('result');
+    setTempKeyModal(true);
     const result = await adminCreateUserAPIKey(id!);
     setTempKey(result);
     setCopied(false);
@@ -131,7 +129,7 @@ export default function AdminUserDetailPage() {
   }
 
   function closeTempKeyModal() {
-    setTempKeyModal(null);
+    setTempKeyModal(false);
     setTempKey(null);
     setCopied(false);
   }
@@ -170,76 +168,80 @@ export default function AdminUserDetailPage() {
           {isEditing ? 'Saving...' : 'Save'}
         </button>
       </div>
-      <div className="card mb-4">
-        <div className="card-body">
-          {editError && (
-            <div className="alert alert-danger py-2 small" role="alert">
-              {editError}
-            </div>
-          )}
-          <form id="edit-user-form" onSubmit={handleUpdate}>
-            <div className="mb-3">
-              <label htmlFor="edit-username" className="form-label">
-                Username
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="edit-username"
-                value={editUsername}
-                onChange={(e) => setEditUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="edit-display-name" className="form-label">
-                Display Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="edit-display-name"
-                value={editDisplayName}
-                onChange={(e) => setEditDisplayName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="edit-email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                className="form-control"
-                id="edit-email"
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-check mb-3">
+      {editError && (
+        <div className="alert alert-danger py-2 small" role="alert">
+          {editError}
+        </div>
+      )}
+      <form id="edit-user-form" onSubmit={handleUpdate}>
+        <div className="list-group">
+          <label
+            htmlFor="edit-username"
+            className="list-group-item d-flex align-items-center justify-content-between py-3"
+          >
+            <span className="me-3 flex-shrink-0">Username</span>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              style={{ maxWidth: '20rem' }}
+              id="edit-username"
+              value={editUsername}
+              onChange={(e) => setEditUsername(e.target.value)}
+              required
+            />
+          </label>
+          <label
+            htmlFor="edit-display-name"
+            className="list-group-item d-flex align-items-center justify-content-between py-3"
+          >
+            <span className="me-3 flex-shrink-0">Display Name</span>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              style={{ maxWidth: '20rem' }}
+              id="edit-display-name"
+              value={editDisplayName}
+              onChange={(e) => setEditDisplayName(e.target.value)}
+              required
+            />
+          </label>
+          <label
+            htmlFor="edit-email"
+            className="list-group-item d-flex align-items-center justify-content-between py-3"
+          >
+            <span className="me-3 flex-shrink-0">Email</span>
+            <input
+              type="email"
+              className="form-control form-control-sm"
+              style={{ maxWidth: '20rem' }}
+              id="edit-email"
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label
+            htmlFor="edit-is-admin"
+            className="list-group-item d-flex align-items-center justify-content-between py-3"
+          >
+            <span className="me-3 flex-shrink-0">Administrator</span>
+            <div className="form-check form-switch mb-0">
               <input
                 type="checkbox"
                 className="form-check-input"
+                role="switch"
                 id="edit-is-admin"
                 checked={editIsAdmin}
                 onChange={(e) => setEditIsAdmin(e.target.checked)}
               />
-              <label className="form-check-label" htmlFor="edit-is-admin">
-                Administrator
-              </label>
             </div>
-          </form>
+          </label>
         </div>
-      </div>
+      </form>
 
       <div className="d-flex justify-content-between align-items-center mt-5 mb-3">
         <h5 className="mb-0">Credentials</h5>
-        <button
-          type="button"
-          className="btn btn-outline-primary btn-sm"
-          onClick={handleGenerateTempKeyClick}
-        >
+        <button type="button" className="btn btn-dark btn-sm" onClick={generateTempKey}>
           Generate Temporary API Key
         </button>
       </div>
@@ -253,97 +255,62 @@ export default function AdminUserDetailPage() {
             role="dialog"
             aria-label="Temporary API key"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                {tempKeyModal === 'confirm' && (
-                  <>
-                    <div className="modal-header">
-                      <h5 className="modal-title">Replace Temporary API Key?</h5>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        aria-label="Close"
-                        onClick={closeTempKeyModal}
-                      />
-                    </div>
-                    <div className="modal-body">
-                      <p className="mb-0">
-                        <code>{user.username}</code> already has a temporary API key. Generating a
-                        new one will replace the existing key.
-                      </p>
-                    </div>
-                    <div className="modal-footer">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={closeTempKeyModal}
-                      >
-                        Cancel
-                      </button>
-                      <button type="button" className="btn btn-warning" onClick={generateTempKey}>
-                        Replace Key
-                      </button>
-                    </div>
-                  </>
-                )}
-                {tempKeyModal === 'result' && (
-                  <>
-                    <div className="modal-header">
-                      <h5 className="modal-title">Created Temporary API Key</h5>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        aria-label="Close"
-                        onClick={closeTempKeyModal}
-                      />
-                    </div>
-                    <div className="modal-body">
-                      {tempKey ? (
-                        <>
-                          <div className="mb-3">
-                            <label htmlFor="temp-key-value" className="form-label">
-                              API Key
-                            </label>
-                            <div className="input-group">
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="temp-key-value"
-                                value={tempKey.key}
-                                readOnly
-                              />
-                              <button
-                                type="button"
-                                className="btn btn-outline-secondary"
-                                onClick={handleCopyKey}
-                              >
-                                {copied ? 'Copied!' : 'Copy'}
-                              </button>
-                            </div>
-                          </div>
-                          <p className="text-body-secondary small mb-0">
-                            Expires {new Date(tempKey.expiresAt * 1000).toLocaleString()}
-                          </p>
-                        </>
-                      ) : (
-                        <div className="text-center py-2">
-                          <div className="spinner-border spinner-border-sm" role="status">
-                            <span className="visually-hidden">Generating...</span>
-                          </div>
+                <div className="modal-header">
+                  <h5 className="modal-title">Temporary API Key</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={closeTempKeyModal}
+                  />
+                </div>
+                <div className="modal-body">
+                  {tempKey ? (
+                    <>
+                      <div className="mb-3">
+                        <label htmlFor="temp-key-value" className="form-label">
+                          API Key
+                        </label>
+                        <div className="input-group">
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="temp-key-value"
+                            value={tempKey.key}
+                            readOnly
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={handleCopyKey}
+                          >
+                            {copied ? 'Copied!' : 'Copy'}
+                          </button>
                         </div>
-                      )}
+                      </div>
+                      <p className="text-body-secondary small mb-0">
+                        Expires {new Date(tempKey.expiresAt * 1000).toLocaleString()}
+                      </p>
+                    </>
+                  ) : (
+                    <div className="text-center py-2">
+                      <div className="spinner-border spinner-border-sm" role="status">
+                        <span className="visually-hidden">Generating...</span>
+                      </div>
                     </div>
-                    <div className="modal-footer">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={closeTempKeyModal}
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </>
-                )}
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={closeTempKeyModal}
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -373,7 +340,10 @@ export default function AdminUserDetailPage() {
                   } as CSSProperties
                 }
                 aria-label={`Delete passkey ${pk.name}`}
-                onClick={() => handleDeletePasskey(pk.id)}
+                onClick={() => {
+                  setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name });
+                  setCredentialConfirmText('');
+                }}
               >
                 <i className="bi bi-trash" />
               </button>
@@ -406,7 +376,15 @@ export default function AdminUserDetailPage() {
                   } as CSSProperties
                 }
                 aria-label={`Revoke API key ${ak.name}`}
-                onClick={() => handleDeleteApiKey(ak.id)}
+                onClick={async () => {
+                  if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
+                    await adminDeleteUserAPIKey(id!, ak.id);
+                    refetch();
+                  } else {
+                    setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
+                    setCredentialConfirmText('');
+                  }
+                }}
               >
                 <i className="bi bi-trash" />
               </button>
@@ -417,34 +395,124 @@ export default function AdminUserDetailPage() {
         <p className="text-body-secondary small">No credentials.</p>
       )}
 
-      <div className="d-flex justify-content-between align-items-center mt-5 mb-3">
-        <h5 className="mb-0">Sessions</h5>
-        <button
-          type="button"
-          className="btn btn-outline-warning btn-sm"
-          onClick={handleRevokeSessions}
-          disabled={isRevokingSessions}
-        >
-          {isRevokingSessions ? 'Revoking...' : 'Revoke All Sessions'}
-        </button>
-      </div>
-      {revokeSessionsSuccess && (
-        <div className="alert alert-success py-2 small" role="status">
-          All sessions have been revoked.
-        </div>
+      {deleteCredential && (
+        <>
+          <div className="modal-backdrop fade show" />
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="delete-credential-title"
+            aria-modal="true"
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="delete-credential-title">
+                    {deleteCredential.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={() => setDeleteCredential(null)}
+                  />
+                </div>
+                <div className="modal-body">
+                  <p>
+                    This will permanently{' '}
+                    {deleteCredential.type === 'passkey' ? 'delete' : 'revoke'}{' '}
+                    <strong>{deleteCredential.name}</strong>. This action cannot be undone.
+                  </p>
+                  <label htmlFor="delete-credential-confirm" className="form-label">
+                    Type <strong>{deleteCredential.name}</strong> to confirm
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="delete-credential-confirm"
+                    value={credentialConfirmText}
+                    onChange={(e) => setCredentialConfirmText(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setDeleteCredential(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    disabled={credentialConfirmText !== deleteCredential.name}
+                    onClick={handleConfirmDeleteCredential}
+                  >
+                    {deleteCredential.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
-      <hr className="my-5" />
-      <button
-        type="button"
-        className="btn btn-outline-danger w-100"
-        onClick={() => {
-          setDeleteConfirmText('');
-          setShowDeleteModal(true);
-        }}
-      >
-        Delete User
-      </button>
+      <h5 className="mt-5 mb-3">Danger Zone</h5>
+      {revokeSessionsSuccess && (
+        <div className="alert alert-success alert-dismissible small" role="status">
+          <strong style={{ opacity: 0.8 }}>All Sessions Revoked</strong>
+          <p className="mb-0 mt-1">
+            Active sessions may remain valid briefly until their current access token expires.
+          </p>
+          <button
+            type="button"
+            className="btn-close btn-close-white"
+            style={{ opacity: 0.8 }}
+            aria-label="Dismiss"
+            onClick={() => setRevokeSessionsSuccess(false)}
+          />
+        </div>
+      )}
+      <div className="list-group border-danger">
+        <div className="list-group-item d-flex align-items-center justify-content-between py-3">
+          <div className="me-3">
+            <strong>Revoke all sessions</strong>
+            <p className="text-body-secondary small mb-0">
+              Log this user out of all devices immediately.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm flex-shrink-0"
+            style={{ minWidth: '9rem' }}
+            onClick={handleRevokeSessions}
+            disabled={isRevokingSessions}
+          >
+            {isRevokingSessions ? 'Revoking...' : 'Revoke sessions'}
+          </button>
+        </div>
+        <div className="list-group-item d-flex align-items-center justify-content-between py-3">
+          <div className="me-3">
+            <strong>Delete this user</strong>
+            <p className="text-body-secondary small mb-0">
+              Permanently remove this user and all their data. This cannot be undone.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-danger btn-sm flex-shrink-0"
+            style={{ minWidth: '9rem' }}
+            onClick={() => {
+              setDeleteConfirmText('');
+              setShowDeleteModal(true);
+            }}
+          >
+            Delete user
+          </button>
+        </div>
+      </div>
 
       {showDeleteModal && (
         <>
@@ -456,7 +524,7 @@ export default function AdminUserDetailPage() {
             aria-labelledby="delete-user-modal-title"
             aria-modal="true"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title" id="delete-user-modal-title">

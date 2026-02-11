@@ -1,5 +1,6 @@
 export { formatSignificant, formatServingSize } from './formatters';
 export type { FormattedServingSize } from './formatters';
+export { generateName } from './generateName';
 export {
   formatRelativeTime,
   resolveEntryName,
