@@ -29,6 +29,7 @@ vi.mock('../components/common', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockDeleteUser = vi.mocked(api.adminDeleteUser);
 const mockDeletePasskey = vi.mocked(api.adminDeleteUserPasskey);
 const mockDeleteAPIKey = vi.mocked(api.adminDeleteUserAPIKey);
 const mockCreateAPIKey = vi.mocked(api.adminCreateUserAPIKey);
@@ -255,5 +256,56 @@ describe('AdminUserDetailPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Revoke All Sessions' }));
     });
     expect(mockRevokeSessions).not.toHaveBeenCalled();
+  });
+
+  it('shows delete confirmation modal when Delete User is clicked', () => {
+    setupMocks(sampleUser);
+    renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
+    expect(screen.getByText(/Type/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete this user' })).toBeDisabled();
+  });
+
+  it('enables delete button only when username matches', () => {
+    setupMocks(sampleUser);
+    renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+
+    const input = screen.getByLabelText(/Type .* to confirm/);
+    const deleteBtn = screen.getByRole('button', { name: 'Delete this user' });
+
+    fireEvent.change(input, { target: { value: 'wrong' } });
+    expect(deleteBtn).toBeDisabled();
+
+    fireEvent.change(input, { target: { value: 'alice' } });
+    expect(deleteBtn).toBeEnabled();
+  });
+
+  it('deletes user and navigates to user list', async () => {
+    mockDeleteUser.mockResolvedValue(undefined);
+    setupMocks(sampleUser);
+    renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+
+    fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
+      target: { value: 'alice' },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Delete this user' }));
+    });
+
+    expect(mockDeleteUser).toHaveBeenCalledWith('u1');
+    expect(screen.getByTestId('users-list')).toBeInTheDocument();
+  });
+
+  it('closes delete modal on cancel', () => {
+    setupMocks(sampleUser);
+    renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete User' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

@@ -94,11 +94,21 @@ describe('AdminUsersPage', () => {
     expect(screen.getByText('No users found')).toBeInTheDocument();
   });
 
-  it('shows create user form when button clicked', () => {
+  it('shows create user modal when button clicked', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
     fireEvent.click(screen.getByText('Create User'));
     expect(screen.getByText('Create New User')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('closes modal via close button', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    fireEvent.click(screen.getByText('Create User'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Close'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('creates user and shows temp API key', async () => {
@@ -134,9 +144,42 @@ describe('AdminUsersPage', () => {
       'charlie@example.com',
       false,
     );
-    expect(screen.getByText('User created successfully')).toBeInTheDocument();
+    // Modal stays open with success view
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('User Created')).toBeInTheDocument();
     expect(screen.getByText('temp-key-abc123')).toBeInTheDocument();
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it('closes modal when Done is clicked on success view', async () => {
+    const refetch = vi.fn();
+    mockQuery({ data: sampleUsers, refetch });
+    mockAdminCreateUser.mockResolvedValue({
+      user: {
+        id: 'u3',
+        username: 'charlie',
+        displayName: 'Charlie',
+        email: 'charlie@example.com',
+        isAdmin: false,
+        createdAt: null,
+        passkeyCount: 0,
+        apiKeyCount: 1,
+      },
+      temporaryAPIKey: 'temp-key-abc123',
+    });
+
+    renderWithRouter(<AdminUsersPage />);
+    fireEvent.click(screen.getByText('Create User'));
+    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'charlie' } });
+    fireEvent.change(screen.getByLabelText('Display Name'), { target: { value: 'Charlie' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'charlie@example.com' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    });
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('renders links to user detail pages', () => {

@@ -33,6 +33,9 @@ export default function AdminUserDetailPage() {
   const [tempKeyModal, setTempKeyModal] = useState<'confirm' | 'result' | null>(null);
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -67,11 +70,15 @@ export default function AdminUserDetailPage() {
   }
 
   async function handleDelete() {
+    setIsDeleting(true);
     try {
       await adminDeleteUser(id!);
       navigate('/admin/users');
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to delete user');
+      setShowDeleteModal(false);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -428,9 +435,79 @@ export default function AdminUserDetailPage() {
       )}
 
       <hr className="my-5" />
-      <button type="button" className="btn btn-outline-danger w-100" onClick={handleDelete}>
+      <button
+        type="button"
+        className="btn btn-outline-danger w-100"
+        onClick={() => {
+          setDeleteConfirmText('');
+          setShowDeleteModal(true);
+        }}
+      >
         Delete User
       </button>
+
+      {showDeleteModal && (
+        <>
+          <div className="modal-backdrop fade show" />
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="delete-user-modal-title"
+            aria-modal="true"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="delete-user-modal-title">
+                    Delete User
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={() => setShowDeleteModal(false)}
+                  />
+                </div>
+                <div className="modal-body">
+                  <p>
+                    This will permanently delete <strong>{user.username}</strong>. This action
+                    cannot be undone.
+                  </p>
+                  <label htmlFor="delete-confirm-input" className="form-label">
+                    Type <strong>{user.username}</strong> to confirm
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="delete-confirm-input"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowDeleteModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    disabled={deleteConfirmText !== user.username || isDeleting}
+                    onClick={handleDelete}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete this user'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

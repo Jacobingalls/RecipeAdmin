@@ -22,6 +22,11 @@ export default function AdminUsersPage() {
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
 
+  function closeModal() {
+    setShowCreateForm(false);
+    setCreatedResult(null);
+  }
+
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     setCreateError(null);
@@ -29,11 +34,6 @@ export default function AdminUsersPage() {
     try {
       const result = await adminCreateUser(newUsername, newDisplayName, newEmail, newIsAdmin);
       setCreatedResult(result);
-      setNewUsername('');
-      setNewDisplayName('');
-      setNewEmail('');
-      setNewIsAdmin(false);
-      setShowCreateForm(false);
       refetch();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create user');
@@ -57,116 +57,158 @@ export default function AdminUsersPage() {
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          onClick={() => setShowCreateForm(!showCreateForm)}
+          onClick={() => {
+            setNewUsername('');
+            setNewDisplayName('');
+            setNewEmail('');
+            setNewIsAdmin(false);
+            setCreateError(null);
+            setCreatedResult(null);
+            setShowCreateForm(true);
+          }}
         >
           Create User
         </button>
       </div>
 
-      {createdResult && (
-        <div className="alert alert-success" role="alert">
-          <h6 className="alert-heading">User created successfully</h6>
-          <p className="mb-2 small">
-            Temporary API key for <strong>{createdResult.user.username}</strong> (expires in 24
-            hours):
-          </p>
-          <div className="d-flex gap-2 align-items-center">
-            <code className="flex-grow-1 text-break">{createdResult.temporaryAPIKey}</code>
-            <button
-              type="button"
-              className="btn btn-outline-success btn-sm"
-              onClick={handleCopyKey}
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <hr />
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => setCreatedResult(null)}
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
       {showCreateForm && (
-        <div className="card mb-3">
-          <div className="card-body">
-            <h6 className="card-title">Create New User</h6>
-            {createError && (
-              <div className="alert alert-danger py-2 small" role="alert">
-                {createError}
+        <>
+          <div className="modal-backdrop fade show" />
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="create-user-modal-title"
+            aria-modal="true"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                {createdResult ? (
+                  <>
+                    <div className="modal-header">
+                      <h5 className="modal-title" id="create-user-modal-title">
+                        User Created
+                      </h5>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        aria-label="Close"
+                        onClick={closeModal}
+                      />
+                    </div>
+                    <div className="modal-body">
+                      <div className="alert alert-success mb-0" role="status">
+                        <p className="mb-2 small">
+                          Temporary API key for <strong>{createdResult.user.username}</strong>{' '}
+                          (expires in 24 hours):
+                        </p>
+                        <div className="d-flex gap-2 align-items-center">
+                          <code className="flex-grow-1 text-break">
+                            {createdResult.temporaryAPIKey}
+                          </code>
+                          <button
+                            type="button"
+                            className="btn btn-outline-success btn-sm"
+                            onClick={handleCopyKey}
+                          >
+                            {copied ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="modal-footer">
+                      <button type="button" className="btn btn-primary" onClick={closeModal}>
+                        Done
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="modal-header">
+                      <h5 className="modal-title" id="create-user-modal-title">
+                        Create New User
+                      </h5>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        aria-label="Close"
+                        onClick={closeModal}
+                      />
+                    </div>
+                    <form onSubmit={handleCreate}>
+                      <div className="modal-body">
+                        {createError && (
+                          <div className="alert alert-danger py-2 small" role="alert">
+                            {createError}
+                          </div>
+                        )}
+                        <div className="mb-3">
+                          <label htmlFor="new-username" className="form-label">
+                            Username
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="new-username"
+                            value={newUsername}
+                            onChange={(e) => setNewUsername(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="new-display-name" className="form-label">
+                            Display Name
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="new-display-name"
+                            value={newDisplayName}
+                            onChange={(e) => setNewDisplayName(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="new-email" className="form-label">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            className="form-control"
+                            id="new-email"
+                            value={newEmail}
+                            onChange={(e) => setNewEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="form-check mb-3">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id="new-is-admin"
+                            checked={newIsAdmin}
+                            onChange={(e) => setNewIsAdmin(e.target.checked)}
+                          />
+                          <label className="form-check-label" htmlFor="new-is-admin">
+                            Administrator
+                          </label>
+                        </div>
+                      </div>
+                      <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                          Cancel
+                        </button>
+                        <button type="submit" className="btn btn-primary" disabled={isCreating}>
+                          {isCreating ? 'Creating...' : 'Create'}
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
               </div>
-            )}
-            <form onSubmit={handleCreate}>
-              <div className="mb-3">
-                <label htmlFor="new-username" className="form-label">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="new-username"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="new-display-name" className="form-label">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="new-display-name"
-                  value={newDisplayName}
-                  onChange={(e) => setNewDisplayName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="new-email" className="form-label">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className="form-control"
-                  id="new-email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-check mb-3">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="new-is-admin"
-                  checked={newIsAdmin}
-                  onChange={(e) => setNewIsAdmin(e.target.checked)}
-                />
-                <label className="form-check-label" htmlFor="new-is-admin">
-                  Administrator
-                </label>
-              </div>
-              <div className="d-flex gap-2">
-                <button type="submit" className="btn btn-primary btn-sm" disabled={isCreating}>
-                  {isCreating ? 'Creating...' : 'Create'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={() => setShowCreateForm(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       <div className="list-group">
