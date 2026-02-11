@@ -2,7 +2,7 @@ import { render, screen, act } from '@testing-library/react';
 
 import * as api from '../api';
 
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider, useAuth, getDeviceName } from './AuthContext';
 
 vi.mock('../api', () => ({
   getStatus: vi.fn(),
@@ -219,5 +219,63 @@ describe('AuthContext', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<TestConsumer />)).toThrow('useAuth must be used within an AuthProvider');
     spy.mockRestore();
+  });
+});
+
+describe('getDeviceName', () => {
+  const originalUserAgent = navigator.userAgent;
+
+  afterEach(() => {
+    Object.defineProperty(navigator, 'userAgent', { value: originalUserAgent, configurable: true });
+  });
+
+  function setUA(ua: string) {
+    Object.defineProperty(navigator, 'userAgent', { value: ua, configurable: true });
+  }
+
+  it('returns iPhone for iPhone user agent', () => {
+    setUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)');
+    expect(getDeviceName()).toBe('iPhone');
+  });
+
+  it('returns iPad for iPad user agent', () => {
+    setUA('Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X)');
+    expect(getDeviceName()).toBe('iPad');
+  });
+
+  it('returns Android for Android user agent', () => {
+    setUA('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
+    expect(getDeviceName()).toBe('Android');
+  });
+
+  it('returns Chrome on Mac for desktop Chrome on macOS', () => {
+    setUA(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    );
+    expect(getDeviceName()).toBe('Chrome on Mac');
+  });
+
+  it('returns Safari on Mac for desktop Safari', () => {
+    setUA(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+    );
+    expect(getDeviceName()).toBe('Safari on Mac');
+  });
+
+  it('returns Edge on Windows for Edge browser', () => {
+    setUA(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+    );
+    expect(getDeviceName()).toBe('Edge on Windows');
+  });
+
+  it('returns Firefox on Linux for Firefox on Linux', () => {
+    setUA('Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0');
+    expect(getDeviceName()).toBe('Firefox on Linux');
+  });
+
+  it('returns Unknown device for unrecognized user agent', () => {
+    setUA('curl/7.88.1');
+    expect(getDeviceName()).toBe('Unknown device');
   });
 });
