@@ -21,7 +21,7 @@ spec:
         - name: regcred
       containers:
         - name: recipe-admin
-          image: ghcr.io/jacobingalls/recipe-admin:0.0.18
+          image: ghcr.io/jacobingalls/recipe-admin:0.0.19
           ports:
             - containerPort: 80
               name: http
