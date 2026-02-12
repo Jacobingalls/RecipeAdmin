@@ -5,7 +5,12 @@ import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
 import { useApiQuery } from '../hooks';
 import { ServingSize } from '../domain';
-import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  ContentUnavailableView,
+  SubsectionTitle,
+} from '../components/common';
 import { PreparationDetails } from '../components/product';
 import BarcodeSection from '../components/BarcodeSection';
 import NotesDisplay from '../components/NotesDisplay';
@@ -53,9 +58,7 @@ export default function ProductDetailPage() {
           ) : null}
 
           <section className="mt-4">
-            <h2 className="h6 text-secondary mb-2">
-              Preparation{preparations.length > 1 ? 's' : ''}
-            </h2>
+            <SubsectionTitle>Preparation{preparations.length > 1 ? 's' : ''}</SubsectionTitle>
             {preparations.length > 0 && (
               <div className="card mb-3">
                 {preparations.length > 1 && (
@@ -64,13 +67,10 @@ export default function ProductDetailPage() {
                       {preparations.map((prep) => (
                         <li className="nav-item" key={prep.id}>
                           <button
-                            className={`nav-link d-flex align-items-center ${activePrep === prep.id ? 'active' : ''}`}
+                            className={`nav-link ${activePrep === prep.id ? 'active' : ''}`}
                             onClick={() => setSelectedPrep(prep.id ?? null)}
                           >
                             {prep.name}
-                            {prep.id === product.defaultPreparationID && (
-                              <span className="badge bg-primary ms-2">Default</span>
-                            )}
                           </button>
                         </li>
                       ))}

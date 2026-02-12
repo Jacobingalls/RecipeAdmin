@@ -5,7 +5,12 @@ import { getGroup } from '../api';
 import { useApiQuery } from '../hooks';
 import type { GroupItem, ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
-import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  ContentUnavailableView,
+  SubsectionTitle,
+} from '../components/common';
 import BarcodeSection from '../components/BarcodeSection';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
@@ -56,7 +61,7 @@ export default function GroupDetailPage() {
           </p>
 
           <section className="mt-4">
-            <h2 className="h6 text-secondary mb-2">Nutrition Estimate</h2>
+            <SubsectionTitle>Nutrition Estimate</SubsectionTitle>
             <div className="card mb-3">
               <div className="card-body">
                 <div className="d-flex align-items-end mb-3">
@@ -87,7 +92,7 @@ export default function GroupDetailPage() {
           )}
 
           <section className="mt-4">
-            <h2 className="h6 text-secondary mb-2">Item{items.length !== 1 ? 's' : ''}</h2>
+            <SubsectionTitle>Item{items.length !== 1 ? 's' : ''}</SubsectionTitle>
             {items.length === 0 ? (
               <p className="text-secondary">No items in this group</p>
             ) : (

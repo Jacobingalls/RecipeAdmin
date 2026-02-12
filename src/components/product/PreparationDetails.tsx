@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { PreparationData, ServingSize } from '../../domain';
 import { Preparation } from '../../domain';
+import { SubsectionTitle } from '../common';
 import NutritionLabel from '../NutritionLabel';
 import ServingSizeSelector from '../ServingSizeSelector';
 import CustomSizesSection from '../CustomSizesSection';
@@ -57,7 +58,7 @@ export default function PreparationDetails({
         <>
           <br />
           <div className="mt-3">
-            <h6 className="text-secondary mb-2">Notes</h6>
+            <SubsectionTitle>Notes</SubsectionTitle>
             <NotesDisplay notes={prep.notes} />
           </div>
         </>

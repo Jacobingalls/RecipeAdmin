@@ -28,46 +28,46 @@ type PrepOrGroup = Preparation | ProductGroup;
 // Mass units with display labels and search aliases
 // Uses RecipeKit unit names as values
 export const massUnits: UnitDefinition[] = [
-  { value: 'g', label: 'grams (g)', aliases: ['gram', 'grams', 'g'] },
-  { value: 'mg', label: 'milligrams (mg)', aliases: ['milligram', 'milligrams', 'mg'] },
+  { value: 'g', label: 'Grams (g)', aliases: ['gram', 'grams', 'g'] },
+  { value: 'mg', label: 'Milligrams (mg)', aliases: ['milligram', 'milligrams', 'mg'] },
   {
     value: 'μg',
-    label: 'micrograms (μg)',
+    label: 'Micrograms (μg)',
     aliases: ['microgram', 'micrograms', 'mcg', 'μg', 'ug'],
   },
-  { value: 'kg', label: 'kilograms (kg)', aliases: ['kilogram', 'kilograms', 'kg'] },
-  { value: 'oz', label: 'ounces (oz)', aliases: ['ounce', 'ounces', 'oz'] },
-  { value: 'lb', label: 'pounds (lb)', aliases: ['pound', 'pounds', 'lb', 'lbs'] },
+  { value: 'kg', label: 'Kilograms (kg)', aliases: ['kilogram', 'kilograms', 'kg'] },
+  { value: 'oz', label: 'Ounces (oz)', aliases: ['ounce', 'ounces', 'oz'] },
+  { value: 'lb', label: 'Pounds (lb)', aliases: ['pound', 'pounds', 'lb', 'lbs'] },
 ];
 
 // Volume units with display labels and search aliases
 // Uses RecipeKit unit names as values (e.g., 'fl oz (US)' not 'fl oz')
 export const volumeUnits: UnitDefinition[] = [
-  { value: 'mL', label: 'milliliters (mL)', aliases: ['milliliter', 'milliliters', 'ml', 'mL'] },
-  { value: 'L', label: 'liters (L)', aliases: ['liter', 'liters', 'l', 'L'] },
-  { value: 'cup (US)', label: 'cups', aliases: ['cup', 'cups'] },
+  { value: 'mL', label: 'Milliliters (mL)', aliases: ['milliliter', 'milliliters', 'ml', 'mL'] },
+  { value: 'L', label: 'Liters (L)', aliases: ['liter', 'liters', 'l', 'L'] },
+  { value: 'cup (US)', label: 'Cups', aliases: ['cup', 'cups'] },
   {
     value: 'tbsp (US)',
-    label: 'tablespoons (tbsp)',
+    label: 'Tablespoons (tbsp)',
     aliases: ['tablespoon', 'tablespoons', 'tbsp', 'tbs'],
   },
-  { value: 'tsp (US)', label: 'teaspoons (tsp)', aliases: ['teaspoon', 'teaspoons', 'tsp'] },
+  { value: 'tsp (US)', label: 'Teaspoons (tsp)', aliases: ['teaspoon', 'teaspoons', 'tsp'] },
   {
     value: 'fl oz (US)',
-    label: 'fluid ounces (fl oz)',
+    label: 'Fluid ounces (fl oz)',
     aliases: ['fluid ounce', 'fluid ounces', 'fl oz', 'floz'],
   },
-  { value: 'pt (US)', label: 'pints (pt)', aliases: ['pint', 'pints', 'pt'] },
-  { value: 'qt (US)', label: 'quarts (qt)', aliases: ['quart', 'quarts', 'qt'] },
-  { value: 'gal (US)', label: 'gallons (gal)', aliases: ['gallon', 'gallons', 'gal'] },
+  { value: 'pt (US)', label: 'Pints (pt)', aliases: ['pint', 'pints', 'pt'] },
+  { value: 'qt (US)', label: 'Quarts (qt)', aliases: ['quart', 'quarts', 'qt'] },
+  { value: 'gal (US)', label: 'Gallons (gal)', aliases: ['gallon', 'gallons', 'gal'] },
 ];
 
 // Energy units with display labels and search aliases
 export const energyUnits: UnitDefinition[] = [
-  { value: 'kcal', label: 'calories (kcal)', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
-  { value: 'kJ', label: 'kilojoules (kJ)', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
-  { value: 'J', label: 'joules (J)', aliases: ['joule', 'joules', 'j', 'J'] },
-  { value: 'Wh', label: 'watt-hours (Wh)', aliases: ['watt-hour', 'watt-hours', 'wh', 'Wh'] },
+  { value: 'kcal', label: 'Calories (kcal)', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
+  { value: 'kJ', label: 'Kilojoules (kJ)', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
+  { value: 'J', label: 'Joules (J)', aliases: ['joule', 'joules', 'j', 'J'] },
+  { value: 'Wh', label: 'Watt-hours (Wh)', aliases: ['watt-hour', 'watt-hours', 'wh', 'Wh'] },
 ];
 
 /**
@@ -92,7 +92,7 @@ export function buildOptionGroups(prepOrGroup: PrepOrGroup): OptionGroup[] {
   groups.push({
     label: 'Servings',
     options: [
-      { type: 'servings', value: 'servings', label: 'servings', aliases: ['serving', 'servings'] },
+      { type: 'servings', value: 'servings', label: 'Servings', aliases: ['serving', 'servings'] },
     ],
   });
 

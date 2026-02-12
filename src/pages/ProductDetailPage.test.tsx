@@ -18,6 +18,7 @@ vi.mock('../components/common', () => ({
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
   ),
+  SubsectionTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }));
 
 vi.mock('../components/product', () => ({
@@ -150,12 +151,6 @@ describe('ProductDetailPage', () => {
     fireEvent.click(lowFatTab);
     // After clicking, the prep details should show Low Fat
     expect(screen.getByTestId('preparation-details')).toHaveTextContent('Low Fat');
-  });
-
-  it('renders default badge on default preparation', () => {
-    mockQuery({ data: sampleProduct });
-    renderWithRoute('/products/p1');
-    expect(screen.getByText('Default')).toBeInTheDocument();
   });
 
   it('does not render tabs for single preparation', () => {

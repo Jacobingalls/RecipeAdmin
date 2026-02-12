@@ -1,11 +1,12 @@
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import type { AdminCreateUserResponse } from '../api';
 import { adminListUsers, adminCreateUser } from '../api';
 import {
   LoadingState,
   ErrorState,
+  ContentUnavailableView,
   CopyButton,
   ModalBase,
   ModalHeader,
@@ -15,6 +16,9 @@ import {
   LinkListItem,
 } from '../components/common';
 import { useApiQuery } from '../hooks';
+import { formatLastLogin } from '../utils/formatters';
+
+type RoleFilter = 'all' | 'admin' | 'normal';
 
 export default function AdminUsersPage() {
   const {
@@ -25,6 +29,8 @@ export default function AdminUsersPage() {
   } = useApiQuery(adminListUsers, [], {
     errorMessage: "Couldn't load users. Try again later.",
   });
+  const [nameFilter, setNameFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newDisplayName, setNewDisplayName] = useState('');
@@ -34,8 +40,22 @@ export default function AdminUsersPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [createdResult, setCreatedResult] = useState<AdminCreateUserResponse | null>(null);
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    return users.filter((u) => {
+      const query = nameFilter.toLowerCase();
+      const matchesName =
+        !nameFilter ||
+        u.displayName.toLowerCase().includes(query) ||
+        u.username.toLowerCase().includes(query) ||
+        u.email.toLowerCase().includes(query);
+      const matchesRole =
+        roleFilter === 'all' ||
+        (roleFilter === 'admin' && u.isAdmin) ||
+        (roleFilter === 'normal' && !u.isAdmin);
+      return matchesName && matchesRole;
+    });
+  }, [users, nameFilter, roleFilter]);
 
   function closeModal() {
     const wasCreated = !!createdResult;
@@ -60,11 +80,11 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="h4 mb-0">Users</h1>
+    <>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="mb-0">Users</h1>
         <Button
-          size="sm"
+          variant="success"
           onClick={() => {
             setNewUsername('');
             setNewDisplayName('');
@@ -75,8 +95,39 @@ export default function AdminUsersPage() {
             setShowCreateForm(true);
           }}
         >
-          Create User
+          New
         </Button>
+      </div>
+
+      <div className="row g-3 mb-4">
+        <div className="col-md-8">
+          <label htmlFor="user-name-filter" className="visually-hidden">
+            Search users
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="user-name-filter"
+            placeholder="Search by name..."
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+          />
+        </div>
+        <div className="col-md-4">
+          <label htmlFor="user-role-filter" className="visually-hidden">
+            Filter by role
+          </label>
+          <select
+            className="form-select"
+            id="user-role-filter"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
+          >
+            <option value="all">All users</option>
+            <option value="admin">Admins</option>
+            <option value="normal">Normal users</option>
+          </select>
+        </div>
       </div>
 
       {showCreateForm && (
@@ -108,7 +159,7 @@ export default function AdminUsersPage() {
           ) : (
             <>
               <ModalHeader onClose={closeModal} titleId="create-user-modal-title">
-                Create New User
+                Add User
               </ModalHeader>
               <form onSubmit={handleCreate}>
                 <ModalBody>
@@ -174,7 +225,7 @@ export default function AdminUsersPage() {
                     Cancel
                   </Button>
                   <Button type="submit" loading={isCreating}>
-                    Create
+                    Add
                   </Button>
                 </ModalFooter>
               </form>
@@ -183,29 +234,37 @@ export default function AdminUsersPage() {
         </ModalBase>
       )}
 
-      <div className="list-group">
-        {users?.map((u) => (
-          <LinkListItem
-            key={u.id}
-            to={`/admin/users/${u.id}`}
-            title={
-              <>
-                <strong>{u.displayName}</strong>
-                <small className="text-body-secondary ms-2">{u.username}</small>
-                {u.isAdmin && <span className="badge bg-warning text-dark ms-2">Admin</span>}
-              </>
-            }
-            trailing={
-              <div className="text-body-secondary small">
-                {u.passkeyCount} passkeys, {u.apiKeyCount} API keys
-              </div>
-            }
-          />
-        ))}
-        {users?.length === 0 && (
-          <div className="list-group-item text-body-secondary text-center">No users found</div>
-        )}
-      </div>
-    </div>
+      {loading && <LoadingState />}
+      {!loading && error && <ErrorState message={error} />}
+      {!loading && !error && filteredUsers.length === 0 && (
+        <ContentUnavailableView
+          icon="bi-people"
+          title="No users"
+          description="Try adjusting your search or filters."
+        />
+      )}
+      {!loading && !error && filteredUsers.length > 0 && (
+        <div className="list-group">
+          {filteredUsers.map((u) => (
+            <LinkListItem
+              key={u.id}
+              to={`/admin/users/${u.id}`}
+              icon={u.isAdmin ? 'bi-shield-lock' : 'bi-person'}
+              title={<strong>{u.displayName}</strong>}
+              subtitle={
+                <>
+                  {u.username}
+                  <span className="mx-1">&middot;</span>
+                  {u.email}
+                </>
+              }
+              trailing={
+                <div className="text-body-secondary small">{formatLastLogin(u.lastLoginAt)}</div>
+              }
+            />
+          ))}
+        </div>
+      )}
+    </>
   );
 }

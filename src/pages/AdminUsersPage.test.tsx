@@ -40,6 +40,7 @@ const sampleUsers: AdminUserListItem[] = [
     email: 'alice@example.com',
     isAdmin: true,
     createdAt: 1700000000,
+    lastLoginAt: Date.now() / 1000 - 3600,
     passkeyCount: 2,
     apiKeyCount: 1,
   },
@@ -50,6 +51,7 @@ const sampleUsers: AdminUserListItem[] = [
     email: 'bob@example.com',
     isAdmin: false,
     createdAt: 1700000000,
+    lastLoginAt: null,
     passkeyCount: 0,
     apiKeyCount: 3,
   },
@@ -86,32 +88,75 @@ describe('AdminUsersPage', () => {
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
   });
 
-  it('renders user list', () => {
+  it('renders user list with display names and usernames', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('Bob')).toBeInTheDocument();
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByText(/alice/)).toBeInTheDocument();
+    expect(screen.getByText(/bob/)).toBeInTheDocument();
   });
 
-  it('renders empty state when no users', () => {
+  it('renders empty state when no users match filters', () => {
     mockQuery({ data: [] });
     renderWithRouter(<AdminUsersPage />);
-    expect(screen.getByText('No users found')).toBeInTheDocument();
+    expect(screen.getByText('No users')).toBeInTheDocument();
   });
 
-  it('shows create user modal when button clicked', () => {
+  it('shows last login time for users', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
-    fireEvent.click(screen.getByText('Create User'));
-    expect(screen.getByText('Create New User')).toBeInTheDocument();
+    expect(screen.getByText(/1h ago/)).toBeInTheDocument();
+    expect(screen.getByText('Never logged in')).toBeInTheDocument();
+  });
+
+  it('renders search input and role filter', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('All users')).toBeInTheDocument();
+  });
+
+  it('filters users by name', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    fireEvent.change(screen.getByPlaceholderText('Search by name...'), {
+      target: { value: 'alice' },
+    });
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+  });
+
+  it('filters users by email', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    fireEvent.change(screen.getByPlaceholderText('Search by name...'), {
+      target: { value: 'bob@example' },
+    });
+    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument();
+  });
+
+  it('filters users by role', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    fireEvent.change(screen.getByDisplayValue('All users'), { target: { value: 'admin' } });
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+  });
+
+  it('shows add user modal when button clicked', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'New' }));
+    expect(screen.getByText('Add User')).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
   });
 
   it('closes modal via close button', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
-    fireEvent.click(screen.getByText('Create User'));
+    fireEvent.click(screen.getByRole('button', { name: 'New' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Close'));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -135,13 +180,14 @@ describe('AdminUsersPage', () => {
     });
 
     renderWithRouter(<AdminUsersPage />);
-    fireEvent.click(screen.getByText('Create User'));
+    fireEvent.click(screen.getByRole('button', { name: 'New' }));
 
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'charlie' } });
     fireEvent.change(screen.getByLabelText('Display Name'), { target: { value: 'Charlie' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'charlie@example.com' } });
+    const submitBtn = screen.getByRole('dialog').querySelector('button[type="submit"]')!;
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+      fireEvent.click(submitBtn);
     });
 
     expect(mockAdminCreateUser).toHaveBeenCalledWith(
@@ -150,7 +196,6 @@ describe('AdminUsersPage', () => {
       'charlie@example.com',
       false,
     );
-    // Modal stays open with success view — refetch is deferred until close
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('User Created')).toBeInTheDocument();
     expect(screen.getByText('temp-key-abc123')).toBeInTheDocument();
@@ -175,12 +220,13 @@ describe('AdminUsersPage', () => {
     });
 
     renderWithRouter(<AdminUsersPage />);
-    fireEvent.click(screen.getByText('Create User'));
+    fireEvent.click(screen.getByRole('button', { name: 'New' }));
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'charlie' } });
     fireEvent.change(screen.getByLabelText('Display Name'), { target: { value: 'Charlie' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'charlie@example.com' } });
+    const submitBtn = screen.getByRole('dialog').querySelector('button[type="submit"]')!;
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+      fireEvent.click(submitBtn);
     });
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -195,5 +241,12 @@ describe('AdminUsersPage', () => {
     const links = screen.getAllByRole('link');
     expect(links[0]).toHaveAttribute('href', '/admin/users/u1');
     expect(links[1]).toHaveAttribute('href', '/admin/users/u2');
+  });
+
+  it('uses consistent h1 page title', () => {
+    mockQuery({ data: sampleUsers });
+    renderWithRouter(<AdminUsersPage />);
+    const heading = screen.getByRole('heading', { level: 1, name: 'Users' });
+    expect(heading).toBeInTheDocument();
   });
 });

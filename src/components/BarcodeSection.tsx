@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { BarcodeData } from '../domain';
 import { ServingSize } from '../domain';
 
+import { SubsectionTitle } from './common';
 import type { Note } from './NotesDisplay';
 import NotesDisplay from './NotesDisplay';
 
@@ -16,7 +17,7 @@ export default function BarcodeSection({ barcodes, onSelectSize }: BarcodeSectio
 
   return (
     <section className="mt-3">
-      <h2 className="h6 text-secondary mb-2">Barcodes</h2>
+      <SubsectionTitle>Barcodes</SubsectionTitle>
       <div className="list-group">
         {barcodes.map((bc, index) => (
           <BarcodeItem key={bc.code || index} barcode={bc} onSelectSize={onSelectSize} />

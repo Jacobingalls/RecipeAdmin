@@ -22,8 +22,8 @@ export default function AdminUserDetailPage() {
     errorMessage: "Couldn't load this user. Try again later.",
   });
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  if (loading && !user) return <LoadingState />;
+  if (error && !user) return <ErrorState message={error} />;
   if (!user) return <ErrorState message="User not found" />;
 
   return (

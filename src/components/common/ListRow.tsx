@@ -21,7 +21,7 @@ interface ListRowProps {
 export default function ListRow({ icon, content, secondary, children }: ListRowProps) {
   return (
     <div className="list-group-item d-flex align-items-center">
-      {icon && <i className={`bi ${icon} me-2`} aria-hidden="true" />}
+      {icon && <i className={`bi ${icon} me-3`} aria-hidden="true" />}
       <div className="me-auto">{content}</div>
       {secondary && <small className="text-body-secondary me-2 flex-shrink-0">{secondary}</small>}
       {children}

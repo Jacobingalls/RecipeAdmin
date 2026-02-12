@@ -106,3 +106,33 @@ export function formatServingSize(
 
   return { primary, resolved: resolved.join(', ') };
 }
+
+const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+
+/**
+ * Format a last-login timestamp for display in a user list.
+ *
+ * - `null`/`undefined` → "Never logged in"
+ * - Within 2 weeks → relative time ("3h ago", "5d ago")
+ * - Older than 2 weeks → date only ("1/15/2025")
+ */
+export function formatLastLogin(timestamp: number | null | undefined): string {
+  if (timestamp == null) return 'Never logged in';
+
+  const nowMs = Date.now();
+  const thenMs = timestamp * 1000;
+  const diffMs = nowMs - thenMs;
+
+  if (diffMs < TWO_WEEKS_MS) {
+    const diffMinutes = Math.floor(diffMs / 60_000);
+    const diffHours = Math.floor(diffMs / 3_600_000);
+    const diffDays = Math.floor(diffMs / 86_400_000);
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  }
+
+  return new Date(thenMs).toLocaleDateString();
+}

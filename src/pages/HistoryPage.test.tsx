@@ -28,6 +28,7 @@ vi.mock('../components/common', () => ({
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
   ),
+  SubsectionTitle: ({ children }: { children: ReactElement }) => <h2>{children}</h2>,
 }));
 
 vi.mock('../components/HistoryEntryRow', () => ({

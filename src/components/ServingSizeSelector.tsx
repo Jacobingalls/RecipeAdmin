@@ -31,7 +31,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
   // Get current unit display label
   const getCurrentLabel = (): string => {
     if (value.type === 'servings') {
-      return 'servings';
+      return 'Servings';
     }
     if (value.type === 'customSize') {
       return (value.value as CustomSizeValue).name;
@@ -140,7 +140,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
         <div className="dropdown">
           <button
             id="serving-unit"
-            className="btn btn-outline-secondary dropdown-toggle"
+            className="form-select text-start"
             type="button"
             onClick={() => setIsOpen(!isOpen)}
             style={{ minWidth: 180 }}

@@ -191,7 +191,7 @@ describe('filterGroups', () => {
         {
           type: 'servings',
           value: 'servings',
-          label: 'servings',
+          label: 'Servings',
           aliases: ['serving', 'servings'],
         },
       ],
@@ -199,14 +199,14 @@ describe('filterGroups', () => {
     {
       label: 'Mass',
       options: [
-        { type: 'mass', value: 'g', label: 'grams (g)', aliases: ['gram', 'grams', 'g'] },
-        { type: 'mass', value: 'oz', label: 'ounces (oz)', aliases: ['ounce', 'ounces', 'oz'] },
+        { type: 'mass', value: 'g', label: 'Grams (g)', aliases: ['gram', 'grams', 'g'] },
+        { type: 'mass', value: 'oz', label: 'Ounces (oz)', aliases: ['ounce', 'ounces', 'oz'] },
       ],
     },
     {
       label: 'Volume',
       options: [
-        { type: 'volume', value: 'mL', label: 'milliliters (mL)', aliases: ['milliliter', 'mL'] },
+        { type: 'volume', value: 'mL', label: 'Milliliters (mL)', aliases: ['milliliter', 'mL'] },
       ],
     },
   ];

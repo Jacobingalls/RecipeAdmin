@@ -7,12 +7,14 @@ import {
   entryDetailPath,
   formatServingSizeDescription,
   formatRelativeTime,
+  formatTime,
 } from '../utils/logEntryHelpers';
 
 interface HistoryEntryRowProps {
   entry: ApiLogEntry;
   name: string;
   calories: number | null;
+  timeDisplay?: 'relative' | 'time';
   onLogAgain: (entry: ApiLogEntry) => void;
   logAgainLoading: boolean;
   onEdit: (entry: ApiLogEntry) => void;
@@ -25,6 +27,7 @@ export default function HistoryEntryRow({
   entry,
   name,
   calories,
+  timeDisplay = 'relative',
   onLogAgain,
   logAgainLoading,
   onEdit,
@@ -53,7 +56,10 @@ export default function HistoryEntryRow({
         <div>
           <div className="fw-medium">{name}</div>
           <small className="text-body-secondary">
-            {formatServingSizeDescription(entry)} &mdash; {formatRelativeTime(entry.timestamp)}
+            {formatServingSizeDescription(entry)} &mdash;{' '}
+            {timeDisplay === 'time'
+              ? formatTime(entry.timestamp)
+              : formatRelativeTime(entry.timestamp)}
           </small>
         </div>
         <div className="d-flex align-items-center gap-2">

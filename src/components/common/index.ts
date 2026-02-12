@@ -14,4 +14,5 @@ export { default as PasskeySetupPrompt } from './PasskeySetupPrompt';
 export { default as RequireAdmin } from './RequireAdmin';
 export { default as RequireAuth } from './RequireAuth';
 export { default as SectionHeader } from './SectionHeader';
+export { default as SubsectionTitle } from './SubsectionTitle';
 export { default as TypeToConfirmModal } from './TypeToConfirmModal';

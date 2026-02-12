@@ -311,6 +311,7 @@ export interface AdminUserListItem {
   email: string;
   isAdmin: boolean;
   createdAt: number | null;
+  lastLoginAt: number | null;
   passkeyCount: number;
   apiKeyCount: number;
 }

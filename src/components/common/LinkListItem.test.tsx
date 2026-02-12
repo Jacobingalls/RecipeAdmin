@@ -46,15 +46,29 @@ describe('LinkListItem', () => {
       />,
     );
     const link = screen.getByRole('link');
-    expect(link).toHaveClass('d-flex', 'justify-content-between', 'align-items-center');
+    expect(link).toHaveClass('d-flex', 'align-items-center');
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('2 keys')).toBeInTheDocument();
   });
 
-  it('does not use flex layout without trailing', () => {
+  it('always uses flex layout for icon alignment', () => {
     renderWithRouter(<LinkListItem to="/products/1" title="Oats" />);
     const link = screen.getByRole('link');
-    expect(link).not.toHaveClass('d-flex');
+    expect(link).toHaveClass('d-flex', 'align-items-center');
+  });
+
+  it('renders icon when provided', () => {
+    const { container } = renderWithRouter(
+      <LinkListItem to="/products/1" title="Oats" icon="bi-person" />,
+    );
+    const icon = container.querySelector('i.bi.bi-person');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('does not render icon when not provided', () => {
+    const { container } = renderWithRouter(<LinkListItem to="/products/1" title="Oats" />);
+    expect(container.querySelector('i.bi')).toBeNull();
   });
 
   it('renders trailing content alongside title', () => {

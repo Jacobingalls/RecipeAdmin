@@ -57,12 +57,23 @@ describe('HistoryEntryRow', () => {
     vi.clearAllMocks();
   });
 
-  it('renders name, serving size, and relative time', () => {
+  it('renders name, serving size, and relative time by default', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     expect(screen.getByText('Oats')).toBeInTheDocument();
     expect(screen.getByText(/2 servings/)).toBeInTheDocument();
     expect(screen.getByText(/5m ago/)).toBeInTheDocument();
     expect(screen.getByText('320 kcal')).toBeInTheDocument();
+  });
+
+  it('renders time-only when timeDisplay is "time"', () => {
+    const entry = makeEntry({ timestamp: new Date(2025, 0, 15, 14, 30).getTime() / 1000 });
+    const expectedTime = new Date(2025, 0, 15, 14, 30).toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    renderWithRouter(<HistoryEntryRow {...defaultProps} entry={entry} timeDisplay="time" />);
+    expect(screen.getByText(new RegExp(expectedTime))).toBeInTheDocument();
+    expect(screen.queryByText(/ago/)).not.toBeInTheDocument();
   });
 
   it('renders placeholder calories when unavailable', () => {

@@ -1,6 +1,7 @@
 import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../api';
 
 import {
+  formatTime,
   formatRelativeTime,
   resolveEntryName,
   entryDetailPath,
@@ -10,6 +11,26 @@ import {
 function nowSeconds() {
   return Date.now() / 1000;
 }
+
+describe('formatTime', () => {
+  it('returns a time-only string', () => {
+    const timestamp = new Date(2025, 0, 15, 14, 30).getTime() / 1000;
+    const expected = new Date(2025, 0, 15, 14, 30).toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    expect(formatTime(timestamp)).toBe(expected);
+  });
+
+  it('formats morning times', () => {
+    const timestamp = new Date(2025, 5, 1, 8, 5).getTime() / 1000;
+    const expected = new Date(2025, 5, 1, 8, 5).toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    expect(formatTime(timestamp)).toBe(expected);
+  });
+});
 
 describe('formatRelativeTime', () => {
   it('returns "just now" for less than a minute ago', () => {

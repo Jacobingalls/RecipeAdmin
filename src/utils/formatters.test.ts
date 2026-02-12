@@ -1,7 +1,7 @@
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { PreparationData, ProductGroupData } from '../domain';
 
-import { formatSignificant, formatServingSize } from './formatters';
+import { formatSignificant, formatServingSize, formatLastLogin } from './formatters';
 
 describe('formatSignificant', () => {
   it('returns "0" for zero', () => {
@@ -222,5 +222,45 @@ describe('formatServingSize', () => {
     expect(result.primary).toBe('1 serving');
     expect(result.resolved).toContain('30g');
     expect(result.resolved).toContain('50mL');
+  });
+});
+
+describe('formatLastLogin', () => {
+  it('returns "Never logged in" for null', () => {
+    expect(formatLastLogin(null)).toBe('Never logged in');
+  });
+
+  it('returns "Never logged in" for undefined', () => {
+    expect(formatLastLogin(undefined)).toBe('Never logged in');
+  });
+
+  it('returns "Just now" for timestamps less than 1 minute ago', () => {
+    const now = Date.now() / 1000 - 10; // 10 seconds ago
+    expect(formatLastLogin(now)).toBe('Just now');
+  });
+
+  it('returns minutes ago for timestamps less than 1 hour ago', () => {
+    const now = Date.now() / 1000 - 300; // 5 minutes ago
+    expect(formatLastLogin(now)).toBe('5m ago');
+  });
+
+  it('returns hours ago for timestamps less than 1 day ago', () => {
+    const now = Date.now() / 1000 - 3600 * 3; // 3 hours ago
+    expect(formatLastLogin(now)).toBe('3h ago');
+  });
+
+  it('returns days ago for timestamps less than 2 weeks ago', () => {
+    const now = Date.now() / 1000 - 86400 * 5; // 5 days ago
+    expect(formatLastLogin(now)).toBe('5d ago');
+  });
+
+  it('returns a date string for timestamps older than 2 weeks', () => {
+    const old = Date.now() / 1000 - 86400 * 30; // 30 days ago
+    const result = formatLastLogin(old);
+    // Should be a locale date string, not a relative time
+    expect(result).not.toContain('ago');
+    expect(result).not.toBe('Never logged in');
+    // Should match a date-like pattern (e.g., "1/12/2026" or "12.1.2026")
+    expect(result).toMatch(/\d/);
   });
 });

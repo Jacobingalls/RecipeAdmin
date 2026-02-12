@@ -1,6 +1,7 @@
 import type { CustomSize } from '../domain';
 import { ServingSize } from '../domain';
 
+import { SubsectionTitle } from './common';
 import type { Note } from './NotesDisplay';
 import NotesDisplay from './NotesDisplay';
 
@@ -14,7 +15,7 @@ export default function CustomSizesSection({ customSizes, onSelectSize }: Custom
 
   return (
     <section className="mt-3">
-      <h2 className="h6 text-secondary mb-2">Custom Sizes</h2>
+      <SubsectionTitle>Custom Sizes</SubsectionTitle>
       <div className="list-group">
         {customSizes.map((cs, index) => (
           <CustomSizeItem

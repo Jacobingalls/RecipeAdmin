@@ -3,6 +3,14 @@ import type { LogTarget } from '../components/LogModal';
 import type { ProductGroupData } from '../domain';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 
+/** Formats a Unix epoch timestamp (seconds) as a time-only string (e.g., "2:30 PM"). */
+export function formatTime(timestamp: number): string {
+  return new Date(timestamp * 1000).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 /** Formats a Unix epoch timestamp (seconds) as a relative time string. */
 export function formatRelativeTime(timestamp: number): string {
   const now = Date.now();

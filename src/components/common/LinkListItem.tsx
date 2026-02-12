@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 interface LinkListItemProps {
   to: string;
+  icon?: string;
   title: ReactNode;
   subtitle?: ReactNode;
   trailing?: ReactNode;
@@ -26,14 +27,14 @@ interface LinkListItemProps {
  * />
  * ```
  */
-export default function LinkListItem({ to, title, subtitle, trailing }: LinkListItemProps) {
+export default function LinkListItem({ to, icon, title, subtitle, trailing }: LinkListItemProps) {
+  const iconEl = icon ? <i className={`bi ${icon} me-3`} aria-hidden="true" /> : null;
+
   if (trailing) {
     return (
-      <Link
-        to={to}
-        className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-      >
-        <div>
+      <Link to={to} className="list-group-item list-group-item-action d-flex align-items-center">
+        {iconEl}
+        <div className="me-auto">
           {title}
           {subtitle && (
             <>
@@ -48,9 +49,12 @@ export default function LinkListItem({ to, title, subtitle, trailing }: LinkList
   }
 
   return (
-    <Link to={to} className="list-group-item list-group-item-action">
-      <div className="fw-bold">{title}</div>
-      {subtitle && <small className="text-body-secondary">{subtitle}</small>}
+    <Link to={to} className="list-group-item list-group-item-action d-flex align-items-center">
+      {iconEl}
+      <div>
+        <div className="fw-bold">{title}</div>
+        {subtitle && <small className="text-body-secondary">{subtitle}</small>}
+      </div>
     </Link>
   );
 }
