@@ -68,6 +68,20 @@ describe('Header', () => {
     });
   });
 
+  it('renders nothing when not authenticated', () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: false,
+      login: vi.fn(),
+      loginWithPasskey: vi.fn(),
+      logout: mockLogout,
+      updateUser: vi.fn(),
+    });
+    const { container } = renderWithRouter(<Header />);
+    expect(container.innerHTML).toBe('');
+  });
+
   it('renders the brand name', () => {
     renderWithRouter(<Header />);
     expect(screen.getByText('Recipe Admin')).toBeInTheDocument();
@@ -78,27 +92,11 @@ describe('Header', () => {
     expect(screen.getByTestId('version-badge')).toBeInTheDocument();
   });
 
-  it('renders Home, Products, and Groups nav links when authenticated', () => {
+  it('renders Home, Products, and Groups nav links', () => {
     renderWithRouter(<Header />);
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Products')).toBeInTheDocument();
     expect(screen.getByText('Groups')).toBeInTheDocument();
-  });
-
-  it('does not render nav links when not authenticated', () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      isLoading: false,
-      login: vi.fn(),
-      loginWithPasskey: vi.fn(),
-      logout: mockLogout,
-      updateUser: vi.fn(),
-    });
-    renderWithRouter(<Header />);
-    expect(screen.queryByText('Home')).not.toBeInTheDocument();
-    expect(screen.queryByText('Products')).not.toBeInTheDocument();
-    expect(screen.queryByText('Groups')).not.toBeInTheDocument();
   });
 
   it('highlights the Home nav link on /', () => {
@@ -108,7 +106,7 @@ describe('Header', () => {
     expect(homeLink.className).toContain('bg-primary');
   });
 
-  it('renders the barcode search form when authenticated', () => {
+  it('renders the barcode search form', () => {
     renderWithRouter(<Header />);
     expect(screen.getByPlaceholderText('Barcode...')).toBeInTheDocument();
     expect(document.querySelector('.bi-upc-scan')).toBeInTheDocument();
@@ -207,7 +205,7 @@ describe('Header', () => {
     expect(screen.queryByRole('link', { name: /^admin$/i })).not.toBeInTheDocument();
   });
 
-  it('renders user menu button when authenticated', () => {
+  it('renders user menu button', () => {
     renderWithRouter(<Header />);
     expect(screen.getByRole('button', { name: 'User menu' })).toBeInTheDocument();
   });
@@ -246,19 +244,5 @@ describe('Header', () => {
     renderWithRouter(<Header />);
     fireEvent.click(screen.getByRole('button', { name: /sign out/i }));
     expect(mockLogout).toHaveBeenCalled();
-  });
-
-  it('does not render user menu when not authenticated', () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      isLoading: false,
-      login: vi.fn(),
-      loginWithPasskey: vi.fn(),
-      logout: mockLogout,
-      updateUser: vi.fn(),
-    });
-    renderWithRouter(<Header />);
-    expect(screen.queryByRole('button', { name: 'User menu' })).not.toBeInTheDocument();
   });
 });

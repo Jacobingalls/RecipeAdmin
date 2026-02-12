@@ -5,6 +5,7 @@ type ButtonVariant =
   | 'secondary'
   | 'danger'
   | 'dark'
+  | 'outline-primary'
   | 'outline-secondary'
   | 'outline-success';
 

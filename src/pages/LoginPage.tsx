@@ -2,6 +2,8 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
+import { Button } from '../components/common';
+import VersionBadge from '../components/VersionBadge';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
@@ -10,10 +12,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showApiKeyForm, setShowApiKeyForm] = useState(false);
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center py-5">
+      <div className="min-vh-100 bg-body-tertiary d-flex align-items-center justify-content-center">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
@@ -55,42 +58,46 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-12">
-        <h1 className="h4 mb-4 text-center">Sign in to Recipe Admin</h1>
+    <div className="min-vh-100 bg-body-tertiary d-flex align-items-center justify-content-center">
+      <div className="text-center" style={{ width: '100%', maxWidth: 360, padding: '0 1rem' }}>
+        <h1 className="display-5 fw-bold mb-1">Recipe Admin</h1>
+        <div className="mb-4">
+          <VersionBadge />
+        </div>
 
         {error && (
-          <div className="alert alert-danger" role="alert">
+          <div className="alert alert-danger text-start" role="alert">
             {error}
           </div>
         )}
 
-        <div className="card mb-3">
-          <div className="card-body text-center">
-            <h6 className="card-title mb-3">Sign in with Passkey</h6>
-            <button
-              type="button"
-              className="btn btn-primary"
+        {!showApiKeyForm ? (
+          <>
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-100 mb-3"
               onClick={handlePasskeyLogin}
+              loading={isSubmitting}
               disabled={isSubmitting}
             >
               <i className="bi bi-fingerprint me-2" />
-              Sign in with Passkey
+              Sign in with passkey
+            </Button>
+            <button
+              type="button"
+              className="btn btn-link text-body-secondary text-decoration-none"
+              onClick={() => setShowApiKeyForm(true)}
+            >
+              Sign in with API key
             </button>
-          </div>
-        </div>
-
-        <div className="text-center text-body-secondary my-3">
-          <small>or</small>
-        </div>
-
-        <div className="card">
-          <div className="card-body">
-            <h6 className="card-title mb-3">Sign in with API Key</h6>
-            <form onSubmit={handleAPIKeyLogin}>
+          </>
+        ) : (
+          <>
+            <form className="text-start mb-3" onSubmit={handleAPIKeyLogin}>
               <div className="mb-3">
                 <label htmlFor="username" className="form-label">
-                  Username or Email
+                  Username or email
                 </label>
                 <input
                   type="text"
@@ -104,7 +111,7 @@ export default function LoginPage() {
               </div>
               <div className="mb-3">
                 <label htmlFor="password" className="form-label">
-                  API Key
+                  API key
                 </label>
                 <input
                   type="password"
@@ -116,16 +123,29 @@ export default function LoginPage() {
                   autoComplete="current-password"
                 />
               </div>
-              <button
+              <Button
+                variant="primary"
                 type="submit"
-                className="btn btn-outline-primary w-100"
+                className="w-100"
+                loading={isSubmitting}
                 disabled={isSubmitting}
               >
                 Sign in
-              </button>
+              </Button>
             </form>
-          </div>
-        </div>
+            <button
+              type="button"
+              className="btn btn-link text-body-secondary text-decoration-none"
+              onClick={() => {
+                setShowApiKeyForm(false);
+                handlePasskeyLogin();
+              }}
+            >
+              <i className="bi bi-fingerprint me-2" />
+              Sign in with passkey
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
