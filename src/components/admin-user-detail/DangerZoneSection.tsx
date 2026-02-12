@@ -30,7 +30,8 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       await adminRevokeUserSessions(userId);
       setRevokeSessionsSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't revoke sessions. Try again.");
+      console.error("Couldn't revoke sessions", err);
+      setError("Couldn't revoke sessions. Try again.");
     } finally {
       setIsRevokingSessions(false);
     }
@@ -42,7 +43,8 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       await adminDeleteUser(userId);
       onDeleted();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete this user. Try again.");
+      console.error("Couldn't delete user", err);
+      setError("Couldn't delete this user. Try again.");
       setShowDeleteModal(false);
     } finally {
       setIsDeleting(false);

@@ -11,7 +11,13 @@ import {
 } from '../components/common';
 
 export default function ProductsPage() {
-  const { data: products, loading, error } = useApiQuery<ApiProductSummary[]>(listProducts, []);
+  const {
+    data: products,
+    loading,
+    error,
+  } = useApiQuery<ApiProductSummary[]>(listProducts, [], {
+    errorMessage: "Couldn't load products. Try again later.",
+  });
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
 

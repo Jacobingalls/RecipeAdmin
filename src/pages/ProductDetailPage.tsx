@@ -14,7 +14,13 @@ import AddToLogButton from '../components/AddToLogButton';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: product, loading, error } = useApiQuery<ApiProduct>(() => getProduct(id!), [id]);
+  const {
+    data: product,
+    loading,
+    error,
+  } = useApiQuery<ApiProduct>(() => getProduct(id!), [id], {
+    errorMessage: "Couldn't load this product. Try again later.",
+  });
   const [selectedPrep, setSelectedPrep] = useState<string | null>(null);
   const [servingSize, setServingSize] = useState(() => ServingSize.servings(1));
 

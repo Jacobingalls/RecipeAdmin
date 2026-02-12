@@ -6,5 +6,5 @@ interface ErrorStateProps {
  * Standard error message display.
  */
 export default function ErrorState({ message }: ErrorStateProps) {
-  return <div className="text-danger">Error: {message}</div>;
+  return <div className="text-danger">{message}</div>;
 }

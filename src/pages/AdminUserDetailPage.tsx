@@ -13,7 +13,14 @@ export default function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: user, loading, error, refetch } = useApiQuery(() => adminGetUser(id!), [id]);
+  const {
+    data: user,
+    loading,
+    error,
+    refetch,
+  } = useApiQuery(() => adminGetUser(id!), [id], {
+    errorMessage: "Couldn't load this user. Try again later.",
+  });
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;

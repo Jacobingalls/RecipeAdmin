@@ -17,7 +17,14 @@ import {
 import { useApiQuery } from '../hooks';
 
 export default function AdminUsersPage() {
-  const { data: users, loading, error, refetch } = useApiQuery(adminListUsers, []);
+  const {
+    data: users,
+    loading,
+    error,
+    refetch,
+  } = useApiQuery(adminListUsers, [], {
+    errorMessage: "Couldn't load users. Try again later.",
+  });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newDisplayName, setNewDisplayName] = useState('');
@@ -45,7 +52,8 @@ export default function AdminUsersPage() {
       const result = await adminCreateUser(newUsername, newDisplayName, newEmail, newIsAdmin);
       setCreatedResult(result);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Couldn't create the user. Try again.");
+      console.error("Couldn't create user", err);
+      setCreateError("Couldn't create the user. Try again.");
     } finally {
       setIsCreating(false);
     }

@@ -22,7 +22,9 @@ export default function GroupDetailPage() {
     data: groupData,
     loading,
     error,
-  } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id]);
+  } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id], {
+    errorMessage: "Couldn't load this group. Try again later.",
+  });
   const [servingSize, setServingSize] = useState(() => ServingSize.servings(1));
 
   const group = groupData ? new ProductGroup(groupData) : null;

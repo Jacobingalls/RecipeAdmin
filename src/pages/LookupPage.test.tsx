@@ -114,7 +114,10 @@ describe('LookupPage', () => {
   it('passes barcode to useApiQuery with enabled flag', () => {
     mockQuery({});
     renderWithRoute('/lookup/999');
-    expect(mockUseApiQuery).toHaveBeenCalledWith(expect.any(Function), ['999'], { enabled: true });
+    expect(mockUseApiQuery).toHaveBeenCalledWith(expect.any(Function), ['999'], {
+      enabled: true,
+      errorMessage: "Couldn't look up this barcode. Try again later.",
+    });
   });
 
   it('disables query when no barcode', () => {
@@ -122,6 +125,7 @@ describe('LookupPage', () => {
     renderWithRoute('/lookup');
     expect(mockUseApiQuery).toHaveBeenCalledWith(expect.any(Function), [undefined], {
       enabled: false,
+      errorMessage: "Couldn't look up this barcode. Try again later.",
     });
   });
 

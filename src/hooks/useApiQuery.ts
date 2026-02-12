@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseApiQueryOptions {
   enabled?: boolean;
+  errorMessage?: string;
 }
 
 export interface UseApiQueryResult<T> {
@@ -20,15 +21,17 @@ export function useApiQuery<T = unknown>(
   deps: DependencyList = [],
   options: UseApiQueryOptions = {},
 ): UseApiQueryResult<T> {
-  const { enabled = true } = options;
+  const { enabled = true, errorMessage } = options;
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchFnRef = useRef(fetchFn);
+  const errorMessageRef = useRef(errorMessage);
 
-  // Keep ref updated with latest fetchFn
+  // Keep refs updated with latest values
   fetchFnRef.current = fetchFn;
+  errorMessageRef.current = errorMessage;
 
   const execute = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -42,9 +45,19 @@ export function useApiQuery<T = unknown>(
     } catch (err) {
       if (!signal?.aborted) {
         if (err instanceof Error && err.name !== 'AbortError') {
-          setError(err.message);
+          if (errorMessageRef.current) {
+            console.error(errorMessageRef.current, err);
+            setError(errorMessageRef.current);
+          } else {
+            setError(err.message);
+          }
         } else if (!(err instanceof Error)) {
-          setError(String(err));
+          if (errorMessageRef.current) {
+            console.error(errorMessageRef.current, err);
+            setError(errorMessageRef.current);
+          } else {
+            setError(String(err));
+          }
         }
       }
     } finally {

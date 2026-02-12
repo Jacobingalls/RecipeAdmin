@@ -22,19 +22,25 @@ export default function SettingsPage() {
     loading: passkeysLoading,
     error: passkeysError,
     refetch: refetchPasskeys,
-  } = useApiQuery(settingsListPasskeys, []);
+  } = useApiQuery(settingsListPasskeys, [], {
+    errorMessage: "Couldn't load passkeys.",
+  });
   const {
     data: apiKeys,
     loading: apiKeysLoading,
     error: apiKeysError,
     refetch: refetchApiKeys,
-  } = useApiQuery(settingsListAPIKeys, []);
+  } = useApiQuery(settingsListAPIKeys, [], {
+    errorMessage: "Couldn't load API keys.",
+  });
   const {
     data: sessions,
     loading: sessionsLoading,
     error: sessionsError,
     refetch: refetchSessions,
-  } = useApiQuery(settingsListSessions, []);
+  } = useApiQuery(settingsListSessions, [], {
+    errorMessage: "Couldn't load sessions.",
+  });
 
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
 

@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import ErrorState from './ErrorState';
 
 describe('ErrorState', () => {
-  it('renders error message with prefix', () => {
+  it('renders error message', () => {
     render(<ErrorState message="Something failed" />);
-    expect(screen.getByText('Error: Something failed')).toBeInTheDocument();
+    expect(screen.getByText('Something failed')).toBeInTheDocument();
   });
 
   it('applies danger text style', () => {

@@ -11,7 +11,13 @@ import {
 } from '../components/common';
 
 export default function GroupsPage() {
-  const { data: groups, loading, error } = useApiQuery<ApiGroupSummary[]>(listGroups, []);
+  const {
+    data: groups,
+    loading,
+    error,
+  } = useApiQuery<ApiGroupSummary[]>(listGroups, [], {
+    errorMessage: "Couldn't load groups. Try again later.",
+  });
   const [nameFilter, setNameFilter] = useState('');
 
   const filteredGroups = useMemo(() => {

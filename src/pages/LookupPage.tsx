@@ -19,6 +19,7 @@ export default function LookupPage() {
     error,
   } = useApiQuery<ApiLookupItem[]>(() => lookupBarcode(barcode!), [barcode], {
     enabled: !!barcode,
+    errorMessage: "Couldn't look up this barcode. Try again later.",
   });
   const [logItem, setLogItem] = useState<ApiLookupItem | null>(null);
 

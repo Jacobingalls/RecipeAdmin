@@ -144,4 +144,50 @@ describe('useApiQuery', () => {
     expect(result.current.error).toBe('string error');
     expect(result.current.data).toBeNull();
   });
+
+  it('uses errorMessage option instead of raw error when provided', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetchFn = () => Promise.reject(new Error('Load failed'));
+    const { result } = renderHook(() =>
+      useApiQuery(fetchFn, [], { errorMessage: "Couldn't load products. Try again later." }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe("Couldn't load products. Try again later.");
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "Couldn't load products. Try again later.",
+      expect.any(Error),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('uses errorMessage option for non-Error rejections', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetchFn = () => Promise.reject('string error');
+    const { result } = renderHook(() =>
+      useApiQuery(fetchFn, [], { errorMessage: 'Friendly message' }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Friendly message');
+    expect(consoleSpy).toHaveBeenCalledWith('Friendly message', 'string error');
+    consoleSpy.mockRestore();
+  });
+
+  it('falls back to raw error when errorMessage is not provided', async () => {
+    const fetchFn = () => Promise.reject(new Error('Network error'));
+    const { result } = renderHook(() => useApiQuery(fetchFn));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Network error');
+  });
 });

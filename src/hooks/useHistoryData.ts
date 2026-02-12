@@ -75,13 +75,19 @@ export function useHistoryData(): UseHistoryDataResult {
     loading: logsLoading,
     error: logsError,
     refetch: refetchLogs,
-  } = useApiQuery(getLogs, []);
+  } = useApiQuery(getLogs, [], { errorMessage: "Couldn't load history. Try again later." });
   const {
     data: products,
     loading: productsLoading,
     error: productsError,
-  } = useApiQuery(listProducts, []);
-  const { data: groups, loading: groupsLoading, error: groupsError } = useApiQuery(listGroups, []);
+  } = useApiQuery(listProducts, [], { errorMessage: "Couldn't load history. Try again later." });
+  const {
+    data: groups,
+    loading: groupsLoading,
+    error: groupsError,
+  } = useApiQuery(listGroups, [], {
+    errorMessage: "Couldn't load history. Try again later.",
+  });
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logAgainLoading, setLogAgainLoading] = useState(false);

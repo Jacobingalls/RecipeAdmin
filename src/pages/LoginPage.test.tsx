@@ -147,7 +147,9 @@ describe('LoginPage', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /sign in with passkey/i }));
     });
-    expect(screen.getByRole('alert')).toHaveTextContent('Passkey failed');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Couldn't sign in with passkey. Try again.",
+    );
   });
 
   it('calls login with username and password on form submit', async () => {
@@ -171,6 +173,8 @@ describe('LoginPage', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     });
-    expect(screen.getByRole('alert')).toHaveTextContent('Invalid key');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Couldn't sign in. Check your credentials and try again.",
+    );
   });
 });

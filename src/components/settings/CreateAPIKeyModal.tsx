@@ -45,7 +45,8 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
       const result = await settingsCreateAPIKey(newKeyName.trim() || defaultKeyName, expiresAt);
       setCreatedKey(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't create the API key. Try again.");
+      console.error("Couldn't create the API key", err);
+      setError("Couldn't create the API key. Try again.");
     } finally {
       setIsCreating(false);
     }

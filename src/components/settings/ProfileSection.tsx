@@ -31,7 +31,8 @@ export default function ProfileSection() {
       setEditing(false);
       setSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't update your profile. Try again.");
+      console.error("Couldn't update profile", err);
+      setError("Couldn't update your profile. Try again.");
     } finally {
       setIsSaving(false);
     }

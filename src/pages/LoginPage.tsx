@@ -34,7 +34,8 @@ export default function LoginPage() {
     try {
       await loginWithPasskey();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't sign in with passkey. Try again.");
+      console.error("Couldn't sign in with passkey", err);
+      setError("Couldn't sign in with passkey. Try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -47,11 +48,8 @@ export default function LoginPage() {
     try {
       await login(usernameOrEmail, password);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Couldn't sign in. Check your credentials and try again.",
-      );
+      console.error("Couldn't sign in", err);
+      setError("Couldn't sign in. Check your credentials and try again.");
     } finally {
       setIsSubmitting(false);
     }
