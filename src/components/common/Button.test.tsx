@@ -66,4 +66,42 @@ describe('Button', () => {
     render(<Button aria-label="Close dialog">X</Button>);
     expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Close dialog');
   });
+
+  describe('loading prop', () => {
+    it('shows spinner and hides children when loading', () => {
+      const { container } = render(<Button loading>Save</Button>);
+      expect(container.querySelector('.spinner-border')).toBeInTheDocument();
+      expect(screen.getByText('Loading')).toHaveClass('visually-hidden');
+    });
+
+    it('disables the button when loading', () => {
+      render(<Button loading>Save</Button>);
+      expect(screen.getByRole('button')).toBeDisabled();
+    });
+
+    it('sets aria-busy when loading', () => {
+      render(<Button loading>Save</Button>);
+      expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('does not set aria-busy when not loading', () => {
+      render(<Button>Save</Button>);
+      expect(screen.getByRole('button')).not.toHaveAttribute('aria-busy');
+    });
+
+    it('does not show spinner when not loading', () => {
+      const { container } = render(<Button>Save</Button>);
+      expect(container.querySelector('.spinner-border')).not.toBeInTheDocument();
+    });
+
+    it('preserves children in DOM for sizing when loading', () => {
+      render(<Button loading>Save</Button>);
+      expect(screen.getByText('Save')).toBeInTheDocument();
+    });
+
+    it('disables even without explicit disabled prop when loading', () => {
+      render(<Button loading>Save</Button>);
+      expect(screen.getByRole('button')).toBeDisabled();
+    });
+  });
 });

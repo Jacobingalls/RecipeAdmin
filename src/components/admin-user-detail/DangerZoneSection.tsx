@@ -30,7 +30,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       await adminRevokeUserSessions(userId);
       setRevokeSessionsSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to revoke sessions');
+      setError(err instanceof Error ? err.message : "Couldn't revoke sessions. Try again.");
     } finally {
       setIsRevokingSessions(false);
     }
@@ -42,7 +42,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       await adminDeleteUser(userId);
       onDeleted();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete user');
+      setError(err instanceof Error ? err.message : "Couldn't delete this user. Try again.");
       setShowDeleteModal(false);
     } finally {
       setIsDeleting(false);
@@ -51,7 +51,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
 
   return (
     <>
-      <SectionHeader title="Danger Zone" className="mt-5" />
+      <SectionHeader title="Account actions" className="mt-5" />
       {revokeSessionsSuccess && (
         <div className="alert alert-success alert-dismissible small" role="status">
           <strong style={{ opacity: 0.8 }}>All Sessions Revoked</strong>
@@ -86,16 +86,16 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
             className="flex-shrink-0"
             style={{ minWidth: '9rem' }}
             onClick={handleRevokeSessions}
-            disabled={isRevokingSessions}
+            loading={isRevokingSessions}
           >
-            {isRevokingSessions ? 'Revoking...' : 'Revoke sessions'}
+            Revoke sessions
           </Button>
         </div>
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
             <strong>Delete this user</strong>
             <p className="text-body-secondary small mb-0">
-              Permanently remove this user and all their data. This cannot be undone.
+              This will permanently delete this user and all their data. This can&apos;t be undone.
             </p>
           </div>
           <Button

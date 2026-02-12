@@ -73,8 +73,8 @@ export default function ProductsPage() {
       {!loading && !error && filteredProducts.length === 0 && (
         <ContentUnavailableView
           icon="bi-box-seam"
-          title="No Products"
-          description="Try adjusting your search or filters"
+          title="No products"
+          description="Try adjusting your search or filters."
         />
       )}
       {!loading && !error && filteredProducts.length > 0 && (

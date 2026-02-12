@@ -61,7 +61,9 @@ describe('PasskeySetupPrompt', () => {
 
   it('shows when user has no passkeys', () => {
     render(<PasskeySetupPrompt />);
-    expect(screen.getByText('Secure your account with a passkey')).toBeInTheDocument();
+    expect(
+      screen.getByText('Sign in faster and more securely with your fingerprint or face.'),
+    ).toBeInTheDocument();
   });
 
   it('hides when user has passkeys', () => {
@@ -103,7 +105,9 @@ describe('PasskeySetupPrompt', () => {
     render(<PasskeySetupPrompt />);
     fireEvent.click(screen.getByText('Remind me later'));
     expect(sessionStorage.getItem('passkey-prompt-dismissed')).toBe('true');
-    expect(screen.queryByText('Secure your account with a passkey')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Sign in faster and more securely with your fingerprint or face.'),
+    ).not.toBeInTheDocument();
   });
 
   it('hides when sessionStorage already has dismissal', () => {
@@ -128,7 +132,9 @@ describe('PasskeySetupPrompt', () => {
     expect(mockBegin).toHaveBeenCalled();
     expect(mockFinish).toHaveBeenCalled();
     // After success, prompt should be hidden
-    expect(screen.queryByText('Secure your account with a passkey')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Sign in faster and more securely with your fingerprint or face.'),
+    ).not.toBeInTheDocument();
   });
 
   it('shows error when registration fails', async () => {

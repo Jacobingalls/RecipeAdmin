@@ -117,7 +117,11 @@ export default function HistoryPage() {
       )}
       {!loading && error && <ErrorState message={error} />}
       {!loading && !error && dayGroups.size === 0 && (
-        <ContentUnavailableView icon="bi-clock-history" title="No History" />
+        <ContentUnavailableView
+          icon="bi-clock-history"
+          title="No history"
+          description="Log something to see it here."
+        />
       )}
       {!loading &&
         !error &&

@@ -67,7 +67,7 @@ export default function AdminUserProfileForm({
       });
       onSaved();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : 'Failed to update user');
+      setEditError(err instanceof Error ? err.message : "Couldn't update this user. Try again.");
     } finally {
       setIsEditing(false);
     }
@@ -76,8 +76,8 @@ export default function AdminUserProfileForm({
   return (
     <>
       <SectionHeader title="Profile" className="mt-5">
-        <Button type="submit" form="edit-user-form" size="sm" disabled={isEditing}>
-          {isEditing ? 'Saving...' : 'Save'}
+        <Button type="submit" form="edit-user-form" size="sm" loading={isEditing}>
+          Save
         </Button>
       </SectionHeader>
       {editError && (

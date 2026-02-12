@@ -94,7 +94,7 @@ export default function DayNutritionModal({
       <div className="modal-header">
         <div>
           <div className="text-secondary small">{dayLabel}</div>
-          <h5 className="modal-title mb-0">Daily Nutrition</h5>
+          <h5 className="modal-title mb-0">Daily nutrition</h5>
         </div>
         <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
       </div>

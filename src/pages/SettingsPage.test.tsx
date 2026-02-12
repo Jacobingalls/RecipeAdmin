@@ -339,7 +339,7 @@ describe('SettingsPage', () => {
   it('shows empty state when no credentials', () => {
     setupMocks([], []);
     render(<SettingsPage />);
-    expect(screen.getByText('No credentials.')).toBeInTheDocument();
+    expect(screen.getByText('No credentials')).toBeInTheDocument();
   });
 
   it('edits display name, refreshes session, and shows success message', async () => {
@@ -433,6 +433,6 @@ describe('SettingsPage', () => {
   it('shows empty state when no sessions', () => {
     setupMocks(samplePasskeys, sampleAPIKeys, false, null, []);
     render(<SettingsPage />);
-    expect(screen.getByText('No active sessions.')).toBeInTheDocument();
+    expect(screen.getByText('No active sessions')).toBeInTheDocument();
   });
 });

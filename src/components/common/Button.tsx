@@ -17,6 +17,8 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'typ
   size?: ButtonSize;
   /** Defaults to `"button"`. Set to `"submit"` for form submission. */
   type?: 'button' | 'submit' | 'reset';
+  /** Replaces content with a spinner while preserving button dimensions. */
+  loading?: boolean;
   children: ReactNode;
 }
 
@@ -26,13 +28,16 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'typ
  * ```tsx
  * <Button variant="primary" onClick={save}>Save</Button>
  * <Button variant="outline-secondary" size="sm" onClick={cancel}>Cancel</Button>
+ * <Button loading={isSaving}>Save</Button>
  * ```
  */
 export default function Button({
   variant = 'primary',
   size,
   type = 'button',
+  loading = false,
   className,
+  disabled,
   children,
   ...rest
 }: ButtonProps) {
@@ -41,8 +46,38 @@ export default function Button({
     .join(' ');
 
   return (
-    <button type={type} className={classes} {...rest}>
-      {children}
+    <button
+      type={type}
+      className={classes}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...rest}
+    >
+      <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+        <span
+          style={{
+            visibility: loading ? 'hidden' : 'visible',
+            display: 'inline-flex',
+            alignItems: 'center',
+          }}
+        >
+          {children}
+        </span>
+        {loading && (
+          <span
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+            <span className="visually-hidden">Loading</span>
+          </span>
+        )}
+      </span>
     </button>
   );
 }

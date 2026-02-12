@@ -150,11 +150,11 @@ describe('AdminUsersPage', () => {
       'charlie@example.com',
       false,
     );
-    // Modal stays open with success view
+    // Modal stays open with success view — refetch is deferred until close
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('User Created')).toBeInTheDocument();
     expect(screen.getByText('temp-key-abc123')).toBeInTheDocument();
-    expect(refetch).toHaveBeenCalled();
+    expect(refetch).not.toHaveBeenCalled();
   });
 
   it('closes modal when Done is clicked on success view', async () => {
@@ -186,6 +186,7 @@ describe('AdminUsersPage', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(refetch).toHaveBeenCalled();
   });
 
   it('renders links to user detail pages', () => {

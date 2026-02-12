@@ -31,7 +31,7 @@ export default function LoginPage() {
     try {
       await loginWithPasskey();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Passkey login failed');
+      setError(err instanceof Error ? err.message : "Couldn't sign in with passkey. Try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -44,7 +44,11 @@ export default function LoginPage() {
     try {
       await login(usernameOrEmail, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Couldn't sign in. Check your credentials and try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -64,9 +68,6 @@ export default function LoginPage() {
         <div className="card mb-3">
           <div className="card-body text-center">
             <h6 className="card-title mb-3">Sign in with Passkey</h6>
-            <p className="text-body-secondary small mb-3">
-              Use your fingerprint, face, or security key
-            </p>
             <button
               type="button"
               className="btn btn-primary"

@@ -31,7 +31,7 @@ export default function ProfileSection() {
       setEditing(false);
       setSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      setError(err instanceof Error ? err.message : "Couldn't update your profile. Try again.");
     } finally {
       setIsSaving(false);
     }
@@ -70,7 +70,7 @@ export default function ProfileSection() {
                     required
                   />
                   <button type="submit" className="btn btn-primary btn-sm" disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save'}
+                    Save
                   </button>
                   <button
                     type="button"

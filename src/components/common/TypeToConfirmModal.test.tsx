@@ -83,9 +83,13 @@ describe('TypeToConfirmModal', () => {
     expect(input.value).toBe('');
   });
 
-  it('shows loading text when isLoading is true', () => {
-    render(<TypeToConfirmModal {...defaultProps} isLoading />);
-    expect(screen.getByRole('button', { name: 'Processing...' })).toBeDisabled();
+  it('shows spinner and disables confirm button when isLoading is true', () => {
+    const { container } = render(<TypeToConfirmModal {...defaultProps} isLoading />);
+    const buttons = screen.getAllByRole('button');
+    // Cancel, Close, and the confirm button
+    const confirmBtn = buttons.find((b) => b.getAttribute('aria-busy') === 'true')!;
+    expect(confirmBtn).toBeDisabled();
+    expect(container.querySelector('.spinner-border')).toBeInTheDocument();
   });
 
   it('supports ReactNode message', () => {

@@ -92,8 +92,8 @@ export default function LookupPage() {
       {results && results.length === 0 && (
         <ContentUnavailableView
           icon="bi-upc-scan"
-          title="No Results"
-          description="No products or groups match this barcode"
+          title="No results"
+          description="No products or groups match this barcode. Check the number and try again."
         />
       )}
       {results && results.length > 0 && (

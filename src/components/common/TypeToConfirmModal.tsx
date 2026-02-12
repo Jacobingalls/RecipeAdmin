@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useState, useId } from 'react';
 
 import ModalBase, { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
+import Button from './Button';
 
 interface TypeToConfirmModalProps {
   isOpen: boolean;
@@ -20,8 +21,8 @@ interface TypeToConfirmModalProps {
  * ```tsx
  * <TypeToConfirmModal
  *   isOpen={!!deleteTarget}
- *   title="Delete Passkey"
- *   message="This will permanently delete this passkey. This action cannot be undone."
+ *   title="Delete passkey"
+ *   message="This will permanently delete this passkey. This can't be undone."
  *   itemName={deleteTarget?.name ?? ''}
  *   confirmButtonText="Delete passkey"
  *   onConfirm={handleDelete}
@@ -64,17 +65,17 @@ function TypeToConfirmModalContent({
         />
       </ModalBody>
       <ModalFooter>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
-        <button
-          type="button"
-          className="btn btn-danger"
-          disabled={confirmText !== itemName || isLoading}
+        </Button>
+        <Button
+          variant="danger"
+          disabled={confirmText !== itemName}
+          loading={isLoading}
           onClick={onConfirm}
         >
-          {isLoading ? 'Processing...' : confirmButtonText}
-        </button>
+          {confirmButtonText}
+        </Button>
       </ModalFooter>
     </ModalBase>
   );

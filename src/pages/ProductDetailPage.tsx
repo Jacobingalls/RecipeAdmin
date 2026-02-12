@@ -33,7 +33,7 @@ export default function ProductDetailPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !product && (
-        <ContentUnavailableView icon="bi-box-seam" title="Product Not Found" />
+        <ContentUnavailableView icon="bi-box-seam" title="Product not found" />
       )}
       {!loading && !error && product && (
         <>

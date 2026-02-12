@@ -44,7 +44,7 @@ export default function GroupDetailPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !groupData && (
-        <ContentUnavailableView icon="bi-collection" title="Group Not Found" />
+        <ContentUnavailableView icon="bi-collection" title="Group not found" />
       )}
       {!loading && !error && groupData && (
         <>

@@ -45,7 +45,7 @@ export default function HistoryTile() {
     );
   } else if (!logs || logs.length === 0) {
     content = centeredWrapper(
-      <ContentUnavailableView icon="bi-clock-history" title="No Recent History" />,
+      <ContentUnavailableView icon="bi-clock-history" title="No recent history" />,
     );
   } else {
     content = (

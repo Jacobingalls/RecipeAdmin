@@ -31,8 +31,10 @@ export default function AdminUsersPage() {
   if (error) return <ErrorState message={error} />;
 
   function closeModal() {
+    const wasCreated = !!createdResult;
     setShowCreateForm(false);
     setCreatedResult(null);
+    if (wasCreated) refetch();
   }
 
   async function handleCreate(e: FormEvent) {
@@ -42,9 +44,8 @@ export default function AdminUsersPage() {
     try {
       const result = await adminCreateUser(newUsername, newDisplayName, newEmail, newIsAdmin);
       setCreatedResult(result);
-      refetch();
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Failed to create user');
+      setCreateError(err instanceof Error ? err.message : "Couldn't create the user. Try again.");
     } finally {
       setIsCreating(false);
     }
@@ -164,8 +165,8 @@ export default function AdminUsersPage() {
                   <Button variant="secondary" onClick={closeModal}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isCreating}>
-                    {isCreating ? 'Creating...' : 'Create'}
+                  <Button type="submit" loading={isCreating}>
+                    Create
                   </Button>
                 </ModalFooter>
               </form>

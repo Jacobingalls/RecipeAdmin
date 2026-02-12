@@ -40,7 +40,7 @@ export default function SessionsSection({
                 onClick={onRevokeSessions}
                 disabled={isRevokingSessions}
               >
-                {isRevokingSessions ? 'Revoking...' : 'Sign out everywhere'}
+                Sign out everywhere
               </button>
             </li>
           </ul>
@@ -74,7 +74,7 @@ export default function SessionsSection({
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No active sessions.</p>
+        <p className="text-body-secondary small">No active sessions</p>
       )}
     </>
   );

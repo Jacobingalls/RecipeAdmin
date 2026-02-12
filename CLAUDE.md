@@ -19,6 +19,10 @@ npm run format:check # Check formatting without writing
 
 ## Code Standards
 
+### Writing style
+
+All user-facing strings must follow `WRITING_STYLE.md`. Use the `writing-style` agent to review copy in changed files.
+
 ### Engineering Philosophy
 
 - Follow the [React documentation](https://react.dev/) and [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) conventions

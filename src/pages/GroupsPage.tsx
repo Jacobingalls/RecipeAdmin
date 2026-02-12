@@ -41,8 +41,8 @@ export default function GroupsPage() {
       {!loading && !error && filteredGroups.length === 0 && (
         <ContentUnavailableView
           icon="bi-collection"
-          title="No Groups"
-          description="Try adjusting your search"
+          title="No groups"
+          description="Try adjusting your search."
         />
       )}
       {!loading && !error && filteredGroups.length > 0 && (

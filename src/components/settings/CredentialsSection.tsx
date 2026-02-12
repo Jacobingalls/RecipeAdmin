@@ -43,7 +43,11 @@ export default function CredentialsSection({
       await settingsAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       refetchPasskeys();
     } catch (err) {
-      setPasskeyError(err instanceof Error ? err.message : 'Failed to register passkey');
+      setPasskeyError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong registering your passkey. Try again.',
+      );
     } finally {
       setIsAddingPasskey(false);
     }
@@ -82,7 +86,7 @@ export default function CredentialsSection({
                 disabled={isAddingPasskey}
               >
                 <i className="bi bi-fingerprint me-2" aria-hidden="true" />
-                {isAddingPasskey ? 'Registering...' : 'Passkey'}
+                Passkey
               </button>
             </li>
             <li>
@@ -101,7 +105,7 @@ export default function CredentialsSection({
 
       {passkeyError && (
         <div className="alert alert-danger alert-dismissible small" role="alert">
-          <strong style={{ opacity: 0.8 }}>Passkey registration failed</strong>
+          <strong style={{ opacity: 0.8 }}>Something went wrong registering your passkey</strong>
           <p className="mb-0 mt-1">{passkeyError}</p>
           <button
             type="button"
@@ -151,7 +155,7 @@ export default function CredentialsSection({
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No credentials.</p>
+        <p className="text-body-secondary small">No credentials</p>
       )}
 
       <TypeToConfirmModal

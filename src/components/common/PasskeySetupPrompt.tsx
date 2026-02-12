@@ -4,6 +4,8 @@ import { startRegistration } from '@simplewebauthn/browser';
 import { useAuth } from '../../contexts/AuthContext';
 import { settingsAddPasskeyBegin, settingsAddPasskeyFinish } from '../../api';
 
+import Button from './Button';
+
 export default function PasskeySetupPrompt() {
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(
@@ -22,7 +24,11 @@ export default function PasskeySetupPrompt() {
       await settingsAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to register passkey');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong registering your passkey. Try again.',
+      );
     } finally {
       setIsRegistering(false);
     }
@@ -41,19 +47,13 @@ export default function PasskeySetupPrompt() {
       <div className="flex-grow-1">
         <h6 className="alert-heading mb-1">Secure your account with a passkey</h6>
         <p className="mb-2 small">
-          Passkeys are more secure than API keys and let you sign in with your fingerprint, face, or
-          security key.
+          Sign in faster and more securely with your fingerprint or face.
         </p>
         {error && <p className="text-danger small mb-2">{error}</p>}
         <div className="d-flex gap-2">
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={handleSetup}
-            disabled={isRegistering}
-          >
-            {isRegistering ? 'Setting up...' : 'Set up now'}
-          </button>
+          <Button size="sm" onClick={handleSetup} loading={isRegistering}>
+            Set up now
+          </Button>
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm"

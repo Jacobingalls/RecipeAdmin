@@ -23,11 +23,13 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
   const [createdKey, setCreatedKey] = useState<CreateAPIKeyResponse | null>(null);
 
   function handleClose() {
+    const wasCreated = !!createdKey;
     setNewKeyName('');
     setHasExpiry(false);
     setNewKeyExpiresAt('');
     setCreatedKey(null);
     setError(null);
+    if (wasCreated) onCreated();
     onClose();
   }
 
@@ -42,9 +44,8 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
           : undefined;
       const result = await settingsCreateAPIKey(newKeyName.trim() || defaultKeyName, expiresAt);
       setCreatedKey(result);
-      onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create API key');
+      setError(err instanceof Error ? err.message : "Couldn't create the API key. Try again.");
     } finally {
       setIsCreating(false);
     }
@@ -61,7 +62,8 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
         {createdKey ? (
           <>
             <p className="small text-body-secondary">
-              Copy your new API key now. For security, it won&rsquo;t be shown again.
+              Make sure to save this key somewhere safe. It acts as your password and can&rsquo;t be
+              retrieved once you close this dialog.
             </p>
             <div className="mb-3">
               <label htmlFor="created-key" className="form-label">
@@ -140,8 +142,8 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
             <Button variant="outline-secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" form="create-api-key-form" disabled={isCreating}>
-              {isCreating ? 'Creating...' : 'Create'}
+            <Button type="submit" form="create-api-key-form" loading={isCreating}>
+              Create
             </Button>
           </>
         )}

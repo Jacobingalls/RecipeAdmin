@@ -2,13 +2,22 @@ import { PasskeySetupPrompt } from '../components/common';
 import { HistoryTile } from '../components/home';
 import { useAuth } from '../contexts/AuthContext';
 
+function getTimeOfDayGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function HomePage() {
   const { user } = useAuth();
-  const greeting = user?.displayName || user?.username || 'there';
+  const name = user?.displayName || user?.username || 'there';
 
   return (
     <>
-      <h1 className="h2 mb-4">Hello, {greeting}</h1>
+      <h1 className="h2 mb-4">
+        {getTimeOfDayGreeting()}, {name}
+      </h1>
       <PasskeySetupPrompt />
       <div className="row g-3">
         <div className="col-12">

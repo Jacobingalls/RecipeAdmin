@@ -40,9 +40,10 @@ function renderWithRouter(ui: ReactElement) {
 }
 
 describe('HomePage', () => {
-  it('renders greeting with display name', () => {
+  it('renders time-aware greeting with display name', () => {
     renderWithRouter(<HomePage />);
-    expect(screen.getByText('Hello, Test User')).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent(/Good (morning|afternoon|evening), Test User/);
   });
 
   it('renders greeting with username when no display name', () => {
@@ -63,7 +64,8 @@ describe('HomePage', () => {
       logout: vi.fn(),
     });
     renderWithRouter(<HomePage />);
-    expect(screen.getByText('Hello, testuser')).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent(/Good (morning|afternoon|evening), testuser/);
   });
 
   it('renders the HistoryTile', () => {
