@@ -108,7 +108,7 @@ export default function AdminUsersPage() {
             type="text"
             className="form-control"
             id="user-name-filter"
-            placeholder="Search by name..."
+            placeholder="Search users..."
             value={nameFilter}
             onChange={(e) => setNameFilter(e.target.value)}
           />
@@ -135,13 +135,13 @@ export default function AdminUsersPage() {
           {createdResult ? (
             <>
               <ModalHeader onClose={closeModal} titleId="create-user-modal-title">
-                User Created
+                User created
               </ModalHeader>
               <ModalBody>
                 <div className="alert alert-success mb-0" role="status">
                   <p className="mb-2 small">
-                    Temporary API key for <strong>{createdResult.user.username}</strong> (expires in
-                    24 hours):
+                    Temporary API key for <strong>{createdResult.user.username}</strong>. Save it
+                    now — it expires in 24 hours and can&apos;t be retrieved later.
                   </p>
                   <div className="d-flex gap-2 align-items-center">
                     <code className="flex-grow-1 text-break">{createdResult.temporaryAPIKey}</code>

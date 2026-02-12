@@ -31,7 +31,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
   // Get current unit display label
   const getCurrentLabel = (): string => {
     if (value.type === 'servings') {
-      return 'Servings';
+      return 'servings';
     }
     if (value.type === 'customSize') {
       return (value.value as CustomSizeValue).name;

@@ -54,7 +54,7 @@ describe('BarcodeSection', () => {
 
   it('renders lookup links for each barcode', () => {
     renderWithRouter(<BarcodeSection barcodes={[barcode]} />);
-    const lookupLink = screen.getByTitle('Look up 0123456789');
+    const lookupLink = screen.getByTitle('Look up barcode 0123456789');
     expect(lookupLink).toHaveAttribute('href', '/lookup/0123456789');
   });
 
@@ -98,7 +98,7 @@ describe('BarcodeSection', () => {
   it('encodes barcode in lookup URL', () => {
     const specialBarcode: BarcodeData = { code: 'foo/bar' };
     renderWithRouter(<BarcodeSection barcodes={[specialBarcode]} />);
-    const link = screen.getByTitle('Look up foo/bar');
+    const link = screen.getByTitle('Look up barcode foo/bar');
     expect(link).toHaveAttribute('href', '/lookup/foo%2Fbar');
   });
 });

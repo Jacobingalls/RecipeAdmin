@@ -113,14 +113,14 @@ describe('AdminUsersPage', () => {
   it('renders search input and role filter', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
-    expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search users...')).toBeInTheDocument();
     expect(screen.getByDisplayValue('All users')).toBeInTheDocument();
   });
 
   it('filters users by name', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
-    fireEvent.change(screen.getByPlaceholderText('Search by name...'), {
+    fireEvent.change(screen.getByPlaceholderText('Search users...'), {
       target: { value: 'alice' },
     });
     expect(screen.getByText('Alice')).toBeInTheDocument();
@@ -130,7 +130,7 @@ describe('AdminUsersPage', () => {
   it('filters users by email', () => {
     mockQuery({ data: sampleUsers });
     renderWithRouter(<AdminUsersPage />);
-    fireEvent.change(screen.getByPlaceholderText('Search by name...'), {
+    fireEvent.change(screen.getByPlaceholderText('Search users...'), {
       target: { value: 'bob@example' },
     });
     expect(screen.getByText('Bob')).toBeInTheDocument();
@@ -197,7 +197,7 @@ describe('AdminUsersPage', () => {
       false,
     );
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('User Created')).toBeInTheDocument();
+    expect(screen.getByText('User created')).toBeInTheDocument();
     expect(screen.getByText('temp-key-abc123')).toBeInTheDocument();
     expect(refetch).not.toHaveBeenCalled();
   });

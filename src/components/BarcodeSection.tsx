@@ -57,7 +57,7 @@ function BarcodeItem({ barcode, onSelectSize }: BarcodeItemProps) {
           <Link
             to={`/lookup/${encodeURIComponent(code)}`}
             className="btn btn-outline-secondary btn-sm"
-            title={`Look up ${code}`}
+            title={`Look up barcode ${code}`}
           >
             Lookup
           </Link>
