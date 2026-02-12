@@ -26,18 +26,11 @@ Break 500+ line page components into focused section components.
 
 ## Tier 3: Shared Modal & Data Patterns
 
-- [ ] **`ModalBase`** — Wrapper component providing modal backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes. Every modal in the app (8+ instances) duplicates this structure. Extract to:
-  ```tsx
-  <ModalBase isOpen={isOpen} onClose={onClose} labelledBy="modal-title">
-    <ModalBase.Header>...</ModalBase.Header>
-    <ModalBase.Body>...</ModalBase.Body>
-    <ModalBase.Footer>...</ModalBase.Footer>
-  </ModalBase>
-  ```
+- [x] **`ModalBase`** — Wrapper component providing modal backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes. All modals in the app now use this shared component. Consumers handle conditional rendering; ModalBase provides the backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes.
 
 - [ ] **`useClipboard` hook** — Encapsulates `navigator.clipboard.writeText` + copied state + auto-reset timer. Used by `CopyButton` internally but also useful standalone.
 
-- [ ] **`useHistoryData` hook** — Shared data fetching and log entry resolution logic duplicated between `HistoryPage` (373 lines) and `HistoryTile` (293 lines). Includes product/group lazy-loading and nutrition calculation.
+- [x] **`useHistoryData` hook** — Shared data fetching and log entry resolution logic extracted from `HistoryPage` (373→175 lines) and `HistoryTile` (293→85 lines). Includes product/group lazy-loading, nutrition calculation, and all action handlers (log again, edit, delete).
 
 ## Tier 4: Consistent UI Patterns
 

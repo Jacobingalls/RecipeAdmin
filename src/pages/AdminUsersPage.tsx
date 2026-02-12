@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import type { AdminCreateUserResponse } from '../api';
 import { adminListUsers, adminCreateUser } from '../api';
-import { LoadingState, ErrorState, CopyButton } from '../components/common';
+import { LoadingState, ErrorState, CopyButton, ModalBase } from '../components/common';
 import { useApiQuery } from '../hooks';
 
 export default function AdminUsersPage() {
@@ -63,140 +63,125 @@ export default function AdminUsersPage() {
       </div>
 
       {showCreateForm && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div
-            className="modal fade show d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-labelledby="create-user-modal-title"
-            aria-modal="true"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                {createdResult ? (
-                  <>
-                    <div className="modal-header">
-                      <h5 className="modal-title" id="create-user-modal-title">
-                        User Created
-                      </h5>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        aria-label="Close"
-                        onClick={closeModal}
-                      />
-                    </div>
-                    <div className="modal-body">
-                      <div className="alert alert-success mb-0" role="status">
-                        <p className="mb-2 small">
-                          Temporary API key for <strong>{createdResult.user.username}</strong>{' '}
-                          (expires in 24 hours):
-                        </p>
-                        <div className="d-flex gap-2 align-items-center">
-                          <code className="flex-grow-1 text-break">
-                            {createdResult.temporaryAPIKey}
-                          </code>
-                          <CopyButton
-                            text={createdResult.temporaryAPIKey}
-                            className="btn btn-outline-success btn-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="modal-footer">
-                      <button type="button" className="btn btn-primary" onClick={closeModal}>
-                        Done
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="modal-header">
-                      <h5 className="modal-title" id="create-user-modal-title">
-                        Create New User
-                      </h5>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        aria-label="Close"
-                        onClick={closeModal}
-                      />
-                    </div>
-                    <form onSubmit={handleCreate}>
-                      <div className="modal-body">
-                        {createError && (
-                          <div className="alert alert-danger py-2 small" role="alert">
-                            {createError}
-                          </div>
-                        )}
-                        <div className="mb-3">
-                          <label htmlFor="new-username" className="form-label">
-                            Username
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="new-username"
-                            value={newUsername}
-                            onChange={(e) => setNewUsername(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="new-display-name" className="form-label">
-                            Display Name
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="new-display-name"
-                            value={newDisplayName}
-                            onChange={(e) => setNewDisplayName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="new-email" className="form-label">
-                            Email
-                          </label>
-                          <input
-                            type="email"
-                            className="form-control"
-                            id="new-email"
-                            value={newEmail}
-                            onChange={(e) => setNewEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="form-check mb-3">
-                          <input
-                            type="checkbox"
-                            className="form-check-input"
-                            id="new-is-admin"
-                            checked={newIsAdmin}
-                            onChange={(e) => setNewIsAdmin(e.target.checked)}
-                          />
-                          <label className="form-check-label" htmlFor="new-is-admin">
-                            Administrator
-                          </label>
-                        </div>
-                      </div>
-                      <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={closeModal}>
-                          Cancel
-                        </button>
-                        <button type="submit" className="btn btn-primary" disabled={isCreating}>
-                          {isCreating ? 'Creating...' : 'Create'}
-                        </button>
-                      </div>
-                    </form>
-                  </>
-                )}
+        <ModalBase onClose={closeModal} ariaLabelledBy="create-user-modal-title">
+          {createdResult ? (
+            <>
+              <div className="modal-header">
+                <h5 className="modal-title" id="create-user-modal-title">
+                  User Created
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={closeModal}
+                />
               </div>
-            </div>
-          </div>
-        </>
+              <div className="modal-body">
+                <div className="alert alert-success mb-0" role="status">
+                  <p className="mb-2 small">
+                    Temporary API key for <strong>{createdResult.user.username}</strong> (expires in
+                    24 hours):
+                  </p>
+                  <div className="d-flex gap-2 align-items-center">
+                    <code className="flex-grow-1 text-break">{createdResult.temporaryAPIKey}</code>
+                    <CopyButton
+                      text={createdResult.temporaryAPIKey}
+                      className="btn btn-outline-success btn-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-primary" onClick={closeModal}>
+                  Done
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="modal-header">
+                <h5 className="modal-title" id="create-user-modal-title">
+                  Create New User
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={closeModal}
+                />
+              </div>
+              <form onSubmit={handleCreate}>
+                <div className="modal-body">
+                  {createError && (
+                    <div className="alert alert-danger py-2 small" role="alert">
+                      {createError}
+                    </div>
+                  )}
+                  <div className="mb-3">
+                    <label htmlFor="new-username" className="form-label">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="new-username"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="new-display-name" className="form-label">
+                      Display Name
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="new-display-name"
+                      value={newDisplayName}
+                      onChange={(e) => setNewDisplayName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="new-email" className="form-label">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="new-email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-check mb-3">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="new-is-admin"
+                      checked={newIsAdmin}
+                      onChange={(e) => setNewIsAdmin(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="new-is-admin">
+                      Administrator
+                    </label>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={isCreating}>
+                    {isCreating ? 'Creating...' : 'Create'}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </ModalBase>
       )}
 
       <div className="list-group">

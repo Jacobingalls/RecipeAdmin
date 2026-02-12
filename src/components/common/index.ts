@@ -6,6 +6,7 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as ErrorState } from './ErrorState';
 export { default as ListRow } from './ListRow';
 export { default as LoadingState } from './LoadingState';
+export { default as ModalBase } from './ModalBase';
 export { default as PasskeySetupPrompt } from './PasskeySetupPrompt';
 export { default as RequireAdmin } from './RequireAdmin';
 export { default as RequireAuth } from './RequireAuth';

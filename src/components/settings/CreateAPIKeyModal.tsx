@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 
 import type { CreateAPIKeyResponse } from '../../api';
 import { settingsCreateAPIKey } from '../../api';
-import { CopyButton } from '../common';
+import { CopyButton, ModalBase } from '../common';
 import { formatRelativeTime, generateName } from '../../utils';
 
 interface CreateAPIKeyModalProps {
@@ -53,127 +53,109 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
   if (!isOpen) return null;
 
   return (
-    <>
-      <div className="modal-backdrop fade show" />
-      <div
-        className="modal fade show d-block"
-        tabIndex={-1}
-        role="dialog"
-        aria-labelledby="create-api-key-title"
-        aria-modal="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="create-api-key-title">
-                Create API Key
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                aria-label="Close"
-                onClick={handleClose}
+    <ModalBase onClose={handleClose} ariaLabelledBy="create-api-key-title">
+      <div className="modal-header">
+        <h5 className="modal-title" id="create-api-key-title">
+          Create API Key
+        </h5>
+        <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} />
+      </div>
+      <div className="modal-body">
+        {createdKey ? (
+          <>
+            <p className="small text-body-secondary">
+              Save this key now. You will not be able to see it again.
+            </p>
+            <div className="mb-3">
+              <label htmlFor="created-key" className="form-label">
+                API Key
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="created-key"
+                value={createdKey.key}
+                readOnly
               />
             </div>
-            <div className="modal-body">
-              {createdKey ? (
-                <>
-                  <p className="small text-body-secondary">
-                    Save this key now. You will not be able to see it again.
-                  </p>
-                  <div className="mb-3">
-                    <label htmlFor="created-key" className="form-label">
-                      API Key
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="created-key"
-                      value={createdKey.key}
-                      readOnly
-                    />
-                  </div>
-                  <CopyButton text={createdKey.key} />
-                  {createdKey.expiresAt && (
-                    <p className="small text-body-secondary mt-2 mb-0">
-                      Expires {formatRelativeTime(createdKey.expiresAt)}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <form id="create-api-key-form" onSubmit={handleSubmit}>
-                  {error && (
-                    <div className="alert alert-danger py-2 small" role="alert">
-                      {error}
-                    </div>
-                  )}
-                  <div className="mb-3">
-                    <label htmlFor="key-name" className="form-label">
-                      Key Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="key-name"
-                      value={newKeyName}
-                      onChange={(e) => setNewKeyName(e.target.value)}
-                      placeholder={defaultKeyName}
-                    />
-                  </div>
-                  <div className="form-check mb-3">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id="has-expiry"
-                      checked={hasExpiry}
-                      onChange={(e) => setHasExpiry(e.target.checked)}
-                    />
-                    <label className="form-check-label" htmlFor="has-expiry">
-                      Set expiration
-                    </label>
-                  </div>
-                  {hasExpiry && (
-                    <div className="mb-3">
-                      <label htmlFor="key-expires-at" className="form-label">
-                        Expires at
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="form-control"
-                        id="key-expires-at"
-                        value={newKeyExpiresAt}
-                        onChange={(e) => setNewKeyExpiresAt(e.target.value)}
-                        required
-                      />
-                    </div>
-                  )}
-                </form>
-              )}
+            <CopyButton text={createdKey.key} />
+            {createdKey.expiresAt && (
+              <p className="small text-body-secondary mt-2 mb-0">
+                Expires {formatRelativeTime(createdKey.expiresAt)}
+              </p>
+            )}
+          </>
+        ) : (
+          <form id="create-api-key-form" onSubmit={handleSubmit}>
+            {error && (
+              <div className="alert alert-danger py-2 small" role="alert">
+                {error}
+              </div>
+            )}
+            <div className="mb-3">
+              <label htmlFor="key-name" className="form-label">
+                Key Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="key-name"
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                placeholder={defaultKeyName}
+              />
             </div>
-            <div className="modal-footer">
-              {createdKey ? (
-                <button type="button" className="btn btn-primary" onClick={handleClose}>
-                  Done
-                </button>
-              ) : (
-                <>
-                  <button type="button" className="btn btn-outline-secondary" onClick={handleClose}>
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    form="create-api-key-form"
-                    className="btn btn-primary"
-                    disabled={isCreating}
-                  >
-                    {isCreating ? 'Creating...' : 'Create'}
-                  </button>
-                </>
-              )}
+            <div className="form-check mb-3">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="has-expiry"
+                checked={hasExpiry}
+                onChange={(e) => setHasExpiry(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="has-expiry">
+                Set expiration
+              </label>
             </div>
-          </div>
-        </div>
+            {hasExpiry && (
+              <div className="mb-3">
+                <label htmlFor="key-expires-at" className="form-label">
+                  Expires at
+                </label>
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  id="key-expires-at"
+                  value={newKeyExpiresAt}
+                  onChange={(e) => setNewKeyExpiresAt(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+          </form>
+        )}
       </div>
-    </>
+      <div className="modal-footer">
+        {createdKey ? (
+          <button type="button" className="btn btn-primary" onClick={handleClose}>
+            Done
+          </button>
+        ) : (
+          <>
+            <button type="button" className="btn btn-outline-secondary" onClick={handleClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="create-api-key-form"
+              className="btn btn-primary"
+              disabled={isCreating}
+            >
+              {isCreating ? 'Creating...' : 'Create'}
+            </button>
+          </>
+        )}
+      </div>
+    </ModalBase>
   );
 }

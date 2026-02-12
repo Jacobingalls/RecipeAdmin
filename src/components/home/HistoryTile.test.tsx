@@ -5,11 +5,11 @@ import { MemoryRouter } from 'react-router-dom';
 import type { UseApiQueryResult } from '../../hooks/useApiQuery';
 import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../../api';
 import * as api from '../../api';
-import { useApiQuery } from '../../hooks';
+import { useApiQuery } from '../../hooks/useApiQuery';
 
 import HistoryTile from './HistoryTile';
 
-vi.mock('../../hooks', () => ({
+vi.mock('../../hooks/useApiQuery', () => ({
   useApiQuery: vi.fn(),
 }));
 

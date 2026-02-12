@@ -44,6 +44,7 @@ npm run format:check # Check formatting without writing
 - See `REFACTORING_PLAN.md` for the current backlog of extraction opportunities
 
 **Available shared components** (use these instead of reimplementing):
+- `ModalBase` — modal wrapper with backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes
 - `ListRow` — horizontal layout: `[icon] [content] [spacer] [secondary] [actions]`
 - `DeleteButton` — circular icon-only trash button for list row actions
 - `CopyButton` — button with "Copied!" feedback for clipboard operations
@@ -130,6 +131,7 @@ src/
 │   │   ├── ErrorState     # Error message display
 │   │   ├── ListRow        # [icon + content + spacer + secondary + actions] layout
 │   │   ├── LoadingState   # Loading indicator
+│   │   ├── ModalBase      # Modal wrapper: backdrop, scroll lock, click-to-dismiss, ARIA
 │   │   ├── PasskeySetupPrompt # Banner prompting users without passkeys to register one
 │   │   ├── RequireAdmin   # Route guard: redirects non-admins to /
 │   │   ├── RequireAuth    # Route guard: redirects unauthenticated to /login, shows PasskeySetupPrompt
@@ -177,7 +179,8 @@ src/
 │   └── ServingSize.ts     # Serving size types (mass, volume, etc.)
 ├── hooks/
 │   ├── index.ts           # Barrel exports
-│   └── useApiQuery.ts     # Data fetching with cancellation
+│   ├── useApiQuery.ts     # Data fetching with cancellation
+│   └── useHistoryData.ts  # Shared history data fetching, nutrition resolution, log actions
 ├── pages/                 # Route components
 │   ├── index.ts           # Barrel exports
 │   ├── AdminUserDetailPage # /admin/users/:id — credential management
