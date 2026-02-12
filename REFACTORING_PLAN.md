@@ -14,7 +14,7 @@ These small, focused components eliminate the most duplication across the codeba
 
 - [x] **`ListRow`** — Horizontal layout: `[icon] [primary content] [spacer] [secondary content] [actions]`. This pattern appears in passkey rows, API key rows, session rows, barcode rows, custom size rows, and history entries. A single composable component enforces consistent spacing, alignment, and accessibility.
 
-- [x] **`ConfirmationModal`** — Modal with "type name to confirm" input for destructive actions. Appears identically 3 times (credential deletion in `SettingsPage`, credential deletion in `AdminUserDetailPage`, user deletion in `AdminUserDetailPage`). ~60 lines each, fully unified.
+- [x] **`TypeToConfirmModal`** (originally `ConfirmationModal`) — Modal with "type name to confirm" input for destructive actions. Appears identically 3 times (credential deletion in `SettingsPage`, credential deletion in `AdminUserDetailPage`, user deletion in `AdminUserDetailPage`). ~60 lines each, fully unified.
 
 ## Tier 2: Decompose Large Pages
 
@@ -26,7 +26,7 @@ Break 500+ line page components into focused section components.
 
 ## Tier 3: Shared Modal & Data Patterns
 
-- [x] **`ModalBase`** — Wrapper component providing modal backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes. All modals in the app now use this shared component. Consumers handle conditional rendering; ModalBase provides the backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes.
+- [x] **`ModalBase`** — Wrapper component providing modal backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes. Also exports `ModalHeader`, `ModalBody`, `ModalFooter` sub-components for standard modal sections. All modals in the app now use this shared component.
 
 - [ ] **`useClipboard` hook** — Encapsulates `navigator.clipboard.writeText` + copied state + auto-reset timer. Used by `CopyButton` internally but also useful standalone.
 
@@ -40,7 +40,9 @@ Break 500+ line page components into focused section components.
 
 - [x] **`LinkListItem`** — List group item that renders as a `<Link>`. Simple mode: title (fw-bold) + subtitle. Trailing mode: flex layout with left title area + right trailing content. Used in `ProductsPage`, `GroupsPage`, `AdminUsersPage`.
 
-- [ ] **`FormField`** — Deferred. The two form layouts (horizontal list-group-item in `AdminUserProfileForm` vs vertical stacked in `AdminUsersPage`) are structurally different enough that a single component would require mode switches. Will revisit when a third pattern emerges.
+- [x] **`InlineFormField`** — Local component in `AdminUserProfileForm` for the repeated horizontal label+input pattern. The two form layouts (horizontal list-group-item in `AdminUserProfileForm` vs vertical stacked in `AdminUsersPage`) are structurally different, so a shared `FormField` was not extracted. `InlineFormField` is file-local; will promote to shared if a second consumer emerges.
+
+- [x] **`Button`** — Semantic wrapper around Bootstrap button classes with `variant` and `size` props. Eliminates raw `className="btn btn-*"` clusters across modals, forms, and action areas.
 
 ## Principles
 

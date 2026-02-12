@@ -1,5 +1,5 @@
 import type { AdminTempAPIKeyResponse } from '../../api';
-import { CopyButton, ModalBase } from '../common';
+import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 
 interface TempAPIKeyModalProps {
   isOpen: boolean;
@@ -12,11 +12,8 @@ export default function TempAPIKeyModal({ isOpen, tempKey, onClose }: TempAPIKey
 
   return (
     <ModalBase onClose={onClose} ariaLabel="Temporary API key">
-      <div className="modal-header">
-        <h5 className="modal-title">Temporary API Key</h5>
-        <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
-      </div>
-      <div className="modal-body">
+      <ModalHeader onClose={onClose}>Temporary API Key</ModalHeader>
+      <ModalBody>
         {tempKey ? (
           <>
             <div className="mb-3">
@@ -45,12 +42,12 @@ export default function TempAPIKeyModal({ isOpen, tempKey, onClose }: TempAPIKey
             </div>
           </div>
         )}
-      </div>
-      <div className="modal-footer">
-        <button type="button" className="btn btn-outline-secondary" onClick={onClose}>
+      </ModalBody>
+      <ModalFooter>
+        <Button variant="outline-secondary" onClick={onClose}>
           Done
-        </button>
-      </div>
+        </Button>
+      </ModalFooter>
     </ModalBase>
   );
 }

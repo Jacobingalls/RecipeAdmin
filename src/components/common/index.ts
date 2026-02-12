@@ -1,4 +1,4 @@
-export { default as ConfirmationModal } from './ConfirmationModal';
+export { default as Button } from './Button';
 export { default as ContentUnavailableView } from './ContentUnavailableView';
 export { default as CopyButton } from './CopyButton';
 export { default as CredentialRow } from './CredentialRow';
@@ -9,7 +9,9 @@ export { default as LinkListItem } from './LinkListItem';
 export { default as ListRow } from './ListRow';
 export { default as LoadingState } from './LoadingState';
 export { default as ModalBase } from './ModalBase';
+export { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
 export { default as PasskeySetupPrompt } from './PasskeySetupPrompt';
 export { default as RequireAdmin } from './RequireAdmin';
 export { default as RequireAuth } from './RequireAuth';
 export { default as SectionHeader } from './SectionHeader';
+export { default as TypeToConfirmModal } from './TypeToConfirmModal';

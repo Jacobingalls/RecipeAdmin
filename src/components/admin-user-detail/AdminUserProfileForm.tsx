@@ -1,8 +1,8 @@
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState, useEffect } from 'react';
 
 import { adminUpdateUser } from '../../api';
-import { SectionHeader } from '../common';
+import { SectionHeader, Button } from '../common';
 
 interface AdminUserProfileFormProps {
   userId: string;
@@ -13,6 +13,26 @@ interface AdminUserProfileFormProps {
     isAdmin: boolean;
   };
   onSaved: () => void;
+}
+
+function InlineFormField({
+  htmlFor,
+  label,
+  children,
+}: {
+  htmlFor: string;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className="list-group-item d-flex align-items-center justify-content-between py-3"
+    >
+      <span className="me-3 flex-shrink-0">{label}</span>
+      {children}
+    </label>
+  );
 }
 
 export default function AdminUserProfileForm({
@@ -56,14 +76,9 @@ export default function AdminUserProfileForm({
   return (
     <>
       <SectionHeader title="Profile" className="mt-5">
-        <button
-          type="submit"
-          form="edit-user-form"
-          className="btn btn-primary btn-sm"
-          disabled={isEditing}
-        >
+        <Button type="submit" form="edit-user-form" size="sm" disabled={isEditing}>
           {isEditing ? 'Saving...' : 'Save'}
-        </button>
+        </Button>
       </SectionHeader>
       {editError && (
         <div className="alert alert-danger py-2 small" role="alert">
@@ -72,11 +87,7 @@ export default function AdminUserProfileForm({
       )}
       <form id="edit-user-form" onSubmit={handleUpdate}>
         <div className="list-group">
-          <label
-            htmlFor="edit-username"
-            className="list-group-item d-flex align-items-center justify-content-between py-3"
-          >
-            <span className="me-3 flex-shrink-0">Username</span>
+          <InlineFormField htmlFor="edit-username" label="Username">
             <input
               type="text"
               className="form-control form-control-sm"
@@ -86,12 +97,8 @@ export default function AdminUserProfileForm({
               onChange={(e) => setEditUsername(e.target.value)}
               required
             />
-          </label>
-          <label
-            htmlFor="edit-display-name"
-            className="list-group-item d-flex align-items-center justify-content-between py-3"
-          >
-            <span className="me-3 flex-shrink-0">Display Name</span>
+          </InlineFormField>
+          <InlineFormField htmlFor="edit-display-name" label="Display Name">
             <input
               type="text"
               className="form-control form-control-sm"
@@ -101,12 +108,8 @@ export default function AdminUserProfileForm({
               onChange={(e) => setEditDisplayName(e.target.value)}
               required
             />
-          </label>
-          <label
-            htmlFor="edit-email"
-            className="list-group-item d-flex align-items-center justify-content-between py-3"
-          >
-            <span className="me-3 flex-shrink-0">Email</span>
+          </InlineFormField>
+          <InlineFormField htmlFor="edit-email" label="Email">
             <input
               type="email"
               className="form-control form-control-sm"
@@ -116,12 +119,8 @@ export default function AdminUserProfileForm({
               onChange={(e) => setEditEmail(e.target.value)}
               required
             />
-          </label>
-          <label
-            htmlFor="edit-is-admin"
-            className="list-group-item d-flex align-items-center justify-content-between py-3"
-          >
-            <span className="me-3 flex-shrink-0">Administrator</span>
+          </InlineFormField>
+          <InlineFormField htmlFor="edit-is-admin" label="Administrator">
             <div className="form-check form-switch mb-0">
               <input
                 type="checkbox"
@@ -132,7 +131,7 @@ export default function AdminUserProfileForm({
                 onChange={(e) => setEditIsAdmin(e.target.checked)}
               />
             </div>
-          </label>
+          </InlineFormField>
         </div>
       </form>
     </>

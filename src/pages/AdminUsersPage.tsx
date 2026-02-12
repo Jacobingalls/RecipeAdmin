@@ -8,6 +8,10 @@ import {
   ErrorState,
   CopyButton,
   ModalBase,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
   LinkListItem,
 } from '../components/common';
 import { useApiQuery } from '../hooks';
@@ -50,9 +54,8 @@ export default function AdminUsersPage() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="h4 mb-0">Users</h1>
-        <button
-          type="button"
-          className="btn btn-primary btn-sm"
+        <Button
+          size="sm"
           onClick={() => {
             setNewUsername('');
             setNewDisplayName('');
@@ -64,25 +67,17 @@ export default function AdminUsersPage() {
           }}
         >
           Create User
-        </button>
+        </Button>
       </div>
 
       {showCreateForm && (
         <ModalBase onClose={closeModal} ariaLabelledBy="create-user-modal-title">
           {createdResult ? (
             <>
-              <div className="modal-header">
-                <h5 className="modal-title" id="create-user-modal-title">
-                  User Created
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={closeModal}
-                />
-              </div>
-              <div className="modal-body">
+              <ModalHeader onClose={closeModal} titleId="create-user-modal-title">
+                User Created
+              </ModalHeader>
+              <ModalBody>
                 <div className="alert alert-success mb-0" role="status">
                   <p className="mb-2 small">
                     Temporary API key for <strong>{createdResult.user.username}</strong> (expires in
@@ -96,28 +91,18 @@ export default function AdminUsersPage() {
                     />
                   </div>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={closeModal}>
-                  Done
-                </button>
-              </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={closeModal}>Done</Button>
+              </ModalFooter>
             </>
           ) : (
             <>
-              <div className="modal-header">
-                <h5 className="modal-title" id="create-user-modal-title">
-                  Create New User
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={closeModal}
-                />
-              </div>
+              <ModalHeader onClose={closeModal} titleId="create-user-modal-title">
+                Create New User
+              </ModalHeader>
               <form onSubmit={handleCreate}>
-                <div className="modal-body">
+                <ModalBody>
                   {createError && (
                     <div className="alert alert-danger py-2 small" role="alert">
                       {createError}
@@ -174,15 +159,15 @@ export default function AdminUsersPage() {
                       Administrator
                     </label>
                   </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                </ModalBody>
+                <ModalFooter>
+                  <Button variant="secondary" onClick={closeModal}>
                     Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary" disabled={isCreating}>
+                  </Button>
+                  <Button type="submit" disabled={isCreating}>
                     {isCreating ? 'Creating...' : 'Create'}
-                  </button>
-                </div>
+                  </Button>
+                </ModalFooter>
               </form>
             </>
           )}

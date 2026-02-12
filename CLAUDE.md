@@ -44,14 +44,16 @@ npm run format:check # Check formatting without writing
 - See `REFACTORING_PLAN.md` for the current backlog of extraction opportunities
 
 **Available shared components** (use these instead of reimplementing):
+- `Button` — semantic wrapper around Bootstrap button classes with `variant` and `size` props
 - `ModalBase` — modal wrapper with backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes
+- `ModalHeader`, `ModalBody`, `ModalFooter` — standard modal section components (exported from `ModalBase`)
 - `ListRow` — horizontal layout: `[icon] [content] [spacer] [secondary] [actions]`
 - `DeleteButton` — circular icon-only trash button for list row actions
 - `CopyButton` — button with "Copied!" feedback for clipboard operations
-- `ConfirmationModal` — "type name to confirm" modal for destructive actions
+- `TypeToConfirmModal` — "type name to confirm" modal for destructive actions
 - `SectionHeader` — `[h5 title] [spacer] [action children]` for section headings with optional actions
 - `CredentialRow` — passkey/API key row with icon, name, timestamp, and delete action
-- `LinkListItem` — `<Link>` list group item with title/subtitle or title/trailing layout
+- `LinkListItem` — navigational list group item with stacked (title/subtitle) or split (title/trailing) layout
 - `LoadingState`, `ErrorState`, `ContentUnavailableView` — standard status displays
 - `RequireAuth`, `RequireAdmin` — route guards
 - `StatusView` — base layout for centered status displays
@@ -126,21 +128,22 @@ src/
 ├── components/
 │   ├── common/            # Shared UI components
 │   │   ├── index.ts       # Barrel exports
-│   │   ├── ConfirmationModal # "Type name to confirm" destructive action modal
+│   │   ├── Button          # Semantic Bootstrap button with variant/size props
 │   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
 │   │   ├── CopyButton     # Clipboard copy with "Copied!" feedback
 │   │   ├── CredentialRow  # Passkey/API key row with icon, name, timestamp, delete
 │   │   ├── DeleteButton   # Circular icon-only trash button for list rows
 │   │   ├── ErrorBoundary  # Catches render errors
 │   │   ├── ErrorState     # Error message display
-│   │   ├── LinkListItem   # <Link> list group item with title/subtitle/trailing layout
+│   │   ├── LinkListItem   # Navigational list group item with stacked/split layout
 │   │   ├── ListRow        # [icon + content + spacer + secondary + actions] layout
 │   │   ├── LoadingState   # Loading indicator
-│   │   ├── ModalBase      # Modal wrapper: backdrop, scroll lock, click-to-dismiss, ARIA
+│   │   ├── ModalBase      # Modal wrapper + ModalHeader/ModalBody/ModalFooter sub-components
 │   │   ├── PasskeySetupPrompt # Banner prompting users without passkeys to register one
 │   │   ├── RequireAdmin   # Route guard: redirects non-admins to /
 │   │   ├── RequireAuth    # Route guard: redirects unauthenticated to /login, shows PasskeySetupPrompt
 │   │   ├── SectionHeader  # [h5 title + spacer + action children] section heading
+│   │   ├── TypeToConfirmModal # "Type name to confirm" destructive action modal
 │   │   └── StatusView
 │   ├── admin-user-detail/ # Admin user detail page sections
 │   │   ├── index.ts       # Barrel exports
@@ -300,13 +303,25 @@ Use components from `src/components/common/` for consistent UI:
 ```tsx
 import {
   LoadingState, ErrorState, ContentUnavailableView,
-  ListRow, DeleteButton, CopyButton, ConfirmationModal,
+  ListRow, DeleteButton, CopyButton, TypeToConfirmModal,
+  Button, ModalBase, ModalHeader, ModalBody, ModalFooter,
 } from '../components/common'
 
 // Status displays
 if (loading) return <LoadingState />
 if (error) return <ErrorState message={error} />
 if (!data) return <ContentUnavailableView icon="bi-box-seam" title="Not Found" />
+
+// Semantic buttons
+<Button variant="primary" onClick={save}>Save</Button>
+<Button variant="outline-secondary" size="sm" onClick={cancel}>Cancel</Button>
+
+// Modals with sub-components
+<ModalBase onClose={handleClose} ariaLabelledBy="my-title">
+  <ModalHeader onClose={handleClose} titleId="my-title">Edit Item</ModalHeader>
+  <ModalBody>...</ModalBody>
+  <ModalFooter><Button onClick={handleClose}>Done</Button></ModalFooter>
+</ModalBase>
 
 // List rows with consistent layout
 <ListRow icon="bi-fingerprint" content={<strong>{name}</strong>} secondary={timestamp}>
@@ -317,7 +332,7 @@ if (!data) return <ContentUnavailableView icon="bi-box-seam" title="Not Found" /
 <CopyButton text={apiKey} />
 
 // Destructive confirmation
-<ConfirmationModal
+<TypeToConfirmModal
   isOpen={!!deleteTarget}
   title="Delete Passkey"
   message="This will permanently delete this passkey."

@@ -15,9 +15,9 @@ interface ModalBaseProps {
  *
  * ```tsx
  * <ModalBase onClose={handleClose} ariaLabelledBy="my-title">
- *   <div className="modal-header">...</div>
- *   <div className="modal-body">...</div>
- *   <div className="modal-footer">...</div>
+ *   <ModalHeader onClose={handleClose} titleId="my-title">Edit Item</ModalHeader>
+ *   <ModalBody>...</ModalBody>
+ *   <ModalFooter>...</ModalFooter>
  * </ModalBase>
  * ```
  */
@@ -67,4 +67,40 @@ export default function ModalBase({
       </div>
     </>
   );
+}
+
+interface ModalHeaderProps {
+  children: ReactNode;
+  onClose: () => void;
+  titleId?: string;
+}
+
+/** Standard modal header with an `<h5>` title and a close button. */
+export function ModalHeader({ children, onClose, titleId }: ModalHeaderProps) {
+  return (
+    <div className="modal-header">
+      <h5 className="modal-title" id={titleId}>
+        {children}
+      </h5>
+      <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+    </div>
+  );
+}
+
+interface ModalBodyProps {
+  children: ReactNode;
+}
+
+/** Standard modal body. */
+export function ModalBody({ children }: ModalBodyProps) {
+  return <div className="modal-body">{children}</div>;
+}
+
+interface ModalFooterProps {
+  children: ReactNode;
+}
+
+/** Standard modal footer for action buttons. */
+export function ModalFooter({ children }: ModalFooterProps) {
+  return <div className="modal-footer">{children}</div>;
 }

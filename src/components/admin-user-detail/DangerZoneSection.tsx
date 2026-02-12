@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { adminDeleteUser, adminRevokeUserSessions } from '../../api';
-import { SectionHeader, ConfirmationModal } from '../common';
+import { SectionHeader, TypeToConfirmModal, Button } from '../common';
 
 interface DangerZoneSectionProps {
   userId: string;
@@ -80,15 +80,16 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
               Log this user out of all devices immediately.
             </p>
           </div>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm flex-shrink-0"
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-shrink-0"
             style={{ minWidth: '9rem' }}
             onClick={handleRevokeSessions}
             disabled={isRevokingSessions}
           >
             {isRevokingSessions ? 'Revoking...' : 'Revoke sessions'}
-          </button>
+          </Button>
         </div>
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
@@ -97,18 +98,19 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
               Permanently remove this user and all their data. This cannot be undone.
             </p>
           </div>
-          <button
-            type="button"
-            className="btn btn-danger btn-sm flex-shrink-0"
+          <Button
+            variant="danger"
+            size="sm"
+            className="flex-shrink-0"
             style={{ minWidth: '9rem' }}
             onClick={() => setShowDeleteModal(true)}
           >
             Delete user
-          </button>
+          </Button>
         </div>
       </div>
 
-      <ConfirmationModal
+      <TypeToConfirmModal
         isOpen={showDeleteModal}
         title="Delete User"
         message={

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { useState, useId } from 'react';
 
-import ModalBase from './ModalBase';
+import ModalBase, { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
 
-interface ConfirmationModalProps {
+interface TypeToConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: ReactNode;
@@ -18,7 +18,7 @@ interface ConfirmationModalProps {
  * Modal that requires the user to type an item name before confirming a destructive action.
  *
  * ```tsx
- * <ConfirmationModal
+ * <TypeToConfirmModal
  *   isOpen={!!deleteTarget}
  *   title="Delete Passkey"
  *   message="This will permanently delete this passkey. This action cannot be undone."
@@ -29,10 +29,9 @@ interface ConfirmationModalProps {
  * />
  * ```
  */
-/**
- * Internal component that manages modal state. Remounts when itemName changes.
- */
-function ConfirmationModalContent({
+
+/** Internal component that manages modal state. Remounts when itemName changes. */
+function TypeToConfirmModalContent({
   title,
   message,
   itemName,
@@ -40,20 +39,17 @@ function ConfirmationModalContent({
   onConfirm,
   onCancel,
   isLoading,
-}: Omit<ConfirmationModalProps, 'isOpen'>) {
+}: Omit<TypeToConfirmModalProps, 'isOpen'>) {
   const [confirmText, setConfirmText] = useState('');
   const titleId = useId();
   const inputId = useId();
 
   return (
     <ModalBase onClose={onCancel} ariaLabelledBy={titleId}>
-      <div className="modal-header">
-        <h5 className="modal-title" id={titleId}>
-          {title}
-        </h5>
-        <button type="button" className="btn-close" aria-label="Close" onClick={onCancel} />
-      </div>
-      <div className="modal-body">
+      <ModalHeader onClose={onCancel} titleId={titleId}>
+        {title}
+      </ModalHeader>
+      <ModalBody>
         <p>{message}</p>
         <label htmlFor={inputId} className="form-label">
           Type <strong>{itemName}</strong> to confirm
@@ -66,8 +62,8 @@ function ConfirmationModalContent({
           onChange={(e) => setConfirmText(e.target.value)}
           autoComplete="off"
         />
-      </div>
-      <div className="modal-footer">
+      </ModalBody>
+      <ModalFooter>
         <button type="button" className="btn btn-secondary" onClick={onCancel}>
           Cancel
         </button>
@@ -79,12 +75,12 @@ function ConfirmationModalContent({
         >
           {isLoading ? 'Processing...' : confirmButtonText}
         </button>
-      </div>
+      </ModalFooter>
     </ModalBase>
   );
 }
 
-export default function ConfirmationModal({
+export default function TypeToConfirmModal({
   isOpen,
   title,
   message,
@@ -93,11 +89,11 @@ export default function ConfirmationModal({
   onConfirm,
   onCancel,
   isLoading = false,
-}: ConfirmationModalProps) {
+}: TypeToConfirmModalProps) {
   if (!isOpen) return null;
 
   return (
-    <ConfirmationModalContent
+    <TypeToConfirmModalContent
       key={itemName}
       title={title}
       message={message}

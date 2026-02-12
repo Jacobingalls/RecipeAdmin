@@ -8,7 +8,7 @@ import {
   settingsDeletePasskey,
   settingsRevokeAPIKey,
 } from '../../api';
-import { SectionHeader, CredentialRow, ConfirmationModal } from '../common';
+import { SectionHeader, CredentialRow, TypeToConfirmModal } from '../common';
 
 import CreateAPIKeyModal from './CreateAPIKeyModal';
 
@@ -154,7 +154,7 @@ export default function CredentialsSection({
         <p className="text-body-secondary small">No credentials.</p>
       )}
 
-      <ConfirmationModal
+      <TypeToConfirmModal
         isOpen={!!deleteCredential}
         title={deleteCredential?.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
         message={

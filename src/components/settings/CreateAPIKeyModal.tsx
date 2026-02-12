@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 
 import type { CreateAPIKeyResponse } from '../../api';
 import { settingsCreateAPIKey } from '../../api';
-import { CopyButton, ModalBase } from '../common';
+import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 import { formatRelativeTime, generateName } from '../../utils';
 
 interface CreateAPIKeyModalProps {
@@ -54,17 +54,14 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
 
   return (
     <ModalBase onClose={handleClose} ariaLabelledBy="create-api-key-title">
-      <div className="modal-header">
-        <h5 className="modal-title" id="create-api-key-title">
-          Create API Key
-        </h5>
-        <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} />
-      </div>
-      <div className="modal-body">
+      <ModalHeader onClose={handleClose} titleId="create-api-key-title">
+        Create API Key
+      </ModalHeader>
+      <ModalBody>
         {createdKey ? (
           <>
             <p className="small text-body-secondary">
-              Save this key now. You will not be able to see it again.
+              Copy your new API key now. For security, it won&rsquo;t be shown again.
             </p>
             <div className="mb-3">
               <label htmlFor="created-key" className="form-label">
@@ -134,28 +131,21 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
             )}
           </form>
         )}
-      </div>
-      <div className="modal-footer">
+      </ModalBody>
+      <ModalFooter>
         {createdKey ? (
-          <button type="button" className="btn btn-primary" onClick={handleClose}>
-            Done
-          </button>
+          <Button onClick={handleClose}>Done</Button>
         ) : (
           <>
-            <button type="button" className="btn btn-outline-secondary" onClick={handleClose}>
+            <Button variant="outline-secondary" onClick={handleClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              form="create-api-key-form"
-              className="btn btn-primary"
-              disabled={isCreating}
-            >
+            </Button>
+            <Button type="submit" form="create-api-key-form" disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create'}
-            </button>
+            </Button>
           </>
         )}
-      </div>
+      </ModalFooter>
     </ModalBase>
   );
 }

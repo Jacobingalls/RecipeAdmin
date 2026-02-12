@@ -2,10 +2,16 @@ import { useState } from 'react';
 
 import type { AdminTempAPIKeyResponse, PasskeyInfo, AdminAPIKeyInfo } from '../../api';
 import { adminDeleteUserPasskey, adminDeleteUserAPIKey, adminCreateUserAPIKey } from '../../api';
-import { SectionHeader, CredentialRow, ConfirmationModal } from '../common';
+import { SectionHeader, CredentialRow, TypeToConfirmModal, Button } from '../common';
 
 import TempAPIKeyModal from './TempAPIKeyModal';
 
+/**
+ * Manages passkeys and API keys for a user within the admin user detail page.
+ *
+ * Use this for the admin view where credentials are managed on behalf of another user.
+ * For the self-service settings page, see `CredentialsSection` in `components/settings/`.
+ */
 interface AdminCredentialsSectionProps {
   userId: string;
   passkeys: PasskeyInfo[];
@@ -53,9 +59,9 @@ export default function AdminCredentialsSection({
   return (
     <>
       <SectionHeader title="Credentials" className="mt-5">
-        <button type="button" className="btn btn-dark btn-sm" onClick={generateTempKey}>
+        <Button variant="dark" size="sm" onClick={generateTempKey}>
           Generate Temporary API Key
-        </button>
+        </Button>
       </SectionHeader>
 
       <TempAPIKeyModal isOpen={tempKeyModal} tempKey={tempKey} onClose={closeTempKeyModal} />
@@ -94,7 +100,7 @@ export default function AdminCredentialsSection({
         <p className="text-body-secondary small">No credentials.</p>
       )}
 
-      <ConfirmationModal
+      <TypeToConfirmModal
         isOpen={!!deleteCredential}
         title={deleteCredential?.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
         message={

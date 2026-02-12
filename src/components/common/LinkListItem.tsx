@@ -9,16 +9,21 @@ interface LinkListItemProps {
 }
 
 /**
- * List group item that renders as a `<Link>` with consistent layout.
+ * Navigational list group item for use inside a `<div className="list-group">`.
  *
- * Simple mode (title + subtitle stacked):
+ * Two layout modes:
+ * - **Stacked** (default): bold `title` above an optional muted `subtitle`.
+ * - **Split**: when `trailing` is provided, the row becomes a flex container
+ *   with the title area on the left and `trailing` content on the right.
+ *   Use this for metadata like counts, badges, or timestamps.
+ *
  * ```tsx
  * <LinkListItem to="/products/1" title="Oats" subtitle="Quaker" />
- * ```
- *
- * With trailing content (flex layout):
- * ```tsx
- * <LinkListItem to="/admin/users/1" title={<strong>Alice</strong>} trailing={<small>2 keys</small>} />
+ * <LinkListItem
+ *   to="/admin/users/1"
+ *   title={<strong>Alice</strong>}
+ *   trailing={<small>3 passkeys, 1 API key</small>}
+ * />
  * ```
  */
 export default function LinkListItem({ to, title, subtitle, trailing }: LinkListItemProps) {
