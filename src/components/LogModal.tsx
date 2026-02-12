@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 
 import type { Preparation, ProductGroup, ServingSize } from '../domain';
 import { logEntry, updateLogEntryServingSize } from '../api';
 
+import { ModalBase } from './common';
 import NutritionLabel from './NutritionLabel';
 import ServingSizeSelector from './ServingSizeSelector';
 
@@ -50,27 +51,6 @@ function LogModalInner({
   const [logState, setLogState] = useState<LogState>('idle');
   const [logError, setLogError] = useState<string | null>(null);
 
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    document.body.classList.add('modal-open');
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
-  }, []);
-
-  // Dismiss when clicking the backdrop (outside the dialog)
-  useEffect(() => {
-    const el = modalRef.current;
-    if (!el) return undefined;
-    const handleMouseDown = (e: MouseEvent) => {
-      if (e.target === el) onClose();
-    };
-    el.addEventListener('mousedown', handleMouseDown);
-    return () => el.removeEventListener('mousedown', handleMouseDown);
-  }, [onClose]);
-
   const isEdit = !!target.editEntryId;
 
   const handleLog = useCallback(async () => {
@@ -114,60 +94,43 @@ function LogModalInner({
   }
 
   return (
-    <>
-      <div className="modal-backdrop fade show" />
-      <div
-        ref={modalRef}
-        className="modal fade show d-block"
-        tabIndex={-1}
-        role="dialog"
-        aria-label="Log modal"
-      >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content">
-            <div className="modal-header d-block align-items-center">
-              <div className="d-flex justify-content-between align-items-start">
-                <div>
-                  {target.brand && <div className="text-secondary small">{target.brand}</div>}
-                  <h5 className="modal-title">{target.name}</h5>
-                </div>
-                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
-              </div>
-              <div className="d-flex justify-content-between align-items-end mt-2">
-                <ServingSizeSelector
-                  prep={prepOrGroup}
-                  value={servingSize}
-                  onChange={setServingSize}
-                />
-                <div>
-                  {logError && <div className="text-danger small me-auto">{logError}</div>}
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleLog}
-                    disabled={logState !== 'idle'}
-                  >
-                    {getButtonLabel(logState, isEdit)}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="modal-body">
-              {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
-              {nutritionInfo && (
-                <div className="bg-body shadow-lg">
-                  <NutritionLabel
-                    nutritionInfo={nutritionInfo}
-                    servingSize={servingSize}
-                    prep={prepOrGroup}
-                  />
-                </div>
-              )}
-            </div>
+    <ModalBase onClose={onClose} ariaLabel="Log modal" scrollable>
+      <div className="modal-header d-block align-items-center">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            {target.brand && <div className="text-secondary small">{target.brand}</div>}
+            <h5 className="modal-title">{target.name}</h5>
+          </div>
+          <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+        </div>
+        <div className="d-flex justify-content-between align-items-end mt-2">
+          <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
+          <div>
+            {logError && <div className="text-danger small me-auto">{logError}</div>}
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleLog}
+              disabled={logState !== 'idle'}
+            >
+              {getButtonLabel(logState, isEdit)}
+            </button>
           </div>
         </div>
       </div>
-    </>
+      <div className="modal-body">
+        {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
+        {nutritionInfo && (
+          <div className="bg-body shadow-lg">
+            <NutritionLabel
+              nutritionInfo={nutritionInfo}
+              servingSize={servingSize}
+              prep={prepOrGroup}
+            />
+          </div>
+        )}
+      </div>
+    </ModalBase>
   );
 }
 

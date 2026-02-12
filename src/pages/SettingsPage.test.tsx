@@ -63,10 +63,16 @@ vi.mock('@simplewebauthn/browser', () => ({
   startRegistration: vi.fn().mockResolvedValue({ id: 'cred-1' }),
 }));
 
-vi.mock('../components/common', () => ({
-  LoadingState: () => <div data-testid="loading-state" />,
-  ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-}));
+vi.mock('../components/common', async () => {
+  const actual = await vi.importActual('../components/common');
+  return {
+    ...actual,
+    LoadingState: () => <div data-testid="loading-state" />,
+    ErrorState: ({ message }: { message: string }) => (
+      <div data-testid="error-state">{message}</div>
+    ),
+  };
+});
 
 const mockUseAuth = vi.mocked(useAuth);
 const mockUseApiQuery = vi.mocked(useApiQuery);

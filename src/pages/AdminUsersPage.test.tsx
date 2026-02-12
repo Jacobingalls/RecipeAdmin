@@ -18,10 +18,16 @@ vi.mock('../api', () => ({
   adminCreateUser: vi.fn(),
 }));
 
-vi.mock('../components/common', () => ({
-  LoadingState: () => <div data-testid="loading-state" />,
-  ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-}));
+vi.mock('../components/common', async () => {
+  const actual = await vi.importActual('../components/common');
+  return {
+    ...actual,
+    LoadingState: () => <div data-testid="loading-state" />,
+    ErrorState: ({ message }: { message: string }) => (
+      <div data-testid="error-state">{message}</div>
+    ),
+  };
+});
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockAdminCreateUser = vi.mocked(api.adminCreateUser);
