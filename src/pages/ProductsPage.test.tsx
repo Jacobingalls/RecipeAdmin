@@ -12,13 +12,19 @@ vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
 }));
 
-vi.mock('../components/common', () => ({
-  LoadingState: () => <div data-testid="loading-state" />,
-  ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
-  ContentUnavailableView: ({ title }: { title: string }) => (
-    <div data-testid="content-unavailable-view">{title}</div>
-  ),
-}));
+vi.mock('../components/common', async () => {
+  const actual = await vi.importActual('../components/common');
+  return {
+    ...actual,
+    LoadingState: () => <div data-testid="loading-state" />,
+    ErrorState: ({ message }: { message: string }) => (
+      <div data-testid="error-state">{message}</div>
+    ),
+    ContentUnavailableView: ({ title }: { title: string }) => (
+      <div data-testid="content-unavailable-view">{title}</div>
+    ),
+  };
+});
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
 

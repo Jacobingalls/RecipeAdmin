@@ -1,10 +1,15 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { AdminCreateUserResponse } from '../api';
 import { adminListUsers, adminCreateUser } from '../api';
-import { LoadingState, ErrorState, CopyButton, ModalBase } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  CopyButton,
+  ModalBase,
+  LinkListItem,
+} from '../components/common';
 import { useApiQuery } from '../hooks';
 
 export default function AdminUsersPage() {
@@ -186,20 +191,22 @@ export default function AdminUsersPage() {
 
       <div className="list-group">
         {users?.map((u) => (
-          <Link
+          <LinkListItem
             key={u.id}
             to={`/admin/users/${u.id}`}
-            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-          >
-            <div>
-              <strong>{u.displayName}</strong>
-              <small className="text-body-secondary ms-2">{u.username}</small>
-              {u.isAdmin && <span className="badge bg-warning text-dark ms-2">Admin</span>}
-            </div>
-            <div className="text-body-secondary small">
-              {u.passkeyCount} passkeys, {u.apiKeyCount} API keys
-            </div>
-          </Link>
+            title={
+              <>
+                <strong>{u.displayName}</strong>
+                <small className="text-body-secondary ms-2">{u.username}</small>
+                {u.isAdmin && <span className="badge bg-warning text-dark ms-2">Admin</span>}
+              </>
+            }
+            trailing={
+              <div className="text-body-secondary small">
+                {u.passkeyCount} passkeys, {u.apiKeyCount} API keys
+              </div>
+            }
+          />
         ))}
         {users?.length === 0 && (
           <div className="list-group-item text-body-secondary text-center">No users found</div>

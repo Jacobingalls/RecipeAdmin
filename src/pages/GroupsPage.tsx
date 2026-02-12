@@ -1,10 +1,14 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { ApiGroupSummary } from '../api';
 import { listGroups } from '../api';
 import { useApiQuery } from '../hooks';
-import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  ContentUnavailableView,
+  LinkListItem,
+} from '../components/common';
 
 export default function GroupsPage() {
   const { data: groups, loading, error } = useApiQuery<ApiGroupSummary[]>(listGroups, []);
@@ -44,14 +48,12 @@ export default function GroupsPage() {
       {!loading && !error && filteredGroups.length > 0 && (
         <div className="list-group">
           {filteredGroups.map((g) => (
-            <Link
+            <LinkListItem
               key={g.id}
               to={`/groups/${g.id}`}
-              className="list-group-item list-group-item-action"
-            >
-              <div className="fw-bold">{g.name}</div>
-              <small className="text-secondary">{g.items.length} item(s)</small>
-            </Link>
+              title={g.name}
+              subtitle={`${g.items.length} item(s)`}
+            />
           ))}
         </div>
       )}

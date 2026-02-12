@@ -34,13 +34,13 @@ Break 500+ line page components into focused section components.
 
 ## Tier 4: Consistent UI Patterns
 
-- [ ] **`SectionHeader`** — `[h5 title] [spacer] [action button/dropdown]` pattern used in every settings/admin section. Standardize spacing, heading levels, and action placement.
+- [x] **`SectionHeader`** — `[h5 title] [spacer] [action children]` layout used in `CredentialsSection`, `SessionsSection`, `AdminCredentialsSection`, `AdminUserProfileForm`, and `DangerZoneSection`. Standardizes spacing, heading level, and action placement.
 
-- [ ] **`CredentialRow`** — Specialized `ListRow` for passkeys and API keys with icon selection, timestamp formatting, expiry badges, and delete action. Used in `SettingsPage` and `AdminUserDetailPage`.
+- [x] **`CredentialRow`** — Specialized `ListRow` for passkeys and API keys. Handles icon selection (`bi-fingerprint`/`bi-key`), timestamp formatting (created vs expires), optional key prefix display, and delete action. Used in `CredentialsSection` and `AdminCredentialsSection`.
 
-- [ ] **`LinkListItem`** — List group item that renders as a `<Link>` with consistent `[title + subtitle] [metadata]` layout. Used in `ProductsPage`, `GroupsPage`, `AdminUsersPage`.
+- [x] **`LinkListItem`** — List group item that renders as a `<Link>`. Simple mode: title (fw-bold) + subtitle. Trailing mode: flex layout with left title area + right trailing content. Used in `ProductsPage`, `GroupsPage`, `AdminUsersPage`.
 
-- [ ] **`FormField`** — Consistent label + input wrapper for forms. Reduces boilerplate in user creation, API key creation, and profile editing forms.
+- [ ] **`FormField`** — Deferred. The two form layouts (horizontal list-group-item in `AdminUserProfileForm` vs vertical stacked in `AdminUsersPage`) are structurally different enough that a single component would require mode switches. Will revisit when a third pattern emerges.
 
 ## Principles
 

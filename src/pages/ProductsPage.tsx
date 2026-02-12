@@ -1,10 +1,14 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { ApiProductSummary } from '../api';
 import { listProducts } from '../api';
 import { useApiQuery } from '../hooks';
-import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  ContentUnavailableView,
+  LinkListItem,
+} from '../components/common';
 
 export default function ProductsPage() {
   const { data: products, loading, error } = useApiQuery<ApiProductSummary[]>(listProducts, []);
@@ -76,14 +80,7 @@ export default function ProductsPage() {
       {!loading && !error && filteredProducts.length > 0 && (
         <div className="list-group">
           {filteredProducts.map((p) => (
-            <Link
-              key={p.id}
-              to={`/products/${p.id}`}
-              className="list-group-item list-group-item-action"
-            >
-              <div className="fw-bold">{p.name}</div>
-              <small className="text-secondary">{p.brand}</small>
-            </Link>
+            <LinkListItem key={p.id} to={`/products/${p.id}`} title={p.name} subtitle={p.brand} />
           ))}
         </div>
       )}

@@ -2,6 +2,7 @@ import type { FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 
 import { adminUpdateUser } from '../../api';
+import { SectionHeader } from '../common';
 
 interface AdminUserProfileFormProps {
   userId: string;
@@ -54,8 +55,7 @@ export default function AdminUserProfileForm({
 
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mt-5 mb-3">
-        <h5 className="mb-0">Profile</h5>
+      <SectionHeader title="Profile" className="mt-5">
         <button
           type="submit"
           form="edit-user-form"
@@ -64,7 +64,7 @@ export default function AdminUserProfileForm({
         >
           {isEditing ? 'Saving...' : 'Save'}
         </button>
-      </div>
+      </SectionHeader>
       {editError && (
         <div className="alert alert-danger py-2 small" role="alert">
           {editError}

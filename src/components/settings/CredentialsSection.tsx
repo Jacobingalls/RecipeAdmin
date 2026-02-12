@@ -8,8 +8,7 @@ import {
   settingsDeletePasskey,
   settingsRevokeAPIKey,
 } from '../../api';
-import { ListRow, DeleteButton, ConfirmationModal } from '../common';
-import { formatRelativeTime } from '../../utils';
+import { SectionHeader, CredentialRow, ConfirmationModal } from '../common';
 
 import CreateAPIKeyModal from './CreateAPIKeyModal';
 
@@ -64,8 +63,7 @@ export default function CredentialsSection({
 
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h5 className="mb-0">Credentials</h5>
+      <SectionHeader title="Credentials" className="mt-4">
         <div className="dropdown">
           <button
             className="btn btn-dark btn-sm dropdown-toggle px-3"
@@ -99,7 +97,7 @@ export default function CredentialsSection({
             </li>
           </ul>
         </div>
-      </div>
+      </SectionHeader>
 
       {passkeyError && (
         <div className="alert alert-danger alert-dismissible small" role="alert">
@@ -124,52 +122,33 @@ export default function CredentialsSection({
       {(passkeys && passkeys.length > 0) || (apiKeys && apiKeys.length > 0) ? (
         <div className="list-group mb-5">
           {passkeys?.map((pk) => (
-            <ListRow
+            <CredentialRow
               key={pk.id}
-              icon="bi-fingerprint"
-              content={<strong>{pk.name}</strong>}
-              secondary={pk.createdAt ? <>Created {formatRelativeTime(pk.createdAt)}</> : undefined}
-            >
-              <DeleteButton
-                ariaLabel={`Delete passkey ${pk.name}`}
-                onClick={() => setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name })}
-              />
-            </ListRow>
+              kind="passkey"
+              name={pk.name}
+              createdAt={pk.createdAt}
+              onDelete={() => setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name })}
+            />
           ))}
-          {apiKeys?.map((ak) => {
-            let secondary;
-            if (ak.isTemporary && ak.expiresAt) {
-              secondary = <>Expires {formatRelativeTime(ak.expiresAt)}</>;
-            } else if (ak.createdAt) {
-              secondary = <>Created {formatRelativeTime(ak.createdAt)}</>;
-            }
-
-            return (
-              <ListRow
-                key={ak.id}
-                icon="bi-key"
-                content={
-                  <>
-                    <strong>{ak.name}</strong>
-                    <code className="ms-2">{ak.keyPrefix}...</code>
-                  </>
+          {apiKeys?.map((ak) => (
+            <CredentialRow
+              key={ak.id}
+              kind="apiKey"
+              name={ak.name}
+              keyPrefix={ak.keyPrefix}
+              createdAt={ak.createdAt}
+              expiresAt={ak.expiresAt}
+              isTemporary={ak.isTemporary}
+              onDelete={async () => {
+                if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
+                  await settingsRevokeAPIKey(ak.id);
+                  refetchApiKeys();
+                } else {
+                  setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
                 }
-                secondary={secondary}
-              >
-                <DeleteButton
-                  ariaLabel={`Revoke API key ${ak.name}`}
-                  onClick={async () => {
-                    if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
-                      await settingsRevokeAPIKey(ak.id);
-                      refetchApiKeys();
-                    } else {
-                      setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
-                    }
-                  }}
-                />
-              </ListRow>
-            );
-          })}
+              }}
+            />
+          ))}
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials.</p>

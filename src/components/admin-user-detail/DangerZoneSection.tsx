@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { adminDeleteUser, adminRevokeUserSessions } from '../../api';
-import { ConfirmationModal } from '../common';
+import { SectionHeader, ConfirmationModal } from '../common';
 
 interface DangerZoneSectionProps {
   userId: string;
@@ -51,7 +51,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
 
   return (
     <>
-      <h5 className="mt-5 mb-3">Danger Zone</h5>
+      <SectionHeader title="Danger Zone" className="mt-5" />
       {revokeSessionsSuccess && (
         <div className="alert alert-success alert-dismissible small" role="status">
           <strong style={{ opacity: 0.8 }}>All Sessions Revoked</strong>

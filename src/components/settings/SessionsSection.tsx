@@ -1,5 +1,5 @@
 import type { SessionInfo } from '../../api';
-import { ListRow, DeleteButton } from '../common';
+import { ListRow, DeleteButton, SectionHeader } from '../common';
 import { formatRelativeTime } from '../../utils';
 
 interface SessionsSectionProps {
@@ -19,8 +19,7 @@ export default function SessionsSection({
 }: SessionsSectionProps) {
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h5 className="mb-0">Sessions</h5>
+      <SectionHeader title="Sessions" className="mt-4">
         <div className="btn-group">
           <button type="button" className="btn btn-dark btn-sm" onClick={onLogout}>
             Sign out
@@ -46,7 +45,7 @@ export default function SessionsSection({
             </li>
           </ul>
         </div>
-      </div>
+      </SectionHeader>
       {sessions && sessions.length > 0 ? (
         <div className="list-group mb-3">
           {sessions.map((session) => (

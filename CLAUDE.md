@@ -49,6 +49,9 @@ npm run format:check # Check formatting without writing
 - `DeleteButton` — circular icon-only trash button for list row actions
 - `CopyButton` — button with "Copied!" feedback for clipboard operations
 - `ConfirmationModal` — "type name to confirm" modal for destructive actions
+- `SectionHeader` — `[h5 title] [spacer] [action children]` for section headings with optional actions
+- `CredentialRow` — passkey/API key row with icon, name, timestamp, and delete action
+- `LinkListItem` — `<Link>` list group item with title/subtitle or title/trailing layout
 - `LoadingState`, `ErrorState`, `ContentUnavailableView` — standard status displays
 - `RequireAuth`, `RequireAdmin` — route guards
 - `StatusView` — base layout for centered status displays
@@ -126,15 +129,18 @@ src/
 │   │   ├── ConfirmationModal # "Type name to confirm" destructive action modal
 │   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
 │   │   ├── CopyButton     # Clipboard copy with "Copied!" feedback
+│   │   ├── CredentialRow  # Passkey/API key row with icon, name, timestamp, delete
 │   │   ├── DeleteButton   # Circular icon-only trash button for list rows
 │   │   ├── ErrorBoundary  # Catches render errors
 │   │   ├── ErrorState     # Error message display
+│   │   ├── LinkListItem   # <Link> list group item with title/subtitle/trailing layout
 │   │   ├── ListRow        # [icon + content + spacer + secondary + actions] layout
 │   │   ├── LoadingState   # Loading indicator
 │   │   ├── ModalBase      # Modal wrapper: backdrop, scroll lock, click-to-dismiss, ARIA
 │   │   ├── PasskeySetupPrompt # Banner prompting users without passkeys to register one
 │   │   ├── RequireAdmin   # Route guard: redirects non-admins to /
 │   │   ├── RequireAuth    # Route guard: redirects unauthenticated to /login, shows PasskeySetupPrompt
+│   │   ├── SectionHeader  # [h5 title + spacer + action children] section heading
 │   │   └── StatusView
 │   ├── admin-user-detail/ # Admin user detail page sections
 │   │   ├── index.ts       # Barrel exports
