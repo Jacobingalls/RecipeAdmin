@@ -134,6 +134,12 @@ src/
 │   │   ├── RequireAdmin   # Route guard: redirects non-admins to /
 │   │   ├── RequireAuth    # Route guard: redirects unauthenticated to /login, shows PasskeySetupPrompt
 │   │   └── StatusView
+│   ├── admin-user-detail/ # Admin user detail page sections
+│   │   ├── index.ts       # Barrel exports
+│   │   ├── AdminUserProfileForm # User profile editing form
+│   │   ├── AdminCredentialsSection # Credential list + temp key generation
+│   │   ├── TempAPIKeyModal # Temporary API key display
+│   │   └── DangerZoneSection # Revoke sessions + delete user
 │   ├── lookup/            # Barcode lookup components
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── GroupCard      # Group result card
@@ -142,6 +148,12 @@ src/
 │   ├── product/           # Product detail components
 │   │   ├── index.ts       # Barrel exports
 │   │   └── PreparationDetails # Nutrition label + serving selector
+│   ├── settings/          # Settings page sections
+│   │   ├── index.ts       # Barrel exports
+│   │   ├── ProfileSection # Display name viewing/editing
+│   │   ├── CredentialsSection # Passkey + API key list with add dropdown
+│   │   ├── CreateAPIKeyModal # Key creation form with expiry toggle
+│   │   └── SessionsSection # Session list with sign-out controls
 │   ├── BarcodeSection     # Barcode list with serving size links
 │   ├── CustomSizesSection # Custom size buttons
 │   ├── Footer             # App footer

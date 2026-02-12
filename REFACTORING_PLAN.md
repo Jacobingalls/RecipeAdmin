@@ -20,17 +20,9 @@ These small, focused components eliminate the most duplication across the codeba
 
 Break 500+ line page components into focused section components.
 
-- [ ] **`SettingsPage` sections** — Currently 660 lines with 20+ state variables. Split into:
-  - `ProfileSection` — display name viewing/editing
-  - `CredentialsSection` — passkey + API key list with add dropdown
-  - `CreateAPIKeyModal` — key creation form with expiry toggle
-  - `SessionsSection` — session list with sign-out controls
+- [x] **`SettingsPage` sections** — Split into `ProfileSection`, `CredentialsSection`, `CreateAPIKeyModal`, `SessionsSection` in `src/components/settings/`. Page is now a 93-line orchestrator.
 
-- [ ] **`AdminUserDetailPage` sections** — Currently 582 lines. Split into:
-  - `AdminUserProfileForm` — user profile editing form
-  - `AdminCredentialsSection` — credential list with generate temp key button
-  - `TempAPIKeyModal` — temporary key display with copy
-  - `DangerZoneSection` — revoke sessions + delete user
+- [x] **`AdminUserDetailPage` sections** — Split into `AdminUserProfileForm`, `AdminCredentialsSection`, `TempAPIKeyModal`, `DangerZoneSection` in `src/components/admin-user-detail/`. Page is now a 53-line orchestrator.
 
 ## Tier 3: Shared Modal & Data Patterns
 
