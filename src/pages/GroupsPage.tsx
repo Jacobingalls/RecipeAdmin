@@ -56,7 +56,7 @@ export default function GroupsPage() {
           {filteredGroups.map((g) => (
             <LinkListItem
               key={g.id}
-              to={`/groups/${g.id}`}
+              to={`/admin/groups/${g.id}`}
               title={g.name}
               subtitle={`${g.items.length} item(s)`}
             />

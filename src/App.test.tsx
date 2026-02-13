@@ -80,6 +80,14 @@ vi.mock('./pages/AdminUsersPage', () => ({
   default: () => <div data-testid="admin-users-page" />,
 }));
 
+vi.mock('./pages/AdminProductEditorPage', () => ({
+  default: () => <div data-testid="admin-product-editor-page" />,
+}));
+
+vi.mock('./pages/AdminGroupEditorPage', () => ({
+  default: () => <div data-testid="admin-group-editor-page" />,
+}));
+
 vi.mock('./pages/AdminUserDetailPage', () => ({
   default: () => <div data-testid="admin-user-detail-page" />,
 }));
@@ -108,28 +116,40 @@ describe('App', () => {
     expect(screen.getByTestId('lookup-page')).toBeInTheDocument();
   });
 
-  it('renders products page on /products', () => {
-    window.history.pushState({}, '', '/products');
-    render(<App />);
-    expect(screen.getByTestId('products-page')).toBeInTheDocument();
-  });
-
   it('renders product detail page on /products/:id', () => {
     window.history.pushState({}, '', '/products/p1');
     render(<App />);
     expect(screen.getByTestId('product-detail-page')).toBeInTheDocument();
   });
 
-  it('renders groups page on /groups', () => {
-    window.history.pushState({}, '', '/groups');
-    render(<App />);
-    expect(screen.getByTestId('groups-page')).toBeInTheDocument();
-  });
-
   it('renders group detail page on /groups/:id', () => {
     window.history.pushState({}, '', '/groups/g1');
     render(<App />);
     expect(screen.getByTestId('group-detail-page')).toBeInTheDocument();
+  });
+
+  it('renders products list page on /admin/products', () => {
+    window.history.pushState({}, '', '/admin/products');
+    render(<App />);
+    expect(screen.getByTestId('products-page')).toBeInTheDocument();
+  });
+
+  it('renders admin product editor on /admin/products/:id', () => {
+    window.history.pushState({}, '', '/admin/products/p1');
+    render(<App />);
+    expect(screen.getByTestId('admin-product-editor-page')).toBeInTheDocument();
+  });
+
+  it('renders groups list page on /admin/groups', () => {
+    window.history.pushState({}, '', '/admin/groups');
+    render(<App />);
+    expect(screen.getByTestId('groups-page')).toBeInTheDocument();
+  });
+
+  it('renders admin group editor on /admin/groups/:id', () => {
+    window.history.pushState({}, '', '/admin/groups/g1');
+    render(<App />);
+    expect(screen.getByTestId('admin-group-editor-page')).toBeInTheDocument();
   });
 
   it('renders lookup page with barcode param', () => {

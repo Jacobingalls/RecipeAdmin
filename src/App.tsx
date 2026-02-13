@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 
+import { AdminLayout } from './components/admin';
 import Header from './components/Header';
 import { ErrorBoundary } from './components/common';
 import RequireAuth from './components/common/RequireAuth';
@@ -16,6 +17,8 @@ import HistoryPage from './pages/HistoryPage';
 import LoginPage from './pages/LoginPage';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminProductEditorPage from './pages/AdminProductEditorPage';
+import AdminGroupEditorPage from './pages/AdminGroupEditorPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminUserDetailPage from './pages/AdminUserDetailPage';
 
@@ -45,13 +48,19 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/lookup/:barcode?" element={<LookupPage />} />
-              <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/groups" element={<GroupsPage />} />
               <Route path="/groups/:id" element={<GroupDetailPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
+          <Route element={<AdminLayout />}>
+            <Route element={<RequireAuth />}>
               <Route element={<RequireAdmin />}>
+                <Route path="/admin/products" element={<ProductsPage />} />
+                <Route path="/admin/products/:id" element={<AdminProductEditorPage />} />
+                <Route path="/admin/groups" element={<GroupsPage />} />
+                <Route path="/admin/groups/:id" element={<AdminGroupEditorPage />} />
                 <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
               </Route>

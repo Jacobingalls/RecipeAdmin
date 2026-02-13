@@ -91,8 +91,8 @@ describe('GroupsPage', () => {
     mockQuery({ data: sampleGroups });
     renderWithRouter(<GroupsPage />);
     const links = screen.getAllByRole('link');
-    expect(links[0]).toHaveAttribute('href', '/groups/g1');
-    expect(links[1]).toHaveAttribute('href', '/groups/g2');
+    expect(links[0]).toHaveAttribute('href', '/admin/groups/g1');
+    expect(links[1]).toHaveAttribute('href', '/admin/groups/g2');
   });
 
   it('filters groups by name', () => {

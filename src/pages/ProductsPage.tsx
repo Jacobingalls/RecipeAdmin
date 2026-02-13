@@ -86,7 +86,12 @@ export default function ProductsPage() {
       {!loading && !error && filteredProducts.length > 0 && (
         <div className="list-group">
           {filteredProducts.map((p) => (
-            <LinkListItem key={p.id} to={`/products/${p.id}`} title={p.name} subtitle={p.brand} />
+            <LinkListItem
+              key={p.id}
+              to={`/admin/products/${p.id}`}
+              title={p.name}
+              subtitle={p.brand}
+            />
           ))}
         </div>
       )}

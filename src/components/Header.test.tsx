@@ -92,18 +92,18 @@ describe('Header', () => {
     expect(screen.getByTestId('version-badge')).toBeInTheDocument();
   });
 
-  it('renders Home, Products, and Groups nav links', () => {
+  it('renders History nav link', () => {
     renderWithRouter(<Header />);
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Products')).toBeInTheDocument();
-    expect(screen.getByText('Groups')).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: 'History' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '/history');
   });
 
-  it('highlights the Home nav link on /', () => {
-    renderWithRouter(<Header />, { route: '/' });
-    const homeLink = screen.getByText('Home');
-    expect(homeLink.className).toContain('active');
-    expect(homeLink.className).toContain('bg-primary');
+  it('highlights the History nav link on /history', () => {
+    renderWithRouter(<Header />, { route: '/history' });
+    const link = screen.getByRole('link', { name: 'History' });
+    expect(link.className).toContain('active');
+    expect(link.className).toContain('fw-semibold');
   });
 
   it('renders the search form', () => {
@@ -206,7 +206,7 @@ describe('Header', () => {
 
   it('does not auto-navigate to empty search from other pages', () => {
     vi.useFakeTimers();
-    renderWithRouter(<Header />, { route: '/products' });
+    renderWithRouter(<Header />, { route: '/history' });
     const input = screen.getByPlaceholderText('Search...');
     fireEvent.change(input, { target: { value: 'ap' } });
     act(() => vi.advanceTimersByTime(300));
@@ -215,20 +215,6 @@ describe('Header', () => {
     act(() => vi.advanceTimersByTime(300));
     expect(mockNavigate).not.toHaveBeenCalled();
     vi.useRealTimers();
-  });
-
-  it('highlights the active nav link', () => {
-    renderWithRouter(<Header />, { route: '/products' });
-    const productsLink = screen.getByText('Products');
-    expect(productsLink.className).toContain('active');
-    expect(productsLink.className).toContain('bg-primary');
-  });
-
-  it('renders inactive nav links with text-light class', () => {
-    renderWithRouter(<Header />, { route: '/products' });
-    const groupsLink = screen.getByText('Groups');
-    expect(groupsLink.className).toContain('text-light');
-    expect(groupsLink.className).not.toContain('active');
   });
 
   it('renders navbar toggler button', () => {

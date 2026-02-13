@@ -78,7 +78,7 @@ export default function Header() {
   if (!isAuthenticated) return null;
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `nav-link px-3 py-2 rounded ${isActive ? 'active bg-primary' : 'text-light'}`;
+    `nav-link px-3 py-2 rounded ${isActive ? 'active text-white fw-semibold' : 'text-light'}`;
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
@@ -107,18 +107,13 @@ export default function Header() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
             <li className="nav-item">
-              <NavLink className={navLinkClass} to="/" end>
-                Home
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className={navLinkClass} to="/products">
-                Products
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className={navLinkClass} to="/groups">
-                Groups
+              <NavLink className={navLinkClass} to="/history">
+                <span className="d-inline-flex flex-column align-items-center">
+                  History
+                  <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
+                    History
+                  </span>
+                </span>
               </NavLink>
             </li>
           </ul>
@@ -140,7 +135,6 @@ export default function Header() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onDoubleClick={(e) => e.currentTarget.select()}
                 onFocus={(e) => {
                   const group = e.currentTarget.closest('.input-group') as HTMLElement | null;
                   group?.style.setProperty('border-color', 'var(--bs-primary)');

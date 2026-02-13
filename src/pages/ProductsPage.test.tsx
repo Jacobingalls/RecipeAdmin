@@ -91,7 +91,7 @@ describe('ProductsPage', () => {
     mockQuery({ data: sampleProducts });
     renderWithRouter(<ProductsPage />);
     const links = screen.getAllByRole('link');
-    expect(links[0]).toHaveAttribute('href', '/products/p1');
+    expect(links[0]).toHaveAttribute('href', '/admin/products/p1');
   });
 
   it('filters by name', () => {
