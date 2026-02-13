@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
@@ -106,56 +106,115 @@ describe('Header', () => {
     expect(homeLink.className).toContain('bg-primary');
   });
 
-  it('renders the barcode search form', () => {
+  it('renders the search form', () => {
     renderWithRouter(<Header />);
-    expect(screen.getByPlaceholderText('Barcode...')).toBeInTheDocument();
-    expect(document.querySelector('.bi-upc-scan')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
+    expect(document.querySelector('.bi-search')).toBeInTheDocument();
   });
 
-  it('navigates to lookup page on search submit', () => {
+  it('navigates to search page on search submit', () => {
     renderWithRouter(<Header />);
-    const input = screen.getByPlaceholderText('Barcode...');
-    fireEvent.change(input, { target: { value: '123456' } });
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: 'apple' } });
     fireEvent.submit(screen.getByRole('search'));
-    expect(mockNavigate).toHaveBeenCalledWith('/lookup/123456');
+    expect(mockNavigate).toHaveBeenCalledWith('/search?q=apple', { replace: false });
   });
 
-  it('clears the input after search', () => {
+  it('keeps the query in the input after search', () => {
     renderWithRouter(<Header />);
-    const input = screen.getByPlaceholderText('Barcode...');
-    fireEvent.change(input, { target: { value: '123456' } });
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: 'apple' } });
     fireEvent.submit(screen.getByRole('search'));
-    expect(input).toHaveValue('');
+    expect(input).toHaveValue('apple');
   });
 
-  it('does not navigate when search input is empty', () => {
+  it('syncs input with URL q param', () => {
+    renderWithRouter(<Header />, { route: '/search?q=banana' });
+    expect(screen.getByPlaceholderText('Search...')).toHaveValue('banana');
+  });
+
+  it('navigates to /search when submitting empty input', () => {
     renderWithRouter(<Header />);
     fireEvent.submit(screen.getByRole('search'));
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/search', { replace: false });
   });
 
-  it('does not navigate when search input is only whitespace', () => {
+  it('navigates to /search when submitting only whitespace', () => {
     renderWithRouter(<Header />);
-    const input = screen.getByPlaceholderText('Barcode...');
+    const input = screen.getByPlaceholderText('Search...');
     fireEvent.change(input, { target: { value: '   ' } });
     fireEvent.submit(screen.getByRole('search'));
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/search', { replace: false });
   });
 
-  it('trims whitespace from barcode before navigating', () => {
+  it('trims whitespace from query before navigating', () => {
     renderWithRouter(<Header />);
-    const input = screen.getByPlaceholderText('Barcode...');
-    fireEvent.change(input, { target: { value: '  123  ' } });
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: '  apple  ' } });
     fireEvent.submit(screen.getByRole('search'));
-    expect(mockNavigate).toHaveBeenCalledWith('/lookup/123');
+    expect(mockNavigate).toHaveBeenCalledWith('/search?q=apple', { replace: false });
   });
 
-  it('encodes special characters in barcode', () => {
+  it('encodes special characters in search query', () => {
     renderWithRouter(<Header />);
-    const input = screen.getByPlaceholderText('Barcode...');
+    const input = screen.getByPlaceholderText('Search...');
     fireEvent.change(input, { target: { value: 'foo/bar' } });
     fireEvent.submit(screen.getByRole('search'));
-    expect(mockNavigate).toHaveBeenCalledWith('/lookup/foo%2Fbar');
+    expect(mockNavigate).toHaveBeenCalledWith('/search?q=foo%2Fbar', { replace: false });
+  });
+
+  it('auto-navigates after debounce when typing', () => {
+    vi.useFakeTimers();
+    renderWithRouter(<Header />);
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: 'apple' } });
+    expect(mockNavigate).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(300));
+    expect(mockNavigate).toHaveBeenCalledWith('/search?q=apple', { replace: false });
+    vi.useRealTimers();
+  });
+
+  it('does not auto-navigate for queries shorter than 2 characters', () => {
+    vi.useFakeTimers();
+    renderWithRouter(<Header />);
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: 'a' } });
+    act(() => vi.advanceTimersByTime(300));
+    expect(mockNavigate).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('replaces history when already on search page', () => {
+    vi.useFakeTimers();
+    renderWithRouter(<Header />, { route: '/search?q=old' });
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: 'new query' } });
+    act(() => vi.advanceTimersByTime(300));
+    expect(mockNavigate).toHaveBeenCalledWith('/search?q=new%20query', { replace: true });
+    vi.useRealTimers();
+  });
+
+  it('navigates to /search when clearing input on search page', () => {
+    vi.useFakeTimers();
+    renderWithRouter(<Header />, { route: '/search?q=apple' });
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: '' } });
+    act(() => vi.advanceTimersByTime(300));
+    expect(mockNavigate).toHaveBeenCalledWith('/search', { replace: true });
+    vi.useRealTimers();
+  });
+
+  it('does not auto-navigate to empty search from other pages', () => {
+    vi.useFakeTimers();
+    renderWithRouter(<Header />, { route: '/products' });
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.change(input, { target: { value: 'ap' } });
+    act(() => vi.advanceTimersByTime(300));
+    mockNavigate.mockClear();
+    fireEvent.change(input, { target: { value: '' } });
+    act(() => vi.advanceTimersByTime(300));
+    expect(mockNavigate).not.toHaveBeenCalled();
+    vi.useRealTimers();
   });
 
   it('highlights the active nav link', () => {

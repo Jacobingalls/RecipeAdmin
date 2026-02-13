@@ -1,21 +1,22 @@
-import type { ApiLookupItem } from '../../api';
+import type { ApiSearchResult } from '../../api';
+import { ServingSize } from '../../domain';
 
 import ProductCard from './ProductCard';
 import GroupCard from './GroupCard';
 
 interface LookupResultItemProps {
-  item: ApiLookupItem;
-  barcode?: string;
-  onLog?: (item: ApiLookupItem) => void;
+  result: ApiSearchResult;
+  onLog?: (result: ApiSearchResult) => void;
 }
 
-export default function LookupResultItem({ item, barcode, onLog }: LookupResultItemProps) {
-  const handleLog = onLog ? () => onLog(item) : undefined;
+export default function LookupResultItem({ result, onLog }: LookupResultItemProps) {
+  const handleLog = onLog ? () => onLog(result) : undefined;
+  const servingSize = ServingSize.fromObject(result.servingSize) || ServingSize.servings(1);
 
-  if (item.product) {
-    return <ProductCard item={item} barcode={barcode} onLog={handleLog} />;
-  } else if (item.group) {
-    return <GroupCard item={item} barcode={barcode} onLog={handleLog} />;
+  if (result.item.product) {
+    return <ProductCard item={result.item} servingSize={servingSize} onLog={handleLog} />;
+  } else if (result.item.group) {
+    return <GroupCard item={result.item} servingSize={servingSize} onLog={handleLog} />;
   }
   return null;
 }

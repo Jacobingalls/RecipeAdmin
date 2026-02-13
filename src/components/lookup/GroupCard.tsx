@@ -6,19 +6,13 @@ import { formatSignificant } from '../../utils/formatters';
 
 interface GroupCardProps {
   item: ApiLookupItem;
-  barcode?: string;
+  servingSize: ServingSize;
   onLog?: () => void;
 }
 
-export default function GroupCard({ item, barcode, onLog }: GroupCardProps) {
+export default function GroupCard({ item, servingSize, onLog }: GroupCardProps) {
   const g = item.group!;
   const group = new ProductGroup(g);
-
-  // Find the matching barcode and get its serving size
-  const matchingBarcode = barcode ? g.barcodes?.find((bc) => bc.code === barcode) : null;
-  const servingSize = matchingBarcode?.servingSize
-    ? ServingSize.fromObject(matchingBarcode.servingSize) || ServingSize.servings(1)
-    : ServingSize.servings(1);
 
   // Calculate nutrition for this serving size
   let serving = group.serving(ServingSize.servings(1));

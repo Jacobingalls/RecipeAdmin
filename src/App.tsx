@@ -14,6 +14,7 @@ import GroupsPage from './pages/GroupsPage';
 import GroupDetailPage from './pages/GroupDetailPage';
 import HistoryPage from './pages/HistoryPage';
 import LoginPage from './pages/LoginPage';
+import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminUserDetailPage from './pages/AdminUserDetailPage';
@@ -42,6 +43,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route element={<RequireAuth />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/lookup/:barcode?" element={<LookupPage />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />

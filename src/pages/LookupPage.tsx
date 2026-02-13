@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import type { ApiLookupItem } from '../api';
+import type { ApiSearchResult } from '../api';
 import { lookupBarcode } from '../api';
 import { useApiQuery } from '../hooks';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
@@ -17,36 +17,33 @@ export default function LookupPage() {
     data: results,
     loading,
     error,
-  } = useApiQuery<ApiLookupItem[]>(() => lookupBarcode(barcode!), [barcode], {
+  } = useApiQuery<ApiSearchResult[]>(() => lookupBarcode(barcode!), [barcode], {
     enabled: !!barcode,
     errorMessage: "Couldn't look up this barcode. Try again later.",
   });
-  const [logItem, setLogItem] = useState<ApiLookupItem | null>(null);
+  const [logItem, setLogItem] = useState<ApiSearchResult | null>(null);
 
   useEffect(() => {
     if (results?.length !== 1) return;
-    const item = results[0];
-    if (item.product?.id) {
-      navigate(`/products/${item.product.id}`, { replace: true });
-    } else if (item.group?.id) {
-      navigate(`/groups/${item.group.id}`, { replace: true });
+    const result = results[0];
+    if (result.item.product?.id) {
+      navigate(`/products/${result.item.product.id}`, { replace: true });
+    } else if (result.item.group?.id) {
+      navigate(`/groups/${result.item.group.id}`, { replace: true });
     }
   }, [results, navigate]);
 
   const logTarget: LogTarget | null = useMemo(() => {
     if (!logItem) return null;
 
-    if (logItem.product) {
-      const p = logItem.product;
+    const servingSize = ServingSize.fromObject(logItem.servingSize) || ServingSize.servings(1);
+
+    if (logItem.item.product) {
+      const p = logItem.item.product;
       const prepData =
-        p.preparations?.find((pr) => pr.id === logItem.preparationID) || p.preparations?.[0];
+        p.preparations?.find((pr) => pr.id === logItem.item.preparationID) || p.preparations?.[0];
       if (!prepData) return null;
       const prep = new Preparation(prepData);
-
-      const matchingBarcode = barcode ? p.barcodes?.find((bc) => bc.code === barcode) : null;
-      const servingSize = matchingBarcode?.servingSize
-        ? ServingSize.fromObject(matchingBarcode.servingSize) || ServingSize.servings(1)
-        : ServingSize.servings(1);
 
       return {
         name: p.name,
@@ -58,14 +55,9 @@ export default function LookupPage() {
       };
     }
 
-    if (logItem.group) {
-      const g = logItem.group;
+    if (logItem.item.group) {
+      const g = logItem.item.group;
       const group = new ProductGroup(g);
-
-      const matchingBarcode = barcode ? g.barcodes?.find((bc) => bc.code === barcode) : null;
-      const servingSize = matchingBarcode?.servingSize
-        ? ServingSize.fromObject(matchingBarcode.servingSize) || ServingSize.servings(1)
-        : ServingSize.servings(1);
 
       return {
         name: g.name || 'Group',
@@ -76,7 +68,7 @@ export default function LookupPage() {
     }
 
     return null;
-  }, [logItem, barcode]);
+  }, [logItem]);
 
   return (
     <>
@@ -99,11 +91,10 @@ export default function LookupPage() {
       )}
       {results && results.length > 0 && (
         <div>
-          {results.map((item) => (
+          {results.map((result) => (
             <LookupResultItem
-              key={item.product?.id ?? item.group?.id}
-              item={item}
-              barcode={barcode}
+              key={result.item.product?.id ?? result.item.group?.id}
+              result={result}
               onLog={setLogItem}
             />
           ))}

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { ApiLookupItem } from '../../api';
+import { ServingSize } from '../../domain';
 
 import GroupCard from './GroupCard';
 
@@ -38,67 +39,39 @@ const makeItem = (overrides: Partial<ApiLookupItem> = {}): ApiLookupItem => ({
 
 describe('GroupCard', () => {
   it('renders the group name as a link', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     const link = screen.getByRole('link', { name: 'Test Group' });
     expect(link).toHaveAttribute('href', '/groups/grp-1');
   });
 
   it('renders the Group badge', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText('Group')).toBeInTheDocument();
   });
 
   it('renders calories', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText(/200/)).toBeInTheDocument();
     expect(screen.getByText(/cal/)).toBeInTheDocument();
   });
 
   it('renders mass', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText(/50/)).toBeInTheDocument();
   });
 
   it('renders item count', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText('1 item(s)')).toBeInTheDocument();
   });
 
   it('displays default 1 serving', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText('1 serving')).toBeInTheDocument();
   });
 
-  it('uses matching barcode serving size', () => {
-    const item = makeItem({
-      group: {
-        id: 'grp-1',
-        name: 'Barcode Group',
-        items: [
-          {
-            product: {
-              preparations: [
-                {
-                  id: 'prep-1',
-                  nutritionalInformation: {
-                    calories: { amount: 100, unit: 'kcal' },
-                  },
-                  mass: { amount: 30, unit: 'g' },
-                },
-              ],
-            },
-            preparationID: 'prep-1',
-          },
-        ],
-        barcodes: [
-          {
-            code: 'XYZ',
-            servingSize: { kind: 'servings', amount: 3 },
-          },
-        ],
-      },
-    });
-    renderWithRouter(<GroupCard item={item} barcode="XYZ" />);
+  it('uses provided serving size', () => {
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(3)} />);
     expect(screen.getByText('3 servings')).toBeInTheDocument();
   });
 
@@ -110,7 +83,7 @@ describe('GroupCard', () => {
         items: [],
       },
     });
-    renderWithRouter(<GroupCard item={item} />);
+    renderWithRouter(<GroupCard item={item} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText('0 item(s)')).toBeInTheDocument();
   });
 
@@ -121,32 +94,36 @@ describe('GroupCard', () => {
         name: 'No Items',
       },
     });
-    renderWithRouter(<GroupCard item={item} />);
+    renderWithRouter(<GroupCard item={item} servingSize={ServingSize.servings(1)} />);
     expect(screen.getByText('No Items')).toBeInTheDocument();
     expect(screen.getByText('0 item(s)')).toBeInTheDocument();
   });
 
   it('renders Log button when onLog is provided', () => {
     const onLog = vi.fn();
-    renderWithRouter(<GroupCard item={makeItem()} onLog={onLog} />);
+    renderWithRouter(
+      <GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} onLog={onLog} />,
+    );
     const logButton = screen.getByRole('button', { name: 'Log' });
     expect(logButton).toBeInTheDocument();
   });
 
   it('does not render Log button when onLog is not provided', () => {
-    renderWithRouter(<GroupCard item={makeItem()} />);
+    renderWithRouter(<GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} />);
     expect(screen.queryByRole('button', { name: 'Log' })).not.toBeInTheDocument();
   });
 
   it('calls onLog when Log button is clicked', () => {
     const onLog = vi.fn();
-    renderWithRouter(<GroupCard item={makeItem()} onLog={onLog} />);
+    renderWithRouter(
+      <GroupCard item={makeItem()} servingSize={ServingSize.servings(1)} onLog={onLog} />,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Log' }));
     expect(onLog).toHaveBeenCalledTimes(1);
   });
 
   it('falls back to oneServing when serving calculation throws', () => {
-    // Mass-based barcode serving size on a group with no mass defined → throws, falls back
+    // Mass-based serving size on a group with no mass defined → throws, falls back
     const item: ApiLookupItem = {
       group: {
         id: 'grp-fallback',
@@ -166,15 +143,10 @@ describe('GroupCard', () => {
             preparationID: 'prep-1',
           },
         ],
-        barcodes: [
-          {
-            code: 'FAIL',
-            servingSize: { kind: 'mass', amount: { amount: 100, unit: 'g' } },
-          },
-        ],
+        barcodes: [],
       },
     };
-    renderWithRouter(<GroupCard item={item} barcode="FAIL" />);
+    renderWithRouter(<GroupCard item={item} servingSize={ServingSize.mass(100, 'g')} />);
     // Falls back to oneServing nutrition
     expect(screen.getByText(/80/)).toBeInTheDocument();
     expect(screen.getByText(/cal/)).toBeInTheDocument();

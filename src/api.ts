@@ -28,6 +28,12 @@ export interface ApiLookupItem {
   group?: ProductGroupData;
 }
 
+export interface ApiSearchResult {
+  item: ApiLookupItem;
+  servingSize: ServingSizeData;
+  relevance: number;
+}
+
 export interface ApiVersion {
   version: string;
   debug?: boolean;
@@ -199,8 +205,12 @@ export interface LogEntryResponse {
   id: string;
 }
 
-export async function lookupBarcode(barcode: string): Promise<ApiLookupItem[]> {
-  return apiFetch<ApiLookupItem[]>(`/lookup/${encodeURIComponent(barcode)}`);
+export async function lookupBarcode(barcode: string): Promise<ApiSearchResult[]> {
+  return apiFetch<ApiSearchResult[]>(`/lookup/${encodeURIComponent(barcode)}`);
+}
+
+export async function searchItems(query: string): Promise<ApiSearchResult[]> {
+  return apiPost<{ query: string }, ApiSearchResult[]>('/search', { query });
 }
 
 export async function listProducts(): Promise<ApiProductSummary[]> {

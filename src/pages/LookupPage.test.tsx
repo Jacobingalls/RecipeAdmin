@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { ApiLookupItem } from '../api';
+import type { ApiSearchResult } from '../api';
 import { useApiQuery } from '../hooks';
 
 import LookupPage from './LookupPage';
@@ -20,9 +20,7 @@ vi.mock('../components/common', () => ({
 }));
 
 vi.mock('../components/lookup', () => ({
-  LookupResultItem: ({ barcode }: { barcode?: string }) => (
-    <div data-testid="lookup-result-item">{barcode}</div>
-  ),
+  LookupResultItem: () => <div data-testid="lookup-result-item" />,
 }));
 
 vi.mock('../components/LogModal', () => ({
@@ -45,19 +43,27 @@ function renderWithRoute(route: string) {
   );
 }
 
-function mockQuery(overrides: Partial<UseApiQueryResult<ApiLookupItem[]>>) {
+function mockQuery(overrides: Partial<UseApiQueryResult<ApiSearchResult[]>>) {
   mockUseApiQuery.mockReturnValue({
     data: null,
     loading: false,
     error: null,
     refetch: vi.fn(),
     ...overrides,
-  } as UseApiQueryResult<ApiLookupItem[]>);
+  } as UseApiQueryResult<ApiSearchResult[]>);
 }
 
-const sampleResults: ApiLookupItem[] = [
-  { product: { id: 'p1', name: 'Apple' } },
-  { group: { id: 'g1', name: 'Fruit Mix' } },
+const sampleResults: ApiSearchResult[] = [
+  {
+    item: { product: { id: 'p1', name: 'Apple' } },
+    servingSize: { kind: 'servings', amount: 1 },
+    relevance: 1.0,
+  },
+  {
+    item: { group: { id: 'g1', name: 'Fruit Mix' } },
+    servingSize: { kind: 'servings', amount: 1 },
+    relevance: 0.9,
+  },
 ];
 
 describe('LookupPage', () => {
@@ -136,13 +142,29 @@ describe('LookupPage', () => {
   });
 
   it('navigates to product detail page when there is a single product result', () => {
-    mockQuery({ data: [{ product: { id: 'p1', name: 'Apple' } }] });
+    mockQuery({
+      data: [
+        {
+          item: { product: { id: 'p1', name: 'Apple' } },
+          servingSize: { kind: 'servings', amount: 1 },
+          relevance: 1.0,
+        },
+      ],
+    });
     renderWithRoute('/lookup/123456');
     expect(screen.getByTestId('product-detail-page')).toBeInTheDocument();
   });
 
   it('navigates to group detail page when there is a single group result', () => {
-    mockQuery({ data: [{ group: { id: 'g1', name: 'Fruit Mix' } }] });
+    mockQuery({
+      data: [
+        {
+          item: { group: { id: 'g1', name: 'Fruit Mix' } },
+          servingSize: { kind: 'servings', amount: 1 },
+          relevance: 1.0,
+        },
+      ],
+    });
     renderWithRoute('/lookup/123456');
     expect(screen.getByTestId('group-detail-page')).toBeInTheDocument();
   });

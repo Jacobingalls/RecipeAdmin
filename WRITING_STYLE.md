@@ -30,9 +30,19 @@ Headings describe the content, not the action. Keep them short and scannable.
 
 Provide a helpful nudge with actionable guidance. Don't use "yet" — it implies the user is behind.
 
+There are two kinds of empty states:
+
+**"Nothing here" states** — the user did something (searched, navigated) but there's no content to show. Title says what's missing; description suggests what to try.
+
 - **Do**: "No products" / "Try adjusting your search or filters."
 - **Do**: "No history" / "Log something to see it here."
 - **Don't**: "No products yet" / "You haven't added any products yet."
+
+**"Ready to start" states** — the user just arrived and hasn't taken action yet. Title says what they can do; description points them to the UI element that gets them started.
+
+- **Do**: "Search products and groups" / "Use the search box above to get started."
+- **Don't**: "No search query" / "Type a query to search." (describes system state, not the user's goal)
+- **Don't**: "Search" (too vague — what can they search?)
 
 ## Error messages
 
@@ -68,7 +78,7 @@ Use them occasionally for warmth in success feedback — "Logged!", "Copied!" ar
 
 ## Placeholders
 
-- Search fields use an action verb: "Search products..."
+- Search fields use an action verb: "Search products..." — exception: a global search box that covers everything can use just "Search..."
 - Identity fields use examples: "e.g. jacob@example.com"
 
 ## Greetings

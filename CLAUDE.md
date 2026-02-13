@@ -21,7 +21,7 @@ npm run format:check # Check formatting without writing
 
 ### Writing style
 
-All user-facing strings must follow `WRITING_STYLE.md`. Use the `writing-style` agent to review copy in changed files.
+All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/writing-style` skill when adding or changing user-facing text.** Never skip this step.
 
 ### Engineering Philosophy
 

@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react';
-import { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
 
@@ -35,9 +35,45 @@ function useGravatarUrl(email: string | undefined, size: number = 32): string | 
 
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
-  const [barcode, setBarcode] = useState('');
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const urlQuery = searchParams.get('q') ?? '';
+  const [searchQuery, setSearchQuery] = useState(urlQuery);
   const navigate = useNavigate();
   const avatarUrl = useGravatarUrl(user?.email);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Sync local input with URL when the q param changes (e.g. back/forward navigation)
+  useEffect(() => {
+    setSearchQuery(urlQuery);
+  }, [urlQuery]);
+
+  const isOnSearchPage = location.pathname === '/search';
+
+  const navigateToSearch = useCallback(
+    (query: string) => {
+      const trimmed = query.trim();
+      const path = trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : '/search';
+      navigate(path, { replace: isOnSearchPage });
+    },
+    [navigate, isOnSearchPage],
+  );
+
+  // Auto-search after debounce
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    // Skip if the URL already matches
+    if (trimmed === urlQuery) return;
+    // Require minimum length for non-empty queries
+    if (trimmed.length > 0 && trimmed.length < 2) return;
+    // Only navigate to empty search if already on the search page
+    if (trimmed.length === 0 && !isOnSearchPage) return;
+
+    debounceRef.current = setTimeout(() => navigateToSearch(searchQuery), 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, urlQuery, isOnSearchPage, navigateToSearch]);
 
   if (!isAuthenticated) return null;
 
@@ -46,10 +82,8 @@ export default function Header() {
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
-    if (barcode.trim()) {
-      navigate(`/lookup/${encodeURIComponent(barcode.trim())}`);
-      setBarcode('');
-    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    navigateToSearch(searchQuery);
   }
 
   return (
@@ -89,21 +123,32 @@ export default function Header() {
             </li>
           </ul>
           <form className="d-flex me-3" role="search" onSubmit={handleSearch}>
-            <label htmlFor="barcode-search" className="visually-hidden">
-              Barcode
+            <label htmlFor="header-search" className="visually-hidden">
+              Search
             </label>
-            <div className="input-group input-group-sm">
-              <span className="input-group-text">
-                <i className="bi bi-upc-scan" aria-hidden="true" />
+            <div
+              className="input-group rounded-pill overflow-hidden"
+              style={{ border: '2px solid transparent' }}
+            >
+              <span className="input-group-text border-0 bg-body-secondary pe-0">
+                <i className="bi bi-search" aria-hidden="true" />
               </span>
               <input
                 type="search"
-                className="form-control"
-                id="barcode-search"
-                placeholder="Barcode..."
-                value={barcode}
-                onChange={(e) => setBarcode(e.target.value)}
-                style={{ width: 150 }}
+                className="form-control border-0 bg-body-secondary shadow-none ps-2"
+                id="header-search"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onDoubleClick={(e) => e.currentTarget.select()}
+                onFocus={(e) => {
+                  const group = e.currentTarget.closest('.input-group') as HTMLElement | null;
+                  group?.style.setProperty('border-color', 'var(--bs-primary)');
+                }}
+                onBlur={(e) => {
+                  const group = e.currentTarget.closest('.input-group') as HTMLElement | null;
+                  group?.style.setProperty('border-color', 'transparent');
+                }}
               />
             </div>
           </form>
