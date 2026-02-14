@@ -105,6 +105,7 @@ export function buildLogTarget(
       productId: product.id,
       preparationId: prepData.id,
       editEntryId: entry.id,
+      initialTimestamp: entry.timestamp,
     };
   }
 
@@ -115,6 +116,7 @@ export function buildLogTarget(
       initialServingSize,
       groupId: groupData.id,
       editEntryId: entry.id,
+      initialTimestamp: entry.timestamp,
     };
   }
 

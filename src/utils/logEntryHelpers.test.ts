@@ -1,4 +1,5 @@
-import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../api';
+import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
+import type { ProductGroupData } from '../domain';
 
 import {
   formatTime,
@@ -6,6 +7,7 @@ import {
   resolveEntryName,
   entryDetailPath,
   formatServingSizeDescription,
+  buildLogTarget,
 } from './logEntryHelpers';
 
 function nowSeconds() {
@@ -200,5 +202,94 @@ describe('formatServingSizeDescription', () => {
       item: { kind: 'product', productID: 'p1', servingSize: {} },
     };
     expect(formatServingSizeDescription(entry)).toBe('');
+  });
+});
+
+describe('buildLogTarget', () => {
+  const mockProduct: ApiProduct = {
+    id: 'prod-1',
+    name: 'Oats',
+    brand: 'QuakerCo',
+    preparations: [
+      {
+        id: 'prep-1',
+        nutritionalInformation: { calories: { amount: 150, unit: 'kcal' } },
+        mass: { amount: 40, unit: 'g' },
+        customSizes: [],
+      },
+    ],
+  };
+
+  const mockGroupData: ProductGroupData = {
+    id: 'group-1',
+    name: 'Breakfast Bowl',
+    items: [],
+  };
+
+  it('includes initialTimestamp for product entries', () => {
+    const entry: ApiLogEntry = {
+      id: 'log-1',
+      timestamp: 1700000000,
+      userID: 'u1',
+      item: {
+        kind: 'product',
+        productID: 'prod-1',
+        preparationID: 'prep-1',
+        servingSize: { kind: 'servings', amount: 2 },
+      },
+    };
+
+    const target = buildLogTarget(entry, mockProduct, null);
+    expect(target).not.toBeNull();
+    expect(target!.initialTimestamp).toBe(1700000000);
+    expect(target!.editEntryId).toBe('log-1');
+    expect(target!.name).toBe('Oats');
+    expect(target!.brand).toBe('QuakerCo');
+  });
+
+  it('includes initialTimestamp for group entries', () => {
+    const entry: ApiLogEntry = {
+      id: 'log-2',
+      timestamp: 1700001000,
+      userID: 'u1',
+      item: {
+        kind: 'group',
+        groupID: 'group-1',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    };
+
+    const target = buildLogTarget(entry, null, mockGroupData);
+    expect(target).not.toBeNull();
+    expect(target!.initialTimestamp).toBe(1700001000);
+    expect(target!.editEntryId).toBe('log-2');
+    expect(target!.name).toBe('Breakfast Bowl');
+  });
+
+  it('returns null when product has no preparations', () => {
+    const entry: ApiLogEntry = {
+      id: 'log-3',
+      timestamp: 1700000000,
+      userID: 'u1',
+      item: {
+        kind: 'product',
+        productID: 'prod-2',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    };
+
+    const noPrepProduct: ApiProduct = { id: 'prod-2', name: 'Empty', preparations: [] };
+    expect(buildLogTarget(entry, noPrepProduct, null)).toBeNull();
+  });
+
+  it('returns null for unknown entry kind', () => {
+    const entry: ApiLogEntry = {
+      id: 'log-4',
+      timestamp: 1700000000,
+      userID: 'u1',
+      item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
+    };
+
+    expect(buildLogTarget(entry, null, null)).toBeNull();
   });
 });

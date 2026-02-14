@@ -205,7 +205,7 @@ export function useHistoryData(): UseHistoryDataResult {
 
       const target = buildLogTarget(entry, product, groupData);
       if (target) {
-        const { editEntryId: _, ...createTarget } = target;
+        const { editEntryId: _, initialTimestamp: __, ...createTarget } = target;
         setLogTarget(createTarget);
       }
     } finally {

@@ -199,6 +199,7 @@ export interface LogEntryRequest {
   groupId?: string;
   preparationId?: string;
   servingSize: ServingSizeData;
+  timestamp?: number;
 }
 
 export interface LogEntryResponse {
@@ -246,7 +247,7 @@ export async function getLogs(from?: number, to?: number): Promise<ApiLogEntry[]
 }
 
 export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse> {
-  const body = entry.groupId
+  const item = entry.groupId
     ? { kind: 'group', groupID: entry.groupId, servingSize: entry.servingSize }
     : {
         kind: 'product',
@@ -254,6 +255,10 @@ export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse
         preparationID: entry.preparationId,
         servingSize: entry.servingSize,
       };
+  const body: { item: typeof item; timestamp?: number } = { item };
+  if (entry.timestamp !== undefined) {
+    body.timestamp = entry.timestamp;
+  }
   return apiPost<typeof body, LogEntryResponse>('/logs', body);
 }
 
@@ -264,6 +269,17 @@ export async function updateLogEntryServingSize(
   return apiPut<ServingSizeData, ApiLogEntry>(
     `/logs/${encodeURIComponent(id)}/serving-size`,
     servingSize,
+  );
+}
+
+export async function updateLogEntry(
+  id: string,
+  item: ApiLogItem,
+  timestamp: number,
+): Promise<ApiLogEntry> {
+  return apiPut<{ item: ApiLogItem; timestamp: number }, ApiLogEntry>(
+    `/logs/${encodeURIComponent(id)}`,
+    { item, timestamp },
   );
 }
 

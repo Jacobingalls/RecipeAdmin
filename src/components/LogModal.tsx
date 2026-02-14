@@ -1,11 +1,28 @@
 import { useState, useCallback } from 'react';
 
 import type { Preparation, ProductGroup, ServingSize } from '../domain';
-import { logEntry, updateLogEntryServingSize } from '../api';
+import type { ApiLogItem } from '../api';
+import { logEntry, updateLogEntry } from '../api';
 
 import { ModalBase } from './common';
 import NutritionLabel from './NutritionLabel';
 import ServingSizeSelector from './ServingSizeSelector';
+
+/** Convert epoch seconds to a datetime-local input value string. */
+export function epochToDatetimeLocal(epoch: number): string {
+  const date = new Date(epoch * 1000);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+/** Convert a datetime-local input value string to epoch seconds. */
+export function datetimeLocalToEpoch(value: string): number {
+  return new Date(value).getTime() / 1000;
+}
 
 export interface LogTarget {
   name: string;
@@ -16,6 +33,7 @@ export interface LogTarget {
   groupId?: string;
   preparationId?: string;
   editEntryId?: string;
+  initialTimestamp?: number;
 }
 
 interface LogModalProps {
@@ -48,6 +66,9 @@ function LogModalInner({
   onSaved?: () => void;
 }) {
   const [servingSize, setServingSize] = useState(() => target.initialServingSize);
+  const [timestamp, setTimestamp] = useState(
+    () => target.initialTimestamp ?? Math.floor(Date.now() / 1000),
+  );
   const [logState, setLogState] = useState<LogState>('idle');
   const [logError, setLogError] = useState<string | null>(null);
 
@@ -59,13 +80,22 @@ function LogModalInner({
 
     try {
       if (target.editEntryId) {
-        await updateLogEntryServingSize(target.editEntryId, servingSize.toObject());
+        const item: ApiLogItem = target.groupId
+          ? { kind: 'group', groupID: target.groupId, servingSize: servingSize.toObject() }
+          : {
+              kind: 'product',
+              productID: target.productId,
+              preparationID: target.preparationId,
+              servingSize: servingSize.toObject(),
+            };
+        await updateLogEntry(target.editEntryId, item, timestamp);
       } else {
         await logEntry({
           productId: target.productId,
           groupId: target.groupId,
           preparationId: target.preparationId,
           servingSize: servingSize.toObject(),
+          timestamp,
         });
       }
       onSaved?.();
@@ -77,7 +107,7 @@ function LogModalInner({
       setLogError((e as Error).message);
       setLogState('idle');
     }
-  }, [target, servingSize, onClose, onSaved]);
+  }, [target, servingSize, timestamp, onClose, onSaved]);
 
   const { prepOrGroup } = target;
 
@@ -116,6 +146,18 @@ function LogModalInner({
               {getButtonLabel(logState, isEdit)}
             </button>
           </div>
+        </div>
+        <div className="mt-2">
+          <label htmlFor="log-timestamp" className="form-label small text-secondary mb-0">
+            Date and time
+          </label>
+          <input
+            id="log-timestamp"
+            type="datetime-local"
+            className="form-control form-control-sm"
+            value={epochToDatetimeLocal(timestamp)}
+            onChange={(e) => setTimestamp(datetimeLocalToEpoch(e.target.value))}
+          />
         </div>
       </div>
       <div className="modal-body">

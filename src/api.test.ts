@@ -226,10 +226,12 @@ describe('logEntry', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        kind: 'product',
-        productID: 'p1',
-        preparationID: 'prep1',
-        servingSize: { kind: 'servings', amount: 2 },
+        item: {
+          kind: 'product',
+          productID: 'p1',
+          preparationID: 'prep1',
+          servingSize: { kind: 'servings', amount: 2 },
+        },
       }),
       credentials: 'include',
     });
@@ -248,9 +250,11 @@ describe('logEntry', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        kind: 'group',
-        groupID: 'g1',
-        servingSize: { kind: 'servings', amount: 1 },
+        item: {
+          kind: 'group',
+          groupID: 'g1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
       }),
       credentials: 'include',
     });

@@ -1,14 +1,14 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import { Preparation, ServingSize } from '../domain';
-import { logEntry, updateLogEntryServingSize } from '../api';
+import { logEntry, updateLogEntry } from '../api';
 
 import type { LogTarget } from './LogModal';
-import LogModal from './LogModal';
+import LogModal, { epochToDatetimeLocal, datetimeLocalToEpoch } from './LogModal';
 
 vi.mock('../api', () => ({
   logEntry: vi.fn(),
-  updateLogEntryServingSize: vi.fn(),
+  updateLogEntry: vi.fn(),
 }));
 
 vi.mock('./NutritionLabel', () => ({
@@ -26,7 +26,7 @@ vi.mock('./ServingSizeSelector', () => ({
 }));
 
 const mockLogEntry = vi.mocked(logEntry);
-const mockUpdateLogEntry = vi.mocked(updateLogEntryServingSize);
+const mockUpdateLogEntry = vi.mocked(updateLogEntry);
 
 function makeTarget(overrides: Partial<LogTarget> = {}): LogTarget {
   return {
@@ -45,6 +45,30 @@ function makeTarget(overrides: Partial<LogTarget> = {}): LogTarget {
     ...overrides,
   };
 }
+
+describe('epochToDatetimeLocal', () => {
+  it('converts epoch seconds to datetime-local format', () => {
+    const epoch = new Date(2025, 0, 15, 14, 30).getTime() / 1000;
+    expect(epochToDatetimeLocal(epoch)).toBe('2025-01-15T14:30');
+  });
+
+  it('zero-pads single-digit months and hours', () => {
+    const epoch = new Date(2025, 2, 5, 8, 5).getTime() / 1000;
+    expect(epochToDatetimeLocal(epoch)).toBe('2025-03-05T08:05');
+  });
+});
+
+describe('datetimeLocalToEpoch', () => {
+  it('converts datetime-local string to epoch seconds', () => {
+    const expected = new Date(2025, 0, 15, 14, 30).getTime() / 1000;
+    expect(datetimeLocalToEpoch('2025-01-15T14:30')).toBe(expected);
+  });
+
+  it('round-trips with epochToDatetimeLocal', () => {
+    const epoch = new Date(2025, 5, 1, 9, 0).getTime() / 1000;
+    expect(datetimeLocalToEpoch(epochToDatetimeLocal(epoch))).toBe(epoch);
+  });
+});
 
 describe('LogModal', () => {
   beforeEach(() => {
@@ -78,8 +102,8 @@ describe('LogModal', () => {
 
   it('does not render brand when not provided', () => {
     render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
-    const header = screen.getByText('Test Product').closest('.modal-header');
-    expect(header?.querySelector('.text-secondary.small')).not.toBeInTheDocument();
+    const titleWrapper = screen.getByText('Test Product').parentElement!;
+    expect(titleWrapper.querySelector('.text-secondary.small')).not.toBeInTheDocument();
   });
 
   it('has modal-dialog-scrollable class', () => {
@@ -109,10 +133,34 @@ describe('LogModal', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('logs entry successfully and shows success state', async () => {
+  it('renders datetime input with label', () => {
+    render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
+    expect(screen.getByLabelText('Date and time')).toBeInTheDocument();
+    expect(screen.getByLabelText('Date and time')).toHaveAttribute('type', 'datetime-local');
+  });
+
+  it('defaults datetime to current time when no initialTimestamp', () => {
+    const fixedNow = new Date(2025, 5, 15, 12, 0).getTime();
+    const spy = vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
+    render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
+    const input = screen.getByLabelText('Date and time') as HTMLInputElement;
+    expect(input.value).toBe(epochToDatetimeLocal(Math.floor(fixedNow / 1000)));
+    spy.mockRestore();
+  });
+
+  it('uses initialTimestamp when provided', () => {
+    const ts = new Date(2025, 0, 10, 8, 30).getTime() / 1000;
+    render(<LogModal target={makeTarget({ initialTimestamp: ts })} onClose={vi.fn()} />);
+    const input = screen.getByLabelText('Date and time') as HTMLInputElement;
+    expect(input.value).toBe('2025-01-10T08:30');
+  });
+
+  it('sends timestamp on create', async () => {
+    const fixedNow = new Date(2025, 5, 15, 12, 0).getTime();
+    const spy = vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
     mockLogEntry.mockResolvedValue({ id: 'log-1' });
-    const onClose = vi.fn();
-    render(<LogModal target={makeTarget()} onClose={onClose} />);
+    render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
+    spy.mockRestore();
 
     fireEvent.click(screen.getByText('Add to Log'));
 
@@ -125,6 +173,7 @@ describe('LogModal', () => {
       groupId: undefined,
       preparationId: 'prep-1',
       servingSize: { kind: 'servings', amount: 1 },
+      timestamp: Math.floor(fixedNow / 1000),
     });
   });
 
@@ -230,16 +279,23 @@ describe('LogModal', () => {
   });
 
   describe('edit mode', () => {
+    const editTimestamp = new Date(2025, 0, 10, 8, 30).getTime() / 1000;
+
     it('shows Save button when editEntryId is set', () => {
-      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+      render(
+        <LogModal
+          target={makeTarget({ editEntryId: 'entry-1', initialTimestamp: editTimestamp })}
+          onClose={vi.fn()}
+        />,
+      );
       expect(screen.getByText('Save')).toBeInTheDocument();
       expect(screen.queryByText('Add to Log')).not.toBeInTheDocument();
     });
 
-    it('calls updateLogEntryServingSize on save', async () => {
+    it('calls updateLogEntry with item and timestamp on save', async () => {
       mockUpdateLogEntry.mockResolvedValue({
         id: 'entry-1',
-        timestamp: 1000,
+        timestamp: editTimestamp,
         userID: 'u1',
         item: {
           kind: 'product',
@@ -247,7 +303,12 @@ describe('LogModal', () => {
           servingSize: { kind: 'servings', amount: 1 },
         },
       });
-      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+      render(
+        <LogModal
+          target={makeTarget({ editEntryId: 'entry-1', initialTimestamp: editTimestamp })}
+          onClose={vi.fn()}
+        />,
+      );
 
       fireEvent.click(screen.getByText('Save'));
 
@@ -255,11 +316,58 @@ describe('LogModal', () => {
         expect(screen.getByText('Saved!')).toBeInTheDocument();
       });
 
-      expect(mockUpdateLogEntry).toHaveBeenCalledWith('entry-1', {
-        kind: 'servings',
-        amount: 1,
-      });
+      expect(mockUpdateLogEntry).toHaveBeenCalledWith(
+        'entry-1',
+        {
+          kind: 'product',
+          productID: 'prod-1',
+          preparationID: 'prep-1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
+        editTimestamp,
+      );
       expect(mockLogEntry).not.toHaveBeenCalled();
+    });
+
+    it('sends group item when editing a group entry', async () => {
+      mockUpdateLogEntry.mockResolvedValue({
+        id: 'entry-2',
+        timestamp: editTimestamp,
+        userID: 'u1',
+        item: {
+          kind: 'group',
+          groupID: 'group-1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
+      });
+      render(
+        <LogModal
+          target={makeTarget({
+            editEntryId: 'entry-2',
+            initialTimestamp: editTimestamp,
+            groupId: 'group-1',
+            productId: undefined,
+            preparationId: undefined,
+          })}
+          onClose={vi.fn()}
+        />,
+      );
+
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Saved!')).toBeInTheDocument();
+      });
+
+      expect(mockUpdateLogEntry).toHaveBeenCalledWith(
+        'entry-2',
+        {
+          kind: 'group',
+          groupID: 'group-1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
+        editTimestamp,
+      );
     });
 
     it('shows Saving... while update is in progress', async () => {
@@ -270,7 +378,12 @@ describe('LogModal', () => {
         }),
       );
 
-      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+      render(
+        <LogModal
+          target={makeTarget({ editEntryId: 'entry-1', initialTimestamp: editTimestamp })}
+          onClose={vi.fn()}
+        />,
+      );
       fireEvent.click(screen.getByText('Save'));
 
       expect(screen.getByText('Saving...')).toBeDisabled();
@@ -278,7 +391,7 @@ describe('LogModal', () => {
       await act(async () => {
         resolveUpdate!({
           id: 'entry-1',
-          timestamp: 1000,
+          timestamp: editTimestamp,
           userID: 'u1',
           item: {
             kind: 'product',
@@ -292,7 +405,7 @@ describe('LogModal', () => {
     it('fires onSaved callback on successful edit', async () => {
       mockUpdateLogEntry.mockResolvedValue({
         id: 'entry-1',
-        timestamp: 1000,
+        timestamp: editTimestamp,
         userID: 'u1',
         item: {
           kind: 'product',
@@ -303,7 +416,7 @@ describe('LogModal', () => {
       const onSaved = vi.fn();
       render(
         <LogModal
-          target={makeTarget({ editEntryId: 'entry-1' })}
+          target={makeTarget({ editEntryId: 'entry-1', initialTimestamp: editTimestamp })}
           onClose={vi.fn()}
           onSaved={onSaved}
         />,
@@ -318,7 +431,12 @@ describe('LogModal', () => {
 
     it('shows error when update fails', async () => {
       mockUpdateLogEntry.mockRejectedValue(new Error('HTTP 500'));
-      render(<LogModal target={makeTarget({ editEntryId: 'entry-1' })} onClose={vi.fn()} />);
+      render(
+        <LogModal
+          target={makeTarget({ editEntryId: 'entry-1', initialTimestamp: editTimestamp })}
+          onClose={vi.fn()}
+        />,
+      );
 
       fireEvent.click(screen.getByText('Save'));
 
