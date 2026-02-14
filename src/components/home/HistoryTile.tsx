@@ -26,7 +26,7 @@ export default function HistoryTile() {
     handleDeleteClick,
     handleSaved,
     handleModalClose,
-  } = useHistoryData();
+  } = useHistoryData({ limit: 6 });
 
   const centeredWrapper = (child: ReactNode) => (
     <div className="card-body d-flex align-items-center justify-content-center">{child}</div>
@@ -76,7 +76,7 @@ export default function HistoryTile() {
   );
 
   return (
-    <Tile title="History" titleRight={historyLink} minHeight="20rem">
+    <Tile title="Recent history" titleRight={historyLink} minHeight="20rem">
       {content}
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
     </Tile>

@@ -238,10 +238,11 @@ export async function getStatus(): Promise<ApiStatus> {
   return apiFetch<ApiStatus>('/status');
 }
 
-export async function getLogs(from?: number, to?: number): Promise<ApiLogEntry[]> {
+export async function getLogs(from?: number, to?: number, limit?: number): Promise<ApiLogEntry[]> {
   const params = new URLSearchParams();
   if (from !== undefined) params.set('from', String(from));
   if (to !== undefined) params.set('to', String(to));
+  if (limit !== undefined) params.set('limit', String(limit));
   const query = params.toString();
   return apiFetch<ApiLogEntry[]>(`/logs${query ? `?${query}` : ''}`);
 }

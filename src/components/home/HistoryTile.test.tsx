@@ -308,14 +308,14 @@ describe('HistoryTile', () => {
     expect(screen.getByText('Unknown Group')).toBeInTheDocument();
   });
 
-  it('renders the tile with "History" title', () => {
+  it('renders the tile with "Recent history" title', () => {
     mockQueries({
       logs: { data: [] },
       products: { data: sampleProducts },
       groups: { data: sampleGroups },
     });
     renderWithRouter(<HistoryTile />);
-    expect(screen.getByText('History')).toBeInTheDocument();
+    expect(screen.getByText('Recent history')).toBeInTheDocument();
   });
 
   it('renders a "View all" link to /history', () => {

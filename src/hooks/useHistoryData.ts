@@ -69,13 +69,16 @@ export interface UseHistoryDataResult {
  * Shared hook for history data fetching, nutrition resolution, and log entry actions.
  * Used by both HistoryPage and HistoryTile.
  */
-export function useHistoryData(): UseHistoryDataResult {
+export function useHistoryData(options?: { limit?: number }): UseHistoryDataResult {
+  const limit = options?.limit;
   const {
     data: logs,
     loading: logsLoading,
     error: logsError,
     refetch: refetchLogs,
-  } = useApiQuery(getLogs, [], { errorMessage: "Couldn't load history. Try again later." });
+  } = useApiQuery(() => getLogs(undefined, undefined, limit), [limit], {
+    errorMessage: "Couldn't load history. Try again later.",
+  });
   const {
     data: products,
     loading: productsLoading,
