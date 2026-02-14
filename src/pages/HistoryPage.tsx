@@ -8,7 +8,7 @@ import LogModal from '../components/LogModal';
 import DayNutritionModal from '../components/DayNutritionModal';
 import HistoryEntryRow from '../components/HistoryEntryRow';
 import { formatSignificant } from '../utils/formatters';
-import { resolveEntryName } from '../utils/logEntryHelpers';
+import { resolveEntryName, resolveEntryBrand } from '../utils/logEntryHelpers';
 
 function formatDayHeading(dateStr: string): string {
   const today = new Date();
@@ -154,6 +154,7 @@ export default function HistoryPage() {
                   key={entry.id}
                   entry={entry}
                   name={resolveEntryName(entry, products!, groups!)}
+                  brand={resolveEntryBrand(entry, products!)}
                   calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
                   timeDisplay="time"
                   onLogAgain={handleLogAgainClick}

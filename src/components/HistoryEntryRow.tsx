@@ -17,6 +17,7 @@ import { MoreButton } from './common';
 interface HistoryEntryRowProps {
   entry: ApiLogEntry;
   name: string;
+  brand?: string;
   calories: number | null;
   timeDisplay?: 'relative' | 'time';
   onLogAgain: (entry: ApiLogEntry) => void;
@@ -30,6 +31,7 @@ interface HistoryEntryRowProps {
 export default function HistoryEntryRow({
   entry,
   name,
+  brand,
   calories,
   timeDisplay = 'relative',
   onLogAgain,
@@ -65,6 +67,7 @@ export default function HistoryEntryRow({
         <div>
           <div className="fw-medium">{name}</div>
           <small className="text-body-secondary">
+            {brand && <>{brand} &middot; </>}
             {formatServingSizeDescription(entry)} &mdash;{' '}
             {timeDisplay === 'time'
               ? formatTime(entry.timestamp)

@@ -4,6 +4,7 @@ import type { ApiFavorite } from '../api';
 import { formatSignificant } from '../utils/formatters';
 import {
   favoriteName,
+  favoriteBrand,
   favoriteDetailPath,
   favoriteCalories,
   favoriteServingSizeDescription,
@@ -33,6 +34,7 @@ export default function FavoriteRow({
 }: FavoriteRowProps) {
   const navigate = useNavigate();
   const name = favoriteName(favorite);
+  const brand = favoriteBrand(favorite);
   const calories = favoriteCalories(favorite);
   const servingSizeDesc = favoriteServingSizeDescription(favorite);
   const detailPath = favoriteDetailPath(favorite);
@@ -59,6 +61,7 @@ export default function FavoriteRow({
         <div className="me-3 min-width-0">
           <div className="fw-medium text-truncate">{name}</div>
           <small className="text-body-secondary">
+            {brand && <>{brand} &middot; </>}
             {servingSizeDesc}
             {servingSizeDesc && favorite.lastUsedAt > 0 && ' \u2014 '}
             {favorite.lastUsedAt > 0 && formatRelativeTime(favorite.lastUsedAt)}

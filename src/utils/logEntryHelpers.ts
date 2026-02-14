@@ -57,6 +57,17 @@ export function resolveEntryName(
   return 'Unknown Item';
 }
 
+export function resolveEntryBrand(
+  entry: ApiLogEntry,
+  products: ApiProductSummary[],
+): string | undefined {
+  if (entry.item.kind === 'product' && entry.item.productID) {
+    const product = products.find((p) => p.id === entry.item.productID);
+    return product?.brand;
+  }
+  return undefined;
+}
+
 export function entryDetailPath(entry: ApiLogEntry): string {
   if (entry.item.kind === 'group' && entry.item.groupID) {
     return `/groups/${entry.item.groupID}`;

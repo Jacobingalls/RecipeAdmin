@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useHistoryData } from '../../hooks';
-import { resolveEntryName } from '../../utils/logEntryHelpers';
+import { resolveEntryName, resolveEntryBrand } from '../../utils/logEntryHelpers';
 import { LoadingState, ContentUnavailableView } from '../common';
 import LogModal from '../LogModal';
 import HistoryEntryRow from '../HistoryEntryRow';
@@ -55,6 +55,7 @@ export default function HistoryTile() {
             key={entry.id}
             entry={entry}
             name={resolveEntryName(entry, products!, groups!)}
+            brand={resolveEntryBrand(entry, products!)}
             calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
             onLogAgain={handleLogAgainClick}
             logAgainLoading={logAgainLoading}
