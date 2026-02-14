@@ -5,7 +5,6 @@ import { MemoryRouter, useNavigate } from 'react-router-dom';
 import type { ApiFavorite } from '../api';
 
 import FavoriteRow from './FavoriteRow';
-import type { FavoriteLogState } from './FavoriteRow';
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -59,9 +58,7 @@ const groupFavorite: ApiFavorite = {
 
 interface RenderOptions {
   favorite?: ApiFavorite;
-  logState?: FavoriteLogState;
   onLog?: (fav: ApiFavorite) => void;
-  onLogWithSize?: (fav: ApiFavorite) => void;
   onRemove?: (fav: ApiFavorite) => void;
   removeLoading?: boolean;
 }
@@ -69,9 +66,7 @@ interface RenderOptions {
 function renderRow(options: RenderOptions = {}) {
   const {
     favorite = productFavorite,
-    logState = 'idle',
     onLog = vi.fn(),
-    onLogWithSize = vi.fn(),
     onRemove = vi.fn(),
     removeLoading = false,
   } = options;
@@ -79,9 +74,7 @@ function renderRow(options: RenderOptions = {}) {
   return renderWithRouter(
     <FavoriteRow
       favorite={favorite}
-      logState={logState}
       onLog={onLog}
-      onLogWithSize={onLogWithSize}
       onRemove={onRemove}
       removeLoading={removeLoading}
     />,
@@ -143,37 +136,30 @@ describe('FavoriteRow', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
   });
 
-  it('calls onLog when Log button is clicked', () => {
+  it('calls onLog when log button is clicked', () => {
     const onLog = vi.fn();
     renderRow({ onLog });
     fireEvent.click(screen.getByRole('button', { name: 'Log Peanut Butter' }));
     expect(onLog).toHaveBeenCalledWith(productFavorite);
   });
 
-  it('does not call onLog when logging', () => {
-    const onLog = vi.fn();
-    renderRow({ onLog, logState: 'logging' });
+  it('shows plus icon', () => {
+    renderRow();
+    const btn = screen.getByRole('button', { name: 'Log Peanut Butter' });
+    expect(btn.querySelector('.bi-plus-lg')).toBeInTheDocument();
+  });
+
+  it('does not navigate when log button is clicked', () => {
+    renderRow();
     fireEvent.click(screen.getByRole('button', { name: 'Log Peanut Butter' }));
-    expect(onLog).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('does not call onLog when success', () => {
-    const onLog = vi.fn();
-    renderRow({ onLog, logState: 'success' });
-    fireEvent.click(screen.getByRole('button', { name: 'Log Peanut Butter' }));
-    expect(onLog).not.toHaveBeenCalled();
-  });
-
-  it('shows "Logged!" when success', () => {
-    renderRow({ logState: 'success' });
-    expect(screen.getByText('Logged!')).toBeInTheDocument();
-  });
-
-  it('calls onLogWithSize from dropdown', () => {
-    const onLogWithSize = vi.fn();
-    renderRow({ onLogWithSize });
-    fireEvent.click(screen.getByText('Log with different size'));
-    expect(onLogWithSize).toHaveBeenCalledWith(productFavorite);
+  it('wraps action buttons in a CircularButtonGroup', () => {
+    renderRow();
+    const group = screen.getByRole('group');
+    expect(group).toBeInTheDocument();
+    expect(group.style.borderRadius).toBe('1.125rem');
   });
 
   it('calls onRemove from dropdown', () => {
@@ -191,11 +177,5 @@ describe('FavoriteRow', () => {
   it('has dropdown trigger with correct aria-label', () => {
     renderRow();
     expect(screen.getByLabelText('Peanut Butter actions')).toBeInTheDocument();
-  });
-
-  it('does not navigate when Log button is clicked', () => {
-    renderRow();
-    fireEvent.click(screen.getByRole('button', { name: 'Log Peanut Butter' }));
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

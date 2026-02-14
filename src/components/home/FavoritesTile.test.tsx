@@ -29,9 +29,7 @@ vi.mock('../../api', async () => {
   const actual = await vi.importActual('../../api');
   return {
     ...actual,
-    logEntry: vi.fn(),
     deleteFavorite: vi.fn(),
-    touchFavoriteLastUsed: vi.fn(),
   };
 });
 
@@ -48,29 +46,18 @@ vi.mock('../common', () => ({
 vi.mock('../FavoriteRow', () => ({
   default: ({
     favorite,
-    logState,
     onLog,
-    onLogWithSize,
     onRemove,
     removeLoading,
   }: {
     favorite: ApiFavorite;
-    logState: string;
     onLog: (fav: ApiFavorite) => void;
-    onLogWithSize: (fav: ApiFavorite) => void;
     onRemove: (fav: ApiFavorite) => void;
     removeLoading: boolean;
   }) => (
-    <div
-      data-testid={`favorite-row-${favorite.id}`}
-      data-log-state={logState}
-      data-remove-loading={removeLoading}
-    >
+    <div data-testid={`favorite-row-${favorite.id}`} data-remove-loading={removeLoading}>
       <button data-testid={`log-${favorite.id}`} onClick={() => onLog(favorite)}>
         Log
-      </button>
-      <button data-testid={`log-with-size-${favorite.id}`} onClick={() => onLogWithSize(favorite)}>
-        Log with size
       </button>
       <button data-testid={`remove-${favorite.id}`} onClick={() => onRemove(favorite)}>
         Remove
@@ -104,9 +91,7 @@ vi.mock('../LogModal', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
-const mockLogEntry = vi.mocked(api.logEntry);
 const mockDeleteFavorite = vi.mocked(api.deleteFavorite);
-const mockTouchLastUsed = vi.mocked(api.touchFavoriteLastUsed);
 
 function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -235,43 +220,14 @@ describe('FavoritesTile', () => {
     expect(screen.queryByTestId('favorite-row-fav-7')).not.toBeInTheDocument();
   });
 
-  it('calls logEntry and updates state on direct log click', async () => {
-    const refetch = vi.fn();
+  it('opens log modal when log button is clicked', () => {
     mockUseApiQuery.mockReturnValue({
       ...defaultResult,
       data: sampleFavorites,
-      refetch,
     } as UseApiQueryResult<unknown>);
-    mockLogEntry.mockResolvedValue({ id: 'log1' });
-    mockTouchLastUsed.mockResolvedValue(sampleFavorites[0]);
-
     renderWithRouter(<FavoritesTile />);
 
     fireEvent.click(screen.getByTestId('log-fav1'));
-
-    await waitFor(() => {
-      expect(mockLogEntry).toHaveBeenCalledWith({
-        productId: 'p1',
-        preparationId: 'prep1',
-        servingSize: { kind: 'servings', amount: 2 },
-      });
-    });
-    await waitFor(() => {
-      expect(mockTouchLastUsed).toHaveBeenCalledWith('fav1');
-    });
-    await waitFor(() => {
-      expect(refetch).toHaveBeenCalled();
-    });
-  });
-
-  it('opens log modal when "Log with size" is clicked', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
-    renderWithRouter(<FavoritesTile />);
-
-    fireEvent.click(screen.getByTestId('log-with-size-fav1'));
 
     expect(screen.getByTestId('log-modal')).toBeInTheDocument();
   });
@@ -286,7 +242,7 @@ describe('FavoritesTile', () => {
 
     renderWithRouter(<FavoritesTile />);
 
-    fireEvent.click(screen.getByTestId('log-with-size-fav1'));
+    fireEvent.click(screen.getByTestId('log-fav1'));
     fireEvent.click(screen.getByTestId('modal-saved'));
 
     await waitFor(() => {
@@ -301,7 +257,7 @@ describe('FavoritesTile', () => {
     } as UseApiQueryResult<unknown>);
     renderWithRouter(<FavoritesTile />);
 
-    fireEvent.click(screen.getByTestId('log-with-size-fav1'));
+    fireEvent.click(screen.getByTestId('log-fav1'));
     expect(screen.getByTestId('log-modal')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('modal-close'));
@@ -326,25 +282,6 @@ describe('FavoritesTile', () => {
     await waitFor(() => {
       expect(mockDeleteFavorite).toHaveBeenCalledWith('fav1');
     });
-    await waitFor(() => {
-      expect(refetch).toHaveBeenCalled();
-    });
-  });
-
-  it('still refetches when touchFavoriteLastUsed fails', async () => {
-    const refetch = vi.fn();
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-      refetch,
-    } as UseApiQueryResult<unknown>);
-    mockLogEntry.mockResolvedValue({ id: 'log1' });
-    mockTouchLastUsed.mockRejectedValue(new Error('network error'));
-
-    renderWithRouter(<FavoritesTile />);
-
-    fireEvent.click(screen.getByTestId('log-fav1'));
-
     await waitFor(() => {
       expect(refetch).toHaveBeenCalled();
     });

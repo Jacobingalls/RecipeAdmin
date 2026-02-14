@@ -1,8 +1,9 @@
-import type { CSSProperties } from 'react';
 import { useState, useCallback, useMemo } from 'react';
 
 import type { ServingSize } from '../domain';
 import { useFavorites } from '../contexts/FavoritesContext';
+
+import { CircularButton } from './common';
 
 interface AddToFavoritesButtonProps {
   productId?: string;
@@ -10,13 +11,6 @@ interface AddToFavoritesButtonProps {
   preparationId?: string;
   servingSize: ServingSize;
 }
-
-const buttonStyle: CSSProperties = {
-  width: '2rem',
-  height: '2rem',
-  '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-  '--bs-btn-hover-border-color': 'transparent',
-} as CSSProperties;
 
 export default function AddToFavoritesButton({
   productId,
@@ -76,11 +70,9 @@ export default function AddToFavoritesButton({
   const label = isFavorited ? 'Remove from favorites' : 'Add to favorites';
 
   return (
-    <button
-      type="button"
-      className="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary"
-      style={buttonStyle}
+    <CircularButton
       aria-label={label}
+      title={label}
       disabled={saving}
       onClick={(e) => {
         e.stopPropagation();
@@ -96,6 +88,6 @@ export default function AddToFavoritesButton({
       ) : (
         <i className={`bi ${icon}${isFavorited ? ' text-warning' : ''}`} aria-hidden="true" />
       )}
-    </button>
+    </CircularButton>
   );
 }

@@ -49,11 +49,13 @@ All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/wr
 
 **Available shared components** (use these instead of reimplementing):
 - `Button` — semantic wrapper around Bootstrap button classes with `variant` and `size` props
+- `CircularButton` — 2rem circular icon button; shows individual hover when standalone, defers to group when inside `CircularButtonGroup`
+- `CircularButtonGroup` — inline-flex pill container with unified hover for adjacent `CircularButton` children
 - `ModalBase` — modal wrapper with backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes
 - `ModalHeader`, `ModalBody`, `ModalFooter` — standard modal section components (exported from `ModalBase`)
 - `ListRow` — horizontal layout: `[icon] [content] [spacer] [secondary] [actions]`
-- `DeleteButton` — circular icon-only trash button for list row actions
-- `MoreButton` — circular icon-only three-dots button for dropdown menus in list rows
+- `DeleteButton` — circular icon-only trash button for list row actions (uses `CircularButton`)
+- `MoreButton` — circular icon-only three-dots button for dropdown menus in list rows (uses `CircularButton`)
 - `CopyButton` — button with "Copied!" feedback for clipboard operations
 - `TypeToConfirmModal` — "type name to confirm" modal for destructive actions
 - `SectionHeader` — `[h5 title] [spacer] [action children]` for section headings with optional actions
@@ -134,6 +136,8 @@ src/
 │   ├── common/            # Shared UI components
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── Button          # Semantic Bootstrap button with variant/size props
+│   │   ├── CircularButton  # 2rem icon button; standalone circle or grouped pill
+│   │   ├── CircularButtonGroup # Pill hover container for adjacent CircularButtons
 │   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
 │   │   ├── CopyButton     # Clipboard copy with "Copied!" feedback
 │   │   ├── CredentialRow  # Passkey/API key row with icon, name, timestamp, delete

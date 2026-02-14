@@ -1,24 +1,13 @@
 import { useState, useMemo, useCallback } from 'react';
 
 import type { ApiFavorite } from '../api';
-import {
-  listFavorites,
-  logEntry,
-  deleteFavorite as deleteFavoriteApi,
-  touchFavoriteLastUsed,
-} from '../api';
+import { listFavorites, deleteFavorite as deleteFavoriteApi } from '../api';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useApiQuery } from '../hooks';
-import {
-  buildFavoriteLogParams,
-  buildFavoriteLogTarget,
-  favoriteName,
-  favoriteBrand,
-} from '../utils/favoriteHelpers';
+import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils/favoriteHelpers';
 import { LoadingState, ContentUnavailableView } from '../components/common';
 import type { LogTarget } from '../components/LogModal';
 import LogModal from '../components/LogModal';
-import type { FavoriteLogState } from '../components/FavoriteRow';
 import FavoriteRow from '../components/FavoriteRow';
 
 export default function FavoritesPage() {
@@ -35,7 +24,6 @@ export default function FavoritesPage() {
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
-  const [logStates, setLogStates] = useState<Map<string, FavoriteLogState>>(new Map());
   const [removeLoading, setRemoveLoading] = useState(false);
 
   const brands = useMemo(() => {
@@ -57,38 +45,7 @@ export default function FavoritesPage() {
     });
   }, [favorites, nameFilter, brandFilter]);
 
-  const getLogState = (id: string): FavoriteLogState => logStates.get(id) ?? 'idle';
-
-  const setLogStateForId = useCallback((id: string, state: FavoriteLogState) => {
-    setLogStates((prev) => new Map(prev).set(id, state));
-  }, []);
-
-  const handleLog = useCallback(
-    async (favorite: ApiFavorite) => {
-      const params = buildFavoriteLogParams(favorite);
-      if (!params) return;
-
-      setLogStateForId(favorite.id, 'logging');
-      try {
-        await logEntry(params);
-        setLogStateForId(favorite.id, 'success');
-        try {
-          await touchFavoriteLastUsed(favorite.id);
-        } catch {
-          // Best-effort touch
-        }
-        refetch();
-        setTimeout(() => {
-          setLogStateForId(favorite.id, 'idle');
-        }, 1500);
-      } catch {
-        setLogStateForId(favorite.id, 'idle');
-      }
-    },
-    [setLogStateForId, refetch],
-  );
-
-  const handleLogWithSize = useCallback((favorite: ApiFavorite) => {
+  const handleLog = useCallback((favorite: ApiFavorite) => {
     const target = buildFavoriteLogTarget(favorite);
     if (target) {
       setLogTarget(target);
@@ -178,9 +135,7 @@ export default function FavoritesPage() {
             <FavoriteRow
               key={fav.id}
               favorite={fav}
-              logState={getLogState(fav.id)}
               onLog={handleLog}
-              onLogWithSize={handleLogWithSize}
               onRemove={handleRemove}
               removeLoading={removeLoading}
             />

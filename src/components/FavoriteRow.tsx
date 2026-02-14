@@ -11,24 +11,18 @@ import {
 } from '../utils/favoriteHelpers';
 import { formatRelativeTime } from '../utils/logEntryHelpers';
 
-import { Button, MoreButton } from './common';
-
-export type FavoriteLogState = 'idle' | 'logging' | 'success';
+import { CircularButton, CircularButtonGroup, MoreButton } from './common';
 
 interface FavoriteRowProps {
   favorite: ApiFavorite;
-  logState: FavoriteLogState;
   onLog: (favorite: ApiFavorite) => void;
-  onLogWithSize: (favorite: ApiFavorite) => void;
   onRemove: (favorite: ApiFavorite) => void;
   removeLoading: boolean;
 }
 
 export default function FavoriteRow({
   favorite,
-  logState,
   onLog,
-  onLogWithSize,
   onRemove,
   removeLoading,
 }: FavoriteRowProps) {
@@ -38,10 +32,6 @@ export default function FavoriteRow({
   const calories = favoriteCalories(favorite);
   const servingSizeDesc = favoriteServingSizeDescription(favorite);
   const detailPath = favoriteDetailPath(favorite);
-
-  const isIdle = logState === 'idle';
-  const isLogging = logState === 'logging';
-  const isSuccess = logState === 'success';
 
   return (
     <div
@@ -73,53 +63,37 @@ export default function FavoriteRow({
               {formatSignificant(calories)} kcal
             </span>
           )}
-          <Button
-            variant={isSuccess ? 'outline-success' : 'outline-secondary'}
-            size="sm"
-            loading={isLogging}
-            disabled={isSuccess}
-            aria-label={`Log ${name}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isIdle) onLog(favorite);
-            }}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            {isSuccess ? 'Logged!' : 'Log'}
-          </Button>
-          <div className="dropdown">
-            <MoreButton ariaLabel={`${name} actions`} />
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLogWithSize(favorite);
-                  }}
-                >
-                  Log with different size
-                </button>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item text-danger"
-                  disabled={removeLoading}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove(favorite);
-                  }}
-                >
-                  Remove
-                </button>
-              </li>
-            </ul>
-          </div>
+          <CircularButtonGroup>
+            <CircularButton
+              aria-label={`Log ${name}`}
+              title="Add to log"
+              onClick={(e) => {
+                e.stopPropagation();
+                onLog(favorite);
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <i className="bi bi-plus-lg" aria-hidden="true" />
+            </CircularButton>
+            <div className="dropdown">
+              <MoreButton ariaLabel={`${name} actions`} />
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button
+                    type="button"
+                    className="dropdown-item"
+                    disabled={removeLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(favorite);
+                    }}
+                  >
+                    Remove
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </CircularButtonGroup>
         </div>
       </div>
     </div>

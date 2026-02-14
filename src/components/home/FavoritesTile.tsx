@@ -3,19 +3,13 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { ApiFavorite } from '../../api';
-import {
-  listFavorites,
-  logEntry,
-  deleteFavorite as deleteFavoriteApi,
-  touchFavoriteLastUsed,
-} from '../../api';
+import { deleteFavorite as deleteFavoriteApi, listFavorites } from '../../api';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { useApiQuery } from '../../hooks';
-import { buildFavoriteLogParams, buildFavoriteLogTarget } from '../../utils/favoriteHelpers';
+import { buildFavoriteLogTarget } from '../../utils/favoriteHelpers';
 import { LoadingState, ContentUnavailableView } from '../common';
 import type { LogTarget } from '../LogModal';
 import LogModal from '../LogModal';
-import type { FavoriteLogState } from '../FavoriteRow';
 import FavoriteRow from '../FavoriteRow';
 
 import Tile from './Tile';
@@ -34,41 +28,9 @@ export default function FavoritesTile() {
   const { refetch: refetchFavoritesCache } = useFavorites();
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
-  const [logStates, setLogStates] = useState<Map<string, FavoriteLogState>>(new Map());
   const [removeLoading, setRemoveLoading] = useState(false);
 
-  const getLogState = (id: string): FavoriteLogState => logStates.get(id) ?? 'idle';
-
-  const setLogStateForId = useCallback((id: string, state: FavoriteLogState) => {
-    setLogStates((prev) => new Map(prev).set(id, state));
-  }, []);
-
-  const handleLog = useCallback(
-    async (favorite: ApiFavorite) => {
-      const params = buildFavoriteLogParams(favorite);
-      if (!params) return;
-
-      setLogStateForId(favorite.id, 'logging');
-      try {
-        await logEntry(params);
-        setLogStateForId(favorite.id, 'success');
-        try {
-          await touchFavoriteLastUsed(favorite.id);
-        } catch {
-          // Best-effort touch
-        }
-        refetch();
-        setTimeout(() => {
-          setLogStateForId(favorite.id, 'idle');
-        }, 1500);
-      } catch {
-        setLogStateForId(favorite.id, 'idle');
-      }
-    },
-    [setLogStateForId, refetch],
-  );
-
-  const handleLogWithSize = useCallback((favorite: ApiFavorite) => {
+  const handleLog = useCallback((favorite: ApiFavorite) => {
     const target = buildFavoriteLogTarget(favorite);
     if (target) {
       setLogTarget(target);
@@ -98,7 +60,7 @@ export default function FavoritesTile() {
   );
 
   const centeredWrapper = (child: ReactNode) => (
-    <div className="d-flex align-items-center justify-content-center flex-grow-1">{child}</div>
+    <div className="card-body d-flex align-items-center justify-content-center">{child}</div>
   );
 
   let content;
@@ -128,9 +90,7 @@ export default function FavoritesTile() {
           <FavoriteRow
             key={fav.id}
             favorite={fav}
-            logState={getLogState(fav.id)}
             onLog={handleLog}
-            onLogWithSize={handleLogWithSize}
             onRemove={handleRemove}
             removeLoading={removeLoading}
           />
@@ -146,10 +106,8 @@ export default function FavoritesTile() {
   );
 
   return (
-    <Tile title="Favorites" titleRight={viewAllLink}>
-      <div style={{ minHeight: '10rem' }} className="d-flex flex-column">
-        {content}
-      </div>
+    <Tile title="Favorites" titleRight={viewAllLink} minHeight="10rem">
+      {content}
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleModalSaved} />
     </Tile>
   );

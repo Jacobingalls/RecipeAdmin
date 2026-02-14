@@ -25,7 +25,7 @@ describe('DeleteButton', () => {
   it('has correct sizing styles', () => {
     render(<DeleteButton ariaLabel="Delete" onClick={vi.fn()} />);
     const button = screen.getByRole('button');
-    expect(button.style.width).toBe('2rem');
-    expect(button.style.height).toBe('2rem');
+    expect(button.style.width).toBe('2.25rem');
+    expect(button.style.height).toBe('2.25rem');
   });
 });

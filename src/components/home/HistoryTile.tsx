@@ -29,7 +29,7 @@ export default function HistoryTile() {
   } = useHistoryData();
 
   const centeredWrapper = (child: ReactNode) => (
-    <div className="d-flex align-items-center justify-content-center flex-grow-1">{child}</div>
+    <div className="card-body d-flex align-items-center justify-content-center">{child}</div>
   );
 
   let content;
@@ -76,10 +76,8 @@ export default function HistoryTile() {
   );
 
   return (
-    <Tile title="History" titleRight={historyLink}>
-      <div style={{ minHeight: '20rem' }} className="d-flex flex-column">
-        {content}
-      </div>
+    <Tile title="History" titleRight={historyLink} minHeight="20rem">
+      {content}
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
     </Tile>
   );

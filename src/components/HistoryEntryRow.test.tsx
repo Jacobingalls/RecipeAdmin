@@ -93,21 +93,21 @@ describe('HistoryEntryRow', () => {
 
   it('navigates to detail page on click', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    const row = screen.getByRole('button', { name: /Oats/i });
+    const row = screen.getByRole('button', { name: 'View Oats' });
     fireEvent.click(row);
     expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
   });
 
   it('navigates on Enter key press', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    const row = screen.getByRole('button', { name: /Oats/i });
+    const row = screen.getByRole('button', { name: 'View Oats' });
     fireEvent.keyDown(row, { key: 'Enter' });
     expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
   });
 
   it('navigates on Space key press', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    const row = screen.getByRole('button', { name: /Oats/i });
+    const row = screen.getByRole('button', { name: 'View Oats' });
     fireEvent.keyDown(row, { key: ' ' });
     expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
   });
@@ -119,7 +119,7 @@ describe('HistoryEntryRow', () => {
     renderWithRouter(
       <HistoryEntryRow {...defaultProps} entry={groupEntry} name="Breakfast Bowl" />,
     );
-    const row = screen.getByRole('button', { name: /Breakfast Bowl/i });
+    const row = screen.getByRole('button', { name: 'View Breakfast Bowl' });
     fireEvent.click(row);
     expect(mockNavigate).toHaveBeenCalledWith('/groups/g1');
   });
@@ -133,7 +133,14 @@ describe('HistoryEntryRow', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const btn = screen.getByLabelText('Entry actions');
     expect(btn).toHaveClass('rounded-circle', 'border-0', 'text-body-secondary');
-    expect(btn).toHaveStyle({ width: '2rem', height: '2rem' });
+    expect(btn).toHaveStyle({ width: '2.25rem', height: '2.25rem' });
+  });
+
+  it('wraps action buttons in a CircularButtonGroup', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const group = screen.getByRole('group');
+    expect(group).toBeInTheDocument();
+    expect(group.style.borderRadius).toBe('1.125rem');
   });
 
   it('does not navigate when overflow menu button is clicked', () => {
@@ -142,34 +149,34 @@ describe('HistoryEntryRow', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('renders Log again menu item', () => {
+  it('renders log button with plus icon', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    expect(screen.getByText('Log again')).toBeInTheDocument();
+    const btn = screen.getByRole('button', { name: 'Log Oats' });
+    expect(btn.querySelector('.bi-plus-lg')).toBeInTheDocument();
   });
 
-  it('calls onLogAgain with the entry when Log again is clicked', () => {
+  it('calls onLogAgain when log button is clicked', () => {
     const onLogAgain = vi.fn();
     renderWithRouter(<HistoryEntryRow {...defaultProps} onLogAgain={onLogAgain} />);
-    fireEvent.click(screen.getByText('Log again'));
+    fireEvent.click(screen.getByRole('button', { name: 'Log Oats' }));
     expect(onLogAgain).toHaveBeenCalledWith(defaultProps.entry);
   });
 
-  it('does not navigate when Log again is clicked', () => {
+  it('does not navigate when log button is clicked', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    fireEvent.click(screen.getByText('Log again'));
+    fireEvent.click(screen.getByRole('button', { name: 'Log Oats' }));
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('disables Log again when logAgainLoading is true', () => {
+  it('disables log button when logAgainLoading is true', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoading />);
-    expect(screen.getByText('Log again')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Log Oats' })).toBeDisabled();
   });
 
-  it('renders a divider between Log again and Edit', () => {
-    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    const menu = screen.getByText('Log again').closest('ul')!;
-    const items = Array.from(menu.querySelectorAll('li'));
-    expect(items[1].querySelector('hr.dropdown-divider')).toBeInTheDocument();
+  it('shows spinner when logAgainLoading is true', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoading />);
+    const btn = screen.getByRole('button', { name: 'Log Oats' });
+    expect(btn.querySelector('.spinner-border')).toBeInTheDocument();
   });
 
   it('renders Edit menu item', () => {
@@ -195,29 +202,27 @@ describe('HistoryEntryRow', () => {
     expect(screen.getByText('Edit')).toBeDisabled();
   });
 
-  it('renders Delete menu item with destructive styling', () => {
+  it('renders Remove menu item', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    const deleteBtn = screen.getByText('Delete');
-    expect(deleteBtn).toBeInTheDocument();
-    expect(deleteBtn).toHaveClass('text-danger');
+    expect(screen.getByText('Remove')).toBeInTheDocument();
   });
 
-  it('calls onDelete with the entry when Delete is clicked', () => {
+  it('calls onDelete with the entry when Remove is clicked', () => {
     const onDelete = vi.fn();
     renderWithRouter(<HistoryEntryRow {...defaultProps} onDelete={onDelete} />);
-    fireEvent.click(screen.getByText('Delete'));
+    fireEvent.click(screen.getByText('Remove'));
     expect(onDelete).toHaveBeenCalledWith(defaultProps.entry);
   });
 
-  it('does not navigate when Delete is clicked', () => {
+  it('does not navigate when Remove is clicked', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
-    fireEvent.click(screen.getByText('Delete'));
+    fireEvent.click(screen.getByText('Remove'));
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('disables Delete when deleteLoading is true', () => {
+  it('disables Remove when deleteLoading is true', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} deleteLoading />);
-    expect(screen.getByText('Delete')).toBeDisabled();
+    expect(screen.getByText('Remove')).toBeDisabled();
   });
 
   it('renders AddToFavoritesButton for product entries', () => {

@@ -12,7 +12,7 @@ import {
 } from '../utils/logEntryHelpers';
 
 import AddToFavoritesButton from './AddToFavoritesButton';
-import { MoreButton } from './common';
+import { CircularButton, CircularButtonGroup, MoreButton } from './common';
 
 interface HistoryEntryRowProps {
   entry: ApiLogEntry;
@@ -78,61 +78,66 @@ export default function HistoryEntryRow({
           <div className="text-nowrap text-body-secondary small fw-medium">
             {calories !== null ? `${formatSignificant(calories)} kcal` : '-- kcal'}
           </div>
-          {servingSize && (
-            <AddToFavoritesButton
-              productId={entry.item.productID}
-              groupId={entry.item.groupID}
-              preparationId={entry.item.preparationID}
-              servingSize={servingSize}
-            />
-          )}
-          <div className="dropdown">
-            <MoreButton ariaLabel="Entry actions" />
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item"
-                  disabled={logAgainLoading}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLogAgain(entry);
-                  }}
-                >
-                  Log again
-                </button>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item"
-                  disabled={editLoading}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(entry);
-                  }}
-                >
-                  Edit
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item text-danger"
-                  disabled={deleteLoading}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(entry);
-                  }}
-                >
-                  Delete
-                </button>
-              </li>
-            </ul>
-          </div>
+          <CircularButtonGroup>
+            <CircularButton
+              aria-label={`Log ${name}`}
+              title="Add to log"
+              disabled={logAgainLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLogAgain(entry);
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              {logAgainLoading ? (
+                <span role="status">
+                  <span className="spinner-border spinner-border-sm" aria-hidden="true" />
+                  <span className="visually-hidden">Loading</span>
+                </span>
+              ) : (
+                <i className="bi bi-plus-lg" aria-hidden="true" />
+              )}
+            </CircularButton>
+            {servingSize && (
+              <AddToFavoritesButton
+                productId={entry.item.productID}
+                groupId={entry.item.groupID}
+                preparationId={entry.item.preparationID}
+                servingSize={servingSize}
+              />
+            )}
+            <div className="dropdown">
+              <MoreButton ariaLabel="Entry actions" />
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button
+                    type="button"
+                    className="dropdown-item"
+                    disabled={editLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(entry);
+                    }}
+                  >
+                    Edit
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="dropdown-item"
+                    disabled={deleteLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(entry);
+                    }}
+                  >
+                    Remove
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </CircularButtonGroup>
         </div>
       </div>
     </div>
