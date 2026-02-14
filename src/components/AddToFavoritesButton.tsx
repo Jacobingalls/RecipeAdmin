@@ -1,9 +1,8 @@
-import { useState, useCallback } from 'react';
+import type { CSSProperties } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 import type { ServingSize } from '../domain';
-import { createFavorite } from '../api';
-
-import { Button } from './common';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 interface AddToFavoritesButtonProps {
   productId?: string;
@@ -12,7 +11,12 @@ interface AddToFavoritesButtonProps {
   servingSize: ServingSize;
 }
 
-type FavoriteState = 'idle' | 'saving' | 'success';
+const buttonStyle: CSSProperties = {
+  width: '2rem',
+  height: '2rem',
+  '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
+  '--bs-btn-hover-border-color': 'transparent',
+} as CSSProperties;
 
 export default function AddToFavoritesButton({
   productId,
@@ -20,50 +24,78 @@ export default function AddToFavoritesButton({
   preparationId,
   servingSize,
 }: AddToFavoritesButtonProps) {
-  const [state, setState] = useState<FavoriteState>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const { findFavorite, addFavorite, removeFavorite } = useFavorites();
+  const [saving, setSaving] = useState(false);
+
+  const servingSizeData = useMemo(() => servingSize.toObject(), [servingSize]);
+
+  const existing = findFavorite({
+    productId,
+    preparationId,
+    groupId,
+    servingSize: servingSizeData,
+  });
+
+  const isFavorited = existing !== null;
 
   const handleClick = useCallback(async () => {
-    setState('saving');
-    setError(null);
+    setSaving(true);
 
     try {
-      await createFavorite(
-        productId && preparationId
-          ? {
-              kind: 'product',
-              productID: productId,
-              preparationID: preparationId,
-              servingSize: servingSize.toObject(),
-            }
-          : { kind: 'group', groupID: groupId!, servingSize: servingSize.toObject() },
-      );
-      setState('success');
-      setTimeout(() => {
-        setState('idle');
-      }, 1500);
-    } catch (e: unknown) {
-      setError((e as Error).message);
-      setState('idle');
+      if (isFavorited) {
+        await removeFavorite(existing!.id);
+      } else {
+        const request =
+          productId && preparationId
+            ? {
+                kind: 'product' as const,
+                productID: productId,
+                preparationID: preparationId,
+                servingSize: servingSizeData,
+              }
+            : { kind: 'group' as const, groupID: groupId!, servingSize: servingSizeData };
+        await addFavorite(request);
+      }
+    } catch {
+      // Errors are non-critical for the compact toggle
+    } finally {
+      setSaving(false);
     }
-  }, [productId, groupId, preparationId, servingSize]);
+  }, [
+    isFavorited,
+    existing,
+    productId,
+    groupId,
+    preparationId,
+    servingSizeData,
+    addFavorite,
+    removeFavorite,
+  ]);
 
-  const variant = state === 'success' ? 'outline-success' : 'outline-secondary';
-  const icon = state === 'success' ? 'bi-star-fill' : 'bi-star';
-  const label = state === 'success' ? 'Favorited!' : 'Favorite';
+  const icon = isFavorited ? 'bi-star-fill' : 'bi-star';
+  const label = isFavorited ? 'Remove from favorites' : 'Add to favorites';
 
   return (
-    <div>
-      <Button
-        variant={variant}
-        size="sm"
-        onClick={handleClick}
-        disabled={state === 'success'}
-        loading={state === 'saving'}
-      >
-        <i className={`${icon} me-1`} /> {label}
-      </Button>
-      {error && <div className="text-danger small mt-1">{error}</div>}
-    </div>
+    <button
+      type="button"
+      className="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary"
+      style={buttonStyle}
+      aria-label={label}
+      disabled={saving}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleClick();
+      }}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      {saving ? (
+        <span role="status">
+          <span className="spinner-border spinner-border-sm" aria-hidden="true" />
+          <span className="visually-hidden">Loading</span>
+        </span>
+      ) : (
+        <i className={`bi ${icon}${isFavorited ? ' text-warning' : ''}`} aria-hidden="true" />
+      )}
+    </button>
   );
 }

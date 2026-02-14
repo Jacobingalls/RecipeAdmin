@@ -293,8 +293,15 @@ export type CreateFavoriteRequest =
 
 // Favorites API functions
 
-export async function listFavorites(): Promise<ApiFavorite[]> {
-  return apiFetch<ApiFavorite[]>('/favorites');
+export async function listFavorites(options?: {
+  productID?: string;
+  groupID?: string;
+}): Promise<ApiFavorite[]> {
+  const params = new URLSearchParams();
+  if (options?.productID) params.set('productID', options.productID);
+  if (options?.groupID) params.set('groupID', options.groupID);
+  const query = params.toString();
+  return apiFetch<ApiFavorite[]>(`/favorites${query ? `?${query}` : ''}`);
 }
 
 export async function createFavorite(request: CreateFavoriteRequest): Promise<ApiFavorite> {

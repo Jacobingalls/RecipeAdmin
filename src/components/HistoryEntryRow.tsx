@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiLogEntry } from '../api';
+import { ServingSize } from '../domain';
 import { formatSignificant } from '../utils/formatters';
 import {
   entryDetailPath,
@@ -9,6 +11,7 @@ import {
   formatTime,
 } from '../utils/logEntryHelpers';
 
+import AddToFavoritesButton from './AddToFavoritesButton';
 import { MoreButton } from './common';
 
 interface HistoryEntryRowProps {
@@ -39,6 +42,11 @@ export default function HistoryEntryRow({
   const navigate = useNavigate();
   const detailPath = entryDetailPath(entry);
 
+  const servingSize = useMemo(
+    () => ServingSize.fromObject(entry.item.servingSize),
+    [entry.item.servingSize],
+  );
+
   return (
     <div
       role="button"
@@ -67,6 +75,14 @@ export default function HistoryEntryRow({
           <div className="text-nowrap text-body-secondary small fw-medium">
             {calories !== null ? `${formatSignificant(calories)} kcal` : '-- kcal'}
           </div>
+          {servingSize && (
+            <AddToFavoritesButton
+              productId={entry.item.productID}
+              groupId={entry.item.groupID}
+              preparationId={entry.item.preparationID}
+              servingSize={servingSize}
+            />
+          )}
           <div className="dropdown">
             <MoreButton ariaLabel="Entry actions" />
             <ul className="dropdown-menu dropdown-menu-end">

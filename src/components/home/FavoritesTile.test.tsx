@@ -13,6 +13,18 @@ vi.mock('../../hooks/useApiQuery', () => ({
   useApiQuery: vi.fn(),
 }));
 
+vi.mock('../../contexts/FavoritesContext', () => ({
+  useFavorites: () => ({
+    favorites: [],
+    loading: false,
+    findFavorite: () => null,
+    isFavorited: () => false,
+    addFavorite: vi.fn(),
+    removeFavorite: vi.fn(),
+    refetch: vi.fn(),
+  }),
+}));
+
 vi.mock('../../api', async () => {
   const actual = await vi.importActual('../../api');
   return {

@@ -1,65 +1,55 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import { ServingSize } from '../domain';
-import { createFavorite } from '../api';
 
 import AddToFavoritesButton from './AddToFavoritesButton';
 
-vi.mock('../api', () => ({
-  createFavorite: vi.fn(),
-}));
+const mockAddFavorite = vi.fn();
+const mockRemoveFavorite = vi.fn();
+const mockFindFavorite = vi.fn();
 
-vi.mock('./common', () => ({
-  Button: ({
-    children,
-    loading,
-    disabled,
-    onClick,
-    variant,
-    size,
-  }: {
-    children: unknown;
-    loading?: boolean;
-    disabled?: boolean;
-    onClick?: () => void;
-    variant?: string;
-    size?: string;
-  }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      data-variant={variant}
-      data-size={size}
-      data-loading={loading}
-    >
-      {children}
-    </button>
-  ),
+vi.mock('../contexts/FavoritesContext', () => ({
+  useFavorites: () => ({
+    findFavorite: mockFindFavorite,
+    isFavorited: (opts: unknown) => mockFindFavorite(opts) !== null,
+    addFavorite: mockAddFavorite,
+    removeFavorite: mockRemoveFavorite,
+    favorites: [],
+    loading: false,
+    refetch: vi.fn(),
+  }),
 }));
-
-const mockCreateFavorite = vi.mocked(createFavorite);
 
 describe('AddToFavoritesButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFindFavorite.mockReturnValue(null);
+    mockAddFavorite.mockResolvedValue(undefined);
+    mockRemoveFavorite.mockResolvedValue(undefined);
   });
 
-  it('renders idle state with "Favorite" text and star icon', () => {
+  it('renders a circular button matching MoreButton style', () => {
     render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
-    const button = screen.getByRole('button', { name: /Favorite/i });
+    const button = screen.getByLabelText('Add to favorites');
     expect(button).toBeInTheDocument();
-    expect(button).not.toBeDisabled();
+    expect(button).toHaveClass('rounded-circle', 'border-0');
+    expect(button).toHaveStyle({ width: '2rem', height: '2rem' });
   });
 
-  it('calls createFavorite with correct params for a product', async () => {
-    mockCreateFavorite.mockResolvedValue({
-      id: 'fav-1',
-      createdAt: 1700000000,
-      lastUsedAt: 1700000000,
-      item: { servingSize: { kind: 'servings', amount: 2 } },
-      servingSize: { kind: 'servings', amount: 2 },
-    });
+  it('renders empty star with aria-label "Add to favorites" when not favorited', () => {
+    render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
+    const button = screen.getByLabelText('Add to favorites');
+    expect(button.querySelector('.bi-star')).toBeInTheDocument();
+  });
+
+  it('renders filled yellow star with aria-label "Remove from favorites" when favorited', () => {
+    mockFindFavorite.mockReturnValue({ id: 'fav-1' });
+    render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
+    const button = screen.getByLabelText('Remove from favorites');
+    expect(button.querySelector('.bi-star-fill.text-warning')).toBeInTheDocument();
+  });
+
+  it('calls addFavorite with product params when not favorited', async () => {
     render(
       <AddToFavoritesButton
         productId="p1"
@@ -68,10 +58,10 @@ describe('AddToFavoritesButton', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
+    fireEvent.click(screen.getByLabelText('Add to favorites'));
 
     await waitFor(() => {
-      expect(mockCreateFavorite).toHaveBeenCalledWith({
+      expect(mockAddFavorite).toHaveBeenCalledWith({
         kind: 'product',
         productID: 'p1',
         preparationID: 'prep-1',
@@ -80,20 +70,13 @@ describe('AddToFavoritesButton', () => {
     });
   });
 
-  it('calls createFavorite with correct params for a group', async () => {
-    mockCreateFavorite.mockResolvedValue({
-      id: 'fav-2',
-      createdAt: 1700000000,
-      lastUsedAt: 1700000000,
-      item: { servingSize: { kind: 'servings', amount: 1 } },
-      servingSize: { kind: 'servings', amount: 1 },
-    });
+  it('calls addFavorite with group params when not favorited', async () => {
     render(<AddToFavoritesButton groupId="g1" servingSize={ServingSize.servings(1)} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
+    fireEvent.click(screen.getByLabelText('Add to favorites'));
 
     await waitFor(() => {
-      expect(mockCreateFavorite).toHaveBeenCalledWith({
+      expect(mockAddFavorite).toHaveBeenCalledWith({
         kind: 'group',
         groupID: 'g1',
         servingSize: { kind: 'servings', amount: 1 },
@@ -101,112 +84,45 @@ describe('AddToFavoritesButton', () => {
     });
   });
 
-  it('shows loading state while request is in flight', async () => {
-    let resolveCreate: (value: unknown) => void;
-    mockCreateFavorite.mockReturnValue(
-      new Promise((resolve) => {
-        resolveCreate = resolve;
+  it('calls removeFavorite when already favorited', async () => {
+    mockFindFavorite.mockReturnValue({ id: 'fav-1' });
+    render(
+      <AddToFavoritesButton
+        productId="p1"
+        preparationId="prep-1"
+        servingSize={ServingSize.servings(1)}
+      />,
+    );
+
+    fireEvent.click(screen.getByLabelText('Remove from favorites'));
+
+    await waitFor(() => {
+      expect(mockRemoveFavorite).toHaveBeenCalledWith('fav-1');
+    });
+  });
+
+  it('shows spinner while saving', async () => {
+    let resolveAdd: () => void;
+    mockAddFavorite.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveAdd = resolve;
       }),
     );
 
     render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
-
-    const button = screen.getByRole('button');
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('data-loading', 'true');
 
     await act(async () => {
-      resolveCreate!({
-        id: 'fav-1',
-        createdAt: 1700000000,
-        lastUsedAt: 1700000000,
-        item: { servingSize: { kind: 'servings', amount: 1 } },
-        servingSize: { kind: 'servings', amount: 1 },
-      });
+      fireEvent.click(screen.getByLabelText('Add to favorites'));
     });
-  });
 
-  it('shows "Favorited!" on success then resets after delay', async () => {
-    vi.useFakeTimers();
-    mockCreateFavorite.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          queueMicrotask(() =>
-            resolve({
-              id: 'fav-1',
-              createdAt: 1700000000,
-              lastUsedAt: 1700000000,
-              item: { servingSize: { kind: 'servings', amount: 1 } },
-              servingSize: { kind: 'servings', amount: 1 },
-            }),
-          );
-        }),
-    );
-
-    render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
+    expect(screen.getByRole('status')).toBeInTheDocument();
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
-      await Promise.resolve();
-    });
-
-    expect(screen.getByText(/Favorited/)).toBeInTheDocument();
-    expect(screen.getByRole('button')).toBeDisabled();
-    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'outline-success');
-
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-
-    expect(screen.getByRole('button', { name: /Favorite/i })).not.toBeDisabled();
-    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'outline-secondary');
-    vi.useRealTimers();
-  });
-
-  it('shows error message when create fails', async () => {
-    mockCreateFavorite.mockRejectedValue(new Error('HTTP 500'));
-    render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText('HTTP 500')).toBeInTheDocument();
-    });
-
-    expect(screen.getByRole('button', { name: /Favorite/i })).not.toBeDisabled();
-  });
-
-  it('clears error on next attempt', async () => {
-    mockCreateFavorite.mockRejectedValueOnce(new Error('HTTP 500'));
-    mockCreateFavorite.mockResolvedValueOnce({
-      id: 'fav-1',
-      createdAt: 1700000000,
-      lastUsedAt: 1700000000,
-      item: { servingSize: { kind: 'servings', amount: 1 } },
-      servingSize: { kind: 'servings', amount: 1 },
-    });
-    render(<AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
-    await waitFor(() => {
-      expect(screen.getByText('HTTP 500')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
-    await waitFor(() => {
-      expect(screen.queryByText('HTTP 500')).not.toBeInTheDocument();
+      resolveAdd!();
     });
   });
 
-  it('uses current servingSize prop value when creating', async () => {
-    mockCreateFavorite.mockResolvedValue({
-      id: 'fav-1',
-      createdAt: 1700000000,
-      lastUsedAt: 1700000000,
-      item: { servingSize: { kind: 'servings', amount: 3 } },
-      servingSize: { kind: 'servings', amount: 3 },
-    });
+  it('uses current servingSize prop value', async () => {
     const { rerender } = render(
       <AddToFavoritesButton
         productId="p1"
@@ -223,14 +139,31 @@ describe('AddToFavoritesButton', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Favorite/i }));
+    fireEvent.click(screen.getByLabelText('Add to favorites'));
 
     await waitFor(() => {
-      expect(mockCreateFavorite).toHaveBeenCalledWith(
+      expect(mockAddFavorite).toHaveBeenCalledWith(
         expect.objectContaining({
           servingSize: { kind: 'servings', amount: 3 },
         }),
       );
     });
+  });
+
+  it('stops event propagation on click', async () => {
+    const outerClick = vi.fn();
+    render(
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+      <div onClick={outerClick}>
+        <AddToFavoritesButton productId="p1" servingSize={ServingSize.servings(1)} />
+      </div>,
+    );
+
+    fireEvent.click(screen.getByLabelText('Add to favorites'));
+
+    await waitFor(() => {
+      expect(mockAddFavorite).toHaveBeenCalled();
+    });
+    expect(outerClick).not.toHaveBeenCalled();
   });
 });

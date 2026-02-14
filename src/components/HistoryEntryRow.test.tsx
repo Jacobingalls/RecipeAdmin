@@ -16,6 +16,16 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+vi.mock('./AddToFavoritesButton', () => ({
+  default: ({ productId, groupId }: { productId?: string; groupId?: string }) => (
+    <div
+      data-testid="add-to-favorites-button"
+      data-product-id={productId}
+      data-group-id={groupId}
+    />
+  ),
+}));
+
 function renderWithRouter(ui: ReactElement) {
   return render(
     <MemoryRouter initialEntries={['/test']}>
@@ -208,5 +218,23 @@ describe('HistoryEntryRow', () => {
   it('disables Delete when deleteLoading is true', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} deleteLoading />);
     expect(screen.getByText('Delete')).toBeDisabled();
+  });
+
+  it('renders AddToFavoritesButton for product entries', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} />);
+    const favBtn = screen.getByTestId('add-to-favorites-button');
+    expect(favBtn).toBeInTheDocument();
+    expect(favBtn).toHaveAttribute('data-product-id', 'p1');
+  });
+
+  it('renders AddToFavoritesButton with groupId for group entries', () => {
+    const groupEntry = makeEntry({
+      item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
+    });
+    renderWithRouter(
+      <HistoryEntryRow {...defaultProps} entry={groupEntry} name="Breakfast Bowl" />,
+    );
+    const favBtn = screen.getByTestId('add-to-favorites-button');
+    expect(favBtn).toHaveAttribute('data-group-id', 'g1');
   });
 });

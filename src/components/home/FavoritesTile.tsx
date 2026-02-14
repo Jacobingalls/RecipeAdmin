@@ -9,6 +9,7 @@ import {
   deleteFavorite as deleteFavoriteApi,
   touchFavoriteLastUsed,
 } from '../../api';
+import { useFavorites } from '../../contexts/FavoritesContext';
 import { useApiQuery } from '../../hooks';
 import { buildFavoriteLogParams, buildFavoriteLogTarget } from '../../utils/favoriteHelpers';
 import { LoadingState, ContentUnavailableView } from '../common';
@@ -30,6 +31,7 @@ export default function FavoritesTile() {
   } = useApiQuery(listFavorites, [], {
     errorMessage: "Couldn't load favorites. Try again later.",
   });
+  const { refetch: refetchFavoritesCache } = useFavorites();
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logStates, setLogStates] = useState<Map<string, FavoriteLogState>>(new Map());
@@ -87,11 +89,12 @@ export default function FavoritesTile() {
       try {
         await deleteFavoriteApi(favorite.id);
         refetch();
+        refetchFavoritesCache();
       } finally {
         setRemoveLoading(false);
       }
     },
-    [refetch],
+    [refetch, refetchFavoritesCache],
   );
 
   const centeredWrapper = (child: ReactNode) => (

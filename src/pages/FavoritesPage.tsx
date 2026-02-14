@@ -7,6 +7,7 @@ import {
   deleteFavorite as deleteFavoriteApi,
   touchFavoriteLastUsed,
 } from '../api';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { useApiQuery } from '../hooks';
 import {
   buildFavoriteLogParams,
@@ -29,6 +30,7 @@ export default function FavoritesPage() {
   } = useApiQuery(listFavorites, [], {
     errorMessage: "Couldn't load favorites. Try again later.",
   });
+  const { refetch: refetchFavoritesCache } = useFavorites();
 
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
@@ -107,11 +109,12 @@ export default function FavoritesPage() {
       try {
         await deleteFavoriteApi(favorite.id);
         refetch();
+        refetchFavoritesCache();
       } finally {
         setRemoveLoading(false);
       }
     },
-    [refetch],
+    [refetch, refetchFavoritesCache],
   );
 
   return (
