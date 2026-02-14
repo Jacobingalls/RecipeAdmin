@@ -17,6 +17,12 @@ export interface ServingSizeData {
   amount?: number | NutritionUnitData;
   value?: number | NutritionUnitData;
   name?: string;
+  // Tagged union keys (API format)
+  servings?: number;
+  mass?: NutritionUnitData;
+  volume?: NutritionUnitData;
+  energy?: NutritionUnitData;
+  customSize?: { name: string; amount: number };
 }
 
 /**
@@ -88,7 +94,15 @@ export class ServingSize {
 
   /**
    * Create from plain object (e.g., from API response).
-   * API format uses 'kind' field:
+   *
+   * Supports two formats:
+   *
+   * Tagged union (API format):
+   * - { servings: 2 }
+   * - { mass: { amount: 100, unit: 'g' } }
+   * - { customSize: { name: 'Cookie', amount: 3 } }
+   *
+   * Legacy kind-based format:
    * - { kind: 'servings', amount: 2 }
    * - { kind: 'customSize', name: '20oz Bottle', amount: 1 }
    * - { kind: 'volume', amount: { amount: 8, unit: 'fl oz (US)' } }
@@ -96,6 +110,29 @@ export class ServingSize {
   static fromObject(obj: ServingSizeData | null | undefined): ServingSize | null {
     if (obj == null) return null;
 
+    // Tagged union format (API format): discriminated by key name
+    if (typeof obj.servings === 'number') {
+      return ServingSize.servings(obj.servings);
+    }
+    if (obj.mass != null) {
+      const nu = NutritionUnit.fromObject(obj.mass);
+      return nu ? new ServingSize('mass', nu) : null;
+    }
+    if (obj.volume != null) {
+      const nu = NutritionUnit.fromObject(obj.volume);
+      return nu ? new ServingSize('volume', nu) : null;
+    }
+    if (obj.energy != null) {
+      const nu = NutritionUnit.fromObject(obj.energy);
+      return nu ? new ServingSize('energy', nu) : null;
+    }
+    if (obj.customSize != null) {
+      const { name, amount } = obj.customSize;
+      if (name == null || amount == null) return null;
+      return ServingSize.customSize(name, amount);
+    }
+
+    // Legacy kind-based format
     const kind = obj.kind || obj.type;
     if (!kind) return null;
 
@@ -139,6 +176,26 @@ export class ServingSize {
       case 'customSize': {
         const { name, amount } = this.value as CustomSizeValue;
         return { kind: 'customSize', name, amount };
+      }
+      default:
+        return {};
+    }
+  }
+
+  /** Serialize to the API's tagged union format. */
+  toApiObject(): ServingSizeData {
+    switch (this.type) {
+      case 'servings':
+        return { servings: this.value as number };
+      case 'mass':
+      case 'volume':
+      case 'energy': {
+        const nu = this.value as NutritionUnit;
+        return { [this.type]: { amount: nu.amount, unit: nu.unit } };
+      }
+      case 'customSize': {
+        const { name, amount } = this.value as CustomSizeValue;
+        return { customSize: { name, amount } };
       }
       default:
         return {};

@@ -15,6 +15,7 @@ import { PreparationDetails } from '../components/product';
 import BarcodeSection from '../components/BarcodeSection';
 import NotesDisplay from '../components/NotesDisplay';
 import type { Note } from '../components/NotesDisplay';
+import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
 export default function ProductDetailPage() {
@@ -84,11 +85,18 @@ export default function ProductDetailPage() {
                       servingSize={servingSize}
                       onServingSizeChange={setServingSize}
                       actionSlot={
-                        <AddToLogButton
-                          productId={product.id}
-                          preparationId={currentPrep.id}
-                          servingSize={servingSize}
-                        />
+                        <div className="d-flex gap-2">
+                          <AddToLogButton
+                            productId={product.id}
+                            preparationId={currentPrep.id}
+                            servingSize={servingSize}
+                          />
+                          <AddToFavoritesButton
+                            productId={product.id}
+                            preparationId={currentPrep.id}
+                            servingSize={servingSize}
+                          />
+                        </div>
                       }
                     />
                   </div>

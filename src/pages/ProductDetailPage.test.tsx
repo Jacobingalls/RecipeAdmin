@@ -46,6 +46,10 @@ vi.mock('../components/NotesDisplay', () => ({
   ),
 }));
 
+vi.mock('../components/AddToFavoritesButton', () => ({
+  default: () => <div data-testid="add-to-favorites-button" />,
+}));
+
 vi.mock('../components/AddToLogButton', () => ({
   default: () => <div data-testid="add-to-log-button" />,
 }));
@@ -223,6 +227,13 @@ describe('ProductDetailPage', () => {
     renderWithRoute('/products/p1');
     expect(screen.getByTestId('add-to-log-button')).toBeInTheDocument();
     // Verify it's inside the action slot
+    expect(screen.getByTestId('action-slot')).toBeInTheDocument();
+  });
+
+  it('renders AddToFavoritesButton inside PreparationDetails', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1');
+    expect(screen.getByTestId('add-to-favorites-button')).toBeInTheDocument();
     expect(screen.getByTestId('action-slot')).toBeInTheDocument();
   });
 

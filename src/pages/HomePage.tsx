@@ -1,5 +1,5 @@
 import { PasskeySetupPrompt } from '../components/common';
-import { HistoryTile } from '../components/home';
+import { FavoritesTile, HistoryTile } from '../components/home';
 import { useAuth } from '../contexts/AuthContext';
 
 function getTimeOfDayGreeting(): string {
@@ -20,6 +20,9 @@ export default function HomePage() {
       </h1>
       <PasskeySetupPrompt />
       <div className="row g-3">
+        <div className="col-12">
+          <FavoritesTile />
+        </div>
         <div className="col-12">
           <HistoryTile />
         </div>

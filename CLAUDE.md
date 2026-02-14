@@ -42,7 +42,7 @@ All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/wr
 - Extract every modal into its own component file
 
 **Reuse shared components:**
-- Before building UI, check `src/components/common/` for existing primitives
+- **ALWAYS check `src/components/common/` for existing shared components before building new UI.** Also search for similar patterns in nearby components — if the same pattern exists elsewhere, extract it into a shared component rather than reimplementing it.
 - When you see the same UI pattern in 2+ places, extract it to `src/components/common/`
 - Shared components live in `src/components/common/` with barrel exports via `index.ts`
 - See `REFACTORING_PLAN.md` for the current backlog of extraction opportunities
@@ -53,6 +53,7 @@ All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/wr
 - `ModalHeader`, `ModalBody`, `ModalFooter` — standard modal section components (exported from `ModalBase`)
 - `ListRow` — horizontal layout: `[icon] [content] [spacer] [secondary] [actions]`
 - `DeleteButton` — circular icon-only trash button for list row actions
+- `MoreButton` — circular icon-only three-dots button for dropdown menus in list rows
 - `CopyButton` — button with "Copied!" feedback for clipboard operations
 - `TypeToConfirmModal` — "type name to confirm" modal for destructive actions
 - `SectionHeader` — `[h5 title] [spacer] [action children]` for section headings with optional actions

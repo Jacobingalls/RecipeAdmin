@@ -9,6 +9,7 @@ export { default as LinkListItem } from './LinkListItem';
 export { default as ListRow } from './ListRow';
 export { default as LoadingState } from './LoadingState';
 export { default as ModalBase } from './ModalBase';
+export { default as MoreButton } from './MoreButton';
 export { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
 export { default as PasskeySetupPrompt } from './PasskeySetupPrompt';
 export { default as RequireAdmin } from './RequireAdmin';

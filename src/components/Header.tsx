@@ -90,7 +90,7 @@ export default function Header() {
     <nav className="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm">
       <div className="container">
         <div className="d-flex flex-column">
-          <NavLink className="navbar-brand fw-semibold mb-0 fs-6" to="/">
+          <NavLink className="navbar-brand fw-semibold mb-0 fs-6 user-select-none" to="/">
             Recipe Admin
           </NavLink>
           <VersionBadge />
@@ -106,6 +106,16 @@ export default function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+            <li className="nav-item">
+              <NavLink className={navLinkClass} to="/favorites">
+                <span className="d-inline-flex flex-column align-items-center">
+                  Favorites
+                  <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
+                    Favorites
+                  </span>
+                </span>
+              </NavLink>
+            </li>
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/history">
                 <span className="d-inline-flex flex-column align-items-center">

@@ -15,6 +15,7 @@ import BarcodeSection from '../components/BarcodeSection';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
 import CustomSizesSection from '../components/CustomSizesSection';
+import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
 interface GroupItemRowProps {
@@ -70,8 +71,9 @@ export default function GroupDetailPage() {
                     value={servingSize}
                     onChange={setServingSize}
                   />
-                  <div className="ms-auto">
+                  <div className="ms-auto d-flex gap-2">
                     <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+                    <AddToFavoritesButton groupId={groupData.id} servingSize={servingSize} />
                   </div>
                 </div>
 

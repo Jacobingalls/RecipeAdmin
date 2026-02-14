@@ -208,6 +208,76 @@ describe('ServingSize', () => {
     });
   });
 
+  describe('fromObject - tagged union (API format)', () => {
+    it('parses servings tagged union', () => {
+      const result = ServingSize.fromObject({ servings: 2 });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('servings');
+      expect(result!.value).toBe(2);
+    });
+
+    it('parses mass tagged union', () => {
+      const result = ServingSize.fromObject({ mass: { amount: 100, unit: 'g' } });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('mass');
+      expect((result!.value as NutritionUnit).amount).toBe(100);
+      expect((result!.value as NutritionUnit).unit).toBe('g');
+    });
+
+    it('parses volume tagged union', () => {
+      const result = ServingSize.fromObject({ volume: { amount: 250, unit: 'mL' } });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('volume');
+      expect((result!.value as NutritionUnit).amount).toBe(250);
+    });
+
+    it('parses energy tagged union', () => {
+      const result = ServingSize.fromObject({ energy: { amount: 200, unit: 'kcal' } });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('energy');
+      expect((result!.value as NutritionUnit).amount).toBe(200);
+    });
+
+    it('parses customSize tagged union', () => {
+      const result = ServingSize.fromObject({ customSize: { name: 'cookie', amount: 3 } });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('customSize');
+      const val = result!.value as CustomSizeValue;
+      expect(val.name).toBe('cookie');
+      expect(val.amount).toBe(3);
+    });
+
+    it('parses mass tagged union even with missing fields', () => {
+      // NutritionUnit.fromObject({}) returns a NutritionUnit (with undefined fields),
+      // so fromObject does not return null here
+      const result = ServingSize.fromObject({ mass: {} as { amount: number; unit: string } });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('mass');
+    });
+
+    it('returns null for customSize tagged union missing name', () => {
+      expect(
+        ServingSize.fromObject({
+          customSize: { name: undefined as unknown as string, amount: 3 },
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null for customSize tagged union missing amount', () => {
+      expect(
+        ServingSize.fromObject({
+          customSize: { name: 'cookie', amount: undefined as unknown as number },
+        }),
+      ).toBeNull();
+    });
+
+    it('prefers tagged union over legacy kind format', () => {
+      // If both formats are present, tagged union wins
+      const result = ServingSize.fromObject({ servings: 5, kind: 'servings', amount: 1 });
+      expect(result!.value).toBe(5);
+    });
+  });
+
   describe('amount getter - default branch', () => {
     it('returns 0 for unknown type', () => {
       const ss = new ServingSize('unknown' as ServingSizeType, 0);
@@ -298,6 +368,68 @@ describe('ServingSize', () => {
     it('round-trips with fromObject for customSize', () => {
       const original = ServingSize.customSize('cookie', 3);
       const restored = ServingSize.fromObject(original.toObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe('customSize');
+      const val = restored!.value as CustomSizeValue;
+      expect(val.name).toBe('cookie');
+      expect(val.amount).toBe(3);
+    });
+  });
+
+  describe('toApiObject', () => {
+    it('serializes servings as tagged union', () => {
+      expect(ServingSize.servings(2).toApiObject()).toEqual({ servings: 2 });
+    });
+
+    it('serializes mass as tagged union', () => {
+      expect(ServingSize.mass(100, 'g').toApiObject()).toEqual({
+        mass: { amount: 100, unit: 'g' },
+      });
+    });
+
+    it('serializes volume as tagged union', () => {
+      expect(ServingSize.volume(250, 'mL').toApiObject()).toEqual({
+        volume: { amount: 250, unit: 'mL' },
+      });
+    });
+
+    it('serializes energy as tagged union', () => {
+      expect(ServingSize.energy(200, 'kcal').toApiObject()).toEqual({
+        energy: { amount: 200, unit: 'kcal' },
+      });
+    });
+
+    it('serializes customSize as tagged union', () => {
+      expect(ServingSize.customSize('cookie', 3).toApiObject()).toEqual({
+        customSize: { name: 'cookie', amount: 3 },
+      });
+    });
+
+    it('returns empty object for unknown type', () => {
+      const ss = new ServingSize('unknown' as ServingSizeType, 0);
+      expect(ss.toApiObject()).toEqual({});
+    });
+
+    it('round-trips with fromObject for servings', () => {
+      const original = ServingSize.servings(2);
+      const restored = ServingSize.fromObject(original.toApiObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe(original.type);
+      expect(restored!.value).toBe(original.value);
+    });
+
+    it('round-trips with fromObject for mass', () => {
+      const original = ServingSize.mass(100, 'g');
+      const restored = ServingSize.fromObject(original.toApiObject());
+      expect(restored).not.toBeNull();
+      expect(restored!.type).toBe('mass');
+      expect((restored!.value as NutritionUnit).amount).toBe(100);
+      expect((restored!.value as NutritionUnit).unit).toBe('g');
+    });
+
+    it('round-trips with fromObject for customSize', () => {
+      const original = ServingSize.customSize('cookie', 3);
+      const restored = ServingSize.fromObject(original.toApiObject());
       expect(restored).not.toBeNull();
       expect(restored!.type).toBe('customSize');
       const val = restored!.value as CustomSizeValue;

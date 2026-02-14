@@ -13,6 +13,7 @@ import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupDetailPage from './pages/GroupDetailPage';
+import FavoritesPage from './pages/FavoritesPage';
 import HistoryPage from './pages/HistoryPage';
 import LoginPage from './pages/LoginPage';
 import SearchPage from './pages/SearchPage';
@@ -50,6 +51,7 @@ export default function App() {
               <Route path="/lookup/:barcode?" element={<LookupPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/groups/:id" element={<GroupDetailPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>

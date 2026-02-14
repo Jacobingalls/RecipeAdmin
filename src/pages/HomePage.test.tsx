@@ -11,6 +11,7 @@ vi.mock('../components/common', () => ({
 }));
 
 vi.mock('../components/home', () => ({
+  FavoritesTile: () => <div data-testid="favorites-tile" />,
   HistoryTile: () => <div data-testid="history-tile" />,
 }));
 
@@ -76,6 +77,11 @@ describe('HomePage', () => {
   it('renders the PasskeySetupPrompt', () => {
     renderWithRouter(<HomePage />);
     expect(screen.getByTestId('passkey-setup-prompt')).toBeInTheDocument();
+  });
+
+  it('renders the FavoritesTile', () => {
+    renderWithRouter(<HomePage />);
+    expect(screen.getByTestId('favorites-tile')).toBeInTheDocument();
   });
 
   it('does not render a settings link on the page', () => {

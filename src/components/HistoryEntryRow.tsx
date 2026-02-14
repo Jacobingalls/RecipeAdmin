@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiLogEntry } from '../api';
@@ -9,6 +8,8 @@ import {
   formatRelativeTime,
   formatTime,
 } from '../utils/logEntryHelpers';
+
+import { MoreButton } from './common';
 
 interface HistoryEntryRowProps {
   entry: ApiLogEntry;
@@ -67,24 +68,7 @@ export default function HistoryEntryRow({
             {calories !== null ? `${formatSignificant(calories)} kcal` : '-- kcal'}
           </div>
           <div className="dropdown">
-            <button
-              type="button"
-              className="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center p-0 text-body-secondary"
-              style={
-                {
-                  width: '2rem',
-                  height: '2rem',
-                  '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.1)',
-                  '--bs-btn-hover-border-color': 'transparent',
-                } as CSSProperties
-              }
-              data-bs-toggle="dropdown"
-              aria-label="Entry actions"
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <i className="bi bi-three-dots" />
-            </button>
+            <MoreButton ariaLabel="Entry actions" />
             <ul className="dropdown-menu dropdown-menu-end">
               <li>
                 <button

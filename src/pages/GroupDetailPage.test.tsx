@@ -42,6 +42,10 @@ vi.mock('../components/BarcodeSection', () => ({
   default: () => <div data-testid="barcode-section" />,
 }));
 
+vi.mock('../components/AddToFavoritesButton', () => ({
+  default: () => <div data-testid="add-to-favorites-button" />,
+}));
+
 vi.mock('../components/AddToLogButton', () => ({
   default: () => <div data-testid="add-to-log-button" />,
 }));
@@ -141,6 +145,12 @@ describe('GroupDetailPage', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('add-to-log-button')).toBeInTheDocument();
+  });
+
+  it('renders AddToFavoritesButton', () => {
+    mockQuery({ data: sampleGroup });
+    renderWithRoute('/groups/g1');
+    expect(screen.getByTestId('add-to-favorites-button')).toBeInTheDocument();
   });
 
   it('renders item rows with product badge', () => {

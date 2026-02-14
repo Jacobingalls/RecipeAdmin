@@ -271,6 +271,57 @@ export async function deleteLog(id: string): Promise<void> {
   return apiDelete(`/logs/${encodeURIComponent(id)}`);
 }
 
+// Favorites types
+
+export interface ApiFavoriteItem {
+  product?: ApiProduct;
+  preparationID?: string;
+  group?: ProductGroupData;
+  servingSize: ServingSizeData;
+}
+
+export interface ApiFavorite {
+  id: string;
+  createdAt: number;
+  lastUsedAt: number;
+  item: ApiFavoriteItem;
+}
+
+export type CreateFavoriteRequest =
+  | { kind: 'product'; productID: string; preparationID: string; servingSize: ServingSizeData }
+  | { kind: 'group'; groupID: string; servingSize: ServingSizeData };
+
+// Favorites API functions
+
+export async function listFavorites(): Promise<ApiFavorite[]> {
+  return apiFetch<ApiFavorite[]>('/favorites');
+}
+
+export async function createFavorite(request: CreateFavoriteRequest): Promise<ApiFavorite> {
+  return apiPost<CreateFavoriteRequest, ApiFavorite>('/favorites', request);
+}
+
+export async function updateFavoriteServingSize(
+  id: string,
+  servingSize: ServingSizeData,
+): Promise<ApiFavorite> {
+  return apiPut<ServingSizeData, ApiFavorite>(
+    `/favorites/${encodeURIComponent(id)}/serving-size`,
+    servingSize,
+  );
+}
+
+export async function touchFavoriteLastUsed(id: string): Promise<ApiFavorite> {
+  return apiPut<Record<string, never>, ApiFavorite>(
+    `/favorites/${encodeURIComponent(id)}/last-used`,
+    {},
+  );
+}
+
+export async function deleteFavorite(id: string): Promise<void> {
+  return apiDelete(`/favorites/${encodeURIComponent(id)}`);
+}
+
 // Auth types
 
 export interface AuthUser {
