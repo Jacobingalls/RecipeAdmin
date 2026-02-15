@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
@@ -17,6 +17,7 @@ vi.mock('../api', async () => {
   const actual = await vi.importActual('../api');
   return {
     ...actual,
+    getLogs: vi.fn(),
     getProduct: vi.fn(),
     getGroup: vi.fn(),
     deleteLog: vi.fn(),
@@ -113,9 +114,13 @@ vi.mock('../components/DayNutritionModal', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockGetLogs = vi.mocked(api.getLogs);
 const mockGetProduct = vi.mocked(api.getProduct);
 const mockGetGroup = vi.mocked(api.getGroup);
 const mockDeleteLog = vi.mocked(api.deleteLog);
+
+// IntersectionObserver mock — reset each test to avoid stale callbacks
+let intersectionCallback: IntersectionObserverCallback = () => {};
 
 function renderWithRouter(ui: ReactElement) {
   return render(
@@ -155,21 +160,25 @@ const defaultResult = {
   refetch: vi.fn(),
 };
 
-function mockQueries(overrides: {
-  logs?: Partial<UseApiQueryResult<ApiLogEntry[]>>;
+function mockProductsAndGroups(overrides?: {
   products?: Partial<UseApiQueryResult<ApiProductSummary[]>>;
   groups?: Partial<UseApiQueryResult<ApiGroupSummary[]>>;
 }) {
   mockUseApiQuery.mockImplementation((fetchFn) => {
     const fnName = fetchFn.name || fetchFn.toString();
-    if (fnName.includes('getLogs') || fnName === 'getLogs') {
-      return { ...defaultResult, ...overrides.logs } as UseApiQueryResult<unknown>;
-    }
     if (fnName.includes('listProducts') || fnName === 'listProducts') {
-      return { ...defaultResult, ...overrides.products } as UseApiQueryResult<unknown>;
+      return {
+        ...defaultResult,
+        data: sampleProducts,
+        ...overrides?.products,
+      } as UseApiQueryResult<unknown>;
     }
     if (fnName.includes('listGroups') || fnName === 'listGroups') {
-      return { ...defaultResult, ...overrides.groups } as UseApiQueryResult<unknown>;
+      return {
+        ...defaultResult,
+        data: sampleGroups,
+        ...overrides?.groups,
+      } as UseApiQueryResult<unknown>;
     }
     return defaultResult as UseApiQueryResult<unknown>;
   });
@@ -178,102 +187,113 @@ function mockQueries(overrides: {
 describe('HistoryPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    intersectionCallback = () => {};
+
+    // Set up IntersectionObserver mock
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        callback: IntersectionObserverCallback;
+        constructor(callback: IntersectionObserverCallback) {
+          this.callback = callback;
+          intersectionCallback = callback;
+        }
+        observe = vi.fn();
+        disconnect = vi.fn();
+        unobserve = vi.fn();
+      },
+    );
   });
 
   it('renders heading and placeholder content while loading', () => {
-    mockQueries({ logs: { loading: true } });
+    mockGetLogs.mockReturnValue(new Promise(() => {}));
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.getByTestId('history-placeholder')).toBeInTheDocument();
   });
 
-  it('renders heading and error state below it', () => {
-    mockQueries({ logs: { error: 'Network error' } });
+  it('renders heading and error state when logs fail to load', async () => {
+    mockGetLogs.mockRejectedValue(new Error('Network error'));
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('History')).toBeInTheDocument();
-    expect(screen.getByTestId('error-state')).toBeInTheDocument();
-    expect(screen.getByText('Network error')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('error-state')).toBeInTheDocument();
+    });
   });
 
-  it('renders empty state when no logs', () => {
-    mockQueries({
-      logs: { data: [] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+  it('renders empty state when no logs', async () => {
+    mockGetLogs.mockResolvedValue([]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
+    });
   });
 
-  it('renders the History heading', () => {
-    mockQueries({
-      logs: { data: [] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+  it('renders the History heading', async () => {
+    mockGetLogs.mockResolvedValue([]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('History')).toBeInTheDocument();
   });
 
-  it('groups entries by day with "Today" heading', () => {
+  it('groups entries by day with "Today" heading', async () => {
     const todayEntry = makeEntry({
       id: 'log1',
       timestamp: Date.now() / 1000,
     });
-    mockQueries({
-      logs: { data: [todayEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([todayEntry]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByText('Today')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Today')).toBeInTheDocument();
+    });
     expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
   });
 
-  it('groups entries by day with "Yesterday" heading', () => {
+  it('groups entries by day with "Yesterday" heading', async () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayEntry = makeEntry({
       id: 'log1',
       timestamp: yesterday.getTime() / 1000,
     });
-    mockQueries({
-      logs: { data: [yesterdayEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([yesterdayEntry]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByText('Yesterday')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Yesterday')).toBeInTheDocument();
+    });
   });
 
-  it('shows date string for older entries', () => {
+  it('shows date string for older entries', async () => {
     const oldDate = new Date();
     oldDate.setDate(oldDate.getDate() - 5);
     const oldEntry = makeEntry({
       id: 'log1',
       timestamp: oldDate.getTime() / 1000,
     });
-    mockQueries({
-      logs: { data: [oldEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([oldEntry]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByText(oldDate.toLocaleDateString())).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(oldDate.toLocaleDateString())).toBeInTheDocument();
+    });
   });
 
-  it('passes resolved name to HistoryEntryRow', () => {
+  it('passes resolved name to HistoryEntryRow', async () => {
     const todayEntry = makeEntry({
       id: 'log1',
       timestamp: Date.now() / 1000,
     });
-    mockQueries({
-      logs: { data: [todayEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([todayEntry]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
+    });
   });
 
   it('shows per-entry kcal, day total kcal, and opens day nutrition modal', async () => {
@@ -288,11 +308,8 @@ describe('HistoryPage', () => {
       },
     });
 
-    mockQueries({
-      logs: { data: [todayEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([todayEntry]);
+    mockProductsAndGroups();
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -318,20 +335,19 @@ describe('HistoryPage', () => {
     );
   });
 
-  it('passes group name to HistoryEntryRow for group entries', () => {
+  it('passes group name to HistoryEntryRow for group entries', async () => {
     const today = new Date();
     const groupEntry = makeEntry({
       id: 'log2',
       timestamp: today.getTime() / 1000,
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     });
-    mockQueries({
-      logs: { data: [groupEntry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([groupEntry]);
+    mockProductsAndGroups();
     renderWithRouter(<HistoryPage />);
-    expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
+    });
   });
 
   it('opens edit modal after clicking Edit on a product entry', async () => {
@@ -345,11 +361,8 @@ describe('HistoryPage', () => {
         servingSize: { kind: 'servings', amount: 2 },
       },
     });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -364,6 +377,10 @@ describe('HistoryPage', () => {
     });
 
     renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByTestId('edit-log1'));
 
@@ -384,11 +401,8 @@ describe('HistoryPage', () => {
         servingSize: { kind: 'servings', amount: 1 },
       },
     });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockGetGroup.mockResolvedValue({
       id: 'g1',
       name: 'Breakfast Bowl',
@@ -396,6 +410,10 @@ describe('HistoryPage', () => {
     });
 
     renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByTestId('edit-log1'));
 
@@ -417,11 +435,8 @@ describe('HistoryPage', () => {
         servingSize: { kind: 'servings', amount: 2 },
       },
     });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -436,6 +451,10 @@ describe('HistoryPage', () => {
     });
 
     renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByTestId('log-again-log1'));
 
@@ -457,11 +476,8 @@ describe('HistoryPage', () => {
         servingSize: { kind: 'servings', amount: 1 },
       },
     });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockGetGroup.mockResolvedValue({
       id: 'g1',
       name: 'Breakfast Bowl',
@@ -469,6 +485,10 @@ describe('HistoryPage', () => {
     });
 
     renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByTestId('log-again-log1'));
 
@@ -480,8 +500,7 @@ describe('HistoryPage', () => {
     expect(mockGetGroup).toHaveBeenCalledWith('g1');
   });
 
-  it('calls refetch when onSaved is triggered', async () => {
-    const refetchLogs = vi.fn();
+  it('reloads history when onSaved is triggered', async () => {
     const entry = makeEntry({
       id: 'log1',
       timestamp: Date.now() / 1000,
@@ -492,34 +511,8 @@ describe('HistoryPage', () => {
         servingSize: { kind: 'servings', amount: 1 },
       },
     });
-    mockUseApiQuery.mockImplementation((fetchFn) => {
-      const fnName = fetchFn.name || fetchFn.toString();
-      if (fnName.includes('getLogs') || fnName === 'getLogs') {
-        return {
-          data: [entry],
-          loading: false,
-          error: null,
-          refetch: refetchLogs,
-        } as UseApiQueryResult<unknown>;
-      }
-      if (fnName.includes('listProducts') || fnName === 'listProducts') {
-        return {
-          data: sampleProducts,
-          loading: false,
-          error: null,
-          refetch: vi.fn(),
-        } as UseApiQueryResult<unknown>;
-      }
-      if (fnName.includes('listGroups') || fnName === 'listGroups') {
-        return {
-          data: sampleGroups,
-          loading: false,
-          error: null,
-          refetch: vi.fn(),
-        } as UseApiQueryResult<unknown>;
-      }
-      return defaultResult as UseApiQueryResult<unknown>;
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -535,53 +528,41 @@ describe('HistoryPage', () => {
 
     renderWithRouter(<HistoryPage />);
 
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByTestId('edit-log1'));
 
     await waitFor(() => {
       expect(screen.getByTestId('log-modal')).toBeInTheDocument();
     });
 
+    // getLogs was called once for the initial load
+    expect(mockGetLogs).toHaveBeenCalledTimes(1);
+
     fireEvent.click(screen.getByTestId('modal-saved'));
-    expect(refetchLogs).toHaveBeenCalled();
+
+    // After save, getLogs is called again (reset + reload)
+    await waitFor(() => {
+      expect(mockGetLogs).toHaveBeenCalledTimes(2);
+    });
   });
 
-  it('calls deleteLog and refetches when Delete is clicked', async () => {
-    const refetchLogs = vi.fn();
+  it('calls deleteLog and removes entry when Delete is clicked', async () => {
     const entry = makeEntry({
       id: 'log1',
       timestamp: Date.now() / 1000,
     });
-    mockUseApiQuery.mockImplementation((fetchFn) => {
-      const fnName = fetchFn.name || fetchFn.toString();
-      if (fnName.includes('getLogs') || fnName === 'getLogs') {
-        return {
-          data: [entry],
-          loading: false,
-          error: null,
-          refetch: refetchLogs,
-        } as UseApiQueryResult<unknown>;
-      }
-      if (fnName.includes('listProducts') || fnName === 'listProducts') {
-        return {
-          data: sampleProducts,
-          loading: false,
-          error: null,
-          refetch: vi.fn(),
-        } as UseApiQueryResult<unknown>;
-      }
-      if (fnName.includes('listGroups') || fnName === 'listGroups') {
-        return {
-          data: sampleGroups,
-          loading: false,
-          error: null,
-          refetch: vi.fn(),
-        } as UseApiQueryResult<unknown>;
-      }
-      return defaultResult as UseApiQueryResult<unknown>;
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockDeleteLog.mockResolvedValue(undefined);
 
     renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByTestId('delete-log1'));
 
@@ -589,7 +570,7 @@ describe('HistoryPage', () => {
       expect(mockDeleteLog).toHaveBeenCalledWith('log1');
     });
     await waitFor(() => {
-      expect(refetchLogs).toHaveBeenCalled();
+      expect(screen.queryByTestId('entry-row-log1')).not.toBeInTheDocument();
     });
   });
 
@@ -604,11 +585,8 @@ describe('HistoryPage', () => {
         servingSize: { kind: 'servings', amount: 1 },
       },
     });
-    mockQueries({
-      logs: { data: [entry] },
-      products: { data: sampleProducts },
-      groups: { data: sampleGroups },
-    });
+    mockGetLogs.mockResolvedValue([entry]);
+    mockProductsAndGroups();
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -624,6 +602,10 @@ describe('HistoryPage', () => {
 
     renderWithRouter(<HistoryPage />);
 
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByTestId('edit-log1'));
 
     await waitFor(() => {
@@ -635,5 +617,74 @@ describe('HistoryPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('log-modal')).not.toBeInTheDocument();
     });
+  });
+
+  it('loads more entries when sentinel becomes visible', async () => {
+    // First week has entries, second week has older entries
+    mockGetLogs
+      .mockResolvedValueOnce([makeEntry({ id: 'log1', timestamp: Date.now() / 1000 })])
+      .mockResolvedValueOnce([
+        makeEntry({ id: 'log-older', timestamp: Date.now() / 1000 - 86400 * 10 }),
+      ]);
+
+    mockProductsAndGroups();
+
+    renderWithRouter(<HistoryPage />);
+
+    // Wait for initial load
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
+
+    // Simulate sentinel becoming visible (triggers loadMore for next week)
+    await act(async () => {
+      intersectionCallback(
+        [{ isIntersecting: true }] as unknown as IntersectionObserverEntry[],
+        {} as IntersectionObserver,
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log-older')).toBeInTheDocument();
+    });
+
+    expect(mockGetLogs).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not load more when previous week returned no entries', async () => {
+    // First week has entries, second week is empty (signals end of history)
+    mockGetLogs
+      .mockResolvedValueOnce([makeEntry({ id: 'log1', timestamp: Date.now() / 1000 })])
+      .mockResolvedValueOnce([]);
+
+    mockProductsAndGroups();
+
+    renderWithRouter(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    });
+
+    // First loadMore fetches the empty week
+    await act(async () => {
+      intersectionCallback(
+        [{ isIntersecting: true }] as unknown as IntersectionObserverEntry[],
+        {} as IntersectionObserver,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockGetLogs).toHaveBeenCalledTimes(2);
+    });
+
+    // Trigger again — should not load a third time since hasMore is false
+    await act(async () => {
+      intersectionCallback(
+        [{ isIntersecting: true }] as unknown as IntersectionObserverEntry[],
+        {} as IntersectionObserver,
+      );
+    });
+
+    expect(mockGetLogs).toHaveBeenCalledTimes(2);
   });
 });

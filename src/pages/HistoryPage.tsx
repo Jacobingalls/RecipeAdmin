@@ -1,9 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 import type { ApiLogEntry } from '../api';
 import { NutritionInformation } from '../domain';
 import { ErrorState, ContentUnavailableView, SubsectionTitle } from '../components/common';
-import { useHistoryData } from '../hooks';
+import { useInfiniteHistoryData } from '../hooks';
 import LogModal from '../components/LogModal';
 import DayNutritionModal from '../components/DayNutritionModal';
 import HistoryEntryRow from '../components/HistoryEntryRow';
@@ -48,7 +48,10 @@ export default function HistoryPage() {
     products,
     groups,
     loading,
+    loadingMore,
+    hasMore,
     error,
+    loadMore,
     entryNutritionById,
     logTarget,
     logAgainLoading,
@@ -59,12 +62,31 @@ export default function HistoryPage() {
     handleDeleteClick,
     handleSaved,
     handleModalClose,
-  } = useHistoryData();
+  } = useInfiniteHistoryData();
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll: observe sentinel to trigger loading more entries
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || loading || loadingMore || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loading, loadingMore, hasMore, loadMore]);
 
   const dayGroups = useMemo(() => {
-    if (!logs) return new Map<string, ApiLogEntry[]>();
+    if (logs.length === 0) return new Map<string, ApiLogEntry[]>();
     return groupByDay(logs);
   }, [logs]);
 
@@ -168,6 +190,20 @@ export default function HistoryPage() {
             </div>
           </div>
         ))}
+
+      <div ref={sentinelRef} aria-hidden="true" />
+      {loadingMore && (
+        <div className="text-center py-3" data-testid="loading-more">
+          <div className="spinner-border spinner-border-sm text-secondary" role="status">
+            <span className="visually-hidden">Loading more entries</span>
+          </div>
+        </div>
+      )}
+      {!loading && !loadingMore && !hasMore && logs.length > 0 && (
+        <p className="text-center text-body-secondary py-3" data-testid="end-of-list">
+          You&rsquo;re all caught up.
+        </p>
+      )}
 
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
       {selectedDay && selectedDayNutrition && (

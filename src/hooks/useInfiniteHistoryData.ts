@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
 import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
@@ -8,6 +8,8 @@ import type { LogTarget } from '../components/LogModal';
 import { buildLogTarget } from '../utils/logEntryHelpers';
 
 import { useApiQuery } from './useApiQuery';
+
+const DAYS_PER_PAGE = 7;
 
 function resolveEntryNutrition(
   entry: ApiLogEntry,
@@ -46,13 +48,15 @@ function resolveEntryNutrition(
   return null;
 }
 
-export interface UseHistoryDataResult {
-  logs: ApiLogEntry[] | null;
+export interface UseInfiniteHistoryDataResult {
+  logs: ApiLogEntry[];
   products: ApiProductSummary[] | null;
   groups: ApiGroupSummary[] | null;
   loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
   error: string | null;
-  refetchLogs: () => void;
+  loadMore: () => void;
   entryNutritionById: Map<string, NutritionInformation>;
   logTarget: LogTarget | null;
   logAgainLoading: boolean;
@@ -66,19 +70,21 @@ export interface UseHistoryDataResult {
 }
 
 /**
- * Shared hook for history data fetching, nutrition resolution, and log entry actions.
- * Used by both HistoryPage and HistoryTile.
+ * Paginated history data hook with infinite scroll.
+ * Loads 1-week windows of entries, accumulating results as the user scrolls.
  */
-export function useHistoryData(options?: { limit?: number }): UseHistoryDataResult {
-  const limit = options?.limit;
-  const {
-    data: logs,
-    loading: logsLoading,
-    error: logsError,
-    refetch: refetchLogs,
-  } = useApiQuery(() => getLogs(limit !== undefined ? { limit } : undefined), [limit], {
-    errorMessage: "Couldn't load history. Try again later.",
-  });
+export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
+  const [allLogs, setAllLogs] = useState<ApiLogEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const hasMoreRef = useRef(true);
+  hasMoreRef.current = hasMore;
+  const [logsError, setLogsError] = useState<string | null>(null);
+  const cursorRef = useRef<number | null>(null);
+  const loadingRef = useRef(false);
+  const [resetKey, setResetKey] = useState(0);
+
   const {
     data: products,
     loading: productsLoading,
@@ -88,9 +94,7 @@ export function useHistoryData(options?: { limit?: number }): UseHistoryDataResu
     data: groups,
     loading: groupsLoading,
     error: groupsError,
-  } = useApiQuery(listGroups, [], {
-    errorMessage: "Couldn't load history. Try again later.",
-  });
+  } = useApiQuery(listGroups, [], { errorMessage: "Couldn't load history. Try again later." });
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logAgainLoading, setLogAgainLoading] = useState(false);
@@ -99,28 +103,94 @@ export function useHistoryData(options?: { limit?: number }): UseHistoryDataResu
   const [productDetails, setProductDetails] = useState<Record<string, ApiProduct>>({});
   const [groupDetails, setGroupDetails] = useState<Record<string, ProductGroupData>>({});
 
-  const loading = logsLoading || productsLoading || groupsLoading;
-  const error = logsError || productsError || groupsError;
-
-  // Lazy-load product and group details for nutrition resolution
+  // Initial load (and reset after save)
   useEffect(() => {
-    if (!logs || logs.length === 0) return;
+    let cancelled = false;
+    setLogsLoading(true);
+    setLogsError(null);
+    setAllLogs([]);
+    setHasMore(true);
+    setProductDetails({});
+    setGroupDetails({});
+    cursorRef.current = null;
+    loadingRef.current = true;
+
+    getLogs({ limitDays: DAYS_PER_PAGE })
+      .then((entries) => {
+        if (cancelled) return;
+        setAllLogs(entries);
+        if (entries.length === 0) {
+          setHasMore(false);
+        } else {
+          cursorRef.current = entries[entries.length - 1].timestamp;
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLogsError("Couldn't load history. Try again later.");
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLogsLoading(false);
+        loadingRef.current = false;
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resetKey]);
+
+  const loadMore = useCallback(async () => {
+    if (loadingRef.current || !hasMoreRef.current || cursorRef.current === null) return;
+    loadingRef.current = true;
+    setLoadingMore(true);
+    try {
+      const entries = await getLogs({
+        start: cursorRef.current - 0.001,
+        limitDays: DAYS_PER_PAGE,
+      });
+      if (entries.length === 0) {
+        setHasMore(false);
+      } else {
+        cursorRef.current = entries[entries.length - 1].timestamp;
+        setAllLogs((prev) => [...prev, ...entries]);
+      }
+    } catch {
+      setHasMore(false);
+    } finally {
+      loadingRef.current = false;
+      setLoadingMore(false);
+    }
+  }, []);
+
+  // Lazy-load product and group details for nutrition resolution.
+  // Uses refs for the filter check to avoid re-triggering when details load.
+  const productDetailsRef = useRef(productDetails);
+  productDetailsRef.current = productDetails;
+  const groupDetailsRef = useRef(groupDetails);
+  groupDetailsRef.current = groupDetails;
+
+  useEffect(() => {
+    if (allLogs.length === 0) return;
+
+    const currentProductDetails = productDetailsRef.current;
+    const currentGroupDetails = groupDetailsRef.current;
 
     const productIds = Array.from(
       new Set(
-        logs
+        allLogs
           .filter((entry) => entry.item.kind === 'product' && !!entry.item.productID)
           .map((entry) => entry.item.productID!)
-          .filter((id) => !productDetails[id]),
+          .filter((id) => !currentProductDetails[id]),
       ),
     );
 
     const groupIds = Array.from(
       new Set(
-        logs
+        allLogs
           .filter((entry) => entry.item.kind === 'group' && !!entry.item.groupID)
           .map((entry) => entry.item.groupID!)
-          .filter((id) => !groupDetails[id]),
+          .filter((id) => !currentGroupDetails[id]),
       ),
     );
 
@@ -178,21 +248,19 @@ export function useHistoryData(options?: { limit?: number }): UseHistoryDataResu
     return () => {
       cancelled = true;
     };
-  }, [logs, productDetails, groupDetails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allLogs]);
 
   const entryNutritionById = useMemo(() => {
     const nutritionById = new Map<string, NutritionInformation>();
-    if (!logs) return nutritionById;
-
-    for (const entry of logs) {
+    for (const entry of allLogs) {
       const nutrition = resolveEntryNutrition(entry, productDetails, groupDetails);
       if (nutrition) {
         nutritionById.set(entry.id, nutrition);
       }
     }
-
     return nutritionById;
-  }, [logs, productDetails, groupDetails]);
+  }, [allLogs, productDetails, groupDetails]);
 
   const handleLogAgainClick = useCallback(async (entry: ApiLogEntry) => {
     setLogAgainLoading(true);
@@ -237,34 +305,36 @@ export function useHistoryData(options?: { limit?: number }): UseHistoryDataResu
     }
   }, []);
 
-  const handleDeleteClick = useCallback(
-    async (entry: ApiLogEntry) => {
-      setDeleteLoading(true);
-      try {
-        await deleteLog(entry.id);
-        refetchLogs();
-      } finally {
-        setDeleteLoading(false);
-      }
-    },
-    [refetchLogs],
-  );
+  const handleDeleteClick = useCallback(async (entry: ApiLogEntry) => {
+    setDeleteLoading(true);
+    try {
+      await deleteLog(entry.id);
+      setAllLogs((prev) => prev.filter((e) => e.id !== entry.id));
+    } finally {
+      setDeleteLoading(false);
+    }
+  }, []);
 
   const handleSaved = useCallback(() => {
-    refetchLogs();
-  }, [refetchLogs]);
+    setResetKey((k) => k + 1);
+  }, []);
 
   const handleModalClose = useCallback(() => {
     setLogTarget(null);
   }, []);
 
+  const loading = logsLoading || productsLoading || groupsLoading;
+  const error = logsError || productsError || groupsError;
+
   return {
-    logs,
+    logs: allLogs,
     products,
     groups,
     loading,
+    loadingMore,
+    hasMore,
     error,
-    refetchLogs,
+    loadMore,
     entryNutritionById,
     logTarget,
     logAgainLoading,
