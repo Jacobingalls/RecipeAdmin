@@ -28,7 +28,6 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
   const allGroups = buildOptionGroups(prep);
   const filteredGroups = filterGroups(allGroups, searchQuery);
 
-  // Get current unit display label
   const getCurrentLabel = (): string => {
     if (value.type === 'servings') {
       return 'Servings';
@@ -45,14 +44,12 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
     return unitValue || 'unknown';
   };
 
-  // Get the unit value (for mass/volume/energy) or name (for customSize)
   const getUnitValue = (): string => {
     if (value.type === 'servings') return 'Servings';
     if (value.type === 'customSize') return (value.value as CustomSizeValue).name;
     return (value.value as NutritionUnit).unit;
   };
 
-  // Create a new ServingSize based on type and unit
   const createServingSize = (
     type: ServingSizeType,
     unitValue: string,
@@ -74,13 +71,11 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
     }
   };
 
-  // Handle amount change
   const handleAmountChange = (newAmount: number): void => {
     const amount = Math.max(0.01, newAmount);
     onChange(createServingSize(value.type, getUnitValue(), amount));
   };
 
-  // Handle unit selection
   const handleUnitSelect = (option: SelectOption): void => {
     const currentAmount = value.amount || 1;
     onChange(createServingSize(option.type, option.value, currentAmount));
@@ -88,7 +83,6 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
     setSearchQuery('');
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -101,14 +95,12 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Focus search input when dropdown opens
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isOpen]);
 
-  // Handle keyboard navigation
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
       setIsOpen(false);
@@ -161,6 +153,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
                   type="text"
                   className="form-control form-control-sm"
                   placeholder="Search units..."
+                  aria-label="Search units"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -176,6 +169,14 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
                       <button
                         key={`${option.type}-${option.value}`}
                         className="dropdown-item"
+                        role="option"
+                        aria-selected={
+                          option.type === value.type &&
+                          (option.type === 'servings' ||
+                            (option.type === 'customSize'
+                              ? option.value === (value.value as CustomSizeValue).name
+                              : option.value === (value.value as NutritionUnit).unit))
+                        }
                         onClick={() => handleUnitSelect(option)}
                       >
                         {option.label}

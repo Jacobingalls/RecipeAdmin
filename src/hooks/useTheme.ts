@@ -10,6 +10,7 @@ function applyTheme(theme: Theme) {
   document.documentElement.setAttribute('data-bs-theme', theme);
 }
 
+/** Sync Bootstrap's `data-bs-theme` attribute with the user's system color scheme preference, updating reactively on OS changes. */
 export function useTheme(): Theme {
   const [theme, setTheme] = useState<Theme>(getSystemTheme);
 

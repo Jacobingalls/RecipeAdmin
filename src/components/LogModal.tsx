@@ -4,7 +4,7 @@ import type { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ApiLogItem } from '../api';
 import { logEntry, updateLogEntry } from '../api';
 
-import { ModalBase } from './common';
+import { ModalBase, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
 import ServingSizeSelector from './ServingSizeSelector';
 
@@ -136,7 +136,11 @@ function LogModalInner({
         <div className="d-flex justify-content-between align-items-end mt-2">
           <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
           <div>
-            {logError && <div className="text-danger small me-auto">{logError}</div>}
+            {logError && (
+              <div className="text-danger small me-auto" role="alert">
+                {logError}
+              </div>
+            )}
             <button
               type="button"
               className="btn btn-primary"
@@ -160,8 +164,12 @@ function LogModalInner({
           />
         </div>
       </div>
-      <div className="modal-body">
-        {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
+      <ModalBody>
+        {nutritionError && (
+          <div className="text-danger small mb-3" role="alert">
+            {nutritionError}
+          </div>
+        )}
         {nutritionInfo && (
           <div className="bg-body shadow-lg">
             <NutritionLabel
@@ -171,7 +179,7 @@ function LogModalInner({
             />
           </div>
         )}
-      </div>
+      </ModalBody>
     </ModalBase>
   );
 }

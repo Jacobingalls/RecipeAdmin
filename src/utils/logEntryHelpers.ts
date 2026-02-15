@@ -43,6 +43,7 @@ export function formatRelativeTime(timestamp: number): string {
   return new Date(thenMs).toLocaleDateString();
 }
 
+/** Resolve the display name for a log entry by looking up its product or group in the provided detail maps. */
 export function resolveEntryName(
   entry: ApiLogEntry,
   productDetails: Record<string, { name: string }>,
@@ -59,6 +60,7 @@ export function resolveEntryName(
   return 'Unknown Item';
 }
 
+/** Resolve the brand name for a log entry by looking up its product or group in the provided detail maps. */
 export function resolveEntryBrand(
   entry: ApiLogEntry,
   productDetails: Record<string, { brand?: string }>,
@@ -75,6 +77,7 @@ export function resolveEntryBrand(
   return undefined;
 }
 
+/** Build a navigation path to the product or group detail page, including serving size and preparation as query params. */
 export function entryDetailPath(entry: ApiLogEntry): string {
   const ss = ServingSize.fromObject(entry.item.servingSize);
   const ssParams = ss ? servingSizeSearchParams(ss) : null;
@@ -94,11 +97,13 @@ export function entryDetailPath(entry: ApiLogEntry): string {
   return '#';
 }
 
+/** Format a log entry's serving size as a human-readable string (e.g., "2 servings", "150g"). */
 export function formatServingSizeDescription(entry: ApiLogEntry): string {
   const ss = ServingSize.fromObject(entry.item.servingSize);
   return ss?.toString() ?? '';
 }
 
+/** Create a LogTarget from a log entry and its resolved product/group data, for use with LogModal to re-log or edit an entry. */
 export function buildLogTarget(
   entry: ApiLogEntry,
   product: ApiProduct | null,

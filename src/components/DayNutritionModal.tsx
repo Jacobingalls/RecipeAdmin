@@ -7,7 +7,7 @@ import {
   ServingSize,
 } from '../domain';
 
-import { ModalBase } from './common';
+import { ModalBase, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
 
 interface DayNutritionModalProps {
@@ -98,7 +98,7 @@ export default function DayNutritionModal({
         </div>
         <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
       </div>
-      <div className="modal-body">
+      <ModalBody>
         <div className="bg-body shadow-lg">
           <NutritionLabel
             nutritionInfo={nutritionInfo}
@@ -106,7 +106,7 @@ export default function DayNutritionModal({
             prep={prep}
           />
         </div>
-      </div>
+      </ModalBody>
     </ModalBase>
   );
 }

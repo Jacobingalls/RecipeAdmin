@@ -127,7 +127,7 @@ describe('AdminUserDetailPage', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Key' }));
-    expect(screen.getByText('Delete Passkey')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Delete passkey' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete passkey' })).toBeDisabled();
     fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
       target: { value: 'My Key' },
@@ -144,7 +144,7 @@ describe('AdminUserDetailPage', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
     fireEvent.click(screen.getByRole('button', { name: 'Revoke API key Test Key' }));
-    expect(screen.getByText('Revoke API Key')).toBeInTheDocument();
+    expect(screen.getByText('Revoke API key')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Revoke key' })).toBeDisabled();
     fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
       target: { value: 'Test Key' },
@@ -205,7 +205,7 @@ describe('AdminUserDetailPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
     });
     expect(mockRevokeSessions).toHaveBeenCalledWith('u1');
-    expect(screen.getByRole('status')).toHaveTextContent('All Sessions Revoked');
+    expect(screen.getByRole('status')).toHaveTextContent(/All sessions revoked/);
   });
 
   it('cancels revoke sessions when confirm is dismissed', async () => {

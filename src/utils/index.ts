@@ -18,3 +18,4 @@ export {
   formatServingSizeDescription,
   buildLogTarget,
 } from './logEntryHelpers';
+export { buildSearchResultLogTarget } from './searchResultLogTarget';

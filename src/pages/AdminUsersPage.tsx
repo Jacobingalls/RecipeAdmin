@@ -1,20 +1,14 @@
-import type { FormEvent } from 'react';
 import { useState, useMemo } from 'react';
 
-import type { AdminCreateUserResponse } from '../api';
-import { adminListUsers, adminCreateUser } from '../api';
+import { adminListUsers } from '../api';
 import {
   LoadingState,
   ErrorState,
   ContentUnavailableView,
-  CopyButton,
-  ModalBase,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
   LinkListItem,
 } from '../components/common';
+import { CreateUserModal } from '../components/admin';
 import { useApiQuery } from '../hooks';
 import { formatLastLogin } from '../utils/formatters';
 
@@ -31,14 +25,7 @@ export default function AdminUsersPage() {
   });
   const [nameFilter, setNameFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newUsername, setNewUsername] = useState('');
-  const [newDisplayName, setNewDisplayName] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newIsAdmin, setNewIsAdmin] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [createdResult, setCreatedResult] = useState<AdminCreateUserResponse | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const filteredUsers = useMemo(() => {
     if (!users) return [];
@@ -57,44 +44,11 @@ export default function AdminUsersPage() {
     });
   }, [users, nameFilter, roleFilter]);
 
-  function closeModal() {
-    const wasCreated = !!createdResult;
-    setShowCreateForm(false);
-    setCreatedResult(null);
-    if (wasCreated) refetch();
-  }
-
-  async function handleCreate(e: FormEvent) {
-    e.preventDefault();
-    setCreateError(null);
-    setIsCreating(true);
-    try {
-      const result = await adminCreateUser(newUsername, newDisplayName, newEmail, newIsAdmin);
-      setCreatedResult(result);
-    } catch (err) {
-      console.error("Couldn't create user", err);
-      setCreateError("Couldn't create the user. Try again.");
-    } finally {
-      setIsCreating(false);
-    }
-  }
-
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="mb-0">Users</h1>
-        <Button
-          variant="success"
-          onClick={() => {
-            setNewUsername('');
-            setNewDisplayName('');
-            setNewEmail('');
-            setNewIsAdmin(false);
-            setCreateError(null);
-            setCreatedResult(null);
-            setShowCreateForm(true);
-          }}
-        >
+        <Button variant="success" onClick={() => setShowCreateModal(true)}>
           New
         </Button>
       </div>
@@ -130,109 +84,11 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {showCreateForm && (
-        <ModalBase onClose={closeModal} ariaLabelledBy="create-user-modal-title">
-          {createdResult ? (
-            <>
-              <ModalHeader onClose={closeModal} titleId="create-user-modal-title">
-                User created
-              </ModalHeader>
-              <ModalBody>
-                <div className="alert alert-success mb-0" role="status">
-                  <p className="mb-2 small">
-                    Temporary API key for <strong>{createdResult.user.username}</strong>. Save it
-                    now — it expires in 24 hours and can&apos;t be retrieved later.
-                  </p>
-                  <div className="d-flex gap-2 align-items-center">
-                    <code className="flex-grow-1 text-break">{createdResult.temporaryAPIKey}</code>
-                    <CopyButton
-                      text={createdResult.temporaryAPIKey}
-                      className="btn btn-outline-success btn-sm"
-                    />
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button onClick={closeModal}>Done</Button>
-              </ModalFooter>
-            </>
-          ) : (
-            <>
-              <ModalHeader onClose={closeModal} titleId="create-user-modal-title">
-                Add User
-              </ModalHeader>
-              <form onSubmit={handleCreate}>
-                <ModalBody>
-                  {createError && (
-                    <div className="alert alert-danger py-2 small" role="alert">
-                      {createError}
-                    </div>
-                  )}
-                  <div className="mb-3">
-                    <label htmlFor="new-username" className="form-label">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="new-username"
-                      value={newUsername}
-                      onChange={(e) => setNewUsername(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="new-display-name" className="form-label">
-                      Display Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="new-display-name"
-                      value={newDisplayName}
-                      onChange={(e) => setNewDisplayName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="new-email" className="form-label">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="new-email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-check mb-3">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id="new-is-admin"
-                      checked={newIsAdmin}
-                      onChange={(e) => setNewIsAdmin(e.target.checked)}
-                    />
-                    <label className="form-check-label" htmlFor="new-is-admin">
-                      Administrator
-                    </label>
-                  </div>
-                </ModalBody>
-                <ModalFooter>
-                  <Button variant="secondary" onClick={closeModal}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" loading={isCreating}>
-                    Add
-                  </Button>
-                </ModalFooter>
-              </form>
-            </>
-          )}
-        </ModalBase>
-      )}
+      <CreateUserModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onUserCreated={refetch}
+      />
 
       {loading && <LoadingState />}
       {!loading && error && <ErrorState message={error} />}

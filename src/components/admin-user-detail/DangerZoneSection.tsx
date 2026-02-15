@@ -56,7 +56,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       <SectionHeader title="Account actions" className="mt-5" />
       {revokeSessionsSuccess && (
         <div className="alert alert-success alert-dismissible small" role="status">
-          <strong style={{ opacity: 0.8 }}>All Sessions Revoked</strong>
+          <strong style={{ opacity: 0.8 }}>All sessions revoked</strong>
           <p className="mb-0 mt-1">
             Active sessions may remain valid briefly until their current access token expires.
           </p>
@@ -114,7 +114,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}
-        title="Delete User"
+        title="Delete user"
         message={
           <>
             This will permanently delete <strong>{username}</strong>. This action cannot be undone.

@@ -44,7 +44,7 @@ describe('ServingSizeSelector', () => {
 
   it('renders the unit button with servings label', () => {
     renderSelector();
-    expect(screen.getByText('servings')).toBeInTheDocument();
+    expect(screen.getByText('Servings')).toBeInTheDocument();
   });
 
   it('renders correct label for customSize type', () => {
@@ -85,14 +85,14 @@ describe('ServingSizeSelector', () => {
 
   it('opens dropdown on button click', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Search units...')).toBeInTheDocument();
   });
 
   it('closes dropdown on second button click', () => {
     renderSelector();
-    const button = screen.getByText('servings');
+    const button = screen.getByText('Servings');
     fireEvent.click(button);
     expect(screen.getByRole('listbox')).toBeInTheDocument();
     fireEvent.click(button);
@@ -112,7 +112,7 @@ describe('ServingSizeSelector', () => {
 
   it('filters options by search query', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     const searchInput = screen.getByPlaceholderText('Search units...');
     fireEvent.change(searchInput, { target: { value: 'gram' } });
     expect(screen.getByText('Grams (g)')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('ServingSizeSelector', () => {
 
   it('shows no matching units message when search has no results', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     const searchInput = screen.getByPlaceholderText('Search units...');
     fireEvent.change(searchInput, { target: { value: 'zzzzzzz' } });
     expect(screen.getByText('No matching units')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('ServingSizeSelector', () => {
   it('calls onChange with correct ServingSize when option selected', () => {
     const onChange = vi.fn();
     renderSelector({ onChange });
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     fireEvent.click(screen.getByText('Grams (g)'));
     expect(onChange).toHaveBeenCalledTimes(1);
     const result = onChange.mock.calls[0][0] as ServingSize;
@@ -143,7 +143,7 @@ describe('ServingSizeSelector', () => {
 
   it('closes dropdown after selecting an option', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     fireEvent.click(screen.getByText('Grams (g)'));
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
@@ -179,7 +179,7 @@ describe('ServingSizeSelector', () => {
 
   it('closes dropdown on Escape key', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     const dropdown = screen.getByRole('listbox');
     fireEvent.keyDown(dropdown, { key: 'Escape' });
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
@@ -187,7 +187,7 @@ describe('ServingSizeSelector', () => {
 
   it('closes dropdown on outside click', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
     fireEvent.mouseDown(document.body);
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
@@ -195,12 +195,12 @@ describe('ServingSizeSelector', () => {
 
   it('clears search query when dropdown closes via Escape', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     const searchInput = screen.getByPlaceholderText('Search units...');
     fireEvent.change(searchInput, { target: { value: 'gram' } });
     fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' });
     // Reopen and verify search is cleared
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.getByPlaceholderText('Search units...')).toHaveValue('');
   });
 
@@ -208,7 +208,7 @@ describe('ServingSizeSelector', () => {
     const onChange = vi.fn();
     const value = ServingSize.servings(5);
     renderSelector({ onChange, value });
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     fireEvent.click(screen.getByText('Grams (g)'));
     const result = onChange.mock.calls[0][0] as ServingSize;
     expect(result.type).toBe('mass');
@@ -217,14 +217,14 @@ describe('ServingSizeSelector', () => {
 
   it('shows custom size options', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.getByText('Cookie')).toBeInTheDocument();
   });
 
   it('calls onChange with customSize when custom size selected', () => {
     const onChange = vi.fn();
     renderSelector({ onChange });
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     fireEvent.click(screen.getByText('Cookie'));
     const result = onChange.mock.calls[0][0] as ServingSize;
     expect(result.type).toBe('customSize');
@@ -233,7 +233,7 @@ describe('ServingSizeSelector', () => {
   it('does not show mass options when prep has no mass', () => {
     const prep = makePrep({ mass: null });
     renderSelector({ prep });
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.queryByText('Mass')).not.toBeInTheDocument();
     expect(screen.queryByText('Grams (g)')).not.toBeInTheDocument();
   });
@@ -241,14 +241,14 @@ describe('ServingSizeSelector', () => {
   it('does not show volume options when prep has no volume', () => {
     const prep = makePrep({ volume: null });
     renderSelector({ prep });
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.queryByText('Volume')).not.toBeInTheDocument();
   });
 
   it('does not show energy options when prep has no calories', () => {
     const prep = makePrep({ nutritionalInformation: {} });
     renderSelector({ prep });
-    fireEvent.click(screen.getByText('servings'));
+    fireEvent.click(screen.getByText('Servings'));
     expect(screen.queryByText('Energy')).not.toBeInTheDocument();
   });
 

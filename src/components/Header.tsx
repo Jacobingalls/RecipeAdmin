@@ -1,100 +1,20 @@
-import type { CSSProperties, FormEvent } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-import { API_DISPLAY_URL, getAdminEnvironment, getAdminGitCommit, getAdminVersion } from '../api';
+import { getAdminEnvironment, getAdminGitCommit, getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-function formatEnvironmentName(apiEnvironment: string | undefined): string {
-  if (!apiEnvironment) return 'Unknown';
-  if (apiEnvironment.toLowerCase() === 'debug') return 'Development';
-  return apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1);
-}
-
-function useGravatarUrl(email: string | undefined, size: number = 32): string | null {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!email) return;
-    let cancelled = false;
-    sha256Hex(email.trim().toLowerCase()).then((hash) => {
-      if (!cancelled) {
-        setUrl(`https://www.gravatar.com/avatar/${hash}?s=${size * 2}&d=mp`);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [email, size]);
-
-  return email ? url : null;
-}
-
-const menuIconStyle: CSSProperties = { width: 20, marginRight: 8 };
+import { HeaderSearchBar, UserDropdownMenu } from './header/index';
 
 export default function Header() {
   const { isAuthenticated, user, logout, apiVersion, apiGitCommit, apiEnvironment } = useAuth();
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const urlQuery = searchParams.get('q') ?? '';
-  const [searchQuery, setSearchQuery] = useState(urlQuery);
-  const navigate = useNavigate();
-  const avatarUrl = useGravatarUrl(user?.email);
   const adminVersion = getAdminVersion();
   const adminGitCommit = getAdminGitCommit();
   const adminEnvironment = getAdminEnvironment();
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
-
-  // Sync local input with URL when the q param changes (e.g. back/forward navigation)
-  useEffect(() => {
-    setSearchQuery(urlQuery);
-  }, [urlQuery]);
-
-  const isOnSearchPage = location.pathname === '/search';
-
-  const navigateToSearch = useCallback(
-    (query: string) => {
-      const trimmed = query.trim();
-      const path = trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : '/search';
-      navigate(path, { replace: isOnSearchPage });
-    },
-    [navigate, isOnSearchPage],
-  );
-
-  // Auto-search after debounce
-  useEffect(() => {
-    const trimmed = searchQuery.trim();
-    // Skip if the URL already matches
-    if (trimmed === urlQuery) return;
-    // Require minimum length for non-empty queries
-    if (trimmed.length > 0 && trimmed.length < 2) return;
-    // Only navigate to empty search if already on the search page
-    if (trimmed.length === 0 && !isOnSearchPage) return;
-
-    debounceRef.current = setTimeout(() => navigateToSearch(searchQuery), 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, urlQuery, isOnSearchPage, navigateToSearch]);
 
   if (!isAuthenticated) return null;
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `nav-link px-3 py-2 rounded ${isActive ? 'active text-white fw-semibold' : 'text-light'}`;
-
-  function handleSearch(e: FormEvent) {
-    e.preventDefault();
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    navigateToSearch(searchQuery);
-  }
 
   return (
     <nav className="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm">
@@ -160,184 +80,20 @@ export default function Header() {
               </NavLink>
             </li>
           </ul>
-          <form className="d-flex me-3" role="search" onSubmit={handleSearch}>
-            <label htmlFor="header-search" className="visually-hidden">
-              Search
-            </label>
-            <div
-              className="input-group rounded-pill overflow-hidden"
-              style={{ border: '2px solid transparent' }}
-            >
-              <span className="input-group-text border-0 bg-body-secondary pe-0">
-                <i className="bi bi-search" aria-hidden="true" />
-              </span>
-              <input
-                type="search"
-                className="form-control border-0 bg-body-secondary shadow-none ps-2"
-                id="header-search"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={(e) => {
-                  const group = e.currentTarget.closest('.input-group') as HTMLElement | null;
-                  group?.style.setProperty('border-color', 'var(--bs-primary)');
-                }}
-                onBlur={(e) => {
-                  const group = e.currentTarget.closest('.input-group') as HTMLElement | null;
-                  group?.style.setProperty('border-color', 'transparent');
-                }}
-              />
-            </div>
-          </form>
-          <div className="dropdown">
-            <button
-              type="button"
-              className="btn p-0 border-0 rounded-circle"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              aria-label="User menu"
-            >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt=""
-                  width={32}
-                  height={32}
-                  className="rounded-circle"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span
-                  className="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary text-white fw-bold"
-                  style={{ width: 32, height: 32, fontSize: 14 }}
-                >
-                  {(user?.displayName?.[0] ?? user?.username?.[0] ?? '?').toUpperCase()}
-                </span>
-              )}
-            </button>
-            <ul
-              className="dropdown-menu dropdown-menu-end"
-              style={{ minWidth: '14rem' }}
-              onClick={(e) => {
-                // Only close on interactive element clicks (links, buttons)
-                if (!(e.target as HTMLElement).closest('a, button')) {
-                  e.stopPropagation();
-                }
-              }}
-              onKeyDown={(e) => {
-                // Only close on interactive element activation (Enter/Space on links, buttons)
-                if (e.key === 'Enter' || e.key === ' ') {
-                  if (!(e.target as HTMLElement).closest('a, button')) {
-                    e.stopPropagation();
-                  }
-                }
-              }}
-              role="menu"
-            >
-              <li className="px-3 py-2">
-                <div className="fw-semibold">{user?.displayName}</div>
-                <div className="text-body-secondary small">{user?.username}</div>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li>
-                <Link className="dropdown-item d-flex align-items-center" to="/settings">
-                  <i
-                    className="bi bi-gear d-inline-block text-center"
-                    aria-hidden="true"
-                    style={menuIconStyle}
-                  />
-                  Settings
-                </Link>
-              </li>
-              {user?.isAdmin && (
-                <li>
-                  <Link className="dropdown-item d-flex align-items-center" to="/admin/users">
-                    <i
-                      className="bi bi-shield-lock d-inline-block text-center"
-                      aria-hidden="true"
-                      style={menuIconStyle}
-                    />
-                    Admin
-                  </Link>
-                </li>
-              )}
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item d-flex align-items-center"
-                  onClick={logout}
-                >
-                  <i
-                    className="bi bi-box-arrow-right d-inline-block text-center"
-                    aria-hidden="true"
-                    style={menuIconStyle}
-                  />
-                  Sign out
-                </button>
-              </li>
-              <li>
-                <hr className="dropdown-divider" />
-              </li>
-              <li className="px-3 py-1">
-                <div className="d-flex align-items-start text-body-secondary small">
-                  <i
-                    className="bi bi-window d-inline-block text-center flex-shrink-0"
-                    aria-hidden="true"
-                    style={{ ...menuIconStyle, lineHeight: 'inherit' }}
-                  />
-                  <span>
-                    {adminEnvironment
-                      ? adminEnvironment.charAt(0).toUpperCase() + adminEnvironment.slice(1)
-                      : 'Development'}
-                    {adminVersion && (
-                      <>
-                        <br />
-                        <span className="text-body-tertiary">
-                          {adminVersion}
-                          {adminGitCommit && ` (${adminGitCommit})`}
-                        </span>
-                      </>
-                    )}
-                  </span>
-                </div>
-              </li>
-              <li className="px-3 py-1">
-                <div className="d-flex align-items-start text-body-secondary small">
-                  <i
-                    className="bi bi-hdd-network d-inline-block text-center flex-shrink-0"
-                    aria-hidden="true"
-                    style={{ ...menuIconStyle, lineHeight: 'inherit' }}
-                  />
-                  <span>
-                    {formatEnvironmentName(apiEnvironment)}
-                    {apiVersion && (
-                      <>
-                        <br />
-                        <span className="text-body-tertiary">
-                          {apiVersion}
-                          {apiGitCommit && ` (${apiGitCommit})`}
-                        </span>
-                      </>
-                    )}
-                    <br />
-                    <a
-                      href={API_DISPLAY_URL}
-                      className="text-body-tertiary"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {API_DISPLAY_URL}
-                    </a>
-                  </span>
-                </div>
-              </li>
-            </ul>
-          </div>
+          <HeaderSearchBar />
+          <UserDropdownMenu
+            displayName={user?.displayName}
+            username={user?.username}
+            email={user?.email}
+            isAdmin={user?.isAdmin ?? false}
+            onLogout={logout}
+            adminVersion={adminVersion}
+            adminGitCommit={adminGitCommit}
+            adminEnvironment={adminEnvironment}
+            apiVersion={apiVersion}
+            apiGitCommit={apiGitCommit}
+            apiEnvironment={apiEnvironment}
+          />
         </div>
       </div>
     </nav>

@@ -65,7 +65,11 @@ export default function AddToLogButton({
       >
         {buttonText}
       </button>
-      {logError && <div className="text-danger small mt-1">{logError}</div>}
+      {logError && (
+        <div className="text-danger small mt-1" role="alert">
+          {logError}
+        </div>
+      )}
     </div>
   );
 }

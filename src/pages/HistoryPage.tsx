@@ -3,12 +3,10 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import type { ApiLogEntry } from '../api';
 import { NutritionInformation } from '../domain';
 import { ErrorState, ContentUnavailableView, SubsectionTitle } from '../components/common';
+import { HistoryDayGroup } from '../components/history';
 import { useInfiniteHistoryData } from '../hooks';
 import LogModal from '../components/LogModal';
 import DayNutritionModal from '../components/DayNutritionModal';
-import HistoryEntryRow from '../components/HistoryEntryRow';
-import { formatSignificant } from '../utils/formatters';
-import { resolveEntryName, resolveEntryBrand } from '../utils/logEntryHelpers';
 
 function formatDayHeading(dateStr: string): string {
   const today = new Date();
@@ -149,46 +147,22 @@ export default function HistoryPage() {
         !error &&
         dayGroups.size > 0 &&
         Array.from(dayGroups.entries()).map(([day, entries]) => (
-          <div key={day} className="mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <SubsectionTitle as="h5" className="mb-0">
-                {formatDayHeading(day)}
-              </SubsectionTitle>
-
-              <div className="d-flex align-items-center">
-                <span className="text-body-secondary small fw-medium mb-0">
-                  {formatSignificant(dayNutritionByDay.get(day)?.calories?.amount ?? 0)} kcal total,
-                  &nbsp;
-                </span>
-
-                <button
-                  type="button"
-                  className="btn btn-link text-decoration-none small p-0"
-                  onClick={() => setSelectedDay(day)}
-                >
-                  View full nutrition &rarr;
-                </button>
-              </div>
-            </div>
-            <div className="list-group">
-              {entries.map((entry) => (
-                <HistoryEntryRow
-                  key={entry.id}
-                  entry={entry}
-                  name={resolveEntryName(entry, productDetails, groupDetails)}
-                  brand={resolveEntryBrand(entry, productDetails, groupDetails)}
-                  calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
-                  timeDisplay="time"
-                  onLogAgain={handleLogAgainClick}
-                  logAgainLoading={logAgainLoading}
-                  onEdit={handleEditClick}
-                  editLoading={editLoading}
-                  onDelete={handleDeleteClick}
-                  deleteLoading={deleteLoading}
-                />
-              ))}
-            </div>
-          </div>
+          <HistoryDayGroup
+            key={day}
+            dayHeading={formatDayHeading(day)}
+            dayNutrition={dayNutritionByDay.get(day)}
+            entries={entries}
+            productDetails={productDetails}
+            groupDetails={groupDetails}
+            entryNutritionById={entryNutritionById}
+            onViewFullNutrition={() => setSelectedDay(day)}
+            onLogAgain={handleLogAgainClick}
+            logAgainLoading={logAgainLoading}
+            onEdit={handleEditClick}
+            editLoading={editLoading}
+            onDelete={handleDeleteClick}
+            deleteLoading={deleteLoading}
+          />
         ))}
 
       <div ref={sentinelRef} aria-hidden="true" />

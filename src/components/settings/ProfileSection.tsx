@@ -2,6 +2,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { settingsUpdateProfile } from '../../api';
+import { Button } from '../../components/common';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProfileSection() {
@@ -70,16 +71,12 @@ export default function ProfileSection() {
                     onChange={(e) => setDisplayNameInput(e.target.value)}
                     required
                   />
-                  <button type="submit" className="btn btn-primary btn-sm" disabled={isSaving}>
+                  <Button type="submit" variant="primary" size="sm" disabled={isSaving}>
                     Save
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() => setEditing(false)}
-                  >
+                  </Button>
+                  <Button variant="outline-secondary" size="sm" onClick={() => setEditing(false)}>
                     Cancel
-                  </button>
+                  </Button>
                 </form>
               ) : (
                 <span className="d-flex align-items-center gap-2">

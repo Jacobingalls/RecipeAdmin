@@ -160,7 +160,7 @@ export default function CredentialsSection({
 
       <TypeToConfirmModal
         isOpen={!!deleteCredential}
-        title={deleteCredential?.type === 'passkey' ? 'Delete Passkey' : 'Revoke API Key'}
+        title={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke API key'}
         message={
           <>
             This will permanently {deleteCredential?.type === 'passkey' ? 'delete' : 'revoke'}{' '}

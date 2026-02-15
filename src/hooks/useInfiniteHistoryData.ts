@@ -70,6 +70,7 @@ export interface UseInfiniteHistoryDataResult {
 /**
  * Paginated history data hook with infinite scroll.
  * Loads 1-week windows of entries, accumulating results as the user scrolls.
+ * Unlike `useHistoryData`, which loads a fixed date range, this hook supports incremental loading via `loadMore`.
  */
 export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
   const [allLogs, setAllLogs] = useState<ApiLogEntry[]>([]);

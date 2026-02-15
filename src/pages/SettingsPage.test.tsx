@@ -212,7 +212,7 @@ describe('SettingsPage', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete passkey My Passkey' }));
-    expect(screen.getByText('Delete Passkey')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Delete passkey' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete passkey' })).toBeDisabled();
     fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
       target: { value: 'My Passkey' },
@@ -230,7 +230,7 @@ describe('SettingsPage', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'Revoke API key My Key' }));
-    expect(screen.getByText('Revoke API Key')).toBeInTheDocument();
+    expect(screen.getByText('Revoke API key')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Revoke key' })).toBeDisabled();
     fireEvent.change(screen.getByLabelText(/Type .* to confirm/), {
       target: { value: 'My Key' },

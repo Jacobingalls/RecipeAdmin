@@ -4,11 +4,10 @@ import { useParams } from 'react-router-dom';
 import type { ApiSearchResult } from '../api';
 import { lookupBarcode } from '../api';
 import { useApiQuery } from '../hooks';
-import { Preparation, ProductGroup, ServingSize } from '../domain';
+import { buildSearchResultLogTarget } from '../utils';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
 import SearchResultRow from '../components/SearchResultRow';
 import LogModal from '../components/LogModal';
-import type { LogTarget } from '../components/LogModal';
 
 export default function LookupPage() {
   const { barcode } = useParams<{ barcode: string }>();
@@ -22,43 +21,10 @@ export default function LookupPage() {
   });
   const [logItem, setLogItem] = useState<ApiSearchResult | null>(null);
 
-  const logTarget: LogTarget | null = useMemo(() => {
-    if (!logItem) return null;
-
-    const servingSize = ServingSize.fromObject(logItem.servingSize) || ServingSize.servings(1);
-
-    if (logItem.item.product) {
-      const p = logItem.item.product;
-      const prepData =
-        p.preparations?.find((pr) => pr.id === logItem.item.preparationID) || p.preparations?.[0];
-      if (!prepData) return null;
-      const prep = new Preparation(prepData);
-
-      return {
-        name: p.name,
-        brand: p.brand,
-        prepOrGroup: prep,
-        initialServingSize: servingSize,
-        productId: p.id,
-        preparationId: prepData.id,
-      };
-    }
-
-    if (logItem.item.group) {
-      const g = logItem.item.group;
-      const group = new ProductGroup(g);
-
-      return {
-        name: g.name || 'Group',
-        brand: g.brand,
-        prepOrGroup: group,
-        initialServingSize: servingSize,
-        groupId: g.id,
-      };
-    }
-
-    return null;
-  }, [logItem]);
+  const logTarget = useMemo(
+    () => (logItem ? buildSearchResultLogTarget(logItem) : null),
+    [logItem],
+  );
 
   return (
     <>

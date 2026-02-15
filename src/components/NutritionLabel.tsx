@@ -67,7 +67,6 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
     };
   };
 
-  // Get calories
   const calories = nutritionInfo.calories?.amount ?? null;
   const caloriesFromFat = nutritionInfo.caloriesFromFat?.amount ?? null;
 
