@@ -249,6 +249,7 @@ export async function getLogs(options?: {
   if (options?.limitDays !== undefined) params.set('limitDays', String(options.limitDays));
   if (options?.sort !== undefined) params.set('sort', options.sort);
   if (options?.limit !== undefined) params.set('limit', String(options.limit));
+  params.set('tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
   const query = params.toString();
   return apiFetch<ApiLogEntry[]>(`/logs${query ? `?${query}` : ''}`);
 }
