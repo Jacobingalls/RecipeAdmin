@@ -121,12 +121,70 @@ describe('favoriteBrand', () => {
 });
 
 describe('favoriteDetailPath', () => {
-  it('returns product path for product favorites', () => {
-    expect(favoriteDetailPath(productFavorite)).toBe('/products/p1');
+  it('returns product path with serving size params', () => {
+    const path = favoriteDetailPath(productFavorite);
+    expect(path).toContain('/products/p1?');
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.get('st')).toBe('servings');
+    expect(params.get('sa')).toBe('2');
   });
 
-  it('returns group path for group favorites', () => {
-    expect(favoriteDetailPath(groupFavorite)).toBe('/groups/g1');
+  it('does not include prep param when preparationID matches default (first prep)', () => {
+    // productFavorite has preparationID 'prep1' which matches the only (first) preparation
+    const path = favoriteDetailPath(productFavorite);
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.has('prep')).toBe(false);
+  });
+
+  it('includes prep param when preparationID differs from default', () => {
+    const fav: ApiFavorite = {
+      ...productFavorite,
+      item: {
+        product: {
+          id: 'p1',
+          name: 'Multi Prep',
+          preparations: [
+            { id: 'prep-a', nutritionalInformation: {} },
+            { id: 'prep-b', nutritionalInformation: {} },
+          ],
+        },
+        preparationID: 'prep-b',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    };
+    const path = favoriteDetailPath(fav);
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.get('prep')).toBe('prep-b');
+  });
+
+  it('does not include prep param when preparationID matches defaultPreparationID', () => {
+    const fav: ApiFavorite = {
+      ...productFavorite,
+      item: {
+        product: {
+          id: 'p1',
+          name: 'With Default',
+          defaultPreparationID: 'prep-b',
+          preparations: [
+            { id: 'prep-a', nutritionalInformation: {} },
+            { id: 'prep-b', nutritionalInformation: {} },
+          ],
+        },
+        preparationID: 'prep-b',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    };
+    const path = favoriteDetailPath(fav);
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.has('prep')).toBe(false);
+  });
+
+  it('returns group path with serving size params', () => {
+    const path = favoriteDetailPath(groupFavorite);
+    expect(path).toContain('/groups/g1?');
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.get('st')).toBe('servings');
+    expect(params.get('sa')).toBe('1');
   });
 
   it('returns "#" when neither product nor group', () => {

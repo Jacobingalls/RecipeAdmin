@@ -2,6 +2,8 @@ import type { ApiFavorite, LogEntryRequest } from '../api';
 import type { LogTarget } from '../components/LogModal';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 
+import { servingSizeSearchParams } from './servingSizeParams';
+
 /** Returns the display name for a favorite (product name or group name). */
 export function favoriteName(fav: ApiFavorite): string {
   if (fav.item.product) {
@@ -20,11 +22,22 @@ export function favoriteBrand(fav: ApiFavorite): string | undefined {
 
 /** Returns the detail page path for a favorite's underlying item. */
 export function favoriteDetailPath(fav: ApiFavorite): string {
+  const ss = ServingSize.fromObject(fav.item.servingSize);
+  const ssParams = ss ? servingSizeSearchParams(ss) : null;
+
   if (fav.item.product) {
-    return `/products/${fav.item.product.id}`;
+    const params = new URLSearchParams(ssParams ?? undefined);
+    const defaultPrepID =
+      fav.item.product.defaultPreparationID ?? fav.item.product.preparations?.[0]?.id;
+    if (fav.item.preparationID && fav.item.preparationID !== defaultPrepID) {
+      params.set('prep', fav.item.preparationID);
+    }
+    const search = params.toString();
+    return `/products/${fav.item.product.id}${search ? `?${search}` : ''}`;
   }
   if (fav.item.group) {
-    return `/groups/${fav.item.group.id}`;
+    const search = ssParams?.toString();
+    return `/groups/${fav.item.group.id}${search ? `?${search}` : ''}`;
   }
   return '#';
 }

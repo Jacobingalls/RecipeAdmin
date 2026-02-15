@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { ServingSize } from '../domain';
+import { servingSizeSearchParams } from '../utils/servingSizeParams';
 
 const PARAM_TYPE = 'st';
 const PARAM_AMOUNT = 'sa';
@@ -45,15 +46,9 @@ function servingSizeToParams(ss: ServingSize, current: URLSearchParams): URLSear
     next.delete(key);
   }
 
-  next.set(PARAM_TYPE, ss.type);
-  next.set(PARAM_AMOUNT, String(ss.amount));
-
-  if (ss.type === 'mass' || ss.type === 'volume' || ss.type === 'energy') {
-    const nu = ss.value as { unit: string };
-    next.set(PARAM_UNIT, nu.unit);
-  } else if (ss.type === 'customSize') {
-    const cs = ss.value as { name: string };
-    next.set(PARAM_NAME, cs.name);
+  const ssParams = servingSizeSearchParams(ss);
+  for (const [key, value] of ssParams) {
+    next.set(key, value);
   }
 
   return next;

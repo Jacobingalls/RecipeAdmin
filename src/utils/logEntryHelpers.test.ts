@@ -142,24 +142,62 @@ describe('resolveEntryName', () => {
 });
 
 describe('entryDetailPath', () => {
-  it('returns product path for product entries', () => {
+  it('returns product path with serving size params', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
       userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
     };
-    expect(entryDetailPath(entry)).toBe('/products/p1');
+    expect(entryDetailPath(entry)).toBe('/products/p1?st=servings&sa=1');
   });
 
-  it('returns group path for group entries', () => {
+  it('includes prep param when preparationID is present', () => {
+    const entry: ApiLogEntry = {
+      id: 'log1',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        preparationID: 'prep-abc',
+        servingSize: { kind: 'servings', amount: 2 },
+      },
+    };
+    const path = entryDetailPath(entry);
+    expect(path).toContain('/products/p1?');
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.get('st')).toBe('servings');
+    expect(params.get('sa')).toBe('2');
+    expect(params.get('prep')).toBe('prep-abc');
+  });
+
+  it('includes mass serving size params for product entries', () => {
+    const entry: ApiLogEntry = {
+      id: 'log1',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: {
+        kind: 'product',
+        productID: 'p1',
+        servingSize: { kind: 'mass', amount: { amount: 100, unit: 'g' } },
+      },
+    };
+    const path = entryDetailPath(entry);
+    const params = new URLSearchParams(path.split('?')[1]);
+    expect(params.get('st')).toBe('mass');
+    expect(params.get('sa')).toBe('100');
+    expect(params.get('su')).toBe('g');
+  });
+
+  it('returns group path with serving size params', () => {
     const entry: ApiLogEntry = {
       id: 'log2',
       timestamp: nowSeconds(),
       userID: 'u1',
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     };
-    expect(entryDetailPath(entry)).toBe('/groups/g1');
+    expect(entryDetailPath(entry)).toBe('/groups/g1?st=servings&sa=1');
   });
 
   it('returns "#" when no ID available', () => {

@@ -3,6 +3,8 @@ import type { LogTarget } from '../components/LogModal';
 import type { ProductGroupData } from '../domain';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 
+import { servingSizeSearchParams } from './servingSizeParams';
+
 /** Formats a Unix epoch timestamp (seconds) as a time-only string (e.g., "2:30 PM"). */
 export function formatTime(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleTimeString(undefined, {
@@ -69,11 +71,20 @@ export function resolveEntryBrand(
 }
 
 export function entryDetailPath(entry: ApiLogEntry): string {
+  const ss = ServingSize.fromObject(entry.item.servingSize);
+  const ssParams = ss ? servingSizeSearchParams(ss) : null;
+
   if (entry.item.kind === 'group' && entry.item.groupID) {
-    return `/groups/${entry.item.groupID}`;
+    const search = ssParams?.toString();
+    return `/groups/${entry.item.groupID}${search ? `?${search}` : ''}`;
   }
   if (entry.item.productID) {
-    return `/products/${entry.item.productID}`;
+    const params = new URLSearchParams(ssParams ?? undefined);
+    if (entry.item.preparationID) {
+      params.set('prep', entry.item.preparationID);
+    }
+    const search = params.toString();
+    return `/products/${entry.item.productID}${search ? `?${search}` : ''}`;
   }
   return '#';
 }

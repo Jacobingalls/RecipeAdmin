@@ -10,6 +10,7 @@ export {
   buildFavoriteLogTarget,
 } from './favoriteHelpers';
 export { generateName } from './generateName';
+export { servingSizeSearchParams } from './servingSizeParams';
 export {
   formatRelativeTime,
   resolveEntryName,
