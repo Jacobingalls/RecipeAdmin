@@ -86,12 +86,14 @@ vi.mock('../LogModal', () => ({
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 const { useHistoryData } = vi.mocked(await import('../../hooks'));
 
-const sampleProducts = [
-  { id: 'p1', name: 'Oats' },
-  { id: 'p2', name: 'Milk' },
-];
+const sampleProductDetails: Record<string, { id: string; name: string; brand?: string }> = {
+  p1: { id: 'p1', name: 'Oats' },
+  p2: { id: 'p2', name: 'Milk' },
+};
 
-const sampleGroups = [{ id: 'g1', name: 'Breakfast Bowl', items: [] }];
+const sampleGroupDetails: Record<string, { id: string; name: string }> = {
+  g1: { id: 'g1', name: 'Breakfast Bowl' },
+};
 
 // Use timestamps relative to the start of today so they're always "today"
 // regardless of what time the tests run.
@@ -125,8 +127,8 @@ const sampleLogs: ApiLogEntry[] = [
 
 const defaultResult: UseHistoryDataResult = {
   logs: null,
-  products: null,
-  groups: null,
+  productDetails: {},
+  groupDetails: {},
   loading: false,
   error: null,
   refetchLogs: vi.fn(),
@@ -208,8 +210,8 @@ describe('TodayTile', () => {
 
     mockHistoryData({
       logs: [sampleLogs[0]],
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
       entryNutritionById: new Map([['log1', nutrition]]),
     });
 
@@ -236,8 +238,8 @@ describe('TodayTile', () => {
 
     mockHistoryData({
       logs: [sampleLogs[0], { ...sampleLogs[0], id: 'log2' }],
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
       entryNutritionById: new Map([
         ['log1', nutrition1],
         ['log2', nutrition2],
@@ -271,8 +273,8 @@ describe('TodayTile', () => {
   it('renders history entry rows in populated state', () => {
     mockHistoryData({
       logs: sampleLogs,
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
     });
     renderTile();
     expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
@@ -282,8 +284,8 @@ describe('TodayTile', () => {
   it('passes resolved names to HistoryEntryRow', () => {
     mockHistoryData({
       logs: sampleLogs,
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
     });
     renderTile();
     expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
@@ -293,8 +295,8 @@ describe('TodayTile', () => {
   it('passes timeDisplay="time" to HistoryEntryRow', () => {
     mockHistoryData({
       logs: [sampleLogs[0]],
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
     });
     renderTile();
     expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-time-display', 'time');
@@ -304,8 +306,8 @@ describe('TodayTile', () => {
     const mockTarget = { product: { id: 'p1' } };
     mockHistoryData({
       logs: [sampleLogs[0]],
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
       logTarget: mockTarget as UseHistoryDataResult['logTarget'],
     });
     renderTile();
@@ -315,8 +317,8 @@ describe('TodayTile', () => {
   it('does not render LogModal when logTarget is null', () => {
     mockHistoryData({
       logs: [sampleLogs[0]],
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
       logTarget: null,
     });
     renderTile();
@@ -341,8 +343,8 @@ describe('TodayTile', () => {
 
     mockHistoryData({
       logs: yesterdayLogs,
-      products: sampleProducts,
-      groups: sampleGroups,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
     });
 
     renderTile();

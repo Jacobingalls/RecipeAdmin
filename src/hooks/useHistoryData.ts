@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 
-import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
-import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
+import type { ApiLogEntry, ApiProduct } from '../api';
+import { getLogs, getProduct, getGroup, deleteLog } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
@@ -48,8 +48,8 @@ function resolveEntryNutrition(
 
 export interface UseHistoryDataResult {
   logs: ApiLogEntry[] | null;
-  products: ApiProductSummary[] | null;
-  groups: ApiGroupSummary[] | null;
+  productDetails: Record<string, ApiProduct>;
+  groupDetails: Record<string, ProductGroupData>;
   loading: boolean;
   error: string | null;
   refetchLogs: () => void;
@@ -83,19 +83,6 @@ export function useHistoryData(options?: {
   } = useApiQuery(() => getLogs({ limit, limitDays }), [limit, limitDays], {
     errorMessage: "Couldn't load history. Try again later.",
   });
-  const {
-    data: products,
-    loading: productsLoading,
-    error: productsError,
-  } = useApiQuery(listProducts, [], { errorMessage: "Couldn't load history. Try again later." });
-  const {
-    data: groups,
-    loading: groupsLoading,
-    error: groupsError,
-  } = useApiQuery(listGroups, [], {
-    errorMessage: "Couldn't load history. Try again later.",
-  });
-
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logAgainLoading, setLogAgainLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -103,8 +90,8 @@ export function useHistoryData(options?: {
   const [productDetails, setProductDetails] = useState<Record<string, ApiProduct>>({});
   const [groupDetails, setGroupDetails] = useState<Record<string, ProductGroupData>>({});
 
-  const loading = logsLoading || productsLoading || groupsLoading;
-  const error = logsError || productsError || groupsError;
+  const loading = logsLoading;
+  const error = logsError;
 
   // Lazy-load product and group details for nutrition resolution
   useEffect(() => {
@@ -264,8 +251,8 @@ export function useHistoryData(options?: {
 
   return {
     logs,
-    products,
-    groups,
+    productDetails,
+    groupDetails,
     loading,
     error,
     refetchLogs,

@@ -1,4 +1,4 @@
-import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
+import type { ApiLogEntry, ApiProduct } from '../api';
 import type { ProductGroupData } from '../domain';
 
 import {
@@ -84,11 +84,13 @@ describe('formatRelativeTime', () => {
 });
 
 describe('resolveEntryName', () => {
-  const products: ApiProductSummary[] = [
-    { id: 'p1', name: 'Oats' },
-    { id: 'p2', name: 'Milk' },
-  ];
-  const groups: ApiGroupSummary[] = [{ id: 'g1', name: 'Breakfast Bowl', items: [] }];
+  const products: Record<string, { name: string }> = {
+    p1: { name: 'Oats' },
+    p2: { name: 'Milk' },
+  };
+  const groups: Record<string, { name: string }> = {
+    g1: { name: 'Breakfast Bowl' },
+  };
 
   it('resolves a product name', () => {
     const entry: ApiLogEntry = {

@@ -1,13 +1,11 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
-import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
-import { getLogs, listProducts, listGroups, getProduct, getGroup, deleteLog } from '../api';
+import type { ApiLogEntry, ApiProduct } from '../api';
+import { getLogs, getProduct, getGroup, deleteLog } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
 import { buildLogTarget } from '../utils/logEntryHelpers';
-
-import { useApiQuery } from './useApiQuery';
 
 const DAYS_PER_PAGE = 7;
 
@@ -50,8 +48,8 @@ function resolveEntryNutrition(
 
 export interface UseInfiniteHistoryDataResult {
   logs: ApiLogEntry[];
-  products: ApiProductSummary[] | null;
-  groups: ApiGroupSummary[] | null;
+  productDetails: Record<string, ApiProduct>;
+  groupDetails: Record<string, ProductGroupData>;
   loading: boolean;
   loadingMore: boolean;
   hasMore: boolean;
@@ -84,17 +82,6 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
   const cursorRef = useRef<number | null>(null);
   const loadingRef = useRef(false);
   const [resetKey, setResetKey] = useState(0);
-
-  const {
-    data: products,
-    loading: productsLoading,
-    error: productsError,
-  } = useApiQuery(listProducts, [], { errorMessage: "Couldn't load history. Try again later." });
-  const {
-    data: groups,
-    loading: groupsLoading,
-    error: groupsError,
-  } = useApiQuery(listGroups, [], { errorMessage: "Couldn't load history. Try again later." });
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logAgainLoading, setLogAgainLoading] = useState(false);
@@ -323,13 +310,13 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
     setLogTarget(null);
   }, []);
 
-  const loading = logsLoading || productsLoading || groupsLoading;
-  const error = logsError || productsError || groupsError;
+  const loading = logsLoading;
+  const error = logsError;
 
   return {
     logs: allLogs,
-    products,
-    groups,
+    productDetails,
+    groupDetails,
     loading,
     loadingMore,
     hasMore,

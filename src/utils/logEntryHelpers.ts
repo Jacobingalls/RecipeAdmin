@@ -1,4 +1,4 @@
-import type { ApiLogEntry, ApiProduct, ApiProductSummary, ApiGroupSummary } from '../api';
+import type { ApiLogEntry, ApiProduct } from '../api';
 import type { LogTarget } from '../components/LogModal';
 import type { ProductGroupData } from '../domain';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
@@ -45,15 +45,15 @@ export function formatRelativeTime(timestamp: number): string {
 
 export function resolveEntryName(
   entry: ApiLogEntry,
-  products: ApiProductSummary[],
-  groups: ApiGroupSummary[],
+  productDetails: Record<string, { name: string }>,
+  groupDetails: Record<string, { name?: string }>,
 ): string {
   if (entry.item.kind === 'group' && entry.item.groupID) {
-    const group = groups.find((g) => g.id === entry.item.groupID);
+    const group = groupDetails[entry.item.groupID];
     return group?.name ?? 'Unknown Group';
   }
   if (entry.item.productID) {
-    const product = products.find((p) => p.id === entry.item.productID);
+    const product = productDetails[entry.item.productID];
     return product?.name ?? 'Unknown Product';
   }
   return 'Unknown Item';
@@ -61,10 +61,10 @@ export function resolveEntryName(
 
 export function resolveEntryBrand(
   entry: ApiLogEntry,
-  products: ApiProductSummary[],
+  productDetails: Record<string, { brand?: string }>,
 ): string | undefined {
   if (entry.item.kind === 'product' && entry.item.productID) {
-    const product = products.find((p) => p.id === entry.item.productID);
+    const product = productDetails[entry.item.productID];
     return product?.brand;
   }
   return undefined;

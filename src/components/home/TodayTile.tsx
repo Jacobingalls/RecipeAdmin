@@ -27,8 +27,8 @@ const NUTRIENTS = [
 export default function TodayTile() {
   const {
     logs,
-    products,
-    groups,
+    productDetails,
+    groupDetails,
     loading,
     error,
     entryNutritionById,
@@ -180,8 +180,8 @@ export default function TodayTile() {
           <HistoryEntryRow
             key={entry.id}
             entry={entry}
-            name={resolveEntryName(entry, products!, groups!)}
-            brand={resolveEntryBrand(entry, products!)}
+            name={resolveEntryName(entry, productDetails, groupDetails)}
+            brand={resolveEntryBrand(entry, productDetails)}
             calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
             timeDisplay="time"
             onLogAgain={handleLogAgainClick}

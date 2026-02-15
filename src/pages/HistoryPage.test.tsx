@@ -2,16 +2,10 @@ import type { ReactElement } from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
-import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { ApiLogEntry, ApiProductSummary, ApiGroupSummary } from '../api';
+import type { ApiLogEntry } from '../api';
 import * as api from '../api';
-import { useApiQuery } from '../hooks/useApiQuery';
 
 import HistoryPage from './HistoryPage';
-
-vi.mock('../hooks/useApiQuery', () => ({
-  useApiQuery: vi.fn(),
-}));
 
 vi.mock('../api', async () => {
   const actual = await vi.importActual('../api');
@@ -113,7 +107,6 @@ vi.mock('../components/DayNutritionModal', () => ({
   ),
 }));
 
-const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockGetLogs = vi.mocked(api.getLogs);
 const mockGetProduct = vi.mocked(api.getProduct);
 const mockGetGroup = vi.mocked(api.getGroup);
@@ -132,13 +125,6 @@ function renderWithRouter(ui: ReactElement) {
   );
 }
 
-const sampleProducts: ApiProductSummary[] = [
-  { id: 'p1', name: 'Oats' },
-  { id: 'p2', name: 'Milk' },
-];
-
-const sampleGroups: ApiGroupSummary[] = [{ id: 'g1', name: 'Breakfast Bowl', items: [] }];
-
 function makeEntry(
   overrides: Partial<ApiLogEntry> & { id: string; timestamp: number },
 ): ApiLogEntry {
@@ -151,37 +137,6 @@ function makeEntry(
     },
     ...overrides,
   };
-}
-
-const defaultResult = {
-  data: null,
-  loading: false,
-  error: null,
-  refetch: vi.fn(),
-};
-
-function mockProductsAndGroups(overrides?: {
-  products?: Partial<UseApiQueryResult<ApiProductSummary[]>>;
-  groups?: Partial<UseApiQueryResult<ApiGroupSummary[]>>;
-}) {
-  mockUseApiQuery.mockImplementation((fetchFn) => {
-    const fnName = fetchFn.name || fetchFn.toString();
-    if (fnName.includes('listProducts') || fnName === 'listProducts') {
-      return {
-        ...defaultResult,
-        data: sampleProducts,
-        ...overrides?.products,
-      } as UseApiQueryResult<unknown>;
-    }
-    if (fnName.includes('listGroups') || fnName === 'listGroups') {
-      return {
-        ...defaultResult,
-        data: sampleGroups,
-        ...overrides?.groups,
-      } as UseApiQueryResult<unknown>;
-    }
-    return defaultResult as UseApiQueryResult<unknown>;
-  });
 }
 
 describe('HistoryPage', () => {
@@ -207,7 +162,7 @@ describe('HistoryPage', () => {
 
   it('renders heading and placeholder content while loading', () => {
     mockGetLogs.mockReturnValue(new Promise(() => {}));
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.getByTestId('history-placeholder')).toBeInTheDocument();
@@ -215,7 +170,7 @@ describe('HistoryPage', () => {
 
   it('renders heading and error state when logs fail to load', async () => {
     mockGetLogs.mockRejectedValue(new Error('Network error'));
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('History')).toBeInTheDocument();
     await waitFor(() => {
@@ -225,7 +180,7 @@ describe('HistoryPage', () => {
 
   it('renders empty state when no logs', async () => {
     mockGetLogs.mockResolvedValue([]);
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     await waitFor(() => {
       expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
@@ -234,7 +189,7 @@ describe('HistoryPage', () => {
 
   it('renders the History heading', async () => {
     mockGetLogs.mockResolvedValue([]);
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     expect(screen.getByText('History')).toBeInTheDocument();
   });
@@ -245,7 +200,7 @@ describe('HistoryPage', () => {
       timestamp: Date.now() / 1000,
     });
     mockGetLogs.mockResolvedValue([todayEntry]);
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     await waitFor(() => {
       expect(screen.getByText('Today')).toBeInTheDocument();
@@ -261,7 +216,7 @@ describe('HistoryPage', () => {
       timestamp: yesterday.getTime() / 1000,
     });
     mockGetLogs.mockResolvedValue([yesterdayEntry]);
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     await waitFor(() => {
       expect(screen.getByText('Yesterday')).toBeInTheDocument();
@@ -276,7 +231,7 @@ describe('HistoryPage', () => {
       timestamp: oldDate.getTime() / 1000,
     });
     mockGetLogs.mockResolvedValue([oldEntry]);
-    mockProductsAndGroups();
+
     renderWithRouter(<HistoryPage />);
     await waitFor(() => {
       expect(screen.getByText(oldDate.toLocaleDateString())).toBeInTheDocument();
@@ -289,7 +244,8 @@ describe('HistoryPage', () => {
       timestamp: Date.now() / 1000,
     });
     mockGetLogs.mockResolvedValue([todayEntry]);
-    mockProductsAndGroups();
+    mockGetProduct.mockResolvedValue({ id: 'p1', name: 'Oats', preparations: [] });
+
     renderWithRouter(<HistoryPage />);
     await waitFor(() => {
       expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
@@ -309,7 +265,7 @@ describe('HistoryPage', () => {
     });
 
     mockGetLogs.mockResolvedValue([todayEntry]);
-    mockProductsAndGroups();
+
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -343,7 +299,8 @@ describe('HistoryPage', () => {
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     });
     mockGetLogs.mockResolvedValue([groupEntry]);
-    mockProductsAndGroups();
+    mockGetGroup.mockResolvedValue({ id: 'g1', name: 'Breakfast Bowl', items: [] });
+
     renderWithRouter(<HistoryPage />);
     await waitFor(() => {
       expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
@@ -362,7 +319,7 @@ describe('HistoryPage', () => {
       },
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -402,7 +359,7 @@ describe('HistoryPage', () => {
       },
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockGetGroup.mockResolvedValue({
       id: 'g1',
       name: 'Breakfast Bowl',
@@ -436,7 +393,7 @@ describe('HistoryPage', () => {
       },
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -477,7 +434,7 @@ describe('HistoryPage', () => {
       },
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockGetGroup.mockResolvedValue({
       id: 'g1',
       name: 'Breakfast Bowl',
@@ -512,7 +469,7 @@ describe('HistoryPage', () => {
       },
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -555,7 +512,7 @@ describe('HistoryPage', () => {
       timestamp: Date.now() / 1000,
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockDeleteLog.mockResolvedValue(undefined);
 
     renderWithRouter(<HistoryPage />);
@@ -586,7 +543,7 @@ describe('HistoryPage', () => {
       },
     });
     mockGetLogs.mockResolvedValue([entry]);
-    mockProductsAndGroups();
+
     mockGetProduct.mockResolvedValue({
       id: 'p1',
       name: 'Oats',
@@ -627,8 +584,6 @@ describe('HistoryPage', () => {
         makeEntry({ id: 'log-older', timestamp: Date.now() / 1000 - 86400 * 10 }),
       ]);
 
-    mockProductsAndGroups();
-
     renderWithRouter(<HistoryPage />);
 
     // Wait for initial load
@@ -656,8 +611,6 @@ describe('HistoryPage', () => {
     mockGetLogs
       .mockResolvedValueOnce([makeEntry({ id: 'log1', timestamp: Date.now() / 1000 })])
       .mockResolvedValueOnce([]);
-
-    mockProductsAndGroups();
 
     renderWithRouter(<HistoryPage />);
 

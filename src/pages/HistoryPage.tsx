@@ -45,8 +45,8 @@ function formatDayLabelForModal(day: string): string {
 export default function HistoryPage() {
   const {
     logs,
-    products,
-    groups,
+    productDetails,
+    groupDetails,
     loading,
     loadingMore,
     hasMore,
@@ -175,8 +175,8 @@ export default function HistoryPage() {
                 <HistoryEntryRow
                   key={entry.id}
                   entry={entry}
-                  name={resolveEntryName(entry, products!, groups!)}
-                  brand={resolveEntryBrand(entry, products!)}
+                  name={resolveEntryName(entry, productDetails, groupDetails)}
+                  brand={resolveEntryBrand(entry, productDetails)}
                   calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
                   timeDisplay="time"
                   onLogAgain={handleLogAgainClick}
