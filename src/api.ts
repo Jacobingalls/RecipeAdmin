@@ -72,6 +72,28 @@ const getApiDisplayUrl = (): string => {
 export const API_BASE = getApiBase();
 export const API_DISPLAY_URL = getApiDisplayUrl();
 
+export const getAdminVersion = (): string | null => {
+  if (
+    typeof window !== 'undefined' &&
+    window.__RUNTIME_CONFIG__?.VERSION &&
+    window.__RUNTIME_CONFIG__.VERSION !== '__VERSION__'
+  ) {
+    return window.__RUNTIME_CONFIG__.VERSION;
+  }
+  return null;
+};
+
+export const getAdminGitCommit = (): string | null => {
+  if (
+    typeof window !== 'undefined' &&
+    window.__RUNTIME_CONFIG__?.GIT_COMMIT &&
+    window.__RUNTIME_CONFIG__.GIT_COMMIT !== '__GIT_COMMIT__'
+  ) {
+    return window.__RUNTIME_CONFIG__.GIT_COMMIT;
+  }
+  return null;
+};
+
 // Transparent token refresh: intercepts 401s, refreshes via cookie, retries once
 let refreshPromise: Promise<number | null> | null = null;
 

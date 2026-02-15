@@ -22,7 +22,8 @@ if [ -n "$(git status --porcelain)" ]; then
 	exit 1
 fi
 
-docker build --ssh default --platform linux/amd64,linux/arm64 -t $container:latest .
+git_commit=$(git rev-parse --short HEAD)
+docker build --ssh default --platform linux/amd64,linux/arm64 --build-arg VERSION=$version --build-arg GIT_COMMIT=$git_commit -t $container:latest .
 docker image tag $container:latest $container:$version
 docker push $container:$version
 docker push $container:latest

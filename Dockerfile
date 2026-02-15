@@ -19,6 +19,11 @@ RUN npm run build
 # Stage 2: Serve with nginx
 FROM nginx:alpine
 
+ARG VERSION=unknown
+ARG GIT_COMMIT=unknown
+ENV VERSION=${VERSION}
+ENV GIT_COMMIT=${GIT_COMMIT}
+
 # Copy the built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 

@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
+import * as api from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 import Header from './Header';
@@ -17,9 +18,14 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('./VersionBadge', () => ({
-  default: () => <span data-testid="version-badge">v1.0</span>,
-}));
+vi.mock('../api', async (importOriginal) => {
+  const actual = await importOriginal<typeof api>();
+  return {
+    ...actual,
+    getAdminVersion: vi.fn(() => null),
+    getAdminGitCommit: vi.fn(() => null),
+  };
+});
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
@@ -32,6 +38,8 @@ vi.mock('../contexts/AuthContext', () => ({
       isAdmin: false,
       hasPasskeys: true,
     },
+    apiVersion: null,
+    apiEnvironment: null,
     isLoading: false,
     login: vi.fn(),
     loginWithPasskey: vi.fn(),
@@ -50,6 +58,8 @@ describe('Header', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
     mockLogout.mockClear();
+    vi.mocked(api.getAdminVersion).mockReturnValue(null);
+    vi.mocked(api.getAdminGitCommit).mockReturnValue(null);
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
       user: {
@@ -60,6 +70,8 @@ describe('Header', () => {
         isAdmin: false,
         hasPasskeys: true,
       },
+      apiVersion: null,
+      apiEnvironment: null,
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
@@ -72,6 +84,8 @@ describe('Header', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
       user: null,
+      apiVersion: null,
+      apiEnvironment: null,
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
@@ -82,14 +96,36 @@ describe('Header', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('renders the brand name', () => {
+  it('renders the branding icon linking to home', () => {
     renderWithRouter(<Header />);
-    expect(screen.getByText('Recipe Admin')).toBeInTheDocument();
+    const brandLink = screen.getByRole('link', { name: 'Recipe Admin home' });
+    expect(brandLink).toHaveAttribute('href', '/');
+    expect(brandLink.querySelector('.bi-egg-fried')).toBeInTheDocument();
   });
 
-  it('renders the version badge', () => {
+  it('shows DEV badge on branding icon when no admin version', () => {
     renderWithRouter(<Header />);
-    expect(screen.getByTestId('version-badge')).toBeInTheDocument();
+    expect(screen.getByText('DEV')).toBeInTheDocument();
+  });
+
+  it('hides DEV badge on branding icon when admin version is set', () => {
+    vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
+    renderWithRouter(<Header />);
+    expect(screen.queryByText('DEV')).not.toBeInTheDocument();
+  });
+
+  it('renders Home nav link', () => {
+    renderWithRouter(<Header />);
+    const link = screen.getByRole('link', { name: 'Home' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '/');
+  });
+
+  it('highlights the Home nav link on /', () => {
+    renderWithRouter(<Header />, { route: '/' });
+    const link = screen.getByRole('link', { name: 'Home' });
+    expect(link.className).toContain('active');
+    expect(link.className).toContain('fw-semibold');
   });
 
   it('renders History nav link', () => {
@@ -234,6 +270,8 @@ describe('Header', () => {
         isAdmin: true,
         hasPasskeys: true,
       },
+      apiVersion: null,
+      apiEnvironment: null,
       isLoading: false,
       login: vi.fn(),
       loginWithPasskey: vi.fn(),
@@ -289,5 +327,90 @@ describe('Header', () => {
     renderWithRouter(<Header />);
     fireEvent.click(screen.getByRole('button', { name: /sign out/i }));
     expect(mockLogout).toHaveBeenCalled();
+  });
+
+  describe('version info in dropdown', () => {
+    it('shows Development when no admin version is set', () => {
+      renderWithRouter(<Header />);
+      expect(screen.getByText('Development')).toBeInTheDocument();
+    });
+
+    it('shows admin version when available', () => {
+      vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
+      renderWithRouter(<Header />);
+      expect(screen.getByText('v0.0.28')).toBeInTheDocument();
+    });
+
+    it('shows admin version with git commit', () => {
+      vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
+      vi.mocked(api.getAdminGitCommit).mockReturnValue('abc1234');
+      renderWithRouter(<Header />);
+      expect(screen.getByText('v0.0.28')).toBeInTheDocument();
+      expect(screen.getByText('(abc1234)')).toBeInTheDocument();
+    });
+
+    it('shows git commit without version in dev mode', () => {
+      vi.mocked(api.getAdminGitCommit).mockReturnValue('abc1234');
+      renderWithRouter(<Header />);
+      expect(screen.getByText('Development')).toBeInTheDocument();
+      expect(screen.getByText('(abc1234)')).toBeInTheDocument();
+    });
+
+    it('shows API environment and version', () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: {
+          id: '1',
+          username: 'testuser',
+          displayName: 'Test User',
+          email: 'test@example.com',
+          isAdmin: false,
+          hasPasskeys: true,
+        },
+        apiVersion: '0.0.27',
+        apiEnvironment: 'Production',
+        isLoading: false,
+        login: vi.fn(),
+        loginWithPasskey: vi.fn(),
+        logout: mockLogout,
+        updateUser: vi.fn(),
+      });
+      renderWithRouter(<Header />);
+      expect(screen.getByText('Production, v0.0.27')).toBeInTheDocument();
+    });
+
+    it('shows API environment without version', () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: {
+          id: '1',
+          username: 'testuser',
+          displayName: 'Test User',
+          email: 'test@example.com',
+          isAdmin: false,
+          hasPasskeys: true,
+        },
+        apiVersion: null,
+        apiEnvironment: 'Debug',
+        isLoading: false,
+        login: vi.fn(),
+        loginWithPasskey: vi.fn(),
+        logout: mockLogout,
+        updateUser: vi.fn(),
+      });
+      renderWithRouter(<Header />);
+      expect(screen.getByText('Debug')).toBeInTheDocument();
+    });
+
+    it('shows Unknown when no API info is available', () => {
+      renderWithRouter(<Header />);
+      expect(screen.getByText('Unknown')).toBeInTheDocument();
+    });
+
+    it('renders window and server icons', () => {
+      renderWithRouter(<Header />);
+      expect(document.querySelector('.bi-window')).toBeInTheDocument();
+      expect(document.querySelector('.bi-server')).toBeInTheDocument();
+    });
   });
 });

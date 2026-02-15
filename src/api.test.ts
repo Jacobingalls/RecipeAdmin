@@ -311,6 +311,74 @@ describe('getTokenExpiry', () => {
   });
 });
 
+describe('getAdminVersion', () => {
+  afterEach(() => {
+    delete window.__RUNTIME_CONFIG__;
+  });
+
+  it('returns version from runtime config when set', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+      VERSION: '0.0.28',
+    };
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminVersion()).toBe('0.0.28');
+  });
+
+  it('returns null when VERSION is placeholder', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+      VERSION: '__VERSION__',
+    };
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminVersion()).toBeNull();
+  });
+
+  it('returns null when no runtime config', async () => {
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminVersion()).toBeNull();
+  });
+});
+
+describe('getAdminGitCommit', () => {
+  afterEach(() => {
+    delete window.__RUNTIME_CONFIG__;
+  });
+
+  it('returns git commit from runtime config when set', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+      GIT_COMMIT: 'abc1234',
+    };
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminGitCommit()).toBe('abc1234');
+  });
+
+  it('returns null when GIT_COMMIT is placeholder', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+      GIT_COMMIT: '__GIT_COMMIT__',
+    };
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminGitCommit()).toBeNull();
+  });
+
+  it('returns null when no runtime config', async () => {
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminGitCommit()).toBeNull();
+  });
+});
+
 describe('error handling', () => {
   it('throws on non-ok response', async () => {
     mockFetch.mockResolvedValue(mockResponse(null, false, 404));

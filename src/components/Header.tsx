@@ -2,9 +2,8 @@ import type { FormEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 
+import { getAdminGitCommit, getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
-
-import VersionBadge from './VersionBadge';
 
 async function sha256Hex(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
@@ -34,13 +33,15 @@ function useGravatarUrl(email: string | undefined, size: number = 32): string | 
 }
 
 export default function Header() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, apiVersion, apiEnvironment } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const urlQuery = searchParams.get('q') ?? '';
   const [searchQuery, setSearchQuery] = useState(urlQuery);
   const navigate = useNavigate();
   const avatarUrl = useGravatarUrl(user?.email);
+  const adminVersion = getAdminVersion();
+  const adminGitCommit = getAdminGitCommit();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   // Sync local input with URL when the q param changes (e.g. back/forward navigation)
@@ -89,12 +90,25 @@ export default function Header() {
   return (
     <nav className="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm">
       <div className="container">
-        <div className="d-flex flex-column">
-          <NavLink className="navbar-brand fw-semibold mb-0 fs-6 user-select-none" to="/">
-            Recipe Admin
-          </NavLink>
-          <VersionBadge />
-        </div>
+        <NavLink
+          className="navbar-brand mb-0 user-select-none d-flex align-items-center position-relative"
+          to="/"
+          aria-label="Recipe Admin home"
+        >
+          <i
+            className="bi bi-egg-fried text-warning"
+            aria-hidden="true"
+            style={{ fontSize: '1.4rem' }}
+          />
+          {!adminVersion && (
+            <span
+              className="position-absolute badge bg-danger rounded-pill"
+              style={{ fontSize: '0.45rem', bottom: 4, right: -12, lineHeight: 1 }}
+            >
+              DEV
+            </span>
+          )}
+        </NavLink>
         <button
           className="navbar-toggler"
           type="button"
@@ -106,6 +120,16 @@ export default function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+            <li className="nav-item">
+              <NavLink className={navLinkClass} to="/" end>
+                <span className="d-inline-flex flex-column align-items-center">
+                  Home
+                  <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
+                    Home
+                  </span>
+                </span>
+              </NavLink>
+            </li>
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/favorites">
                 <span className="d-inline-flex flex-column align-items-center">
@@ -212,6 +236,30 @@ export default function Header() {
                   <i className="bi bi-box-arrow-right me-2" aria-hidden="true" />
                   Sign out
                 </button>
+              </li>
+              <li>
+                <hr className="dropdown-divider" />
+              </li>
+              <li className="px-3 py-1">
+                <div className="d-flex align-items-center text-body-secondary small">
+                  <i className="bi bi-window me-2" aria-hidden="true" />
+                  <span>
+                    {adminVersion ? `v${adminVersion}` : 'Development'}
+                    {adminGitCommit && (
+                      <span className="text-body-tertiary ms-1">({adminGitCommit})</span>
+                    )}
+                  </span>
+                </div>
+              </li>
+              <li className="px-3 py-1">
+                <div className="d-flex align-items-center text-body-secondary small">
+                  <i className="bi bi-server me-2" aria-hidden="true" />
+                  <span>
+                    {[apiEnvironment, apiVersion ? `v${apiVersion}` : null]
+                      .filter(Boolean)
+                      .join(', ') || 'Unknown'}
+                  </span>
+                </div>
               </li>
             </ul>
           </div>
