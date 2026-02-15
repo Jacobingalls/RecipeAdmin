@@ -1,6 +1,6 @@
 import type { ApiSearchResult } from '../../api';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../common';
-import { LookupResultItem } from '../lookup';
+import SearchResultRow from '../SearchResultRow';
 
 interface SearchResultsProps {
   results: ApiSearchResult[] | null;
@@ -10,11 +10,6 @@ interface SearchResultsProps {
   onLog?: (result: ApiSearchResult) => void;
 }
 
-/**
- * Renders a list of search results using LookupResultItem cards.
- * Handles loading, error, and empty states. Designed for reuse in
- * both full-page search and smaller popover contexts.
- */
 export default function SearchResults({
   results,
   loading,
@@ -41,9 +36,9 @@ export default function SearchResults({
   if (!results) return null;
 
   return (
-    <div role="region" aria-label="Search results">
+    <div className="list-group" role="region" aria-label="Search results">
       {results.map((result) => (
-        <LookupResultItem
+        <SearchResultRow
           key={result.item.product?.id ?? result.item.group?.id}
           result={result}
           onLog={onLog}

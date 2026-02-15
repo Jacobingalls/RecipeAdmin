@@ -19,8 +19,8 @@ vi.mock('../components/common', () => ({
   ),
 }));
 
-vi.mock('../components/lookup', () => ({
-  LookupResultItem: () => <div data-testid="lookup-result-item" />,
+vi.mock('../components/SearchResultRow', () => ({
+  default: () => <div data-testid="search-result-row" />,
 }));
 
 vi.mock('../components/LogModal', () => ({
@@ -104,10 +104,10 @@ describe('LookupPage', () => {
     expect(resultsText).toHaveTextContent('123456');
   });
 
-  it('renders result items', () => {
+  it('renders result items in a list-group', () => {
     mockQuery({ data: sampleResults });
     renderWithRoute('/lookup/123456');
-    const items = screen.getAllByTestId('lookup-result-item');
+    const items = screen.getAllByTestId('search-result-row');
     expect(items).toHaveLength(2);
   });
 
@@ -174,6 +174,6 @@ describe('LookupPage', () => {
     renderWithRoute('/lookup/123456');
     expect(screen.queryByTestId('product-detail-page')).not.toBeInTheDocument();
     expect(screen.queryByTestId('group-detail-page')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('lookup-result-item')).toHaveLength(2);
+    expect(screen.getAllByTestId('search-result-row')).toHaveLength(2);
   });
 });

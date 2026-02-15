@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ApiLogEntry } from '../api';
 import { ServingSize } from '../domain';
-import { formatSignificant } from '../utils/formatters';
 import {
   entryDetailPath,
   formatServingSizeDescription,
@@ -12,7 +11,7 @@ import {
 } from '../utils/logEntryHelpers';
 
 import AddToFavoritesButton from './AddToFavoritesButton';
-import { CircularButton, CircularButtonGroup, MoreButton } from './common';
+import { CircularButton, CircularButtonGroup, FoodItemRow, MoreButton } from './common';
 
 interface HistoryEntryRowProps {
   entry: ApiLogEntry;
@@ -49,97 +48,82 @@ export default function HistoryEntryRow({
     [entry.item.servingSize],
   );
 
+  const subtitle = (
+    <>
+      {brand && <>{brand} &middot; </>}
+      {formatServingSizeDescription(entry)} &mdash;{' '}
+      {timeDisplay === 'time' ? formatTime(entry.timestamp) : formatRelativeTime(entry.timestamp)}
+    </>
+  );
+
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className="list-group-item list-group-item-action"
-      aria-label={`View ${name}`}
+    <FoodItemRow
+      name={name}
+      subtitle={subtitle}
+      calories={calories}
+      ariaLabel={`View ${name}`}
       onClick={() => navigate(detailPath)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          navigate(detailPath);
-        }
-      }}
     >
-      <div className="d-flex justify-content-between align-items-center">
-        <div>
-          <div className="fw-medium">{name}</div>
-          <small className="text-secondary">
-            {brand && <>{brand} &middot; </>}
-            {formatServingSizeDescription(entry)} &mdash;{' '}
-            {timeDisplay === 'time'
-              ? formatTime(entry.timestamp)
-              : formatRelativeTime(entry.timestamp)}
-          </small>
+      <CircularButtonGroup>
+        <CircularButton
+          aria-label={`Log ${name}`}
+          title="Add to log"
+          disabled={logAgainLoading}
+          onClick={(e) => {
+            e.stopPropagation();
+            onLogAgain(entry);
+          }}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          {logAgainLoading ? (
+            <span role="status">
+              <span className="spinner-border spinner-border-sm" aria-hidden="true" />
+              <span className="visually-hidden">Loading</span>
+            </span>
+          ) : (
+            <i className="bi bi-plus-lg" aria-hidden="true" />
+          )}
+        </CircularButton>
+        {servingSize && (
+          <AddToFavoritesButton
+            productId={entry.item.productID}
+            groupId={entry.item.groupID}
+            preparationId={entry.item.preparationID}
+            servingSize={servingSize}
+          />
+        )}
+        <div className="dropdown">
+          <MoreButton ariaLabel="Entry actions" />
+          <ul className="dropdown-menu dropdown-menu-end">
+            <li>
+              <button
+                type="button"
+                className="dropdown-item"
+                disabled={editLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(entry);
+                }}
+              >
+                Edit
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className="dropdown-item"
+                disabled={deleteLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(entry);
+                }}
+              >
+                Remove
+              </button>
+            </li>
+          </ul>
         </div>
-        <div className="d-flex align-items-center gap-2">
-          <div className="text-nowrap text-body-secondary small fw-medium">
-            {calories !== null ? `${formatSignificant(calories)} kcal` : '-- kcal'}
-          </div>
-          <CircularButtonGroup>
-            <CircularButton
-              aria-label={`Log ${name}`}
-              title="Add to log"
-              disabled={logAgainLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                onLogAgain(entry);
-              }}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              {logAgainLoading ? (
-                <span role="status">
-                  <span className="spinner-border spinner-border-sm" aria-hidden="true" />
-                  <span className="visually-hidden">Loading</span>
-                </span>
-              ) : (
-                <i className="bi bi-plus-lg" aria-hidden="true" />
-              )}
-            </CircularButton>
-            {servingSize && (
-              <AddToFavoritesButton
-                productId={entry.item.productID}
-                groupId={entry.item.groupID}
-                preparationId={entry.item.preparationID}
-                servingSize={servingSize}
-              />
-            )}
-            <div className="dropdown">
-              <MoreButton ariaLabel="Entry actions" />
-              <ul className="dropdown-menu dropdown-menu-end">
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    disabled={editLoading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(entry);
-                    }}
-                  >
-                    Edit
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    disabled={deleteLoading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(entry);
-                    }}
-                  >
-                    Remove
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </CircularButtonGroup>
-        </div>
-      </div>
-    </div>
+      </CircularButtonGroup>
+    </FoodItemRow>
   );
 }

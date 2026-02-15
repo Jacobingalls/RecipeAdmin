@@ -6,7 +6,7 @@ import { lookupBarcode } from '../api';
 import { useApiQuery } from '../hooks';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
-import { LookupResultItem } from '../components/lookup';
+import SearchResultRow from '../components/SearchResultRow';
 import LogModal from '../components/LogModal';
 import type { LogTarget } from '../components/LogModal';
 
@@ -90,9 +90,9 @@ export default function LookupPage() {
         />
       )}
       {results && results.length > 0 && (
-        <div>
+        <div className="list-group">
           {results.map((result) => (
-            <LookupResultItem
+            <SearchResultRow
               key={result.item.product?.id ?? result.item.group?.id}
               result={result}
               onLog={setLogItem}

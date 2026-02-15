@@ -13,15 +13,15 @@ vi.mock('../common', () => ({
   ),
 }));
 
-vi.mock('../lookup', () => ({
-  LookupResultItem: ({
+vi.mock('../SearchResultRow', () => ({
+  default: ({
     result,
     onLog,
   }: {
     result: ApiSearchResult;
     onLog?: (result: ApiSearchResult) => void;
   }) => (
-    <button type="button" data-testid="lookup-result-item" onClick={() => onLog?.(result)}>
+    <button type="button" data-testid="search-result-row" onClick={() => onLog?.(result)}>
       {result.item.product?.name ?? result.item.group?.name}
     </button>
   ),
@@ -88,7 +88,7 @@ describe('SearchResults', () => {
 
   it('renders result items', () => {
     renderSearchResults({ results: sampleResults, query: 'fruit' });
-    const items = screen.getAllByTestId('lookup-result-item');
+    const items = screen.getAllByTestId('search-result-row');
     expect(items).toHaveLength(2);
     expect(items[0]).toHaveTextContent('Apple');
     expect(items[1]).toHaveTextContent('Fruit Mix');
@@ -99,15 +99,16 @@ describe('SearchResults', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('wraps results in a region with aria-label', () => {
+  it('wraps results in a list-group with aria-label', () => {
     renderSearchResults({ results: sampleResults, query: 'fruit' });
     expect(screen.getByRole('region', { name: 'Search results' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Search results' })).toHaveClass('list-group');
   });
 
   it('passes onLog to result items', () => {
     const onLog = vi.fn();
     renderSearchResults({ results: sampleResults, query: 'fruit', onLog });
-    screen.getAllByTestId('lookup-result-item')[0].click();
+    screen.getAllByTestId('search-result-row')[0].click();
     expect(onLog).toHaveBeenCalledWith(sampleResults[0]);
   });
 });
