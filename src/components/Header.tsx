@@ -122,7 +122,7 @@ export default function Header() {
           <span className="navbar-toggler-icon" />
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+          <ul className="navbar-nav me-auto mb-2 mb-sm-0 gap-1">
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/" end>
                 <span className="d-inline-flex flex-column align-items-center">
