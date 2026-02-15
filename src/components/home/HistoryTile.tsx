@@ -39,7 +39,7 @@ export default function HistoryTile() {
     content = centeredWrapper(
       <ContentUnavailableView
         icon="bi-clock-history"
-        title="Unable to load history"
+        title="Couldn't load history"
         description={error}
       />,
     );

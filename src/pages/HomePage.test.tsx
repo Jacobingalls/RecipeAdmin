@@ -11,6 +11,7 @@ vi.mock('../components/common', () => ({
 }));
 
 vi.mock('../components/home', () => ({
+  TodayTile: () => <div data-testid="today-tile" />,
   FavoritesTile: () => <div data-testid="favorites-tile" />,
   HistoryTile: () => <div data-testid="history-tile" />,
 }));
