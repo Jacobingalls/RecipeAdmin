@@ -91,28 +91,28 @@ describe('HistoryEntryRow', () => {
     expect(screen.getByText('-- kcal')).toBeInTheDocument();
   });
 
-  it('navigates to detail page on click', () => {
+  it('navigates to detail page with serving size params on click', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const row = screen.getByRole('button', { name: 'View Oats' });
     fireEvent.click(row);
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
   });
 
   it('navigates on Enter key press', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const row = screen.getByRole('button', { name: 'View Oats' });
     fireEvent.keyDown(row, { key: 'Enter' });
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
   });
 
   it('navigates on Space key press', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const row = screen.getByRole('button', { name: 'View Oats' });
     fireEvent.keyDown(row, { key: ' ' });
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
   });
 
-  it('navigates to group detail for group entries', () => {
+  it('navigates to group detail with serving size params', () => {
     const groupEntry = makeEntry({
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     });
@@ -121,7 +121,7 @@ describe('HistoryEntryRow', () => {
     );
     const row = screen.getByRole('button', { name: 'View Breakfast Bowl' });
     fireEvent.click(row);
-    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1');
+    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1?st=servings&sa=1');
   });
 
   it('renders the overflow menu button', () => {

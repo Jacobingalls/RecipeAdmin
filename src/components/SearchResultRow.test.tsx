@@ -97,16 +97,60 @@ describe('SearchResultRow', () => {
     expect(screen.getByText('150 kcal')).toBeInTheDocument();
   });
 
-  it('navigates to product detail on click', () => {
+  it('navigates to product detail with serving size params on click', () => {
     renderWithRouter(<SearchResultRow result={makeProductResult()} />);
     fireEvent.click(screen.getByRole('button', { name: 'View Oats' }));
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=1');
   });
 
-  it('navigates to group detail on click', () => {
+  it('navigates to group detail with serving size params on click', () => {
     renderWithRouter(<SearchResultRow result={makeGroupResult()} />);
     fireEvent.click(screen.getByRole('button', { name: 'View Breakfast Bowl' }));
-    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1');
+    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1?st=servings&sa=1');
+  });
+
+  it('includes prep param when preparationID differs from default', () => {
+    const result = makeProductResult({
+      item: {
+        product: {
+          id: 'p1',
+          name: 'Oats',
+          brand: "Bob's Red Mill",
+          preparations: [
+            {
+              id: 'prep1',
+              nutritionalInformation: { calories: { amount: 150, unit: 'kcal' } },
+              mass: { amount: 40, unit: 'g' },
+            },
+            {
+              id: 'prep-cooked',
+              nutritionalInformation: { calories: { amount: 100, unit: 'kcal' } },
+              mass: { amount: 100, unit: 'g' },
+            },
+          ],
+        },
+        preparationID: 'prep-cooked',
+      },
+    });
+    renderWithRouter(<SearchResultRow result={result} />);
+    fireEvent.click(screen.getByRole('button', { name: 'View Oats' }));
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=1&prep=prep-cooked');
+  });
+
+  it('omits prep param when preparationID matches default', () => {
+    renderWithRouter(<SearchResultRow result={makeProductResult()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'View Oats' }));
+    const path = mockNavigate.mock.calls[0][0] as string;
+    expect(path).not.toContain('prep=');
+  });
+
+  it('includes mass serving size params in link', () => {
+    const result = makeProductResult({
+      servingSize: { mass: { amount: 100, unit: 'g' } },
+    });
+    renderWithRouter(<SearchResultRow result={result} />);
+    fireEvent.click(screen.getByRole('button', { name: 'View Oats' }));
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=mass&sa=100&su=g');
   });
 
   it('renders log button when onLog is provided', () => {

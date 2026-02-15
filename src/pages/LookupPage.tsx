@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 
 import type { ApiSearchResult } from '../api';
 import { lookupBarcode } from '../api';
@@ -12,7 +12,6 @@ import type { LogTarget } from '../components/LogModal';
 
 export default function LookupPage() {
   const { barcode } = useParams<{ barcode: string }>();
-  const navigate = useNavigate();
   const {
     data: results,
     loading,
@@ -22,16 +21,6 @@ export default function LookupPage() {
     errorMessage: "Couldn't look up this barcode. Try again later.",
   });
   const [logItem, setLogItem] = useState<ApiSearchResult | null>(null);
-
-  useEffect(() => {
-    if (results?.length !== 1) return;
-    const result = results[0];
-    if (result.item.product?.id) {
-      navigate(`/products/${result.item.product.id}`, { replace: true });
-    } else if (result.item.group?.id) {
-      navigate(`/groups/${result.item.group.id}`, { replace: true });
-    }
-  }, [results, navigate]);
 
   const logTarget: LogTarget | null = useMemo(() => {
     if (!logItem) return null;

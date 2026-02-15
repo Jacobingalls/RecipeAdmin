@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ApiSearchResult } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
+import { servingSizeSearchParams } from '../utils/servingSizeParams';
 
 import AddToFavoritesButton from './AddToFavoritesButton';
 import { CircularButton, CircularButtonGroup, FoodItemRow } from './common';
@@ -19,14 +20,29 @@ export default function SearchResultRow({ result, onLog, logLoading }: SearchRes
   const isProduct = !!result.item.product;
   const name = isProduct ? result.item.product!.name : (result.item.group!.name ?? 'Group');
   const brand = isProduct ? result.item.product!.brand : undefined;
-  const detailPath = isProduct
-    ? `/products/${result.item.product!.id}`
-    : `/groups/${result.item.group!.id}`;
 
   const servingSize = useMemo(
     () => ServingSize.fromObject(result.servingSize) ?? ServingSize.servings(1),
     [result.servingSize],
   );
+
+  const detailPath = useMemo(() => {
+    const ssParams = servingSizeSearchParams(servingSize);
+
+    if (isProduct) {
+      const params = new URLSearchParams(ssParams);
+      const product = result.item.product!;
+      const defaultPrepID = product.defaultPreparationID ?? product.preparations?.[0]?.id;
+      if (result.item.preparationID && result.item.preparationID !== defaultPrepID) {
+        params.set('prep', result.item.preparationID);
+      }
+      const search = params.toString();
+      return `/products/${product.id}${search ? `?${search}` : ''}`;
+    }
+
+    const search = ssParams.toString();
+    return `/groups/${result.item.group!.id}${search ? `?${search}` : ''}`;
+  }, [isProduct, result, servingSize]);
 
   const calories = useMemo(() => {
     if (isProduct) {

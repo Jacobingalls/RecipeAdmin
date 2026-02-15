@@ -36,8 +36,6 @@ function renderWithRoute(route: string) {
     <MemoryRouter initialEntries={[route]}>
       <Routes>
         <Route path="/lookup/:barcode?" element={<LookupPage />} />
-        <Route path="/products/:id" element={<div data-testid="product-detail-page" />} />
-        <Route path="/groups/:id" element={<div data-testid="group-detail-page" />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -141,7 +139,7 @@ describe('LookupPage', () => {
     expect(screen.getByTestId('log-modal')).toHaveTextContent('closed');
   });
 
-  it('navigates to product detail page when there is a single product result', () => {
+  it('renders single result without redirecting', () => {
     mockQuery({
       data: [
         {
@@ -152,28 +150,6 @@ describe('LookupPage', () => {
       ],
     });
     renderWithRoute('/lookup/123456');
-    expect(screen.getByTestId('product-detail-page')).toBeInTheDocument();
-  });
-
-  it('navigates to group detail page when there is a single group result', () => {
-    mockQuery({
-      data: [
-        {
-          item: { group: { id: 'g1', name: 'Fruit Mix' } },
-          servingSize: { kind: 'servings', amount: 1 },
-          relevance: 1.0,
-        },
-      ],
-    });
-    renderWithRoute('/lookup/123456');
-    expect(screen.getByTestId('group-detail-page')).toBeInTheDocument();
-  });
-
-  it('does not navigate when there are multiple results', () => {
-    mockQuery({ data: sampleResults });
-    renderWithRoute('/lookup/123456');
-    expect(screen.queryByTestId('product-detail-page')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('group-detail-page')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('search-result-row')).toHaveLength(2);
+    expect(screen.getByTestId('search-result-row')).toBeInTheDocument();
   });
 });

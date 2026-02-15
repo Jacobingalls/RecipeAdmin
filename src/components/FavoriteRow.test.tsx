@@ -116,16 +116,16 @@ describe('FavoriteRow', () => {
     expect(screen.getByText('Breakfast Bowl')).toBeInTheDocument();
   });
 
-  it('navigates to product detail on click', () => {
+  it('navigates to product detail with serving size params on click', () => {
     renderRow();
     fireEvent.click(screen.getByRole('button', { name: 'View Peanut Butter' }));
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
   });
 
-  it('navigates to group detail on click', () => {
+  it('navigates to group detail with serving size params on click', () => {
     renderRow({ favorite: groupFavorite });
     fireEvent.click(screen.getByRole('button', { name: 'View Breakfast Bowl' }));
-    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1');
+    expect(mockNavigate).toHaveBeenCalledWith('/groups/g1?st=servings&sa=1');
   });
 
   it('navigates on Enter key', () => {
@@ -133,7 +133,7 @@ describe('FavoriteRow', () => {
     fireEvent.keyDown(screen.getByRole('button', { name: 'View Peanut Butter' }), {
       key: 'Enter',
     });
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
   });
 
   it('calls onLog when log button is clicked', () => {
