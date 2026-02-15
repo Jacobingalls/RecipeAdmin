@@ -17,7 +17,12 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    # Cache static assets
+    # Runtime config must not be cached — it changes per deployment
+    location = /config.js {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+
+    # Cache static assets (Vite adds content hashes to filenames)
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
