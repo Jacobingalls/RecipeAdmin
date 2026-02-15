@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 import { getGroup } from '../api';
-import { useApiQuery } from '../hooks';
+import { useApiQuery, useServingSizeParams } from '../hooks';
 import type { GroupItem, ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
 import {
@@ -31,7 +30,7 @@ export default function GroupDetailPage() {
   } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id], {
     errorMessage: "Couldn't load this group. Try again later.",
   });
-  const [servingSize, setServingSize] = useState(() => ServingSize.servings(1));
+  const [servingSize, setServingSize] = useServingSizeParams();
 
   const group = groupData ? new ProductGroup(groupData) : null;
   const items = groupData?.items ?? [];

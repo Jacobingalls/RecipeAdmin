@@ -4,12 +4,14 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiProduct } from '../api';
-import { useApiQuery } from '../hooks';
+import { ServingSize } from '../domain';
+import { useApiQuery, useServingSizeParams } from '../hooks';
 
 import ProductDetailPage from './ProductDetailPage';
 
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
+  useServingSizeParams: vi.fn(),
 }));
 
 vi.mock('../components/common', () => ({
@@ -55,6 +57,7 @@ vi.mock('../components/AddToLogButton', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseServingSizeParams = vi.mocked(useServingSizeParams);
 
 function renderWithRoute(route: string) {
   return render(
@@ -105,6 +108,8 @@ const sampleProduct: ApiProduct = {
 describe('ProductDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: return servings(1) with a no-op setter
+    mockUseServingSizeParams.mockReturnValue([ServingSize.servings(1), vi.fn()]);
   });
 
   it('renders loading state', () => {
@@ -154,6 +159,12 @@ describe('ProductDetailPage', () => {
     const lowFatTab = screen.getByText('Low Fat');
     fireEvent.click(lowFatTab);
     // After clicking, the prep details should show Low Fat
+    expect(screen.getByTestId('preparation-details')).toHaveTextContent('Low Fat');
+  });
+
+  it('selects prep from URL search param', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1?prep=prep2');
     expect(screen.getByTestId('preparation-details')).toHaveTextContent('Low Fat');
   });
 
@@ -252,5 +263,12 @@ describe('ProductDetailPage', () => {
     fireEvent.click(noIdTab);
     // Should not crash — setSelectedPrep(null) is called
     expect(screen.getByText('No ID Prep')).toBeInTheDocument();
+  });
+
+  it('falls back to default prep when prep param is invalid', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1?prep=nonexistent');
+    // Should fall back to default prep (prep1 = Standard)
+    expect(screen.getByTestId('preparation-details')).toHaveTextContent('Standard');
   });
 });

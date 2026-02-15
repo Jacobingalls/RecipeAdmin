@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useCallback } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
-import { useApiQuery } from '../hooks';
-import { ServingSize } from '../domain';
+import { useApiQuery, useServingSizeParams } from '../hooks';
 import {
   LoadingState,
   ErrorState,
@@ -27,8 +26,28 @@ export default function ProductDetailPage() {
   } = useApiQuery<ApiProduct>(() => getProduct(id!), [id], {
     errorMessage: "Couldn't load this product. Try again later.",
   });
-  const [selectedPrep, setSelectedPrep] = useState<string | null>(null);
-  const [servingSize, setServingSize] = useState(() => ServingSize.servings(1));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [servingSize, setServingSize] = useServingSizeParams();
+
+  const selectedPrep = searchParams.get('prep');
+
+  const setSelectedPrep = useCallback(
+    (prepId: string | null) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (prepId) {
+            next.set('prep', prepId);
+          } else {
+            next.delete('prep');
+          }
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   const defaultPrepId = product?.defaultPreparationID || product?.preparations?.[0]?.id || null;
   const activePrep =

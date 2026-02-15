@@ -6,4 +6,5 @@ export { useInfiniteHistoryData } from './useInfiniteHistoryData';
 export type { UseInfiniteHistoryDataResult } from './useInfiniteHistoryData';
 export { useSearch } from './useSearch';
 export type { UseSearchResult } from './useSearch';
+export { useServingSizeParams } from './useServingSizeParams';
 export { useTheme } from './useTheme';

@@ -1,16 +1,17 @@
 import type { ReactNode } from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ProductGroupData } from '../domain';
 import { ServingSize } from '../domain';
-import { useApiQuery } from '../hooks';
+import { useApiQuery, useServingSizeParams } from '../hooks';
 
 import GroupDetailPage from './GroupDetailPage';
 
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
+  useServingSizeParams: vi.fn(),
 }));
 
 vi.mock('../components/common', () => ({
@@ -26,12 +27,8 @@ vi.mock('../components/NutritionLabel', () => ({
   default: () => <div data-testid="nutrition-label" />,
 }));
 
-const mockServingSizeSelectorOnChange = vi.fn();
 vi.mock('../components/ServingSizeSelector', () => ({
-  default: ({ onChange }: { onChange: (ss: unknown) => void }) => {
-    mockServingSizeSelectorOnChange.mockImplementation(onChange);
-    return <div data-testid="serving-size-selector" />;
-  },
+  default: () => <div data-testid="serving-size-selector" />,
 }));
 
 vi.mock('../components/CustomSizesSection', () => ({
@@ -51,6 +48,9 @@ vi.mock('../components/AddToLogButton', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseServingSizeParams = vi.mocked(useServingSizeParams);
+
+let mockSetServingSize: ReturnType<typeof vi.fn>;
 
 function renderWithRoute(route: string) {
   return render(
@@ -106,6 +106,8 @@ const sampleGroup: ProductGroupData = {
 describe('GroupDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSetServingSize = vi.fn();
+    mockUseServingSizeParams.mockReturnValue([ServingSize.servings(1), mockSetServingSize]);
   });
 
   it('renders loading state', () => {
@@ -229,18 +231,13 @@ describe('GroupDetailPage', () => {
       ],
     };
     mockQuery({ data: noMassGroup });
+    // Render with a mass-based serving size — group has no mass so this will throw
+    mockUseServingSizeParams.mockReturnValue([ServingSize.mass(100, 'g'), mockSetServingSize]);
     renderWithRoute('/groups/g-err');
-    // Initially renders with servings(1) — no error
-    expect(screen.getByTestId('nutrition-label')).toBeInTheDocument();
 
-    // Now trigger a mass-based serving size via the selector mock
-    act(() => {
-      mockServingSizeSelectorOnChange(ServingSize.mass(100, 'g'));
-    });
-
-    // The nutrition error should now be displayed
+    // The nutrition error should be displayed
     expect(screen.getByText(/Cannot calculate serving by mass/)).toBeInTheDocument();
-    // Nutrition label should no longer render (nutritionInfo is null)
+    // Nutrition label should not render (nutritionInfo is null)
     expect(screen.queryByTestId('nutrition-label')).not.toBeInTheDocument();
   });
 
