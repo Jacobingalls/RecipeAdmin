@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 import type { UseHistoryDataResult } from '../../hooks/useHistoryData';
+import type { ApiLogEntry } from '../../api';
 import { NutritionInformation } from '../../domain';
 
 import TodayTile from './TodayTile';
@@ -41,8 +43,79 @@ vi.mock('./SparklineCard', () => ({
   ),
 }));
 
+vi.mock('../HistoryEntryRow', () => ({
+  default: ({
+    entry,
+    name,
+    timeDisplay,
+  }: {
+    entry: ApiLogEntry;
+    name: string;
+    timeDisplay?: string;
+  }) => (
+    <div data-testid={`entry-row-${entry.id}`} data-name={name} data-time-display={timeDisplay}>
+      {name}
+    </div>
+  ),
+}));
+
+vi.mock('../LogModal', () => ({
+  default: ({
+    target,
+    onClose,
+    onSaved,
+  }: {
+    target: Record<string, unknown> | null;
+    onClose: () => void;
+    onSaved?: () => void;
+  }) =>
+    target ? (
+      <div data-testid="log-modal">
+        <button data-testid="modal-close" onClick={onClose}>
+          Close
+        </button>
+        {onSaved && (
+          <button data-testid="modal-saved" onClick={onSaved}>
+            Saved
+          </button>
+        )}
+      </div>
+    ) : null,
+}));
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 const { useHistoryData } = vi.mocked(await import('../../hooks'));
+
+const sampleProducts = [
+  { id: 'p1', name: 'Oats' },
+  { id: 'p2', name: 'Milk' },
+];
+
+const sampleGroups = [{ id: 'g1', name: 'Breakfast Bowl', items: [] }];
+
+const sampleLogs: ApiLogEntry[] = [
+  {
+    id: 'log1',
+    timestamp: Date.now() / 1000 - 5 * 60,
+    userID: 'u1',
+    item: {
+      kind: 'product',
+      productID: 'p1',
+      preparationID: 'prep1',
+      servingSize: { kind: 'servings', amount: 2 },
+    },
+  },
+  {
+    id: 'log2',
+    timestamp: Date.now() / 1000 - 2 * 3600,
+    userID: 'u1',
+    item: {
+      kind: 'group',
+      groupID: 'g1',
+      servingSize: { kind: 'servings', amount: 1 },
+    },
+  },
+];
 
 const defaultResult: UseHistoryDataResult = {
   logs: null,
@@ -67,6 +140,14 @@ function mockHistoryData(overrides: Partial<UseHistoryDataResult>) {
   useHistoryData.mockReturnValue({ ...defaultResult, ...overrides });
 }
 
+function renderTile() {
+  return render(
+    <MemoryRouter>
+      <TodayTile />
+    </MemoryRouter>,
+  );
+}
+
 describe('TodayTile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -74,20 +155,20 @@ describe('TodayTile', () => {
 
   it('renders loading state', () => {
     mockHistoryData({ loading: true });
-    render(<TodayTile />);
+    renderTile();
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
   });
 
   it('renders error state', () => {
     mockHistoryData({ error: "Couldn't load history. Try again later." });
-    render(<TodayTile />);
+    renderTile();
     const view = screen.getByTestId('content-unavailable-view');
     expect(view).toHaveTextContent("Couldn't load today's nutrition");
   });
 
   it('renders empty state when no logs', () => {
     mockHistoryData({ logs: [] });
-    render(<TodayTile />);
+    renderTile();
     const view = screen.getByTestId('content-unavailable-view');
     expect(view).toHaveTextContent('Nothing logged today');
     expect(view).toHaveAttribute(
@@ -98,13 +179,13 @@ describe('TodayTile', () => {
 
   it('renders empty state when logs is null', () => {
     mockHistoryData({ logs: null });
-    render(<TodayTile />);
+    renderTile();
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders the tile with "Today" title', () => {
     mockHistoryData({ logs: [] });
-    render(<TodayTile />);
+    renderTile();
     expect(screen.getByText('Today')).toBeInTheDocument();
   });
 
@@ -120,22 +201,13 @@ describe('TodayTile', () => {
     });
 
     mockHistoryData({
-      logs: [
-        {
-          id: 'log1',
-          timestamp: Date.now() / 1000,
-          userID: 'u1',
-          item: {
-            kind: 'product',
-            productID: 'p1',
-            servingSize: { kind: 'servings', amount: 1 },
-          },
-        },
-      ],
+      logs: [sampleLogs[0]],
+      products: sampleProducts,
+      groups: sampleGroups,
       entryNutritionById: new Map([['log1', nutrition]]),
     });
 
-    render(<TodayTile />);
+    renderTile();
 
     expect(screen.getByTestId('sparkline-card-calories')).toBeInTheDocument();
     expect(screen.getByTestId('sparkline-card-protein')).toBeInTheDocument();
@@ -157,35 +229,16 @@ describe('TodayTile', () => {
     });
 
     mockHistoryData({
-      logs: [
-        {
-          id: 'log1',
-          timestamp: Date.now() / 1000,
-          userID: 'u1',
-          item: {
-            kind: 'product',
-            productID: 'p1',
-            servingSize: { kind: 'servings', amount: 1 },
-          },
-        },
-        {
-          id: 'log2',
-          timestamp: Date.now() / 1000,
-          userID: 'u1',
-          item: {
-            kind: 'product',
-            productID: 'p2',
-            servingSize: { kind: 'servings', amount: 1 },
-          },
-        },
-      ],
+      logs: [sampleLogs[0], { ...sampleLogs[0], id: 'log2' }],
+      products: sampleProducts,
+      groups: sampleGroups,
       entryNutritionById: new Map([
         ['log1', nutrition1],
         ['log2', nutrition2],
       ]),
     });
 
-    render(<TodayTile />);
+    renderTile();
 
     // 500 + 700 = 1200
     const caloriesCard = screen.getByTestId('sparkline-card-calories');
@@ -198,7 +251,69 @@ describe('TodayTile', () => {
 
   it('calls useHistoryData with limitDays: 1', () => {
     mockHistoryData({ logs: [] });
-    render(<TodayTile />);
+    renderTile();
     expect(useHistoryData).toHaveBeenCalledWith({ limitDays: 1 });
+  });
+
+  it('renders a "History" link to /history', () => {
+    mockHistoryData({ logs: [] });
+    renderTile();
+    const historyLink = screen.getByRole('link', { name: /History/ });
+    expect(historyLink).toHaveAttribute('href', '/history');
+  });
+
+  it('renders history entry rows in populated state', () => {
+    mockHistoryData({
+      logs: sampleLogs,
+      products: sampleProducts,
+      groups: sampleGroups,
+    });
+    renderTile();
+    expect(screen.getByTestId('entry-row-log1')).toBeInTheDocument();
+    expect(screen.getByTestId('entry-row-log2')).toBeInTheDocument();
+  });
+
+  it('passes resolved names to HistoryEntryRow', () => {
+    mockHistoryData({
+      logs: sampleLogs,
+      products: sampleProducts,
+      groups: sampleGroups,
+    });
+    renderTile();
+    expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-name', 'Oats');
+    expect(screen.getByTestId('entry-row-log2')).toHaveAttribute('data-name', 'Breakfast Bowl');
+  });
+
+  it('passes timeDisplay="time" to HistoryEntryRow', () => {
+    mockHistoryData({
+      logs: [sampleLogs[0]],
+      products: sampleProducts,
+      groups: sampleGroups,
+    });
+    renderTile();
+    expect(screen.getByTestId('entry-row-log1')).toHaveAttribute('data-time-display', 'time');
+  });
+
+  it('renders LogModal with logTarget from hook', () => {
+    const mockTarget = { product: { id: 'p1' } };
+    mockHistoryData({
+      logs: [sampleLogs[0]],
+      products: sampleProducts,
+      groups: sampleGroups,
+      logTarget: mockTarget as UseHistoryDataResult['logTarget'],
+    });
+    renderTile();
+    expect(screen.getByTestId('log-modal')).toBeInTheDocument();
+  });
+
+  it('does not render LogModal when logTarget is null', () => {
+    mockHistoryData({
+      logs: [sampleLogs[0]],
+      products: sampleProducts,
+      groups: sampleGroups,
+      logTarget: null,
+    });
+    renderTile();
+    expect(screen.queryByTestId('log-modal')).not.toBeInTheDocument();
   });
 });

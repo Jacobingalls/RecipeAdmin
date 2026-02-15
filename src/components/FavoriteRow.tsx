@@ -50,7 +50,7 @@ export default function FavoriteRow({
       <div className="d-flex justify-content-between align-items-center">
         <div className="me-3 min-width-0">
           <div className="fw-medium text-truncate">{name}</div>
-          <small className="text-body-secondary">
+          <small className="text-secondary">
             {brand && <>{brand} &middot; </>}
             {servingSizeDesc}
             {servingSizeDesc && favorite.lastUsedAt > 0 && ' \u2014 '}

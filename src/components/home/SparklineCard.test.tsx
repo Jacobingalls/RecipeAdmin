@@ -10,9 +10,9 @@ const defaultPoints: SparklinePoint[] = [
   { hour: 18, amount: 1800 },
 ];
 
-const GREEN = 'rgb(25, 135, 84)';
-const YELLOW = 'rgb(255, 193, 7)';
-const RED = 'rgb(220, 53, 69)';
+const GREEN = 'var(--bs-success)';
+const YELLOW = 'var(--bs-warning)';
+const RED = 'var(--bs-danger)';
 
 describe('SparklineCard', () => {
   it('renders label, value, and unit', () => {

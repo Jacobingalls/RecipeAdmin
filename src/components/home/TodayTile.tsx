@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useHistoryData } from '../../hooks';
 import { NutritionInformation } from '../../domain';
 import { DAILY_VALUES } from '../../config/constants';
+import { resolveEntryName, resolveEntryBrand } from '../../utils/logEntryHelpers';
 import { LoadingState, ContentUnavailableView } from '../common';
+import LogModal from '../LogModal';
+import HistoryEntryRow from '../HistoryEntryRow';
 
 import Tile from './Tile';
 import SparklineCard from './SparklineCard';
@@ -21,7 +25,23 @@ const NUTRIENTS = [
 ] as const;
 
 export default function TodayTile() {
-  const { logs, loading, error, entryNutritionById } = useHistoryData({ limitDays: 1 });
+  const {
+    logs,
+    products,
+    groups,
+    loading,
+    error,
+    entryNutritionById,
+    logTarget,
+    logAgainLoading,
+    editLoading,
+    deleteLoading,
+    handleLogAgainClick,
+    handleEditClick,
+    handleDeleteClick,
+    handleSaved,
+    handleModalClose,
+  } = useHistoryData({ limitDays: 1 });
 
   const totalNutrition = useMemo(() => {
     let total = NutritionInformation.zero();
@@ -69,9 +89,15 @@ export default function TodayTile() {
     <div className="card-body d-flex align-items-center justify-content-center">{child}</div>
   );
 
+  const historyLink = (
+    <Link to="/history" className="text-decoration-none small">
+      History &rarr;
+    </Link>
+  );
+
   if (loading) {
     return (
-      <Tile title="Today" minHeight="12rem">
+      <Tile title="Today" titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(<LoadingState />)}
       </Tile>
     );
@@ -79,7 +105,7 @@ export default function TodayTile() {
 
   if (error) {
     return (
-      <Tile title="Today" minHeight="12rem">
+      <Tile title="Today" titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(
           <ContentUnavailableView
             icon="bi-calendar-day"
@@ -93,7 +119,7 @@ export default function TodayTile() {
 
   if (!logs || logs.length === 0) {
     return (
-      <Tile title="Today" minHeight="12rem">
+      <Tile title="Today" titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(
           <ContentUnavailableView
             icon="bi-calendar-day"
@@ -106,7 +132,7 @@ export default function TodayTile() {
   }
 
   return (
-    <Tile title="Today">
+    <Tile title="Today" titleRight={historyLink}>
       <div className="card-body">
         <div className="row g-3">
           {NUTRIENTS.map(({ key, label, unit, goal, size }) => {
@@ -135,6 +161,25 @@ export default function TodayTile() {
           })}
         </div>
       </div>
+      <div className="list-group list-group-flush bg-body-secondary">
+        {logs.map((entry) => (
+          <HistoryEntryRow
+            key={entry.id}
+            entry={entry}
+            name={resolveEntryName(entry, products!, groups!)}
+            brand={resolveEntryBrand(entry, products!)}
+            calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
+            timeDisplay="time"
+            onLogAgain={handleLogAgainClick}
+            logAgainLoading={logAgainLoading}
+            onEdit={handleEditClick}
+            editLoading={editLoading}
+            onDelete={handleDeleteClick}
+            deleteLoading={deleteLoading}
+          />
+        ))}
+      </div>
+      <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleSaved} />
     </Tile>
   );
 }

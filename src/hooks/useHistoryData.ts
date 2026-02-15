@@ -67,7 +67,7 @@ export interface UseHistoryDataResult {
 
 /**
  * Shared hook for history data fetching, nutrition resolution, and log entry actions.
- * Used by both HistoryPage and HistoryTile.
+ * Used by both HistoryPage and TodayTile.
  */
 export function useHistoryData(options?: {
   limit?: number;

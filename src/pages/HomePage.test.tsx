@@ -13,7 +13,6 @@ vi.mock('../components/common', () => ({
 vi.mock('../components/home', () => ({
   TodayTile: () => <div data-testid="today-tile" />,
   FavoritesTile: () => <div data-testid="favorites-tile" />,
-  HistoryTile: () => <div data-testid="history-tile" />,
 }));
 
 vi.mock('../contexts/AuthContext', () => ({
@@ -70,9 +69,9 @@ describe('HomePage', () => {
     expect(heading).toHaveTextContent(/Good (morning|afternoon|evening), testuser/);
   });
 
-  it('renders the HistoryTile', () => {
+  it('renders the TodayTile', () => {
     renderWithRouter(<HomePage />);
-    expect(screen.getByTestId('history-tile')).toBeInTheDocument();
+    expect(screen.getByTestId('today-tile')).toBeInTheDocument();
   });
 
   it('renders the PasskeySetupPrompt', () => {

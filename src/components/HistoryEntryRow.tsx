@@ -66,7 +66,7 @@ export default function HistoryEntryRow({
       <div className="d-flex justify-content-between align-items-center">
         <div>
           <div className="fw-medium">{name}</div>
-          <small className="text-body-secondary">
+          <small className="text-secondary">
             {brand && <>{brand} &middot; </>}
             {formatServingSizeDescription(entry)} &mdash;{' '}
             {timeDisplay === 'time'
