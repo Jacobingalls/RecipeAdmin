@@ -17,6 +17,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   user: AuthUser | null;
   isLoading: boolean;
+  apiVersion: string | null;
+  apiEnvironment: string | null;
   login: (usernameOrEmail: string, password: string) => Promise<void>;
   loginWithPasskey: (usernameOrEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -51,6 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | null>(null);
+  const [apiVersion, setApiVersion] = useState<string | null>(null);
+  const [apiEnvironment, setApiEnvironment] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -58,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTokenExpiresAt(expiry);
       const status = await getStatus();
       setUser(status.user ?? null);
+      setApiVersion(status.version);
+      setApiEnvironment(status.environment ?? (status.debug ? 'Debug' : 'Production'));
     } catch {
       setUser(null);
     } finally {
@@ -126,6 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokenExpiresAt(expiry);
     const status = await getStatus();
     setUser(status.user ?? null);
+    setApiVersion(status.version);
+    setApiEnvironment(status.environment ?? (status.debug ? 'Debug' : 'Production'));
   }, []);
 
   return (
@@ -134,6 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: user !== null,
         user,
         isLoading,
+        apiVersion,
+        apiEnvironment,
         login,
         loginWithPasskey,
         logout: logoutFn,

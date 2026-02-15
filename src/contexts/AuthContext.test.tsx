@@ -36,14 +36,25 @@ const testUser = {
 };
 
 function TestConsumer() {
-  const { isAuthenticated, user, isLoading, login, logout, loginWithPasskey, refreshSession } =
-    useAuth();
+  const {
+    isAuthenticated,
+    user,
+    isLoading,
+    apiVersion,
+    apiEnvironment,
+    login,
+    logout,
+    loginWithPasskey,
+    refreshSession,
+  } = useAuth();
   return (
     <div>
       <span data-testid="loading">{String(isLoading)}</span>
       <span data-testid="authenticated">{String(isAuthenticated)}</span>
       <span data-testid="username">{user?.username ?? 'none'}</span>
       <span data-testid="display-name">{user?.displayName ?? 'none'}</span>
+      <span data-testid="api-version">{apiVersion ?? 'null'}</span>
+      <span data-testid="api-environment">{apiEnvironment ?? 'null'}</span>
       <button data-testid="login" onClick={() => login('user', 'pass')} type="button" />
       <button data-testid="logout" onClick={() => logout()} type="button" />
       <button data-testid="passkey" onClick={() => loginWithPasskey()} type="button" />
@@ -73,6 +84,58 @@ describe('AuthContext', () => {
     });
     expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
     expect(screen.getByTestId('username')).toHaveTextContent('testuser');
+  });
+
+  it('stores apiVersion and apiEnvironment from status response', async () => {
+    mockGetStatus.mockResolvedValue({
+      version: '2.1.0',
+      environment: 'staging',
+      debug: false,
+      user: testUser,
+    });
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('api-version')).toHaveTextContent('2.1.0');
+    expect(screen.getByTestId('api-environment')).toHaveTextContent('staging');
+  });
+
+  it('derives environment from debug flag when environment is null', async () => {
+    mockGetStatus.mockResolvedValue({
+      version: '1.0.0',
+      environment: null,
+      debug: true,
+      user: testUser,
+    });
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('api-environment')).toHaveTextContent('Debug');
+  });
+
+  it('derives Production environment when debug is false and environment is null', async () => {
+    mockGetStatus.mockResolvedValue({
+      version: '1.0.0',
+      environment: null,
+      debug: false,
+      user: testUser,
+    });
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestConsumer />
+        </AuthProvider>,
+      );
+    });
+    expect(screen.getByTestId('api-environment')).toHaveTextContent('Production');
   });
 
   it('sets unauthenticated when getStatus returns null user', async () => {

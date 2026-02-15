@@ -40,12 +40,21 @@ const groupFavorite: ApiFavorite = {
 };
 
 function TestConsumer() {
-  const { favorites, loading, findFavorite, isFavorited, addFavorite, removeFavorite, refetch } =
-    useFavorites();
+  const {
+    favorites,
+    loading,
+    error,
+    findFavorite,
+    isFavorited,
+    addFavorite,
+    removeFavorite,
+    refetch,
+  } = useFavorites();
 
   return (
     <div>
       <div data-testid="loading">{String(loading)}</div>
+      <div data-testid="error">{error ?? 'null'}</div>
       <div data-testid="count">{favorites.length}</div>
       <div data-testid="find-product">
         {String(
@@ -255,6 +264,36 @@ describe('FavoritesContext', () => {
       expect(screen.getByTestId('loading')).toHaveTextContent('false');
     });
     expect(screen.getByTestId('count')).toHaveTextContent('0');
+    expect(screen.getByTestId('error')).toHaveTextContent(
+      "Couldn't load favorites. Try again later.",
+    );
+  });
+
+  it('clears error on successful refetch', async () => {
+    mockListFavorites.mockRejectedValueOnce(new Error('Network error'));
+
+    render(
+      <FavoritesProvider>
+        <TestConsumer />
+      </FavoritesProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false');
+    });
+    expect(screen.getByTestId('error')).not.toHaveTextContent('null');
+
+    mockListFavorites.mockResolvedValue([productFavorite]);
+
+    await act(async () => {
+      screen.getByTestId('refetch').click();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false');
+    });
+    expect(screen.getByTestId('error')).toHaveTextContent('null');
+    expect(screen.getByTestId('count')).toHaveTextContent('1');
   });
 
   it('throws when useFavorites is used outside provider', () => {

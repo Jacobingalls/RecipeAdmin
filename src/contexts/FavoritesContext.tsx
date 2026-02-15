@@ -15,6 +15,7 @@ interface FindFavoriteOptions {
 interface FavoritesContextValue {
   favorites: ApiFavorite[];
   loading: boolean;
+  error: string | null;
   findFavorite: (opts: FindFavoriteOptions) => ApiFavorite | null;
   isFavorited: (opts: FindFavoriteOptions) => boolean;
   addFavorite: (request: CreateFavoriteRequest) => Promise<void>;
@@ -53,6 +54,7 @@ function matchesFavorite(fav: ApiFavorite, opts: FindFavoriteOptions): boolean {
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<ApiFavorite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
@@ -61,12 +63,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       .then((data) => {
         if (!cancelled) {
           setFavorites(data);
+          setError(null);
           setLoading(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setFavorites([]);
+          setError("Couldn't load favorites. Try again later.");
           setLoading(false);
         }
       });
@@ -77,6 +81,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const refetch = useCallback(() => {
     setLoading(true);
+    setError(null);
     setFetchKey((k) => k + 1);
   }, []);
 
@@ -111,13 +116,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     () => ({
       favorites,
       loading,
+      error,
       findFavorite,
       isFavorited,
       addFavorite: addFav,
       removeFavorite: removeFav,
       refetch,
     }),
-    [favorites, loading, findFavorite, isFavorited, addFav, removeFav, refetch],
+    [favorites, loading, error, findFavorite, isFavorited, addFav, removeFav, refetch],
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

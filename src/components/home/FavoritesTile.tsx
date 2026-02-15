@@ -3,9 +3,8 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { ApiFavorite } from '../../api';
-import { deleteFavorite as deleteFavoriteApi, listFavorites } from '../../api';
+import { deleteFavorite as deleteFavoriteApi } from '../../api';
 import { useFavorites } from '../../contexts/FavoritesContext';
-import { useApiQuery } from '../../hooks';
 import { buildFavoriteLogTarget } from '../../utils/favoriteHelpers';
 import { LoadingState, ContentUnavailableView } from '../common';
 import type { LogTarget } from '../LogModal';
@@ -17,15 +16,7 @@ import Tile from './Tile';
 const MAX_DISPLAY = 6;
 
 export default function FavoritesTile() {
-  const {
-    data: favorites,
-    loading,
-    error,
-    refetch,
-  } = useApiQuery(listFavorites, [], {
-    errorMessage: "Couldn't load favorites. Try again later.",
-  });
-  const { refetch: refetchFavoritesCache } = useFavorites();
+  const { favorites, loading, error, refetch } = useFavorites();
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [removeLoading, setRemoveLoading] = useState(false);
@@ -51,12 +42,11 @@ export default function FavoritesTile() {
       try {
         await deleteFavoriteApi(favorite.id);
         refetch();
-        refetchFavoritesCache();
       } finally {
         setRemoveLoading(false);
       }
     },
-    [refetch, refetchFavoritesCache],
+    [refetch],
   );
 
   const centeredWrapper = (child: ReactNode) => (
@@ -74,7 +64,7 @@ export default function FavoritesTile() {
         description="Try again later."
       />,
     );
-  } else if (!favorites || favorites.length === 0) {
+  } else if (favorites.length === 0) {
     content = centeredWrapper(
       <ContentUnavailableView
         icon="bi-star"

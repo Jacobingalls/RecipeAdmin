@@ -1,101 +1,46 @@
 import { render, screen } from '@testing-library/react';
 
-import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { ApiStatus } from '../api';
-
 import VersionBadge from './VersionBadge';
 
-const mockUseApiQuery = vi.fn<() => UseApiQueryResult<ApiStatus>>();
+const mockUseAuth = vi.fn();
 
-vi.mock('../hooks', () => ({
-  useApiQuery: (...args: unknown[]) => mockUseApiQuery(...args),
-}));
-
-vi.mock('../api', () => ({
-  getStatus: vi.fn(),
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: (...args: unknown[]) => mockUseAuth(...args),
 }));
 
 describe('VersionBadge', () => {
-  it('returns null while loading', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: null,
-      loading: true,
-      error: null,
-      refetch: vi.fn(),
-    });
-
+  it('returns null when apiEnvironment is null', () => {
+    mockUseAuth.mockReturnValue({ apiVersion: null, apiEnvironment: null });
     const { container } = render(<VersionBadge />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders error state when fetch fails', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: null,
-      loading: false,
-      error: 'Network error',
-      refetch: vi.fn(),
-    });
-
-    render(<VersionBadge />);
-    expect(screen.getByText('Error loading version')).toBeInTheDocument();
-  });
-
-  it('renders error state when data is null', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: null,
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-
-    render(<VersionBadge />);
-    expect(screen.getByText('Error loading version')).toBeInTheDocument();
-  });
-
-  it('renders Production environment when debug is false', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: { version: '1.2.3', environment: null, debug: false, user: null },
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-
+  it('renders Production environment with version', () => {
+    mockUseAuth.mockReturnValue({ apiVersion: '1.2.3', apiEnvironment: 'Production' });
     render(<VersionBadge />);
     expect(screen.getByText('Production, v1.2.3')).toBeInTheDocument();
   });
 
-  it('renders Debug environment when debug is true', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: { version: '1.0.0', environment: null, debug: true, user: null },
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-
+  it('renders Debug environment with version', () => {
+    mockUseAuth.mockReturnValue({ apiVersion: '1.0.0', apiEnvironment: 'Debug' });
     render(<VersionBadge />);
     expect(screen.getByText('Debug, v1.0.0')).toBeInTheDocument();
   });
 
-  it('renders environment name from API when available', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: { version: '1.0.0', environment: 'staging', debug: false, user: null },
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-
+  it('renders custom environment name', () => {
+    mockUseAuth.mockReturnValue({ apiVersion: '1.0.0', apiEnvironment: 'staging' });
     render(<VersionBadge />);
     expect(screen.getByText('staging, v1.0.0')).toBeInTheDocument();
   });
 
-  it('renders without version when version is empty', () => {
-    mockUseApiQuery.mockReturnValue({
-      data: { version: '', environment: null, debug: true, user: null },
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+  it('renders without version when version is null', () => {
+    mockUseAuth.mockReturnValue({ apiVersion: null, apiEnvironment: 'Debug' });
+    render(<VersionBadge />);
+    expect(screen.getByText('Debug')).toBeInTheDocument();
+  });
 
+  it('renders without version when version is empty', () => {
+    mockUseAuth.mockReturnValue({ apiVersion: '', apiEnvironment: 'Debug' });
     render(<VersionBadge />);
     expect(screen.getByText('Debug')).toBeInTheDocument();
   });

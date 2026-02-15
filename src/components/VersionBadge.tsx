@@ -1,31 +1,18 @@
-import type { ApiStatus } from '../api';
-import { getStatus } from '../api';
-import { useApiQuery } from '../hooks';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function VersionBadge() {
-  const { data, loading, error } = useApiQuery<ApiStatus>(getStatus, []);
+  const { apiVersion, apiEnvironment } = useAuth();
 
-  if (loading) {
-    return null;
-  }
+  if (!apiEnvironment) return null;
 
-  if (error || !data) {
-    return (
-      <small className="text-danger d-block" style={{ fontSize: '0.7rem', marginTop: -4 }}>
-        Error loading version
-      </small>
-    );
-  }
-
-  const environment = data.environment ?? (data.debug ? 'Debug' : 'Production');
-  const version = data.version ? `v${data.version}` : null;
+  const version = apiVersion ? `v${apiVersion}` : null;
 
   return (
     <small
       className="text-light d-block"
       style={{ fontSize: '0.55rem', marginTop: -8, opacity: 0.7 }}
     >
-      {environment}
+      {apiEnvironment}
       {version && `, ${version}`}
     </small>
   );
