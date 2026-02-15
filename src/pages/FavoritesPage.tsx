@@ -1,9 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
 
 import type { ApiFavorite } from '../api';
-import { listFavorites, deleteFavorite as deleteFavoriteApi } from '../api';
+import { deleteFavorite as deleteFavoriteApi } from '../api';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useApiQuery } from '../hooks';
 import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils/favoriteHelpers';
 import { LoadingState, ContentUnavailableView } from '../components/common';
 import type { LogTarget } from '../components/LogModal';
@@ -11,15 +10,7 @@ import LogModal from '../components/LogModal';
 import FavoriteRow from '../components/FavoriteRow';
 
 export default function FavoritesPage() {
-  const {
-    data: favorites,
-    loading,
-    error,
-    refetch,
-  } = useApiQuery(listFavorites, [], {
-    errorMessage: "Couldn't load favorites. Try again later.",
-  });
-  const { refetch: refetchFavoritesCache } = useFavorites();
+  const { favorites, loading, error, refetch } = useFavorites();
 
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
@@ -27,23 +18,23 @@ export default function FavoritesPage() {
   const [removeLoading, setRemoveLoading] = useState(false);
 
   const brands = useMemo(() => {
-    if (!favorites) return [];
     const uniqueBrands = [
       ...new Set(favorites.map((fav) => favoriteBrand(fav)).filter((b): b is string => Boolean(b))),
     ];
     return uniqueBrands.sort((a, b) => a.localeCompare(b));
   }, [favorites]);
 
-  const filteredFavorites = useMemo(() => {
-    if (!favorites) return [];
-    return favorites.filter((fav) => {
-      const name = favoriteName(fav).toLowerCase();
-      const brand = favoriteBrand(fav)?.toLowerCase();
-      const matchesName = !nameFilter || name.includes(nameFilter.toLowerCase());
-      const matchesBrand = !brandFilter || brand === brandFilter.toLowerCase();
-      return matchesName && matchesBrand;
-    });
-  }, [favorites, nameFilter, brandFilter]);
+  const filteredFavorites = useMemo(
+    () =>
+      favorites.filter((fav) => {
+        const name = favoriteName(fav).toLowerCase();
+        const brand = favoriteBrand(fav)?.toLowerCase();
+        const matchesName = !nameFilter || name.includes(nameFilter.toLowerCase());
+        const matchesBrand = !brandFilter || brand === brandFilter.toLowerCase();
+        return matchesName && matchesBrand;
+      }),
+    [favorites, nameFilter, brandFilter],
+  );
 
   const handleLog = useCallback((favorite: ApiFavorite) => {
     const target = buildFavoriteLogTarget(favorite);
@@ -66,12 +57,11 @@ export default function FavoritesPage() {
       try {
         await deleteFavoriteApi(favorite.id);
         refetch();
-        refetchFavoritesCache();
       } finally {
         setRemoveLoading(false);
       }
     },
-    [refetch, refetchFavoritesCache],
+    [refetch],
   );
 
   return (

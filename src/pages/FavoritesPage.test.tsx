@@ -2,27 +2,15 @@ import type { ReactElement } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiFavorite } from '../api';
 import * as api from '../api';
-import { useApiQuery } from '../hooks/useApiQuery';
 
 import FavoritesPage from './FavoritesPage';
 
-vi.mock('../hooks/useApiQuery', () => ({
-  useApiQuery: vi.fn(),
-}));
+const mockUseFavorites = vi.fn();
 
 vi.mock('../contexts/FavoritesContext', () => ({
-  useFavorites: () => ({
-    favorites: [],
-    loading: false,
-    findFavorite: () => null,
-    isFavorited: () => false,
-    addFavorite: vi.fn(),
-    removeFavorite: vi.fn(),
-    refetch: vi.fn(),
-  }),
+  useFavorites: (...args: unknown[]) => mockUseFavorites(...args),
 }));
 
 vi.mock('../api', async () => {
@@ -94,7 +82,6 @@ vi.mock('../components/LogModal', () => ({
     ) : null,
 }));
 
-const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockDeleteFavorite = vi.mocked(api.deleteFavorite);
 
 function renderWithRouter(ui: ReactElement) {
@@ -177,70 +164,67 @@ const sampleFavorites: ApiFavorite[] = [
   },
 ];
 
-const defaultResult = {
-  data: null,
+const defaultContextValue = {
+  favorites: [] as ApiFavorite[],
   loading: false,
-  error: null,
+  error: null as string | null,
+  findFavorite: () => null,
+  isFavorited: () => false,
+  addFavorite: vi.fn(),
+  removeFavorite: vi.fn(),
   refetch: vi.fn(),
 };
 
 describe('FavoritesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseFavorites.mockReturnValue(defaultContextValue);
   });
 
   it('renders the page heading', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: [],
-    } as UseApiQueryResult<unknown>);
     renderWithRouter(<FavoritesPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Favorites');
   });
 
   it('renders loading state', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
       loading: true,
-    } as UseApiQueryResult<unknown>);
+    });
     renderWithRouter(<FavoritesPage />);
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
   });
 
   it('renders error state', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
       error: "Couldn't load favorites. Try again later.",
-    } as UseApiQueryResult<unknown>);
+    });
     renderWithRouter(<FavoritesPage />);
     expect(screen.getByText("Couldn't load favorites")).toBeInTheDocument();
   });
 
   it('renders empty state when no favorites', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: [],
-    } as UseApiQueryResult<unknown>);
     renderWithRouter(<FavoritesPage />);
     expect(screen.getByText('No favorites')).toBeInTheDocument();
     expect(screen.getByText('Add favorites from product or group pages.')).toBeInTheDocument();
   });
 
   it('renders search inputs', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
     expect(screen.getByPlaceholderText('Search by name...')).toBeInTheDocument();
     expect(screen.getByDisplayValue('All brands')).toBeInTheDocument();
   });
 
   it('renders FavoriteRow for each favorite', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
     expect(screen.getByTestId('favorite-row-fav1')).toBeInTheDocument();
     expect(screen.getByTestId('favorite-row-fav2')).toBeInTheDocument();
@@ -249,10 +233,10 @@ describe('FavoritesPage', () => {
   });
 
   it('filters by name', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
 
     fireEvent.change(screen.getByPlaceholderText('Search by name...'), {
@@ -266,10 +250,10 @@ describe('FavoritesPage', () => {
   });
 
   it('filters by brand', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
 
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'DairyCo' } });
@@ -281,10 +265,10 @@ describe('FavoritesPage', () => {
   });
 
   it('shows filtered empty state when filters match nothing', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
 
     fireEvent.change(screen.getByPlaceholderText('Search by name...'), {
@@ -296,10 +280,10 @@ describe('FavoritesPage', () => {
   });
 
   it('populates brand filter dropdown', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
 
     const select = screen.getByRole('combobox');
@@ -312,10 +296,10 @@ describe('FavoritesPage', () => {
   });
 
   it('opens log modal when log button is clicked', () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
 
     fireEvent.click(screen.getByTestId('log-fav1'));
@@ -325,11 +309,11 @@ describe('FavoritesPage', () => {
 
   it('calls deleteFavorite and refetches on remove', async () => {
     const refetch = vi.fn();
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
       refetch,
-    } as UseApiQueryResult<unknown>);
+    });
     mockDeleteFavorite.mockResolvedValue(undefined);
 
     renderWithRouter(<FavoritesPage />);
@@ -345,10 +329,10 @@ describe('FavoritesPage', () => {
   });
 
   it('closes modal when onClose is triggered', async () => {
-    mockUseApiQuery.mockReturnValue({
-      ...defaultResult,
-      data: sampleFavorites,
-    } as UseApiQueryResult<unknown>);
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
     renderWithRouter(<FavoritesPage />);
 
     fireEvent.click(screen.getByTestId('log-fav1'));
