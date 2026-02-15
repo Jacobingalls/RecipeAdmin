@@ -93,10 +93,16 @@ const sampleProducts = [
 
 const sampleGroups = [{ id: 'g1', name: 'Breakfast Bowl', items: [] }];
 
+// Use timestamps relative to the start of today so they're always "today"
+// regardless of what time the tests run.
+const todayNoon = new Date();
+todayNoon.setHours(12, 0, 0, 0);
+const todayNoonEpoch = todayNoon.getTime() / 1000;
+
 const sampleLogs: ApiLogEntry[] = [
   {
     id: 'log1',
-    timestamp: Date.now() / 1000 - 5 * 60,
+    timestamp: todayNoonEpoch,
     userID: 'u1',
     item: {
       kind: 'product',
@@ -107,7 +113,7 @@ const sampleLogs: ApiLogEntry[] = [
   },
   {
     id: 'log2',
-    timestamp: Date.now() / 1000 - 2 * 3600,
+    timestamp: todayNoonEpoch - 3600,
     userID: 'u1',
     item: {
       kind: 'group',
@@ -315,5 +321,32 @@ describe('TodayTile', () => {
     });
     renderTile();
     expect(screen.queryByTestId('log-modal')).not.toBeInTheDocument();
+  });
+
+  it('shows empty state when backend returns only yesterday logs', () => {
+    const yesterdayTimestamp = Date.now() / 1000 - 24 * 3600;
+    const yesterdayLogs: ApiLogEntry[] = [
+      {
+        id: 'yesterday1',
+        timestamp: yesterdayTimestamp,
+        userID: 'u1',
+        item: {
+          kind: 'product',
+          productID: 'p1',
+          preparationID: 'prep1',
+          servingSize: { kind: 'servings', amount: 1 },
+        },
+      },
+    ];
+
+    mockHistoryData({
+      logs: yesterdayLogs,
+      products: sampleProducts,
+      groups: sampleGroups,
+    });
+
+    renderTile();
+    const view = screen.getByTestId('content-unavailable-view');
+    expect(view).toHaveTextContent('Nothing logged today');
   });
 });

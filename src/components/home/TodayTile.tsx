@@ -43,18 +43,32 @@ export default function TodayTile() {
     handleModalClose,
   } = useHistoryData({ limitDays: 1 });
 
+  // Filter logs to only include entries from today in the user's local timezone.
+  // The backend returns the most recent day with data, which may be yesterday
+  // if nothing has been logged today yet.
+  const todayLogs = useMemo(() => {
+    if (!logs) return null;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+    const tomorrowStart =
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000;
+    return logs.filter((entry) => entry.timestamp >= todayStart && entry.timestamp < tomorrowStart);
+  }, [logs]);
+
   const totalNutrition = useMemo(() => {
+    if (!todayLogs) return NutritionInformation.zero();
     let total = NutritionInformation.zero();
-    for (const nutrition of entryNutritionById.values()) {
-      total = total.add(nutrition);
+    for (const entry of todayLogs) {
+      const nutrition = entryNutritionById.get(entry.id);
+      if (nutrition) total = total.add(nutrition);
     }
     return total;
-  }, [entryNutritionById]);
+  }, [todayLogs, entryNutritionById]);
 
   const sparklineData = useMemo(() => {
-    if (!logs || logs.length === 0) return null;
+    if (!todayLogs || todayLogs.length === 0) return null;
 
-    const sorted = [...logs].sort((a, b) => a.timestamp - b.timestamp);
+    const sorted = [...todayLogs].sort((a, b) => a.timestamp - b.timestamp);
     const data: Record<string, SparklinePoint[]> = {};
 
     for (const { key } of NUTRIENTS) {
@@ -78,7 +92,7 @@ export default function TodayTile() {
     }
 
     return data;
-  }, [logs, entryNutritionById]);
+  }, [todayLogs, entryNutritionById]);
 
   const currentHour = useMemo(() => {
     const n = new Date();
@@ -108,7 +122,7 @@ export default function TodayTile() {
       <Tile title="Today" titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(
           <ContentUnavailableView
-            icon="bi-calendar-day"
+            icon="bi-journal-x"
             title="Couldn't load today's nutrition"
             description={error}
           />,
@@ -117,12 +131,12 @@ export default function TodayTile() {
     );
   }
 
-  if (!logs || logs.length === 0) {
+  if (!todayLogs || todayLogs.length === 0) {
     return (
       <Tile title="Today" titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(
           <ContentUnavailableView
-            icon="bi-calendar-day"
+            icon="bi-journal-x"
             title="Nothing logged today"
             description="Log something to see your daily nutrition here."
           />,
@@ -162,7 +176,7 @@ export default function TodayTile() {
         </div>
       </div>
       <div className="list-group list-group-flush bg-body-secondary">
-        {logs.map((entry) => (
+        {todayLogs.map((entry) => (
           <HistoryEntryRow
             key={entry.id}
             entry={entry}
