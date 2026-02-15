@@ -3,15 +3,17 @@ import type { ButtonHTMLAttributes, CSSProperties } from 'react';
 type CircularButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'>;
 
 const buttonStyle = {
-  width: '2.75rem',
-  height: '2.75rem',
+  width: '2.25rem',
+  height: '2.25rem',
   fontSize: '1.1rem',
   '--bs-btn-hover-bg': 'rgba(var(--bs-body-color-rgb), 0.2)',
   '--bs-btn-hover-border-color': 'transparent',
 } as CSSProperties;
 
 /**
- * Base 2.75rem (44px) circular icon button with a subtle hover highlight.
+ * Base 2.25rem circular icon button with a subtle hover highlight.
+ *
+ * Touch target is below 44px but meets WCAG 2.5.8 via the spacing exception.
  *
  * Works both standalone and inside a `CircularButtonGroup`.
  *

@@ -49,7 +49,7 @@ All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/wr
 
 **Available shared components** (use these instead of reimplementing):
 - `Button` — semantic wrapper around Bootstrap button classes with `variant` and `size` props
-- `CircularButton` — 2.75rem (44px) circular icon button; shows individual hover when standalone, defers to group when inside `CircularButtonGroup`
+- `CircularButton` — 2.25rem circular icon button with subtle hover highlight (below 44px touch target; meets WCAG 2.5.8 via spacing exception)
 - `CircularButtonGroup` — inline-flex pill container with unified hover for adjacent `CircularButton` children
 - `ListFilter` — shared name-text + dropdown filter row with accessible labels, used across list pages
 - `ModalBase` — modal wrapper with backdrop, scroll lock, focus trapping, backdrop-click-to-dismiss, and ARIA attributes
@@ -89,7 +89,7 @@ Follow the [Inclusive Design Principles](https://inclusivedesignprinciples.info/
 **Responsive design:**
 - Mobile-first approach — design for small screens, then enhance for larger ones
 - Use Bootstrap's responsive grid (`container`, `row`, `col-*`) and breakpoint utilities (`col-md-*`, `d-md-*`)
-- Touch targets must be at least 44x44 CSS pixels
+- Touch targets must be at least 44x44 CSS pixels (exception: `CircularButton` uses 2.25rem/36px and relies on the WCAG 2.5.8 spacing exception)
 - Avoid fixed widths — use relative units (`rem`, `%`) and `max-width` for readable line lengths
 - Test layouts at standard breakpoints: 320px, 768px, 1024px, 1440px
 
@@ -137,7 +137,7 @@ src/
 │   ├── common/            # Shared UI components
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── Button          # Semantic Bootstrap button with variant/size props
-│   │   ├── CircularButton  # 2rem icon button; standalone circle or grouped pill
+│   │   ├── CircularButton  # 2.25rem icon button (WCAG 2.5.8 spacing exception)
 │   │   ├── CircularButtonGroup # Pill hover container for adjacent CircularButtons
 │   │   ├── ContentUnavailableView # Centered empty state with icon/title/description
 │   │   ├── CopyButton     # Clipboard copy with "Copied!" feedback

@@ -16,7 +16,7 @@ const groupRules = [
 const containerStyle: CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
-  borderRadius: '1.375rem',
+  borderRadius: '1.125rem',
   backgroundColor: 'rgba(var(--bs-body-color-rgb), 0.05)',
 };
 
