@@ -28,6 +28,7 @@ export interface GroupItem {
 
 export interface ProductGroupData {
   id?: string;
+  brand?: string;
   name?: string;
   items?: GroupItem[];
   mass?: NutritionUnitData | null;
@@ -55,6 +56,7 @@ interface GroupServing extends ItemServing {
  */
 export class ProductGroup {
   id: string | undefined;
+  brand: string | undefined;
   name: string | undefined;
   items: GroupItem[];
   mass: NutritionUnit | null;
@@ -64,6 +66,7 @@ export class ProductGroup {
 
   constructor(data: ProductGroupData = {}) {
     this.id = data.id;
+    this.brand = data.brand;
     this.name = data.name;
 
     // Items in the group (each is a lookup result with product or group)

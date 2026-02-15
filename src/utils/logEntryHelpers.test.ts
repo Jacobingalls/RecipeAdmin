@@ -5,6 +5,7 @@ import {
   formatTime,
   formatRelativeTime,
   resolveEntryName,
+  resolveEntryBrand,
   entryDetailPath,
   formatServingSizeDescription,
   buildLogTarget,
@@ -140,6 +141,67 @@ describe('resolveEntryName', () => {
       item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryName(entry, products, groups)).toBe('Unknown Item');
+  });
+});
+
+describe('resolveEntryBrand', () => {
+  const products: Record<string, { brand?: string }> = {
+    p1: { brand: 'QuakerCo' },
+    p2: {},
+  };
+  const groups: Record<string, { brand?: string }> = {
+    g1: { brand: 'HomeMade' },
+    g2: {},
+  };
+
+  it('resolves a product brand', () => {
+    const entry: ApiLogEntry = {
+      id: 'log1',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
+    };
+    expect(resolveEntryBrand(entry, products, groups)).toBe('QuakerCo');
+  });
+
+  it('resolves a group brand', () => {
+    const entry: ApiLogEntry = {
+      id: 'log2',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
+    };
+    expect(resolveEntryBrand(entry, products, groups)).toBe('HomeMade');
+  });
+
+  it('returns undefined when product has no brand', () => {
+    const entry: ApiLogEntry = {
+      id: 'log3',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: { kind: 'product', productID: 'p2', servingSize: { kind: 'servings', amount: 1 } },
+    };
+    expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
+  });
+
+  it('returns undefined when group has no brand', () => {
+    const entry: ApiLogEntry = {
+      id: 'log4',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: { kind: 'group', groupID: 'g2', servingSize: { kind: 'servings', amount: 1 } },
+    };
+    expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
+  });
+
+  it('returns undefined for unknown kind', () => {
+    const entry: ApiLogEntry = {
+      id: 'log5',
+      timestamp: nowSeconds(),
+      userID: 'u1',
+      item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
+    };
+    expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
   });
 });
 
@@ -304,6 +366,29 @@ describe('buildLogTarget', () => {
     expect(target!.initialTimestamp).toBe(1700001000);
     expect(target!.editEntryId).toBe('log-2');
     expect(target!.name).toBe('Breakfast Bowl');
+  });
+
+  it('includes brand for group entries when present', () => {
+    const groupWithBrand: ProductGroupData = {
+      id: 'group-2',
+      name: 'Protein Shake',
+      brand: 'FitCo',
+      items: [],
+    };
+    const entry: ApiLogEntry = {
+      id: 'log-5',
+      timestamp: 1700002000,
+      userID: 'u1',
+      item: {
+        kind: 'group',
+        groupID: 'group-2',
+        servingSize: { kind: 'servings', amount: 1 },
+      },
+    };
+
+    const target = buildLogTarget(entry, null, groupWithBrand);
+    expect(target).not.toBeNull();
+    expect(target!.brand).toBe('FitCo');
   });
 
   it('returns null when product has no preparations', () => {

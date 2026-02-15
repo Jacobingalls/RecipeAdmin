@@ -19,7 +19,7 @@ export default function SearchResultRow({ result, onLog, logLoading }: SearchRes
 
   const isProduct = !!result.item.product;
   const name = isProduct ? result.item.product!.name : (result.item.group!.name ?? 'Group');
-  const brand = isProduct ? result.item.product!.brand : undefined;
+  const brand = isProduct ? result.item.product!.brand : result.item.group?.brand;
 
   const servingSize = useMemo(
     () => ServingSize.fromObject(result.servingSize) ?? ServingSize.servings(1),

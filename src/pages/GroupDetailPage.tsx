@@ -61,6 +61,7 @@ export default function GroupDetailPage() {
       {!loading && !error && groupData && (
         <>
           <h1 className="mb-1">{groupData.name}</h1>
+          {groupData.brand && <p className="text-secondary mb-1">{groupData.brand}</p>}
           <p className="text-secondary mb-3">
             {items.length} item{items.length !== 1 ? 's' : ''}
           </p>
@@ -147,9 +148,7 @@ function GroupItemRow({ item }: GroupItemRowProps) {
           <div>
             <span className="badge bg-secondary me-2">Group</span>
             <span className="fw-medium">{group.name}</span>
-            <span className="text-secondary ms-2 small">
-              {(group.items ?? []).length} item{(group.items ?? []).length !== 1 ? 's' : ''}
-            </span>
+            {group.brand && <span className="text-secondary ms-2 small">{group.brand}</span>}
           </div>
           {servingSizeDisplay && <span className="text-secondary small">{servingSizeDisplay}</span>}
         </div>

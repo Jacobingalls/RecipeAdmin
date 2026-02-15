@@ -50,6 +50,7 @@ export default function LookupPage() {
 
       return {
         name: g.name || 'Group',
+        brand: g.brand,
         prepOrGroup: group,
         initialServingSize: servingSize,
         groupId: g.id,

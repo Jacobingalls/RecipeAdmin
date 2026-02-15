@@ -104,8 +104,19 @@ describe('favoriteBrand', () => {
     expect(favoriteBrand(productFavorite)).toBe('NutCo');
   });
 
-  it('returns undefined for group favorites', () => {
+  it('returns undefined for group favorites without brand', () => {
     expect(favoriteBrand(groupFavorite)).toBeUndefined();
+  });
+
+  it('returns brand for group favorites with brand', () => {
+    const fav: ApiFavorite = {
+      ...groupFavorite,
+      item: {
+        group: { ...groupFavorite.item.group!, brand: 'HomeMade' },
+        servingSize: groupFavorite.item.servingSize,
+      },
+    };
+    expect(favoriteBrand(fav)).toBe('HomeMade');
   });
 
   it('returns undefined when product has no brand', () => {
@@ -370,6 +381,19 @@ describe('buildFavoriteLogTarget', () => {
     expect(target!.groupId).toBe('g1');
     expect(target!.productId).toBeUndefined();
     expect(target!.editEntryId).toBeUndefined();
+  });
+
+  it('includes brand for group favorites with brand', () => {
+    const fav: ApiFavorite = {
+      ...groupFavorite,
+      item: {
+        group: { ...groupFavorite.item.group!, brand: 'HomeMade' },
+        servingSize: groupFavorite.item.servingSize,
+      },
+    };
+    const target = buildFavoriteLogTarget(fav);
+    expect(target).not.toBeNull();
+    expect(target!.brand).toBe('HomeMade');
   });
 
   it('returns null when product has no preparations', () => {

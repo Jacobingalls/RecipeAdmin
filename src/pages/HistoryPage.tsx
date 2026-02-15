@@ -176,7 +176,7 @@ export default function HistoryPage() {
                   key={entry.id}
                   entry={entry}
                   name={resolveEntryName(entry, productDetails, groupDetails)}
-                  brand={resolveEntryBrand(entry, productDetails)}
+                  brand={resolveEntryBrand(entry, productDetails, groupDetails)}
                   calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
                   timeDisplay="time"
                   onLogAgain={handleLogAgainClick}

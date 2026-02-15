@@ -62,10 +62,15 @@ export function resolveEntryName(
 export function resolveEntryBrand(
   entry: ApiLogEntry,
   productDetails: Record<string, { brand?: string }>,
+  groupDetails: Record<string, { brand?: string }>,
 ): string | undefined {
   if (entry.item.kind === 'product' && entry.item.productID) {
     const product = productDetails[entry.item.productID];
     return product?.brand;
+  }
+  if (entry.item.kind === 'group' && entry.item.groupID) {
+    const group = groupDetails[entry.item.groupID];
+    return group?.brand;
   }
   return undefined;
 }
@@ -123,6 +128,7 @@ export function buildLogTarget(
   if (entry.item.kind === 'group' && groupData) {
     return {
       name: groupData.name ?? 'Group',
+      brand: groupData.brand,
       prepOrGroup: new ProductGroup(groupData),
       initialServingSize,
       groupId: groupData.id,

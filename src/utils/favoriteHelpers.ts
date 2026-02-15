@@ -15,9 +15,9 @@ export function favoriteName(fav: ApiFavorite): string {
   return 'Unknown';
 }
 
-/** Returns the brand for a product favorite, or undefined for groups. */
+/** Returns the brand for a favorite, if available. */
 export function favoriteBrand(fav: ApiFavorite): string | undefined {
-  return fav.item.product?.brand;
+  return fav.item.product?.brand ?? fav.item.group?.brand;
 }
 
 /** Returns the detail page path for a favorite's underlying item. */
@@ -129,6 +129,7 @@ export function buildFavoriteLogTarget(fav: ApiFavorite): LogTarget | null {
   if (fav.item.group) {
     return {
       name: fav.item.group.name ?? 'Group',
+      brand: fav.item.group.brand,
       prepOrGroup: new ProductGroup(fav.item.group),
       initialServingSize,
       groupId: fav.item.group.id,
