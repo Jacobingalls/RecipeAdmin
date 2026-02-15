@@ -31,7 +31,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
   // Get current unit display label
   const getCurrentLabel = (): string => {
     if (value.type === 'servings') {
-      return 'servings';
+      return 'Servings';
     }
     if (value.type === 'customSize') {
       return (value.value as CustomSizeValue).name;
@@ -47,7 +47,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
 
   // Get the unit value (for mass/volume/energy) or name (for customSize)
   const getUnitValue = (): string => {
-    if (value.type === 'servings') return 'servings';
+    if (value.type === 'servings') return 'Servings';
     if (value.type === 'customSize') return (value.value as CustomSizeValue).name;
     return (value.value as NutritionUnit).unit;
   };

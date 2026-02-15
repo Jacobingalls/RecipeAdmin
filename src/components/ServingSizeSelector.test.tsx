@@ -101,9 +101,9 @@ describe('ServingSizeSelector', () => {
 
   it('shows option groups when dropdown is open', () => {
     renderSelector();
-    fireEvent.click(screen.getByText('servings'));
-    // "Servings" appears as dropdown header and dropdown option (button says "servings")
-    expect(screen.getAllByText('Servings').length).toBeGreaterThanOrEqual(2);
+    fireEvent.click(screen.getAllByText('Servings')[0]);
+    // "Servings" appears as button, dropdown header, and dropdown option
+    expect(screen.getAllByText('Servings').length).toBeGreaterThanOrEqual(3);
     expect(screen.getByText('Custom Sizes')).toBeInTheDocument();
     expect(screen.getByText('Mass')).toBeInTheDocument();
     expect(screen.getByText('Volume')).toBeInTheDocument();
