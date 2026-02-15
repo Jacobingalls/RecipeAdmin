@@ -41,6 +41,7 @@ function TestConsumer() {
     user,
     isLoading,
     apiVersion,
+    apiGitCommit,
     apiEnvironment,
     login,
     logout,
@@ -54,6 +55,7 @@ function TestConsumer() {
       <span data-testid="username">{user?.username ?? 'none'}</span>
       <span data-testid="display-name">{user?.displayName ?? 'none'}</span>
       <span data-testid="api-version">{apiVersion ?? 'null'}</span>
+      <span data-testid="api-git-commit">{apiGitCommit ?? 'null'}</span>
       <span data-testid="api-environment">{apiEnvironment ?? 'null'}</span>
       <button data-testid="login" onClick={() => login('user', 'pass')} type="button" />
       <button data-testid="logout" onClick={() => logout()} type="button" />
@@ -71,6 +73,7 @@ describe('AuthContext', () => {
   it('checks auth on mount and sets user', async () => {
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -89,6 +92,7 @@ describe('AuthContext', () => {
   it('stores apiVersion and apiEnvironment from status response', async () => {
     mockGetStatus.mockResolvedValue({
       version: '2.1.0',
+      gitCommit: null,
       environment: 'staging',
       debug: false,
       user: testUser,
@@ -107,6 +111,7 @@ describe('AuthContext', () => {
   it('derives environment from debug flag when environment is null', async () => {
     mockGetStatus.mockResolvedValue({
       version: '1.0.0',
+      gitCommit: null,
       environment: null,
       debug: true,
       user: testUser,
@@ -124,6 +129,7 @@ describe('AuthContext', () => {
   it('derives Production environment when debug is false and environment is null', async () => {
     mockGetStatus.mockResolvedValue({
       version: '1.0.0',
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -139,7 +145,13 @@ describe('AuthContext', () => {
   });
 
   it('sets unauthenticated when getStatus returns null user', async () => {
-    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      gitCommit: null,
+      environment: null,
+      debug: false,
+      user: null,
+    });
     await act(async () => {
       render(
         <AuthProvider>
@@ -152,7 +164,13 @@ describe('AuthContext', () => {
   });
 
   it('login calls API and sets user', async () => {
-    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      gitCommit: null,
+      environment: null,
+      debug: false,
+      user: null,
+    });
     mockAuthLogin.mockResolvedValue({
       token: 'tok',
       user: testUser,
@@ -176,6 +194,7 @@ describe('AuthContext', () => {
   it('logout calls API and clears user', async () => {
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -199,6 +218,7 @@ describe('AuthContext', () => {
   it('handles auth:unauthorized event', async () => {
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -218,7 +238,13 @@ describe('AuthContext', () => {
   });
 
   it('loginWithPasskey calls begin, startAuthentication, finish', async () => {
-    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      gitCommit: null,
+      environment: null,
+      debug: false,
+      user: null,
+    });
     mockAuthLoginBegin.mockResolvedValue({
       options: { challenge: 'abc' },
       sessionID: 'sess-1',
@@ -250,6 +276,7 @@ describe('AuthContext', () => {
   it('refreshSession calls tryRefresh and getStatus to update user', async () => {
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -288,7 +315,7 @@ describe('AuthContext', () => {
     });
     mockGetStatus.mockImplementation(async () => {
       callOrder.push('getStatus');
-      return { version: null, environment: null, debug: false, user: testUser };
+      return { version: null, gitCommit: null, environment: null, debug: false, user: testUser };
     });
 
     await act(async () => {
@@ -307,6 +334,7 @@ describe('AuthContext', () => {
     mockTryRefresh.mockResolvedValue(null);
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: true,
       user: testUser,
@@ -324,7 +352,13 @@ describe('AuthContext', () => {
   });
 
   it('login sets token expiry from JWT', async () => {
-    mockGetStatus.mockResolvedValue({ version: null, environment: null, debug: false, user: null });
+    mockGetStatus.mockResolvedValue({
+      version: null,
+      gitCommit: null,
+      environment: null,
+      debug: false,
+      user: null,
+    });
     mockGetTokenExpiry.mockReturnValue(1700000900);
     mockAuthLogin.mockResolvedValue({
       token: 'fake.jwt.token',
@@ -356,6 +390,7 @@ describe('AuthContext', () => {
     mockTryRefresh.mockResolvedValueOnce(futureExp); // initial checkAuth
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -392,6 +427,7 @@ describe('AuthContext', () => {
     mockTryRefresh.mockResolvedValueOnce(futureExp); // initial checkAuth
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,
@@ -426,6 +462,7 @@ describe('AuthContext', () => {
     mockTryRefresh.mockResolvedValueOnce(futureExp); // initial checkAuth
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: testUser,

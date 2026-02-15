@@ -42,6 +42,7 @@ export interface ApiVersion {
 
 export interface ApiStatus {
   version: string | null;
+  gitCommit: string | null;
   environment: string | null;
   debug: boolean;
   user: AuthUser | null;

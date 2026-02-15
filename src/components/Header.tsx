@@ -13,6 +13,12 @@ async function sha256Hex(input: string): Promise<string> {
     .join('');
 }
 
+function formatEnvironmentName(apiEnvironment: string | undefined): string {
+  if (!apiEnvironment) return 'Unknown';
+  if (apiEnvironment.toLowerCase() === 'debug') return 'Development';
+  return apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1);
+}
+
 function useGravatarUrl(email: string | undefined, size: number = 32): string | null {
   const [url, setUrl] = useState<string | null>(null);
 
@@ -35,7 +41,7 @@ function useGravatarUrl(email: string | undefined, size: number = 32): string | 
 const menuIconStyle: CSSProperties = { width: 20, marginRight: 8 };
 
 export default function Header() {
-  const { isAuthenticated, user, logout, apiVersion, apiEnvironment } = useAuth();
+  const { isAuthenticated, user, logout, apiVersion, apiGitCommit, apiEnvironment } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const urlQuery = searchParams.get('q') ?? '';
@@ -290,13 +296,11 @@ export default function Header() {
                       : 'Development'}
                     {adminVersion && (
                       <>
-                        <br />v{adminVersion}
-                      </>
-                    )}
-                    {adminGitCommit && (
-                      <>
                         <br />
-                        <span className="text-body-tertiary">{adminGitCommit}</span>
+                        <span className="text-body-tertiary">
+                          {adminVersion}
+                          {adminGitCommit && ` (${adminGitCommit})`}
+                        </span>
                       </>
                     )}
                   </span>
@@ -310,21 +314,25 @@ export default function Header() {
                     style={{ ...menuIconStyle, lineHeight: 'inherit' }}
                   />
                   <span>
-                    {apiEnvironment &&
-                      (apiEnvironment.toLowerCase() === 'debug'
-                        ? 'Development'
-                        : apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1))}
+                    {formatEnvironmentName(apiEnvironment)}
                     {apiVersion && (
                       <>
-                        {apiEnvironment && <br />}v{apiVersion}
-                      </>
-                    )}
-                    {apiEnvironment?.toLowerCase() === 'debug' && (
-                      <>
                         <br />
-                        <span className="text-body-tertiary">{API_DISPLAY_URL}</span>
+                        <span className="text-body-tertiary">
+                          {apiVersion}
+                          {apiGitCommit && ` (${apiGitCommit})`}
+                        </span>
                       </>
                     )}
+                    <br />
+                    <a
+                      href={API_DISPLAY_URL}
+                      className="text-body-tertiary"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {API_DISPLAY_URL}
+                    </a>
                   </span>
                 </div>
               </li>

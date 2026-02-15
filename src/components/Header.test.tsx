@@ -73,6 +73,7 @@ describe('Header', () => {
         hasPasskeys: true,
       },
       apiVersion: null,
+      apiGitCommit: null,
       apiEnvironment: null,
       isLoading: false,
       login: vi.fn(),
@@ -87,6 +88,7 @@ describe('Header', () => {
       isAuthenticated: false,
       user: null,
       apiVersion: null,
+      apiGitCommit: null,
       apiEnvironment: null,
       isLoading: false,
       login: vi.fn(),
@@ -273,6 +275,7 @@ describe('Header', () => {
         hasPasskeys: true,
       },
       apiVersion: null,
+      apiGitCommit: null,
       apiEnvironment: null,
       isLoading: false,
       login: vi.fn(),
@@ -341,7 +344,7 @@ describe('Header', () => {
       vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
       renderWithRouter(<Header />);
       const adminRow = document.querySelector('.bi-window')!.closest('div')!;
-      expect(adminRow).toHaveTextContent('v0.0.28');
+      expect(adminRow).toHaveTextContent('0.0.28');
     });
 
     it('shows admin version with git commit', () => {
@@ -349,16 +352,15 @@ describe('Header', () => {
       vi.mocked(api.getAdminGitCommit).mockReturnValue('abc1234');
       renderWithRouter(<Header />);
       const adminRow = document.querySelector('.bi-window')!.closest('div')!;
-      expect(adminRow).toHaveTextContent('v0.0.28');
-      expect(adminRow).toHaveTextContent('abc1234');
+      expect(adminRow).toHaveTextContent('0.0.28 (abc1234)');
     });
 
-    it('shows git commit without version in dev mode', () => {
+    it('does not show git commit without version', () => {
       vi.mocked(api.getAdminGitCommit).mockReturnValue('abc1234');
       renderWithRouter(<Header />);
       const adminRow = document.querySelector('.bi-window')!.closest('div')!;
       expect(adminRow).toHaveTextContent('Development');
-      expect(adminRow).toHaveTextContent('abc1234');
+      expect(adminRow).not.toHaveTextContent('abc1234');
     });
 
     it('shows admin environment when set', () => {
@@ -367,7 +369,7 @@ describe('Header', () => {
       renderWithRouter(<Header />);
       const adminRow = document.querySelector('.bi-window')!.closest('div')!;
       expect(adminRow).toHaveTextContent('Production');
-      expect(adminRow).toHaveTextContent('v0.0.28');
+      expect(adminRow).toHaveTextContent('0.0.28');
     });
 
     it('shows API environment and version', () => {
@@ -382,6 +384,7 @@ describe('Header', () => {
           hasPasskeys: true,
         },
         apiVersion: '0.0.27',
+        apiGitCommit: null,
         apiEnvironment: 'Production',
         isLoading: false,
         login: vi.fn(),
@@ -390,7 +393,7 @@ describe('Header', () => {
         updateUser: vi.fn(),
       });
       renderWithRouter(<Header />);
-      expect(screen.getByText(/v0\.0\.27/)).toBeInTheDocument();
+      expect(screen.getByText(/0\.0\.27/)).toBeInTheDocument();
       expect(screen.getByText(/Production/)).toBeInTheDocument();
     });
 
@@ -406,6 +409,7 @@ describe('Header', () => {
           hasPasskeys: true,
         },
         apiVersion: null,
+        apiGitCommit: null,
         apiEnvironment: 'Debug',
         isLoading: false,
         login: vi.fn(),
@@ -418,10 +422,11 @@ describe('Header', () => {
       expect(apiRow).toHaveTextContent('Development');
     });
 
-    it('omits version text when no API info is available', () => {
+    it('shows Unknown environment and API URL when no API info is available', () => {
       renderWithRouter(<Header />);
       const apiRow = document.querySelector('.bi-hdd-network')!.closest('div')!;
-      expect(apiRow).toHaveTextContent('');
+      expect(apiRow).toHaveTextContent('Unknown');
+      expect(apiRow.querySelector('a')).toBeInTheDocument();
     });
 
     it('renders window and server icons', () => {

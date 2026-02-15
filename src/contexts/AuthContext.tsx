@@ -18,6 +18,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   apiVersion: string | null;
+  apiGitCommit: string | null;
   apiEnvironment: string | null;
   login: (usernameOrEmail: string, password: string) => Promise<void>;
   loginWithPasskey: (usernameOrEmail?: string) => Promise<void>;
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | null>(null);
   const [apiVersion, setApiVersion] = useState<string | null>(null);
+  const [apiGitCommit, setApiGitCommit] = useState<string | null>(null);
   const [apiEnvironment, setApiEnvironment] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
@@ -63,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const status = await getStatus();
       setUser(status.user ?? null);
       setApiVersion(status.version);
+      setApiGitCommit(status.gitCommit ?? null);
       setApiEnvironment(status.environment ?? (status.debug ? 'Debug' : 'Production'));
     } catch {
       setUser(null);
@@ -133,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const status = await getStatus();
     setUser(status.user ?? null);
     setApiVersion(status.version);
+    setApiGitCommit(status.gitCommit ?? null);
     setApiEnvironment(status.environment ?? (status.debug ? 'Debug' : 'Production'));
   }, []);
 
@@ -143,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         apiVersion,
+        apiGitCommit,
         apiEnvironment,
         login,
         loginWithPasskey,
