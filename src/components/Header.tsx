@@ -1,8 +1,8 @@
-import type { FormEvent } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 
-import { getAdminGitCommit, getAdminVersion } from '../api';
+import { API_DISPLAY_URL, getAdminGitCommit, getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 async function sha256Hex(input: string): Promise<string> {
@@ -31,6 +31,8 @@ function useGravatarUrl(email: string | undefined, size: number = 32): string | 
 
   return email ? url : null;
 }
+
+const menuIconStyle: CSSProperties = { width: 20, marginRight: 8 };
 
 export default function Header() {
   const { isAuthenticated, user, logout, apiVersion, apiEnvironment } = useAuth();
@@ -206,7 +208,7 @@ export default function Header() {
                 </span>
               )}
             </button>
-            <ul className="dropdown-menu dropdown-menu-end">
+            <ul className="dropdown-menu dropdown-menu-end" style={{ minWidth: '14rem' }}>
               <li className="px-3 py-2">
                 <div className="fw-semibold">{user?.displayName}</div>
                 <div className="text-body-secondary small">{user?.username}</div>
@@ -215,15 +217,23 @@ export default function Header() {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <Link className="dropdown-item" to="/settings">
-                  <i className="bi bi-gear me-2" aria-hidden="true" />
+                <Link className="dropdown-item d-flex align-items-center" to="/settings">
+                  <i
+                    className="bi bi-gear d-inline-block text-center"
+                    aria-hidden="true"
+                    style={menuIconStyle}
+                  />
                   Settings
                 </Link>
               </li>
               {user?.isAdmin && (
                 <li>
-                  <Link className="dropdown-item" to="/admin/users">
-                    <i className="bi bi-shield-lock me-2" aria-hidden="true" />
+                  <Link className="dropdown-item d-flex align-items-center" to="/admin/users">
+                    <i
+                      className="bi bi-shield-lock d-inline-block text-center"
+                      aria-hidden="true"
+                      style={menuIconStyle}
+                    />
                     Admin
                   </Link>
                 </li>
@@ -232,8 +242,16 @@ export default function Header() {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <button type="button" className="dropdown-item" onClick={logout}>
-                  <i className="bi bi-box-arrow-right me-2" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="dropdown-item d-flex align-items-center"
+                  onClick={logout}
+                >
+                  <i
+                    className="bi bi-box-arrow-right d-inline-block text-center"
+                    aria-hidden="true"
+                    style={menuIconStyle}
+                  />
                   Sign out
                 </button>
               </li>
@@ -242,7 +260,11 @@ export default function Header() {
               </li>
               <li className="px-3 py-1">
                 <div className="d-flex align-items-center text-body-secondary small">
-                  <i className="bi bi-window me-2" aria-hidden="true" />
+                  <i
+                    className="bi bi-window d-inline-block text-center flex-shrink-0"
+                    aria-hidden="true"
+                    style={menuIconStyle}
+                  />
                   <span>
                     {adminVersion ? `v${adminVersion}` : 'Development'}
                     {adminGitCommit && (
@@ -252,12 +274,28 @@ export default function Header() {
                 </div>
               </li>
               <li className="px-3 py-1">
-                <div className="d-flex align-items-center text-body-secondary small">
-                  <i className="bi bi-server me-2" aria-hidden="true" />
+                <div className="d-flex align-items-start text-body-secondary small">
+                  <i
+                    className="bi bi-hdd-network d-inline-block text-center flex-shrink-0"
+                    aria-hidden="true"
+                    style={{ ...menuIconStyle, lineHeight: 'inherit' }}
+                  />
                   <span>
-                    {[apiEnvironment, apiVersion ? `v${apiVersion}` : null]
-                      .filter(Boolean)
-                      .join(', ') || 'Unknown'}
+                    {apiVersion && `v${apiVersion}`}
+                    {apiEnvironment && (
+                      <>
+                        {apiVersion && <br />}
+                        {apiEnvironment.toLowerCase() === 'debug'
+                          ? 'Development'
+                          : apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1)}
+                      </>
+                    )}
+                    {apiEnvironment?.toLowerCase() === 'debug' && (
+                      <>
+                        <br />
+                        <span className="text-body-tertiary">{API_DISPLAY_URL}</span>
+                      </>
+                    )}
                   </span>
                 </div>
               </li>

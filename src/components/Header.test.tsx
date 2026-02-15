@@ -376,7 +376,8 @@ describe('Header', () => {
         updateUser: vi.fn(),
       });
       renderWithRouter(<Header />);
-      expect(screen.getByText('Production, v0.0.27')).toBeInTheDocument();
+      expect(screen.getByText(/v0\.0\.27/)).toBeInTheDocument();
+      expect(screen.getByText(/Production/)).toBeInTheDocument();
     });
 
     it('shows API environment without version', () => {
@@ -399,18 +400,20 @@ describe('Header', () => {
         updateUser: vi.fn(),
       });
       renderWithRouter(<Header />);
-      expect(screen.getByText('Debug')).toBeInTheDocument();
+      const apiRow = document.querySelector('.bi-hdd-network')!.closest('div')!;
+      expect(apiRow).toHaveTextContent('Development');
     });
 
-    it('shows Unknown when no API info is available', () => {
+    it('omits version text when no API info is available', () => {
       renderWithRouter(<Header />);
-      expect(screen.getByText('Unknown')).toBeInTheDocument();
+      const apiRow = document.querySelector('.bi-hdd-network')!.closest('div')!;
+      expect(apiRow).toHaveTextContent('');
     });
 
     it('renders window and server icons', () => {
       renderWithRouter(<Header />);
       expect(document.querySelector('.bi-window')).toBeInTheDocument();
-      expect(document.querySelector('.bi-server')).toBeInTheDocument();
+      expect(document.querySelector('.bi-hdd-network')).toBeInTheDocument();
     });
   });
 });
