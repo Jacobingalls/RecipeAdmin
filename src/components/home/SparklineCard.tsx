@@ -1,6 +1,6 @@
 import type { DailyValue } from '../../config/constants';
 import { NutritionUnit } from '../../domain';
-import { formatSignificant } from '../../utils/formatters';
+import { formatSignificant } from '../../utils';
 
 export interface SparklinePoint {
   hour: number;
@@ -39,6 +39,12 @@ function getColor(ratio: number, goal: NutrientGoal): string {
       if (ratio <= 1.2) return YELLOW;
       return RED;
   }
+}
+
+function getStatusLabel(color: string): string {
+  if (color === GREEN) return 'on target';
+  if (color === YELLOW) return 'near target';
+  return 'off target';
 }
 
 export default function SparklineCard({
@@ -163,7 +169,12 @@ export default function SparklineCard({
             data-testid="sparkline-value"
           >
             {formatSignificant(currentAmount)}
-          </span>{' '}
+          </span>
+          {dailyValue && (
+            <span className="visually-hidden" data-testid="sparkline-status">
+              ({getStatusLabel(color)})
+            </span>
+          )}{' '}
           <span
             className="small"
             style={{ opacity: 0.5, textShadow: textSeparationShadow }}

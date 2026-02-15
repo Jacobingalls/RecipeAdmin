@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import type { ApiFavorite } from '../../api';
 import { deleteFavorite as deleteFavoriteApi } from '../../api';
 import { useFavorites } from '../../contexts/FavoritesContext';
-import { buildFavoriteLogTarget } from '../../utils/favoriteHelpers';
+import { buildFavoriteLogTarget } from '../../utils';
 import { LoadingState, ContentUnavailableView } from '../common';
 import type { LogTarget } from '../LogModal';
 import LogModal from '../LogModal';

@@ -63,6 +63,9 @@ export default function ProfileSection() {
                       {error}
                     </div>
                   )}
+                  <label htmlFor="edit-display-name" className="visually-hidden">
+                    Display name
+                  </label>
                   <input
                     type="text"
                     className="form-control form-control-sm"
@@ -83,7 +86,8 @@ export default function ProfileSection() {
                   {user?.displayName}
                   <button
                     type="button"
-                    className="btn btn-link btn-sm p-0 text-body-secondary"
+                    className="btn btn-link btn-sm text-body-secondary d-inline-flex align-items-center justify-content-center"
+                    style={{ minWidth: '44px', minHeight: '44px' }}
                     aria-label="Edit display name"
                     onClick={startEditing}
                   >

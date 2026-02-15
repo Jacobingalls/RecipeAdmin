@@ -86,6 +86,7 @@ export function useApiQuery<T = unknown>(
     return () => {
       abortController.abort();
     };
+    // Spread deps can't be statically analyzed; callers control re-fetch via deps array
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, execute, ...deps]);
 

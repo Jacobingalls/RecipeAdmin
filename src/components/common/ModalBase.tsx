@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"]):not(:disabled)';
 
 interface ModalBaseProps {
   children: ReactNode;
@@ -29,6 +32,12 @@ export default function ModalBase({
   scrollable = false,
 }: ModalBaseProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<Element | null>(null);
+
+  const getFocusableElements = useCallback((): HTMLElement[] => {
+    if (!modalRef.current) return [];
+    return Array.from(modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+  }, []);
 
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -46,6 +55,49 @@ export default function ModalBase({
     el.addEventListener('mousedown', handleMouseDown);
     return () => el.removeEventListener('mousedown', handleMouseDown);
   }, [onClose]);
+
+  // Focus trapping: save previous focus, focus first element, trap Tab, restore on unmount
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement;
+
+    const focusable = getFocusableElements();
+    if (focusable.length > 0) {
+      focusable[0].focus();
+    } else {
+      modalRef.current?.focus();
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      const elements = getFocusableElements();
+      if (elements.length === 0) {
+        e.preventDefault();
+        return;
+      }
+
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocusedRef.current instanceof HTMLElement) {
+        previouslyFocusedRef.current.focus();
+      }
+    };
+  }, [getFocusableElements]);
 
   return (
     <>

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useHistoryData } from '../../hooks';
 import { NutritionInformation } from '../../domain';
 import { DAILY_VALUES } from '../../config/constants';
-import { resolveEntryName, resolveEntryBrand } from '../../utils/logEntryHelpers';
+import { resolveEntryName, resolveEntryBrand } from '../../utils';
 import { LoadingState, ContentUnavailableView } from '../common';
 import LogModal from '../LogModal';
 import HistoryEntryRow from '../HistoryEntryRow';

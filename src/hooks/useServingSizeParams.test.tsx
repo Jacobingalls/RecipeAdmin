@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useSearchParams } from 'react-router-dom';
 
 import { ServingSize } from '../domain';
 
@@ -224,8 +224,6 @@ describe('useServingSizeParams', () => {
     it('preserves non-serving-size params', () => {
       const { result } = renderHook(
         () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
-          const { useSearchParams } = require('react-router-dom');
           const [params] = useSearchParams();
           return { hook: useServingSizeParams(), params };
         },

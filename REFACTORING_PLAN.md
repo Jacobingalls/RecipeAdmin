@@ -44,6 +44,16 @@ Break 500+ line page components into focused section components.
 
 - [x] **`Button`** — Semantic wrapper around Bootstrap button classes with `variant` and `size` props. Eliminates raw `className="btn btn-*"` clusters across modals, forms, and action areas.
 
+- [x] **`ListFilter`** — Shared name-text + dropdown filter row used by `ProductsPage`, `GroupsPage`, `FavoritesPage`, and `AdminUsersPage`. Accepts string arrays or `{value, label}` option objects. Includes accessible visually-hidden labels.
+
+- [x] **`NutritionRow`** — Extracted from `NutritionLabel`. Renders a single nutrient row as a `<tr>` with semantic `<th>`/`<td>` elements. Supports bold, indent, double-indent, and thick border variants.
+
+- [x] **`GroupItemRow`** — Extracted from `GroupDetailPage`. Renders a single item row within a product group detail view. Lives in `src/components/group/`.
+
+## Tier 5: Hook Extractions
+
+- [x] **`useGravatarUrl`** — Extracted from `UserDropdownMenu`. Async SHA-256 hash of email for Gravatar avatar URL with cleanup on unmount. Accepts email and optional size parameter.
+
 ## Principles
 
 1. **One component per file** — each extracted component gets its own file and test file

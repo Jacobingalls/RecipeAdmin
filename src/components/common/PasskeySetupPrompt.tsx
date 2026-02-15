@@ -49,7 +49,11 @@ export default function PasskeySetupPrompt() {
         <p className="mb-2 small">
           Sign in faster and more securely with your fingerprint or face.
         </p>
-        {error && <p className="text-danger small mb-2">{error}</p>}
+        {error && (
+          <p className="text-danger small mb-2" role="alert">
+            {error}
+          </p>
+        )}
         <div className="d-flex gap-2">
           <Button size="sm" onClick={handleSetup} loading={isRegistering}>
             Set up now

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ApiSearchResult } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
-import { servingSizeSearchParams } from '../utils/servingSizeParams';
+import { servingSizeSearchParams } from '../utils';
 
 import AddToFavoritesButton from './AddToFavoritesButton';
 import { CircularButton, CircularButtonGroup, FoodItemRow } from './common';

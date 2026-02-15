@@ -13,4 +13,9 @@ describe('ErrorState', () => {
     const div = container.firstElementChild as HTMLElement;
     expect(div.className).toContain('text-danger');
   });
+
+  it('has alert role for screen readers', () => {
+    render(<ErrorState message="Something broke" />);
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
 });

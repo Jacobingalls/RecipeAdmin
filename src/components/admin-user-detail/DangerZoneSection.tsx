@@ -1,7 +1,15 @@
 import { useState } from 'react';
 
 import { adminDeleteUser, adminRevokeUserSessions } from '../../api';
-import { SectionHeader, TypeToConfirmModal, Button } from '../common';
+import {
+  SectionHeader,
+  TypeToConfirmModal,
+  Button,
+  ModalBase,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '../common';
 
 interface DangerZoneSectionProps {
   userId: string;
@@ -12,18 +20,13 @@ interface DangerZoneSectionProps {
 export default function DangerZoneSection({ userId, username, onDeleted }: DangerZoneSectionProps) {
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
+  const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleRevokeSessions() {
-    if (
-      !window.confirm(
-        `Revoke all sessions for ${username}? They will be logged out of all devices.`,
-      )
-    ) {
-      return;
-    }
+    setShowRevokeConfirm(false);
     setIsRevokingSessions(true);
     setRevokeSessionsSuccess(false);
     try {
@@ -87,7 +90,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
             size="sm"
             className="flex-shrink-0"
             style={{ minWidth: '9rem' }}
-            onClick={handleRevokeSessions}
+            onClick={() => setShowRevokeConfirm(true)}
             loading={isRevokingSessions}
           >
             Revoke sessions
@@ -111,6 +114,29 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
           </Button>
         </div>
       </div>
+
+      {showRevokeConfirm && (
+        <ModalBase
+          onClose={() => setShowRevokeConfirm(false)}
+          ariaLabelledBy="revoke-sessions-title"
+        >
+          <ModalHeader onClose={() => setShowRevokeConfirm(false)} titleId="revoke-sessions-title">
+            Revoke all sessions
+          </ModalHeader>
+          <ModalBody>
+            Revoke all sessions for <strong>{username}</strong>? They will be logged out of all
+            devices.
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="secondary" onClick={() => setShowRevokeConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleRevokeSessions}>
+              Revoke sessions
+            </Button>
+          </ModalFooter>
+        </ModalBase>
+      )}
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}

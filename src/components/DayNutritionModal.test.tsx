@@ -118,7 +118,7 @@ describe('DayNutritionModal', () => {
         onClose={vi.fn()}
       />,
     );
-    expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'Day nutrition modal');
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'day-nutrition-title');
   });
 
   it('renders with different day labels', () => {

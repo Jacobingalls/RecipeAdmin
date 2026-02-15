@@ -42,7 +42,11 @@ export default function PreparationDetails({
         {actionSlot && <div className="ms-auto">{actionSlot}</div>}
       </div>
 
-      {error && <div className="text-danger small mb-3">{error}</div>}
+      {error && (
+        <div className="text-danger small mb-3" role="alert">
+          {error}
+        </div>
+      )}
       {nutritionInfo && (
         <NutritionLabel nutritionInfo={nutritionInfo} servingSize={servingSize} prep={prep} />
       )}

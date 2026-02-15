@@ -51,28 +51,32 @@ describe('DangerZoneSection', () => {
   });
 
   describe('revoke sessions', () => {
+    it('opens confirmation modal when Revoke sessions is clicked', () => {
+      renderSection();
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText(/They will be logged out of all devices/)).toBeInTheDocument();
+    });
+
     it('calls adminRevokeUserSessions when confirmed', async () => {
       mockRevokeSessions.mockResolvedValue(undefined);
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       renderSection();
 
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
       await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+        fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-danger')!);
       });
 
-      expect(window.confirm).toHaveBeenCalledWith(
-        'Revoke all sessions for alice? They will be logged out of all devices.',
-      );
       expect(mockRevokeSessions).toHaveBeenCalledWith('u1');
     });
 
     it('shows success alert after revoking sessions', async () => {
       mockRevokeSessions.mockResolvedValue(undefined);
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       renderSection();
 
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
       await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+        fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-danger')!);
       });
 
       expect(screen.getByRole('status')).toHaveTextContent('All sessions revoked');
@@ -80,11 +84,11 @@ describe('DangerZoneSection', () => {
 
     it('dismisses success alert when close button is clicked', async () => {
       mockRevokeSessions.mockResolvedValue(undefined);
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       renderSection();
 
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
       await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+        fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-danger')!);
       });
       expect(screen.getByRole('status')).toBeInTheDocument();
 
@@ -92,24 +96,22 @@ describe('DangerZoneSection', () => {
       expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
 
-    it('does not call API when confirm is dismissed', async () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(false);
+    it('does not call API when cancel is clicked', () => {
       renderSection();
-
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
-      });
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
       expect(mockRevokeSessions).not.toHaveBeenCalled();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('shows error alert when revoke fails', async () => {
       mockRevokeSessions.mockRejectedValue(new Error('Network error'));
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       renderSection();
 
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
       await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+        fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-danger')!);
       });
 
       expect(screen.getByRole('alert')).toHaveTextContent("Couldn't revoke sessions. Try again.");

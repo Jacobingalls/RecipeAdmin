@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 
 export default function AdminSidebar() {
   return (
-    <nav className="flex-shrink-0 pt-4" style={{ width: 220 }} aria-label="Admin">
+    <nav className="flex-shrink-0 pt-4" style={{ width: '13.75rem' }} aria-label="Admin">
       <h6 className="text-body-secondary text-uppercase fw-semibold small mb-2 px-3">Admin</h6>
       <ul className="nav flex-column">
         <li className="nav-item">

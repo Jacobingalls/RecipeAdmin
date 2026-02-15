@@ -9,6 +9,7 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as ErrorState } from './ErrorState';
 export { default as FoodItemRow } from './FoodItemRow';
 export { default as LinkListItem } from './LinkListItem';
+export { default as ListFilter } from './ListFilter';
 export { default as ListRow } from './ListRow';
 export { default as LoadingState } from './LoadingState';
 export { default as ModalBase } from './ModalBase';

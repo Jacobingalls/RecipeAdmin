@@ -2,26 +2,26 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 
 import { AdminLayout } from './components/admin';
 import Header from './components/Header';
-import { ErrorBoundary } from './components/common';
-import RequireAuth from './components/common/RequireAuth';
-import RequireAdmin from './components/common/RequireAdmin';
+import { ErrorBoundary, RequireAuth, RequireAdmin } from './components/common';
 import { AuthProvider } from './contexts/AuthContext';
 import { useTheme } from './hooks';
-import HomePage from './pages/HomePage';
-import LookupPage from './pages/LookupPage';
-import ProductsPage from './pages/ProductsPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import GroupsPage from './pages/GroupsPage';
-import GroupDetailPage from './pages/GroupDetailPage';
-import FavoritesPage from './pages/FavoritesPage';
-import HistoryPage from './pages/HistoryPage';
-import LoginPage from './pages/LoginPage';
-import SearchPage from './pages/SearchPage';
-import SettingsPage from './pages/SettingsPage';
-import AdminProductEditorPage from './pages/AdminProductEditorPage';
-import AdminGroupEditorPage from './pages/AdminGroupEditorPage';
-import AdminUsersPage from './pages/AdminUsersPage';
-import AdminUserDetailPage from './pages/AdminUserDetailPage';
+import {
+  AdminGroupEditorPage,
+  AdminProductEditorPage,
+  AdminUserDetailPage,
+  AdminUsersPage,
+  FavoritesPage,
+  GroupDetailPage,
+  GroupsPage,
+  HistoryPage,
+  HomePage,
+  LoginPage,
+  LookupPage,
+  ProductDetailPage,
+  ProductsPage,
+  SearchPage,
+  SettingsPage,
+} from './pages';
 
 function AppLayout() {
   return (

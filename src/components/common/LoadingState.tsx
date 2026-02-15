@@ -12,7 +12,15 @@ interface LoadingStateProps {
 export default function LoadingState({ title = 'Loading...', description }: LoadingStateProps) {
   return (
     <StatusView
-      symbol={<i className="spinner-border fs-1 text-secondary" style={{ borderWidth: '0.1em' }} />}
+      symbol={
+        <span
+          className="spinner-border fs-1 text-secondary"
+          role="status"
+          style={{ borderWidth: '0.1em' }}
+        >
+          <span className="visually-hidden">Loading...</span>
+        </span>
+      }
       title={title}
       description={description}
     />

@@ -7,7 +7,7 @@ import {
   ServingSize,
 } from '../domain';
 
-import { ModalBase, ModalBody } from './common';
+import { ModalBase, ModalHeader, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
 
 interface DayNutritionModalProps {
@@ -90,14 +90,11 @@ export default function DayNutritionModal({
   );
 
   return (
-    <ModalBase onClose={onClose} ariaLabel="Day nutrition modal" scrollable>
-      <div className="modal-header">
-        <div>
-          <div className="text-secondary small">{dayLabel}</div>
-          <h5 className="modal-title mb-0">Daily nutrition</h5>
-        </div>
-        <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
-      </div>
+    <ModalBase onClose={onClose} ariaLabelledBy="day-nutrition-title" scrollable>
+      <ModalHeader onClose={onClose} titleId="day-nutrition-title">
+        <span className="text-secondary small d-block fw-normal">{dayLabel}</span>
+        Daily nutrition
+      </ModalHeader>
       <ModalBody>
         <div className="bg-body shadow-lg">
           <NutritionLabel

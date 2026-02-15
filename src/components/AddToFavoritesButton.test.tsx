@@ -33,7 +33,7 @@ describe('AddToFavoritesButton', () => {
     const button = screen.getByLabelText('Add to favorites');
     expect(button).toBeInTheDocument();
     expect(button).toHaveClass('rounded-circle', 'border-0');
-    expect(button).toHaveStyle({ width: '2.25rem', height: '2.25rem' });
+    expect(button).toHaveStyle({ width: '2.75rem', height: '2.75rem' });
   });
 
   it('renders empty star with aria-label "Add to favorites" when not favorited', () => {

@@ -1,8 +1,8 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { getGroup } from '../api';
 import { useApiQuery, useServingSizeParams } from '../hooks';
-import type { GroupItem, ProductGroupData } from '../domain';
+import type { ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
 import {
   LoadingState,
@@ -10,16 +10,13 @@ import {
   ContentUnavailableView,
   SubsectionTitle,
 } from '../components/common';
+import { GroupItemRow } from '../components/group';
 import BarcodeSection from '../components/BarcodeSection';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
 import CustomSizesSection from '../components/CustomSizesSection';
 import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
-
-interface GroupItemRowProps {
-  item: GroupItem;
-}
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -82,7 +79,11 @@ export default function GroupDetailPage() {
                   </div>
                 </div>
 
-                {nutritionError && <div className="text-danger small mb-3">{nutritionError}</div>}
+                {nutritionError && (
+                  <div className="text-danger small mb-3" role="alert">
+                    {nutritionError}
+                  </div>
+                )}
                 {nutritionInfo && (
                   <NutritionLabel
                     nutritionInfo={nutritionInfo}
@@ -118,43 +119,4 @@ export default function GroupDetailPage() {
       )}
     </>
   );
-}
-
-function GroupItemRow({ item }: GroupItemRowProps) {
-  const servingSizeObj = item.servingSize ? ServingSize.fromObject(item.servingSize) : null;
-  const servingSizeDisplay = servingSizeObj ? servingSizeObj.toString() : null;
-
-  if (item.product) {
-    const { product } = item;
-    return (
-      <Link to={`/products/${product.id}`} className="list-group-item list-group-item-action">
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <span className="badge bg-primary me-2">Product</span>
-            <span className="fw-medium">{product.name}</span>
-            {product.brand && <span className="text-secondary ms-2 small">{product.brand}</span>}
-          </div>
-          {servingSizeDisplay && <span className="text-secondary small">{servingSizeDisplay}</span>}
-        </div>
-      </Link>
-    );
-  }
-
-  if (item.group) {
-    const { group } = item;
-    return (
-      <Link to={`/groups/${group.id}`} className="list-group-item list-group-item-action">
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <span className="badge bg-secondary me-2">Group</span>
-            <span className="fw-medium">{group.name}</span>
-            {group.brand && <span className="text-secondary ms-2 small">{group.brand}</span>}
-          </div>
-          {servingSizeDisplay && <span className="text-secondary small">{servingSizeDisplay}</span>}
-        </div>
-      </Link>
-    );
-  }
-
-  return null;
 }

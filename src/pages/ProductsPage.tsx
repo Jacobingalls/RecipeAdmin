@@ -8,6 +8,7 @@ import {
   ErrorState,
   ContentUnavailableView,
   LinkListItem,
+  ListFilter,
 } from '../components/common';
 
 export default function ProductsPage() {
@@ -41,39 +42,14 @@ export default function ProductsPage() {
   return (
     <>
       <h1 className="mb-4">Products</h1>
-      <div className="row g-3 mb-4">
-        <div className="col-md-6">
-          <label htmlFor="product-name-filter" className="visually-hidden">
-            Filter by name
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="product-name-filter"
-            placeholder="Search by name..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-          />
-        </div>
-        <div className="col-md-6">
-          <label htmlFor="product-brand-filter" className="visually-hidden">
-            Filter by brand
-          </label>
-          <select
-            className="form-select"
-            id="product-brand-filter"
-            value={brandFilter}
-            onChange={(e) => setBrandFilter(e.target.value)}
-          >
-            <option value="">All brands</option>
-            {brands.map((brand) => (
-              <option key={brand} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <ListFilter
+        nameFilter={nameFilter}
+        onNameFilterChange={setNameFilter}
+        dropdownFilter={brandFilter}
+        onDropdownFilterChange={setBrandFilter}
+        dropdownLabel="All brands"
+        dropdownOptions={brands}
+      />
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && filteredProducts.length === 0 && (

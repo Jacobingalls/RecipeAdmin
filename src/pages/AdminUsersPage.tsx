@@ -7,12 +7,16 @@ import {
   ContentUnavailableView,
   Button,
   LinkListItem,
+  ListFilter,
 } from '../components/common';
 import { CreateUserModal } from '../components/admin';
 import { useApiQuery } from '../hooks';
-import { formatLastLogin } from '../utils/formatters';
+import { formatLastLogin } from '../utils';
 
-type RoleFilter = 'all' | 'admin' | 'normal';
+const ROLE_OPTIONS = [
+  { value: 'admin', label: 'Admins' },
+  { value: 'normal', label: 'Normal users' },
+];
 
 export default function AdminUsersPage() {
   const {
@@ -24,7 +28,7 @@ export default function AdminUsersPage() {
     errorMessage: "Couldn't load users. Try again later.",
   });
   const [nameFilter, setNameFilter] = useState('');
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
+  const [roleFilter, setRoleFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const filteredUsers = useMemo(() => {
@@ -37,7 +41,7 @@ export default function AdminUsersPage() {
         u.username.toLowerCase().includes(query) ||
         u.email.toLowerCase().includes(query);
       const matchesRole =
-        roleFilter === 'all' ||
+        !roleFilter ||
         (roleFilter === 'admin' && u.isAdmin) ||
         (roleFilter === 'normal' && !u.isAdmin);
       return matchesName && matchesRole;
@@ -53,36 +57,18 @@ export default function AdminUsersPage() {
         </Button>
       </div>
 
-      <div className="row g-3 mb-4">
-        <div className="col-md-8">
-          <label htmlFor="user-name-filter" className="visually-hidden">
-            Search users
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="user-name-filter"
-            placeholder="Search users..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-          />
-        </div>
-        <div className="col-md-4">
-          <label htmlFor="user-role-filter" className="visually-hidden">
-            Filter by role
-          </label>
-          <select
-            className="form-select"
-            id="user-role-filter"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
-          >
-            <option value="all">All users</option>
-            <option value="admin">Admins</option>
-            <option value="normal">Normal users</option>
-          </select>
-        </div>
-      </div>
+      <ListFilter
+        nameFilter={nameFilter}
+        onNameFilterChange={setNameFilter}
+        nameLabel="Search users"
+        namePlaceholder="Search users..."
+        nameColumnClass="col-md-8"
+        dropdownFilter={roleFilter}
+        onDropdownFilterChange={setRoleFilter}
+        dropdownLabel="All users"
+        dropdownOptions={ROLE_OPTIONS}
+        dropdownColumnClass="col-md-4"
+      />
 
       <CreateUserModal
         isOpen={showCreateModal}

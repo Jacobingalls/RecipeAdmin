@@ -1,4 +1,4 @@
-import { formatSignificant } from '../utils/formatters';
+import { formatSignificant } from '../utils';
 
 import type { ServingSizeData } from './ServingSize';
 import { ServingSize } from './ServingSize';

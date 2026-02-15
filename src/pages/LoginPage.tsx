@@ -56,7 +56,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-vh-100 bg-body-tertiary d-flex align-items-center justify-content-center">
+    <main className="min-vh-100 bg-body-tertiary d-flex align-items-center justify-content-center">
       <div className="text-center" style={{ width: '100%', maxWidth: 360, padding: '0 1rem' }}>
         <h1 className="display-5 fw-bold mb-1">Recipe Admin</h1>
         <div className="mb-4">
@@ -145,6 +145,6 @@ export default function LoginPage() {
           </>
         )}
       </div>
-    </div>
+    </main>
   );
 }

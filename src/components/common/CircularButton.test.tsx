@@ -13,11 +13,11 @@ describe('CircularButton', () => {
     expect(screen.getByRole('button').querySelector('.bi-star')).toBeInTheDocument();
   });
 
-  it('has 2rem width and height', () => {
+  it('has 2.75rem (44px) width and height for touch target compliance', () => {
     render(<CircularButton aria-label="Test" />);
     const btn = screen.getByRole('button');
-    expect(btn.style.width).toBe('2.25rem');
-    expect(btn.style.height).toBe('2.25rem');
+    expect(btn.style.width).toBe('2.75rem');
+    expect(btn.style.height).toBe('2.75rem');
   });
 
   it('has rounded-circle class', () => {

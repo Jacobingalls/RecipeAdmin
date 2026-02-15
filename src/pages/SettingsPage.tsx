@@ -8,7 +8,15 @@ import {
   settingsRevokeSession,
   settingsRevokeSessions,
 } from '../api';
-import { LoadingState, ErrorState } from '../components/common';
+import {
+  LoadingState,
+  ErrorState,
+  Button,
+  ModalBase,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '../components/common';
 import { ProfileSection, CredentialsSection, SessionsSection } from '../components/settings';
 import { useAuth } from '../contexts/AuthContext';
 import { useApiQuery } from '../hooks';
@@ -43,6 +51,7 @@ export default function SettingsPage() {
   });
 
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
+  const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
 
   async function handleRevokeSession(familyId: string) {
     await settingsRevokeSession(familyId);
@@ -50,9 +59,7 @@ export default function SettingsPage() {
   }
 
   async function handleRevokeSessions() {
-    if (!window.confirm('This will sign you out of all devices, including this one. Continue?')) {
-      return;
-    }
+    setShowRevokeConfirm(false);
     setIsRevokingSessions(true);
     try {
       await settingsRevokeSessions();
@@ -91,9 +98,29 @@ export default function SettingsPage() {
         sessions={sessions}
         isRevokingSessions={isRevokingSessions}
         onLogout={handleLogout}
-        onRevokeSessions={handleRevokeSessions}
+        onRevokeSessions={() => setShowRevokeConfirm(true)}
         onRevokeSession={handleRevokeSession}
       />
+
+      {showRevokeConfirm && (
+        <ModalBase
+          onClose={() => setShowRevokeConfirm(false)}
+          ariaLabelledBy="revoke-sessions-title"
+        >
+          <ModalHeader onClose={() => setShowRevokeConfirm(false)} titleId="revoke-sessions-title">
+            Revoke all sessions
+          </ModalHeader>
+          <ModalBody>This will sign you out of all devices, including this one.</ModalBody>
+          <ModalFooter>
+            <Button variant="secondary" onClick={() => setShowRevokeConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleRevokeSessions}>
+              Revoke sessions
+            </Button>
+          </ModalFooter>
+        </ModalBase>
+      )}
     </div>
   );
 }

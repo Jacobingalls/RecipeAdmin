@@ -122,7 +122,7 @@ describe('LogModal', () => {
   it('calls onClose when clicking the backdrop', () => {
     const onClose = vi.fn();
     render(<LogModal target={makeTarget()} onClose={onClose} />);
-    fireEvent.mouseDown(screen.getByLabelText('Log modal'));
+    fireEvent.mouseDown(screen.getByRole('dialog'));
     expect(onClose).toHaveBeenCalled();
   });
 

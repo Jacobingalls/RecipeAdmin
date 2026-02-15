@@ -7,8 +7,8 @@ import {
   favoriteDetailPath,
   favoriteCalories,
   favoriteServingSizeDescription,
-} from '../utils/favoriteHelpers';
-import { formatRelativeTime } from '../utils/logEntryHelpers';
+  formatRelativeTime,
+} from '../utils';
 
 import { CircularButton, CircularButtonGroup, FoodItemRow, MoreButton } from './common';
 

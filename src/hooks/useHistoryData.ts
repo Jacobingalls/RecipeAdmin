@@ -5,7 +5,7 @@ import { getLogs, getProduct, getGroup, deleteLog } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
-import { buildLogTarget } from '../utils/logEntryHelpers';
+import { buildLogTarget } from '../utils';
 
 import { useApiQuery } from './useApiQuery';
 

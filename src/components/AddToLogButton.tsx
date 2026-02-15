@@ -62,6 +62,7 @@ export default function AddToLogButton({
         className={buttonClass}
         onClick={handleLog}
         disabled={logState !== 'idle'}
+        aria-live="polite"
       >
         {buttonText}
       </button>

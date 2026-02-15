@@ -3,8 +3,8 @@ import { useState, useMemo, useCallback } from 'react';
 import type { ApiFavorite } from '../api';
 import { deleteFavorite as deleteFavoriteApi } from '../api';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils/favoriteHelpers';
-import { LoadingState, ContentUnavailableView } from '../components/common';
+import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils';
+import { LoadingState, ContentUnavailableView, ListFilter } from '../components/common';
 import type { LogTarget } from '../components/LogModal';
 import LogModal from '../components/LogModal';
 import FavoriteRow from '../components/FavoriteRow';
@@ -67,39 +67,14 @@ export default function FavoritesPage() {
   return (
     <>
       <h1 className="mb-4">Favorites</h1>
-      <div className="row g-3 mb-4">
-        <div className="col-md-6">
-          <label htmlFor="favorite-name-filter" className="visually-hidden">
-            Filter by name
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="favorite-name-filter"
-            placeholder="Search by name..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-          />
-        </div>
-        <div className="col-md-6">
-          <label htmlFor="favorite-brand-filter" className="visually-hidden">
-            Filter by brand
-          </label>
-          <select
-            className="form-select"
-            id="favorite-brand-filter"
-            value={brandFilter}
-            onChange={(e) => setBrandFilter(e.target.value)}
-          >
-            <option value="">All brands</option>
-            {brands.map((brand) => (
-              <option key={brand} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <ListFilter
+        nameFilter={nameFilter}
+        onNameFilterChange={setNameFilter}
+        dropdownFilter={brandFilter}
+        onDropdownFilterChange={setBrandFilter}
+        dropdownLabel="All brands"
+        dropdownOptions={brands}
+      />
       {loading && <LoadingState />}
       {error && !loading && (
         <ContentUnavailableView

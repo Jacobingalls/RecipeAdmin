@@ -198,23 +198,24 @@ describe('AdminUserDetailPage', () => {
 
   it('revokes all sessions for user', async () => {
     mockRevokeSessions.mockResolvedValue(undefined);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+      fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-danger')!);
     });
     expect(mockRevokeSessions).toHaveBeenCalledWith('u1');
     expect(screen.getByRole('status')).toHaveTextContent(/All sessions revoked/);
   });
 
-  it('cancels revoke sessions when confirm is dismissed', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('cancels revoke sessions when cancel is clicked', () => {
     setupMocks(sampleUser);
     renderPage(<AdminUserDetailPage />);
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(mockRevokeSessions).not.toHaveBeenCalled();
   });
 

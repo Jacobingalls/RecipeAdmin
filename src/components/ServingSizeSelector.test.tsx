@@ -5,6 +5,9 @@ import { Preparation, ServingSize } from '../domain';
 
 import ServingSizeSelector from './ServingSizeSelector';
 
+// jsdom does not implement scrollIntoView
+Element.prototype.scrollIntoView = vi.fn();
+
 function makePrep(overrides = {}) {
   return new Preparation({
     name: 'Default',

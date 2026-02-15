@@ -77,6 +77,7 @@ function NoteItem({ note }: NoteItemProps) {
   if ('warning' in note) {
     return (
       <li className="text-warning">
+        <i className="bi bi-exclamation-triangle-fill me-1" aria-hidden="true" />
         {note.warning.markdown || note.warning.text || JSON.stringify(note.warning)}
       </li>
     );
@@ -85,7 +86,8 @@ function NoteItem({ note }: NoteItemProps) {
   // Severe note
   if ('severe' in note) {
     return (
-      <li className="text-danger">
+      <li className="text-danger" role="alert">
+        <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true" />
         {note.severe.markdown || note.severe.text || JSON.stringify(note.severe)}
       </li>
     );

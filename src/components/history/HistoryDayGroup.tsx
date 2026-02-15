@@ -2,8 +2,7 @@ import type { ApiLogEntry, ApiProduct } from '../../api';
 import type { NutritionInformation, ProductGroupData } from '../../domain';
 import { SubsectionTitle } from '../common';
 import HistoryEntryRow from '../HistoryEntryRow';
-import { formatSignificant } from '../../utils/formatters';
-import { resolveEntryName, resolveEntryBrand } from '../../utils/logEntryHelpers';
+import { formatSignificant, resolveEntryName, resolveEntryBrand } from '../../utils';
 
 interface HistoryDayGroupProps {
   dayHeading: string;

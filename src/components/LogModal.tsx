@@ -4,7 +4,7 @@ import type { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ApiLogItem } from '../api';
 import { logEntry, updateLogEntry } from '../api';
 
-import { ModalBase, ModalBody } from './common';
+import { ModalBase, ModalHeader, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
 import ServingSizeSelector from './ServingSizeSelector';
 
@@ -124,16 +124,15 @@ function LogModalInner({
   }
 
   return (
-    <ModalBase onClose={onClose} ariaLabel="Log modal" scrollable>
-      <div className="modal-header d-block align-items-center">
-        <div className="d-flex justify-content-between align-items-start">
-          <div>
-            {target.brand && <div className="text-secondary small">{target.brand}</div>}
-            <h5 className="modal-title">{target.name}</h5>
-          </div>
-          <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
-        </div>
-        <div className="d-flex justify-content-between align-items-end mt-2">
+    <ModalBase onClose={onClose} ariaLabelledBy="log-modal-title" scrollable>
+      <ModalHeader onClose={onClose} titleId="log-modal-title">
+        {target.brand && (
+          <span className="text-secondary small d-block fw-normal">{target.brand}</span>
+        )}
+        {target.name}
+      </ModalHeader>
+      <div className="modal-body border-bottom py-2">
+        <div className="d-flex justify-content-between align-items-end">
           <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
           <div>
             {logError && (

@@ -5,7 +5,7 @@ import { getLogs, getProduct, getGroup, deleteLog } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
-import { buildLogTarget } from '../utils/logEntryHelpers';
+import { buildLogTarget } from '../utils';
 
 const DAYS_PER_PAGE = 7;
 
@@ -236,6 +236,8 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
     return () => {
       cancelled = true;
     };
+    // productDetails/groupDetails excluded to avoid infinite loop — effect updates these states,
+    // and refs provide current values without triggering re-runs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allLogs]);
 

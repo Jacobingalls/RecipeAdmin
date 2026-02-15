@@ -391,24 +391,25 @@ describe('SettingsPage', () => {
   it('revokes all sessions and navigates to login', async () => {
     mockRevokeSessions.mockResolvedValue(undefined);
     mockLogout.mockResolvedValue(undefined);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
+      fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-danger')!);
     });
     expect(mockRevokeSessions).toHaveBeenCalled();
     expect(mockLogout).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
-  it('cancels revoke sessions when confirm is dismissed', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('cancels revoke sessions when cancel is clicked', () => {
     setupMocks(samplePasskeys, sampleAPIKeys);
     render(<SettingsPage />);
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(mockRevokeSessions).not.toHaveBeenCalled();
   });
 

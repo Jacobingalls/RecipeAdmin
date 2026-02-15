@@ -49,9 +49,10 @@ All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/wr
 
 **Available shared components** (use these instead of reimplementing):
 - `Button` — semantic wrapper around Bootstrap button classes with `variant` and `size` props
-- `CircularButton` — 2rem circular icon button; shows individual hover when standalone, defers to group when inside `CircularButtonGroup`
+- `CircularButton` — 2.75rem (44px) circular icon button; shows individual hover when standalone, defers to group when inside `CircularButtonGroup`
 - `CircularButtonGroup` — inline-flex pill container with unified hover for adjacent `CircularButton` children
-- `ModalBase` — modal wrapper with backdrop, scroll lock, backdrop-click-to-dismiss, and ARIA attributes
+- `ListFilter` — shared name-text + dropdown filter row with accessible labels, used across list pages
+- `ModalBase` — modal wrapper with backdrop, scroll lock, focus trapping, backdrop-click-to-dismiss, and ARIA attributes
 - `ModalHeader`, `ModalBody`, `ModalFooter` — standard modal section components (exported from `ModalBase`)
 - `ListRow` — horizontal layout: `[icon] [content] [spacer] [secondary] [actions]`
 - `DeleteButton` — circular icon-only trash button for list row actions (uses `CircularButton`)
@@ -146,6 +147,7 @@ src/
 │   │   ├── ErrorState     # Error message display
 │   │   ├── LinkListItem   # Navigational list group item with stacked/split layout
 │   │   ├── ListRow        # [icon + content + spacer + secondary + actions] layout
+│   │   ├── ListFilter     # Name-text + dropdown filter row for list pages
 │   │   ├── LoadingState   # Loading indicator
 │   │   ├── ModalBase      # Modal wrapper + ModalHeader/ModalBody/ModalFooter sub-components
 │   │   ├── PasskeySetupPrompt # Banner prompting users without passkeys to register one
@@ -153,7 +155,7 @@ src/
 │   │   ├── RequireAuth    # Route guard: redirects unauthenticated to /login, shows PasskeySetupPrompt
 │   │   ├── SectionHeader  # [h5 title + spacer + action children] section heading
 │   │   ├── TypeToConfirmModal # "Type name to confirm" destructive action modal
-│   │   └── StatusView
+│   │   └── StatusView     # Base layout for centered status displays
 │   ├── admin-user-detail/ # Admin user detail page sections
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── AdminUserProfileForm # User profile editing form
@@ -165,6 +167,9 @@ src/
 │   │   ├── GroupCard      # Group result card
 │   │   ├── LookupResultItem # Dispatches to Product/GroupCard
 │   │   └── ProductCard    # Product result card
+│   ├── group/             # Group detail components
+│   │   ├── index.ts       # Barrel exports
+│   │   └── GroupItemRow   # Single item row within a product group
 │   ├── product/           # Product detail components
 │   │   ├── index.ts       # Barrel exports
 │   │   └── PreparationDetails # Nutrition label + serving selector
@@ -180,6 +185,7 @@ src/
 │   ├── Header             # App header with nav, user dropdown, admin link
 │   ├── NotesDisplay       # Product/barcode notes
 │   ├── NutritionLabel     # FDA-style nutrition facts label
+│   ├── NutritionRow       # Individual nutrient row for NutritionLabel table
 │   ├── ServingSizeSelector # Serving size input controls
 │   └── VersionBadge       # API version display
 ├── config/
@@ -198,6 +204,7 @@ src/
 ├── hooks/
 │   ├── index.ts           # Barrel exports
 │   ├── useApiQuery.ts     # Data fetching with cancellation
+│   ├── useGravatarUrl.ts  # Gravatar avatar URL from email via SHA-256 hash
 │   └── useHistoryData.ts  # Shared history data fetching, nutrition resolution, log actions
 ├── pages/                 # Route components
 │   ├── index.ts           # Barrel exports

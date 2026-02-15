@@ -107,6 +107,12 @@ export function formatServingSize(
   return { primary, resolved: resolved.join(', ') };
 }
 
+export function formatEnvironmentName(environment: string | null | undefined): string {
+  if (!environment) return 'Unknown';
+  if (environment.toLowerCase() === 'debug') return 'Development';
+  return environment.charAt(0).toUpperCase() + environment.slice(1);
+}
+
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 
 /**

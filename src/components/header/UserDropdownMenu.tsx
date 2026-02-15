@@ -1,78 +1,35 @@
 import type { CSSProperties } from 'react';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { API_DISPLAY_URL } from '../../api';
-
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-function formatEnvironmentName(apiEnvironment: string | undefined): string {
-  if (!apiEnvironment) return 'Unknown';
-  if (apiEnvironment.toLowerCase() === 'debug') return 'Development';
-  return apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1);
-}
-
-function useGravatarUrl(email: string | undefined, size: number = 32): string | null {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!email) return;
-    let cancelled = false;
-    sha256Hex(email.trim().toLowerCase()).then((hash) => {
-      if (!cancelled) {
-        setUrl(`https://www.gravatar.com/avatar/${hash}?s=${size * 2}&d=mp`);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [email, size]);
-
-  return email ? url : null;
-}
+import {
+  API_DISPLAY_URL,
+  getAdminEnvironment,
+  getAdminGitCommit,
+  getAdminVersion,
+} from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
+import { useGravatarUrl } from '../../hooks/useGravatarUrl';
+import { formatEnvironmentName } from '../../utils';
 
 const menuIconStyle: CSSProperties = { width: 20, marginRight: 8 };
 
-interface UserDropdownMenuProps {
-  displayName: string | undefined;
-  username: string | undefined;
-  email: string | undefined;
-  isAdmin: boolean;
-  onLogout: () => void;
-  adminVersion: string | null;
-  adminGitCommit: string | null;
-  adminEnvironment: string | null;
-  apiVersion: string | null | undefined;
-  apiGitCommit: string | null | undefined;
-  apiEnvironment: string | null | undefined;
-}
+export default function UserDropdownMenu() {
+  const { user, logout, apiVersion, apiGitCommit, apiEnvironment } = useAuth();
+  const avatarUrl = useGravatarUrl(user?.email);
 
-export default function UserDropdownMenu({
-  displayName,
-  username,
-  email,
-  isAdmin,
-  onLogout,
-  adminVersion,
-  adminGitCommit,
-  adminEnvironment,
-  apiVersion,
-  apiGitCommit,
-  apiEnvironment,
-}: UserDropdownMenuProps) {
-  const avatarUrl = useGravatarUrl(email);
+  const adminVersion = getAdminVersion();
+  const adminGitCommit = getAdminGitCommit();
+  const adminEnvironment = getAdminEnvironment();
+
+  const displayName = user?.displayName;
+  const username = user?.username;
+  const isAdmin = user?.isAdmin ?? false;
 
   return (
     <div className="dropdown">
       <button
         type="button"
-        className="btn p-0 border-0 rounded-circle"
+        className="btn p-1 border-0 rounded-circle"
         data-bs-toggle="dropdown"
         aria-expanded="false"
         aria-label="User menu"
@@ -148,7 +105,7 @@ export default function UserDropdownMenu({
           <button
             type="button"
             className="dropdown-item d-flex align-items-center"
-            onClick={onLogout}
+            onClick={logout}
           >
             <i
               className="bi bi-box-arrow-right d-inline-block text-center"
@@ -169,9 +126,7 @@ export default function UserDropdownMenu({
               style={{ ...menuIconStyle, lineHeight: 'inherit' }}
             />
             <span>
-              {adminEnvironment
-                ? adminEnvironment.charAt(0).toUpperCase() + adminEnvironment.slice(1)
-                : 'Development'}
+              {formatEnvironmentName(adminEnvironment ?? 'development')}
               {adminVersion && (
                 <>
                   <br />

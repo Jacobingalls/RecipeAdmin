@@ -1,4 +1,9 @@
-export { formatSignificant, formatServingSize } from './formatters';
+export {
+  formatSignificant,
+  formatServingSize,
+  formatEnvironmentName,
+  formatLastLogin,
+} from './formatters';
 export type { FormattedServingSize } from './formatters';
 export {
   favoriteName,
@@ -12,8 +17,10 @@ export {
 export { generateName } from './generateName';
 export { servingSizeSearchParams } from './servingSizeParams';
 export {
+  formatTime,
   formatRelativeTime,
   resolveEntryName,
+  resolveEntryBrand,
   entryDetailPath,
   formatServingSizeDescription,
   buildLogTarget,

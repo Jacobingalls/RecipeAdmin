@@ -133,14 +133,14 @@ describe('HistoryEntryRow', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const btn = screen.getByLabelText('Entry actions');
     expect(btn).toHaveClass('rounded-circle', 'border-0', 'text-body-secondary');
-    expect(btn).toHaveStyle({ width: '2.25rem', height: '2.25rem' });
+    expect(btn).toHaveStyle({ width: '2.75rem', height: '2.75rem' });
   });
 
   it('wraps action buttons in a CircularButtonGroup', () => {
     renderWithRouter(<HistoryEntryRow {...defaultProps} />);
     const group = screen.getByRole('group');
     expect(group).toBeInTheDocument();
-    expect(group.style.borderRadius).toBe('1.125rem');
+    expect(group.style.borderRadius).toBe('1.375rem');
   });
 
   it('does not navigate when overflow menu button is clicked', () => {

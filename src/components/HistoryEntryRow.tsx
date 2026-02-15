@@ -8,7 +8,7 @@ import {
   formatServingSizeDescription,
   formatRelativeTime,
   formatTime,
-} from '../utils/logEntryHelpers';
+} from '../utils';
 
 import AddToFavoritesButton from './AddToFavoritesButton';
 import { CircularButton, CircularButtonGroup, FoodItemRow, MoreButton } from './common';

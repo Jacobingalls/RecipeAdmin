@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { ServingSize } from '../domain';
-import { servingSizeSearchParams } from '../utils/servingSizeParams';
+import { servingSizeSearchParams } from '../utils';
 
 const PARAM_TYPE = 'st';
 const PARAM_AMOUNT = 'sa';

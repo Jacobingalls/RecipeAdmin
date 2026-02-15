@@ -21,15 +21,19 @@ vi.mock('../api', async () => {
   };
 });
 
-vi.mock('../components/common', () => ({
-  LoadingState: () => <div data-testid="loading-state" />,
-  ContentUnavailableView: ({ title, description }: { title: string; description?: string }) => (
-    <div data-testid="content-unavailable-view">
-      <span>{title}</span>
-      {description && <span>{description}</span>}
-    </div>
-  ),
-}));
+vi.mock('../components/common', async () => {
+  const actual = await vi.importActual('../components/common');
+  return {
+    ...actual,
+    LoadingState: () => <div data-testid="loading-state" />,
+    ContentUnavailableView: ({ title, description }: { title: string; description?: string }) => (
+      <div data-testid="content-unavailable-view">
+        <span>{title}</span>
+        {description && <span>{description}</span>}
+      </div>
+    ),
+  };
+});
 
 vi.mock('../components/FavoriteRow', () => ({
   default: ({

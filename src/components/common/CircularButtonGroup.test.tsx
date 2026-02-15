@@ -28,7 +28,7 @@ describe('CircularButtonGroup', () => {
         <CircularButton aria-label="Test" />
       </CircularButtonGroup>,
     );
-    expect(screen.getByRole('group').style.borderRadius).toBe('1.125rem');
+    expect(screen.getByRole('group').style.borderRadius).toBe('1.375rem');
   });
 
   it('has a subtle constant background', () => {

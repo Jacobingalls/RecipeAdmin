@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { formatSignificant } from '../../utils/formatters';
+import { formatSignificant } from '../../utils';
 
 interface FoodItemRowProps {
   name: string;

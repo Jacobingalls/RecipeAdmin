@@ -1,15 +1,13 @@
 import { NavLink } from 'react-router-dom';
 
-import { getAdminEnvironment, getAdminGitCommit, getAdminVersion } from '../api';
+import { getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 import { HeaderSearchBar, UserDropdownMenu } from './header/index';
 
 export default function Header() {
-  const { isAuthenticated, user, logout, apiVersion, apiGitCommit, apiEnvironment } = useAuth();
+  const { isAuthenticated } = useAuth();
   const adminVersion = getAdminVersion();
-  const adminGitCommit = getAdminGitCommit();
-  const adminEnvironment = getAdminEnvironment();
 
   if (!isAuthenticated) return null;
 
@@ -81,19 +79,7 @@ export default function Header() {
             </li>
           </ul>
           <HeaderSearchBar />
-          <UserDropdownMenu
-            displayName={user?.displayName}
-            username={user?.username}
-            email={user?.email}
-            isAdmin={user?.isAdmin ?? false}
-            onLogout={logout}
-            adminVersion={adminVersion}
-            adminGitCommit={adminGitCommit}
-            adminEnvironment={adminEnvironment}
-            apiVersion={apiVersion}
-            apiGitCommit={apiGitCommit}
-            apiEnvironment={apiEnvironment}
-          />
+          <UserDropdownMenu />
         </div>
       </div>
     </nav>
