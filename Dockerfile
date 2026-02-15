@@ -19,6 +19,12 @@ RUN npm run build
 # Stage 2: Serve with nginx
 FROM nginx:alpine
 
+# Carry build-time version info into runtime environment
+ARG VERSION
+ARG GIT_COMMIT
+ENV VERSION=${VERSION}
+ENV GIT_COMMIT=${GIT_COMMIT}
+
 # Copy the built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
