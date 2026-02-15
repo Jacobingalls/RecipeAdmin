@@ -11,8 +11,10 @@ const PARAM_NAME = 'sn';
 
 const SERVING_SIZE_PARAMS = [PARAM_TYPE, PARAM_AMOUNT, PARAM_UNIT, PARAM_NAME];
 
-function parseServingSize(params: URLSearchParams): ServingSize {
+function parseServingSize(params: URLSearchParams): ServingSize | null {
   const type = params.get(PARAM_TYPE);
+  if (!type) return null;
+
   const amountStr = params.get(PARAM_AMOUNT);
   const unit = params.get(PARAM_UNIT);
   const name = params.get(PARAM_NAME);
@@ -54,8 +56,9 @@ function servingSizeToParams(ss: ServingSize, current: URLSearchParams): URLSear
   return next;
 }
 
-/** Syncs a `ServingSize` with URL search params (`st`, `sa`, `su`, `sn`). */
-export function useServingSizeParams(): [ServingSize, (ss: ServingSize) => void] {
+/** Syncs a `ServingSize` with URL search params (`st`, `sa`, `su`, `sn`).
+ *  Returns `null` when no serving size params are present in the URL. */
+export function useServingSizeParams(): [ServingSize | null, (ss: ServingSize) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const servingSize = parseServingSize(searchParams);

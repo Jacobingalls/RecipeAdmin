@@ -30,9 +30,14 @@ export default function GroupDetailPage() {
   } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id], {
     errorMessage: "Couldn't load this group. Try again later.",
   });
-  const [servingSize, setServingSize] = useServingSizeParams();
+  const [urlServingSize, setServingSize] = useServingSizeParams();
 
   const group = groupData ? new ProductGroup(groupData) : null;
+
+  const servingSize =
+    urlServingSize ??
+    ServingSize.fromObject(groupData?.defaultServingSize) ??
+    ServingSize.servings(1);
   const items = groupData?.items ?? [];
   const barcodes = groupData?.barcodes ?? [];
 

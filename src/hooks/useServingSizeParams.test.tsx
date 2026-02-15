@@ -20,13 +20,12 @@ function wrapper(initialEntry: string) {
 
 describe('useServingSizeParams', () => {
   describe('parsing', () => {
-    it('defaults to 1 serving when no params present', () => {
+    it('returns null when no params present', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test'),
       });
       const [ss] = result.current;
-      expect(ss.type).toBe('servings');
-      expect(ss.amount).toBe(1);
+      expect(ss).toBeNull();
     });
 
     it('parses servings type', () => {

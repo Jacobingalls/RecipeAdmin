@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
+import { ServingSize } from '../domain';
 import { useApiQuery, useServingSizeParams } from '../hooks';
 import {
   LoadingState,
@@ -27,7 +28,7 @@ export default function ProductDetailPage() {
     errorMessage: "Couldn't load this product. Try again later.",
   });
   const [searchParams, setSearchParams] = useSearchParams();
-  const [servingSize, setServingSize] = useServingSizeParams();
+  const [urlServingSize, setServingSize] = useServingSizeParams();
 
   const selectedPrep = searchParams.get('prep');
 
@@ -58,6 +59,11 @@ export default function ProductDetailPage() {
   const preparations = product?.preparations ?? [];
   const barcodes = product?.barcodes ?? [];
   const currentPrep = preparations.find((p) => p.id === activePrep);
+
+  const servingSize =
+    urlServingSize ??
+    ServingSize.fromObject(currentPrep?.defaultServingSize) ??
+    ServingSize.servings(1);
 
   return (
     <>

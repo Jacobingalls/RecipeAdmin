@@ -2,7 +2,7 @@ import type { NutritionInformationData } from './NutritionInformation';
 import { NutritionInformation } from './NutritionInformation';
 import type { NutritionUnitData } from './NutritionUnit';
 import { NutritionUnit } from './NutritionUnit';
-import type { CustomSizeValue } from './ServingSize';
+import type { CustomSizeValue, ServingSizeData } from './ServingSize';
 import { ServingSize } from './ServingSize';
 import type { CustomSizeData } from './CustomSize';
 import { CustomSize } from './CustomSize';
@@ -15,6 +15,7 @@ export interface PreparationData {
   volume?: NutritionUnitData | null;
   customSizes?: CustomSizeData[];
   servingSizeDescription?: string | null;
+  defaultServingSize?: ServingSizeData;
   notes?: string[];
 }
 

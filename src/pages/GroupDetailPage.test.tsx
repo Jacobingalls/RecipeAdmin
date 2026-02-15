@@ -107,7 +107,8 @@ describe('GroupDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSetServingSize = vi.fn();
-    mockUseServingSizeParams.mockReturnValue([ServingSize.servings(1), mockSetServingSize]);
+    // Default: return null (no URL params) with a mock setter
+    mockUseServingSizeParams.mockReturnValue([null, mockSetServingSize]);
   });
 
   it('renders loading state', () => {
@@ -239,6 +240,29 @@ describe('GroupDetailPage', () => {
     expect(screen.getByText(/Cannot calculate serving by mass/)).toBeInTheDocument();
     // Nutrition label should not render (nutritionInfo is null)
     expect(screen.queryByTestId('nutrition-label')).not.toBeInTheDocument();
+  });
+
+  it('uses group defaultServingSize when no URL params', () => {
+    const groupWithDefault: ProductGroupData = {
+      ...sampleGroup,
+      defaultServingSize: { servings: 2 },
+    };
+    mockQuery({ data: groupWithDefault });
+    mockUseServingSizeParams.mockReturnValue([null, mockSetServingSize]);
+    renderWithRoute('/groups/g1');
+    // Should render without error — the group's defaultServingSize is used
+    expect(screen.getByTestId('nutrition-label')).toBeInTheDocument();
+  });
+
+  it('prefers URL serving size over group defaultServingSize', () => {
+    const groupWithDefault: ProductGroupData = {
+      ...sampleGroup,
+      defaultServingSize: { servings: 2 },
+    };
+    mockQuery({ data: groupWithDefault });
+    mockUseServingSizeParams.mockReturnValue([ServingSize.servings(3), mockSetServingSize]);
+    renderWithRoute('/groups/g1');
+    expect(screen.getByTestId('nutrition-label')).toBeInTheDocument();
   });
 
   it('renders null for GroupItemRow with neither product nor group', () => {

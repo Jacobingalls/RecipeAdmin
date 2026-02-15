@@ -34,6 +34,7 @@ export interface ProductGroupData {
   volume?: NutritionUnitData | null;
   customSizes?: CustomSizeData[];
   barcodes?: BarcodeData[];
+  defaultServingSize?: ServingSizeData;
 }
 
 interface ItemServing {
