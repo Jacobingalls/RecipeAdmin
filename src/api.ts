@@ -94,6 +94,17 @@ export const getAdminGitCommit = (): string | null => {
   return null;
 };
 
+export const getAdminEnvironment = (): string | null => {
+  if (
+    typeof window !== 'undefined' &&
+    window.__RUNTIME_CONFIG__?.ENVIRONMENT &&
+    window.__RUNTIME_CONFIG__.ENVIRONMENT !== '__ENVIRONMENT__'
+  ) {
+    return window.__RUNTIME_CONFIG__.ENVIRONMENT;
+  }
+  return null;
+};
+
 // Transparent token refresh: intercepts 401s, refreshes via cookie, retries once
 let refreshPromise: Promise<number | null> | null = null;
 

@@ -24,6 +24,7 @@ vi.mock('../api', async (importOriginal) => {
     ...actual,
     getAdminVersion: vi.fn(() => null),
     getAdminGitCommit: vi.fn(() => null),
+    getAdminEnvironment: vi.fn(() => null),
   };
 });
 
@@ -60,6 +61,7 @@ describe('Header', () => {
     mockLogout.mockClear();
     vi.mocked(api.getAdminVersion).mockReturnValue(null);
     vi.mocked(api.getAdminGitCommit).mockReturnValue(null);
+    vi.mocked(api.getAdminEnvironment).mockReturnValue(null);
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
       user: {
@@ -338,22 +340,34 @@ describe('Header', () => {
     it('shows admin version when available', () => {
       vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
       renderWithRouter(<Header />);
-      expect(screen.getByText('v0.0.28')).toBeInTheDocument();
+      const adminRow = document.querySelector('.bi-window')!.closest('div')!;
+      expect(adminRow).toHaveTextContent('v0.0.28');
     });
 
     it('shows admin version with git commit', () => {
       vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
       vi.mocked(api.getAdminGitCommit).mockReturnValue('abc1234');
       renderWithRouter(<Header />);
-      expect(screen.getByText('v0.0.28')).toBeInTheDocument();
-      expect(screen.getByText('(abc1234)')).toBeInTheDocument();
+      const adminRow = document.querySelector('.bi-window')!.closest('div')!;
+      expect(adminRow).toHaveTextContent('v0.0.28');
+      expect(adminRow).toHaveTextContent('abc1234');
     });
 
     it('shows git commit without version in dev mode', () => {
       vi.mocked(api.getAdminGitCommit).mockReturnValue('abc1234');
       renderWithRouter(<Header />);
-      expect(screen.getByText('Development')).toBeInTheDocument();
-      expect(screen.getByText('(abc1234)')).toBeInTheDocument();
+      const adminRow = document.querySelector('.bi-window')!.closest('div')!;
+      expect(adminRow).toHaveTextContent('Development');
+      expect(adminRow).toHaveTextContent('abc1234');
+    });
+
+    it('shows admin environment when set', () => {
+      vi.mocked(api.getAdminEnvironment).mockReturnValue('Production');
+      vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
+      renderWithRouter(<Header />);
+      const adminRow = document.querySelector('.bi-window')!.closest('div')!;
+      expect(adminRow).toHaveTextContent('Production');
+      expect(adminRow).toHaveTextContent('v0.0.28');
     });
 
     it('shows API environment and version', () => {
@@ -414,6 +428,38 @@ describe('Header', () => {
       renderWithRouter(<Header />);
       expect(document.querySelector('.bi-window')).toBeInTheDocument();
       expect(document.querySelector('.bi-hdd-network')).toBeInTheDocument();
+    });
+  });
+
+  describe('dropdown menu behavior', () => {
+    it('stops propagation when clicking non-interactive elements', () => {
+      renderWithRouter(<Header />);
+      const menu = document.querySelector('.dropdown-menu')!;
+      const usernameEl = screen.getByText('testuser');
+      const event = new MouseEvent('click', { bubbles: true });
+      const stopPropagation = vi.spyOn(event, 'stopPropagation');
+      usernameEl.dispatchEvent(event);
+      expect(stopPropagation).toHaveBeenCalled();
+      // Verify the menu handler is wired up
+      expect(menu).toBeInTheDocument();
+    });
+
+    it('allows propagation when clicking links', () => {
+      renderWithRouter(<Header />);
+      const settingsLink = screen.getByRole('link', { name: /settings/i });
+      const event = new MouseEvent('click', { bubbles: true });
+      const stopPropagation = vi.spyOn(event, 'stopPropagation');
+      settingsLink.dispatchEvent(event);
+      expect(stopPropagation).not.toHaveBeenCalled();
+    });
+
+    it('allows propagation when clicking buttons', () => {
+      renderWithRouter(<Header />);
+      const signOutBtn = screen.getByRole('button', { name: /sign out/i });
+      const event = new MouseEvent('click', { bubbles: true });
+      const stopPropagation = vi.spyOn(event, 'stopPropagation');
+      signOutBtn.dispatchEvent(event);
+      expect(stopPropagation).not.toHaveBeenCalled();
     });
   });
 });

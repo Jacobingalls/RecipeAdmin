@@ -379,6 +379,40 @@ describe('getAdminGitCommit', () => {
   });
 });
 
+describe('getAdminEnvironment', () => {
+  afterEach(() => {
+    delete window.__RUNTIME_CONFIG__;
+  });
+
+  it('returns environment from runtime config when set', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+      ENVIRONMENT: 'Production',
+    };
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminEnvironment()).toBe('Production');
+  });
+
+  it('returns null when ENVIRONMENT is placeholder', async () => {
+    window.__RUNTIME_CONFIG__ = {
+      API_BASE_URL: '__API_BASE_URL__',
+      API_DISPLAY_URL: '__API_DISPLAY_URL__',
+      ENVIRONMENT: '__ENVIRONMENT__',
+    };
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminEnvironment()).toBeNull();
+  });
+
+  it('returns null when no runtime config', async () => {
+    vi.resetModules();
+    const mod = await import('./api');
+    expect(mod.getAdminEnvironment()).toBeNull();
+  });
+});
+
 describe('error handling', () => {
   it('throws on non-ok response', async () => {
     mockFetch.mockResolvedValue(mockResponse(null, false, 404));

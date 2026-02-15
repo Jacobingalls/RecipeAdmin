@@ -2,7 +2,7 @@ import type { CSSProperties, FormEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 
-import { API_DISPLAY_URL, getAdminGitCommit, getAdminVersion } from '../api';
+import { API_DISPLAY_URL, getAdminEnvironment, getAdminGitCommit, getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 async function sha256Hex(input: string): Promise<string> {
@@ -44,6 +44,7 @@ export default function Header() {
   const avatarUrl = useGravatarUrl(user?.email);
   const adminVersion = getAdminVersion();
   const adminGitCommit = getAdminGitCommit();
+  const adminEnvironment = getAdminEnvironment();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   // Sync local input with URL when the q param changes (e.g. back/forward navigation)
@@ -208,7 +209,25 @@ export default function Header() {
                 </span>
               )}
             </button>
-            <ul className="dropdown-menu dropdown-menu-end" style={{ minWidth: '14rem' }}>
+            <ul
+              className="dropdown-menu dropdown-menu-end"
+              style={{ minWidth: '14rem' }}
+              onClick={(e) => {
+                // Only close on interactive element clicks (links, buttons)
+                if (!(e.target as HTMLElement).closest('a, button')) {
+                  e.stopPropagation();
+                }
+              }}
+              onKeyDown={(e) => {
+                // Only close on interactive element activation (Enter/Space on links, buttons)
+                if (e.key === 'Enter' || e.key === ' ') {
+                  if (!(e.target as HTMLElement).closest('a, button')) {
+                    e.stopPropagation();
+                  }
+                }
+              }}
+              role="menu"
+            >
               <li className="px-3 py-2">
                 <div className="fw-semibold">{user?.displayName}</div>
                 <div className="text-body-secondary small">{user?.username}</div>
@@ -259,16 +278,26 @@ export default function Header() {
                 <hr className="dropdown-divider" />
               </li>
               <li className="px-3 py-1">
-                <div className="d-flex align-items-center text-body-secondary small">
+                <div className="d-flex align-items-start text-body-secondary small">
                   <i
                     className="bi bi-window d-inline-block text-center flex-shrink-0"
                     aria-hidden="true"
-                    style={menuIconStyle}
+                    style={{ ...menuIconStyle, lineHeight: 'inherit' }}
                   />
                   <span>
-                    {adminVersion ? `v${adminVersion}` : 'Development'}
+                    {adminEnvironment
+                      ? adminEnvironment.charAt(0).toUpperCase() + adminEnvironment.slice(1)
+                      : 'Development'}
+                    {adminVersion && (
+                      <>
+                        <br />v{adminVersion}
+                      </>
+                    )}
                     {adminGitCommit && (
-                      <span className="text-body-tertiary ms-1">({adminGitCommit})</span>
+                      <>
+                        <br />
+                        <span className="text-body-tertiary">{adminGitCommit}</span>
+                      </>
                     )}
                   </span>
                 </div>

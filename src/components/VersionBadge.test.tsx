@@ -15,12 +15,14 @@ vi.mock('../api', async (importOriginal) => {
   return {
     ...actual,
     getAdminVersion: vi.fn(() => null),
+    getAdminEnvironment: vi.fn(() => null),
   };
 });
 
 describe('VersionBadge', () => {
   beforeEach(() => {
     vi.mocked(api.getAdminVersion).mockReturnValue(null);
+    vi.mocked(api.getAdminEnvironment).mockReturnValue(null);
   });
 
   it('returns null when apiEnvironment is null and no admin version', () => {
@@ -88,6 +90,31 @@ describe('VersionBadge', () => {
       mockUseAuth.mockReturnValue({ apiVersion: null, apiEnvironment: null });
       render(<VersionBadge />);
       expect(screen.getByText('v0.0.28')).toBeInTheDocument();
+    });
+
+    it('prefers admin environment over API environment', () => {
+      vi.mocked(api.getAdminVersion).mockReturnValue('0.0.28');
+      vi.mocked(api.getAdminEnvironment).mockReturnValue('Staging');
+      mockUseAuth.mockReturnValue({ apiVersion: '0.0.27', apiEnvironment: 'Production' });
+      render(<VersionBadge />);
+      const el = screen.getByText(/v0\.0\.28/);
+      expect(el).toHaveTextContent('Staging, v0.0.28 (API v0.0.27)');
+    });
+  });
+
+  describe('with admin environment', () => {
+    it('shows admin environment when no admin version', () => {
+      vi.mocked(api.getAdminEnvironment).mockReturnValue('Production');
+      mockUseAuth.mockReturnValue({ apiVersion: null, apiEnvironment: null });
+      render(<VersionBadge />);
+      expect(screen.getByText('Production')).toBeInTheDocument();
+    });
+
+    it('prefers admin environment over API environment without admin version', () => {
+      vi.mocked(api.getAdminEnvironment).mockReturnValue('Staging');
+      mockUseAuth.mockReturnValue({ apiVersion: '1.0.0', apiEnvironment: 'Production' });
+      render(<VersionBadge />);
+      expect(screen.getByText('Staging, v1.0.0')).toBeInTheDocument();
     });
   });
 });
