@@ -281,13 +281,13 @@ export default function Header() {
                     style={{ ...menuIconStyle, lineHeight: 'inherit' }}
                   />
                   <span>
-                    {apiVersion && `v${apiVersion}`}
-                    {apiEnvironment && (
+                    {apiEnvironment &&
+                      (apiEnvironment.toLowerCase() === 'debug'
+                        ? 'Development'
+                        : apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1))}
+                    {apiVersion && (
                       <>
-                        {apiVersion && <br />}
-                        {apiEnvironment.toLowerCase() === 'debug'
-                          ? 'Development'
-                          : apiEnvironment.charAt(0).toUpperCase() + apiEnvironment.slice(1)}
+                        {apiEnvironment && <br />}v{apiVersion}
                       </>
                     )}
                     {apiEnvironment?.toLowerCase() === 'debug' && (
