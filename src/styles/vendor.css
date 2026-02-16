@@ -3,13 +3,44 @@
 
 [data-bs-theme='light'] {
   --sparkline-card-bg: rgba(0, 0, 0, 0.02);
+  --app-header-bg: #ffffff;
+  --app-header-border-color: rgba(33, 37, 41, 0.2);
+  --app-header-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  --app-header-navbar-color: rgba(33, 37, 41, 0.8);
+  --app-header-navbar-hover-color: #212529;
+  --app-header-navbar-active-color: #212529;
+  --app-header-navbar-brand-color: #212529;
+  --app-header-navbar-toggler-border-color: rgba(33, 37, 41, 0.2);
+  --app-header-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
 [data-bs-theme='dark'] {
   --sparkline-card-bg: rgba(0, 0, 0, 0.2);
+  --app-header-bg: var(--bs-dark);
+  --app-header-border-color: rgba(255, 255, 255, 0.14);
+  --app-header-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+  --app-header-navbar-color: rgba(255, 255, 255, 0.75);
+  --app-header-navbar-hover-color: #fff;
+  --app-header-navbar-active-color: #fff;
+  --app-header-navbar-brand-color: #fff;
+  --app-header-navbar-toggler-border-color: rgba(255, 255, 255, 0.1);
+  --app-header-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
 .sparkline-card {
   background-color: var(--sparkline-card-bg);
   border: 1px solid var(--bs-card-border-color);
+}
+
+.app-header-navbar {
+  background-color: var(--app-header-bg);
+  border-bottom: 1px solid var(--app-header-border-color);
+  box-shadow: var(--app-header-shadow);
+  --bs-navbar-color: var(--app-header-navbar-color);
+  --bs-navbar-hover-color: var(--app-header-navbar-hover-color);
+  --bs-navbar-active-color: var(--app-header-navbar-active-color);
+  --bs-navbar-brand-color: var(--app-header-navbar-brand-color);
+  --bs-navbar-brand-hover-color: var(--app-header-navbar-brand-color);
+  --bs-navbar-toggler-border-color: var(--app-header-navbar-toggler-border-color);
+  --bs-navbar-toggler-icon-bg: var(--app-header-navbar-toggler-icon-bg);
 }

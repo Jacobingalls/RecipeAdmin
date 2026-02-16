@@ -150,10 +150,10 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
           />
           <NutritionRow label="Sugar Alcohol" nutrient={getNutrient('sugarAlcohol')} indent />
           {/* Protein */}
-          <NutritionRow label="Protein" nutrient={getNutrient('protein')} bold thick />
+          <NutritionRow label="Protein" nutrient={getNutrient('protein')} bold hideBottomBorder />
           {/* Vitamins & Minerals separator */}
           <tr>
-            <td className="border-bottom border-4" colSpan={3} />
+            <td colSpan={3} style={{ borderBottom: '8px solid var(--bs-border-color)', padding: 0 }} />
           </tr>
           {/* Vitamins */}
           <NutritionRow label="Vitamin A" nutrient={getNutrient('vitaminA')} />

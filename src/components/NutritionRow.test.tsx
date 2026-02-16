@@ -76,16 +76,10 @@ describe('NutritionRow', () => {
     expect(screen.getByText('Total Fat')).toHaveStyle({ paddingLeft: '0px' });
   });
 
-  it('applies border-4 class when thick is true', () => {
-    renderRow({ thick: true });
+  it('removes bottom border when hideBottomBorder is true', () => {
+    renderRow({ hideBottomBorder: true });
     const row = screen.getByText('Total Fat').closest('tr');
-    expect(row?.className).toContain('border-4');
-  });
-
-  it('does not apply border-4 class when thick is false', () => {
-    renderRow({ thick: false });
-    const row = screen.getByText('Total Fat').closest('tr');
-    expect(row?.className).not.toContain('border-4');
+    expect(row?.querySelectorAll('.border-bottom')).toHaveLength(0);
   });
 
   it('renders %DV tooltip with daily value info', () => {

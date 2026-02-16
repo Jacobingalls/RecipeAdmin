@@ -14,7 +14,7 @@ interface NutritionRowProps {
   bold?: boolean;
   indent?: boolean;
   doubleIndent?: boolean;
-  thick?: boolean;
+  hideBottomBorder?: boolean;
 }
 
 function getIndentPadding(doubleIndent?: boolean, indent?: boolean): number {
@@ -29,24 +29,25 @@ export default function NutritionRow({
   bold,
   indent,
   doubleIndent,
-  thick,
+  hideBottomBorder = false,
 }: NutritionRowProps) {
   if (!nutrient || !nutrient.formatted) return null;
 
   const { formatted, percentDV, dvFormatted } = nutrient;
+  const borderClass = hideBottomBorder ? '' : 'border-bottom';
 
   return (
-    <tr className={`nutrition-row ${thick ? 'border-4' : ''}`}>
+    <tr className="nutrition-row">
       <th
         scope="row"
-        className={`border-bottom ${bold ? 'fw-bold' : 'fw-normal'}`}
+        className={`${borderClass} ${bold ? 'fw-bold' : 'fw-normal'}`}
         style={{ paddingLeft: getIndentPadding(doubleIndent, indent) }}
       >
         {label}
       </th>
-      <td className="border-bottom text-end">{formatted}</td>
+      <td className={`${borderClass} text-end`}>{formatted}</td>
       <td
-        className="border-bottom fw-bold text-end"
+        className={`${borderClass} fw-bold text-end`}
         title={percentDV !== null ? `${percentDV}% of ${dvFormatted}` : undefined}
       >
         {percentDV !== null ? `${percentDV}%` : ''}

@@ -12,10 +12,10 @@ export default function Header() {
   if (!isAuthenticated) return null;
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `nav-link px-3 py-2 rounded ${isActive ? 'active text-white fw-semibold' : 'text-light'}`;
+    `nav-link px-3 py-2 rounded ${isActive ? 'active fw-semibold' : ''}`;
 
   return (
-    <nav className="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm">
+    <nav className="navbar navbar-expand-sm sticky-top app-header-navbar">
       <div className="container">
         <NavLink
           className="navbar-brand mb-0 user-select-none d-flex align-items-center position-relative"
