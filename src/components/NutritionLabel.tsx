@@ -57,13 +57,15 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
     >
       <style>{`
         .nutrition-row { position: relative; isolation: isolate; }
-        .nutrition-row::after {
+        .nutrition-row > th,
+        .nutrition-row > td { position: relative; z-index: 1; }
+        .nutrition-row > th::after {
           content: ''; position: absolute;
-          top: -1px; bottom: -1px; left: -8px; right: -8px;
+          top: -1px; bottom: -1px; left: -8px; right: -208px;
           border-radius: 6px; background-color: transparent;
           pointer-events: none; transition: background-color 0.1s ease; z-index: -1;
         }
-        .nutrition-row:hover::after { background-color: var(--bs-border-color); }
+        .nutrition-row:hover > th::after { background-color: var(--nutrition-row-hover-bg, var(--bs-border-color)); }
         .nutrition-row:hover td,
         .nutrition-row:hover th,
         .nutrition-row:has(+ .nutrition-row:hover) td,
