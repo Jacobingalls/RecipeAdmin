@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -24,13 +24,18 @@ const NUTRIENTS = [
   { key: 'sodium', label: 'Sodium', unit: 'mg', goal: 'less', size: 'default' },
 ] as const;
 
-export default function TodayTile() {
+interface TodayTileProps {
+  refreshSignal?: number;
+}
+
+export default function TodayTile({ refreshSignal }: TodayTileProps) {
   const {
     logs,
     productDetails,
     groupDetails,
     loading,
     error,
+    refetchLogs,
     entryNutritionById,
     logTarget,
     logAgainLoadingId,
@@ -42,6 +47,15 @@ export default function TodayTile() {
     handleSaved,
     handleModalClose,
   } = useHistoryData({ limitDays: 1 });
+
+  // Refetch when an external action (e.g. logging from favorites) changes the signal.
+  const prevSignal = useRef(refreshSignal);
+  useEffect(() => {
+    if (refreshSignal !== undefined && refreshSignal !== prevSignal.current) {
+      prevSignal.current = refreshSignal;
+      refetchLogs();
+    }
+  }, [refreshSignal, refetchLogs]);
 
   // Filter logs to only include entries from today in the user's local timezone.
   // The backend returns the most recent day with data, which may be yesterday

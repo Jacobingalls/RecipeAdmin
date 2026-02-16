@@ -15,7 +15,11 @@ import Tile from './Tile';
 
 const MAX_DISPLAY = 6;
 
-export default function FavoritesTile() {
+interface FavoritesTileProps {
+  onItemLogged?: () => void;
+}
+
+export default function FavoritesTile({ onItemLogged }: FavoritesTileProps) {
   const { favorites, loading, error, refetch } = useFavorites();
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
@@ -30,7 +34,8 @@ export default function FavoritesTile() {
 
   const handleModalSaved = useCallback(() => {
     refetch();
-  }, [refetch]);
+    onItemLogged?.();
+  }, [refetch, onItemLogged]);
 
   const handleModalClose = useCallback(() => {
     setLogTarget(null);

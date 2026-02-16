@@ -325,6 +325,40 @@ describe('TodayTile', () => {
     expect(screen.queryByTestId('log-modal')).not.toBeInTheDocument();
   });
 
+  it('calls refetchLogs when refreshSignal changes', () => {
+    const refetchLogs = vi.fn();
+    mockHistoryData({ logs: [], refetchLogs });
+
+    const { rerender } = render(
+      <MemoryRouter>
+        <TodayTile refreshSignal={0} />
+      </MemoryRouter>,
+    );
+
+    expect(refetchLogs).not.toHaveBeenCalled();
+
+    rerender(
+      <MemoryRouter>
+        <TodayTile refreshSignal={1} />
+      </MemoryRouter>,
+    );
+
+    expect(refetchLogs).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call refetchLogs on initial render with refreshSignal', () => {
+    const refetchLogs = vi.fn();
+    mockHistoryData({ logs: [], refetchLogs });
+
+    render(
+      <MemoryRouter>
+        <TodayTile refreshSignal={0} />
+      </MemoryRouter>,
+    );
+
+    expect(refetchLogs).not.toHaveBeenCalled();
+  });
+
   it('shows empty state when backend returns only yesterday logs', () => {
     const yesterdayTimestamp = Date.now() / 1000 - 24 * 3600;
     const yesterdayLogs: ApiLogEntry[] = [

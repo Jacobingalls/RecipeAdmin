@@ -234,6 +234,23 @@ describe('FavoritesTile', () => {
     });
   });
 
+  it('calls onItemLogged after saving from modal', async () => {
+    const onItemLogged = vi.fn();
+    mockUseFavorites.mockReturnValue({
+      ...defaultContextValue,
+      favorites: sampleFavorites,
+    });
+
+    renderWithRouter(<FavoritesTile onItemLogged={onItemLogged} />);
+
+    fireEvent.click(screen.getByTestId('log-fav1'));
+    fireEvent.click(screen.getByTestId('modal-saved'));
+
+    await waitFor(() => {
+      expect(onItemLogged).toHaveBeenCalled();
+    });
+  });
+
   it('closes modal when onClose is triggered', async () => {
     mockUseFavorites.mockReturnValue({
       ...defaultContextValue,
