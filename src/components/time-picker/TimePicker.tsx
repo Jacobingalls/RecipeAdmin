@@ -5,6 +5,8 @@ import {
   BLOCKS,
   getNowMinutes,
   dayMinutesToEpoch,
+  epochToDayMinutes,
+  blockForMinutes,
   formatTriggerLabel,
   determineInitialView,
 } from './timeBlocks';
@@ -198,8 +200,15 @@ export default function TimePicker({ value, onChange }: TimePickerProps) {
 
   function handleSelectPreset(minutesAgo: number) {
     const epoch = Math.floor(Date.now() / 1000) - minutesAgo * 60;
-    onChange(epoch);
-    handleClose();
+    const { dayOffset: presetDayOffset, minutes } = epochToDayMinutes(epoch);
+    const roundedMinutes = Math.round(minutes / 5) * 5;
+    const blockIdx = blockForMinutes(roundedMinutes);
+
+    setDayOffset(presetDayOffset);
+    setSelectedBlockIdx(blockIdx);
+    setInitialSliderMinutes(roundedMinutes);
+    onChange(dayMinutesToEpoch(presetDayOffset, roundedMinutes));
+    navigateTo('slider');
   }
 
   function handleSelectDay(offset: number) {
