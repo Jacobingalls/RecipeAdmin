@@ -1,2 +1,15 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+
+[data-bs-theme='light'] {
+  --sparkline-card-bg: rgba(0, 0, 0, 0.02);
+}
+
+[data-bs-theme='dark'] {
+  --sparkline-card-bg: rgba(0, 0, 0, 0.2);
+}
+
+.sparkline-card {
+  background-color: var(--sparkline-card-bg);
+  border: 1px solid var(--bs-card-border-color);
+}

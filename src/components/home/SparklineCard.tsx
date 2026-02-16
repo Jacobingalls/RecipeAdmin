@@ -99,12 +99,8 @@ export default function SparklineCard({
 
   return (
     <div
-      className="position-relative rounded-3 overflow-hidden"
+      className="sparkline-card position-relative rounded-3 overflow-hidden"
       data-testid={`sparkline-card-${label.toLowerCase()}`}
-      style={{
-        backgroundColor: 'var(--bs-dark-bg-subtle)',
-        border: '1px solid var(--bs-card-border-color)',
-      }}
     >
       <svg
         viewBox="0 0 24 1"
