@@ -7,22 +7,9 @@ import { logEntry, updateLogEntry } from '../api';
 import { ModalBase, ModalHeader, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
 import ServingSizeSelector from './ServingSizeSelector';
+import { TimePicker } from './time-picker';
 
-/** Convert epoch seconds to a datetime-local input value string. */
-export function epochToDatetimeLocal(epoch: number): string {
-  const date = new Date(epoch * 1000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-/** Convert a datetime-local input value string to epoch seconds. */
-export function datetimeLocalToEpoch(value: string): number {
-  return new Date(value).getTime() / 1000;
-}
+export { epochToDatetimeLocal, datetimeLocalToEpoch } from './time-picker/timeBlocks';
 
 export interface LogTarget {
   name: string;
@@ -124,7 +111,7 @@ function LogModalInner({
   }
 
   return (
-    <ModalBase onClose={onClose} ariaLabelledBy="log-modal-title" scrollable>
+    <ModalBase onClose={onClose} ariaLabelledBy="log-modal-title" scrollable maxWidth={700}>
       <ModalHeader onClose={onClose} titleId="log-modal-title">
         {target.brand && (
           <span className="text-secondary small d-block fw-normal">{target.brand}</span>
@@ -133,7 +120,17 @@ function LogModalInner({
       </ModalHeader>
       <div className="modal-body border-bottom py-2 flex-shrink-0 overflow-visible">
         <div className="d-flex justify-content-between align-items-end">
-          <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
+          <div className="d-flex align-items-end gap-2 flex-wrap">
+            <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
+            <div className="col-auto">
+              <label htmlFor="log-when" className="form-label small mb-1">
+                When
+              </label>
+              <div id="log-when">
+                <TimePicker value={timestamp} onChange={setTimestamp} />
+              </div>
+            </div>
+          </div>
           <div>
             {logError && (
               <div className="text-danger small me-auto" role="alert">
@@ -149,18 +146,6 @@ function LogModalInner({
               {getButtonLabel(logState, isEdit)}
             </button>
           </div>
-        </div>
-        <div className="mt-2">
-          <label htmlFor="log-timestamp" className="form-label small text-secondary mb-0">
-            Date and time
-          </label>
-          <input
-            id="log-timestamp"
-            type="datetime-local"
-            className="form-control form-control-sm"
-            value={epochToDatetimeLocal(timestamp)}
-            onChange={(e) => setTimestamp(datetimeLocalToEpoch(e.target.value))}
-          />
         </div>
       </div>
       <ModalBody>

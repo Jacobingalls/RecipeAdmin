@@ -10,6 +10,7 @@ interface ModalBaseProps {
   ariaLabel?: string;
   ariaLabelledBy?: string;
   scrollable?: boolean;
+  maxWidth?: number;
 }
 
 /**
@@ -30,6 +31,7 @@ export default function ModalBase({
   ariaLabel,
   ariaLabelledBy,
   scrollable = false,
+  maxWidth,
 }: ModalBaseProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<Element | null>(null);
@@ -113,6 +115,7 @@ export default function ModalBase({
       >
         <div
           className={`modal-dialog modal-dialog-centered${scrollable ? ' modal-dialog-scrollable' : ''}`}
+          style={maxWidth ? { maxWidth } : undefined}
         >
           <div className="modal-content">{children}</div>
         </div>

@@ -25,6 +25,16 @@ vi.mock('./ServingSizeSelector', () => ({
   ),
 }));
 
+vi.mock('./time-picker', () => ({
+  TimePicker: ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
+    <div data-testid="time-picker" data-value={value}>
+      <button data-testid="change-time" onClick={() => onChange(value + 60)}>
+        Change time
+      </button>
+    </div>
+  ),
+}));
+
 const mockLogEntry = vi.mocked(logEntry);
 const mockUpdateLogEntry = vi.mocked(updateLogEntry);
 
@@ -133,26 +143,26 @@ describe('LogModal', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('renders datetime input with label', () => {
+  it('renders time picker with When label', () => {
     render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
-    expect(screen.getByLabelText('Date and time')).toBeInTheDocument();
-    expect(screen.getByLabelText('Date and time')).toHaveAttribute('type', 'datetime-local');
+    expect(screen.getByText('When')).toBeInTheDocument();
+    expect(screen.getByTestId('time-picker')).toBeInTheDocument();
   });
 
-  it('defaults datetime to current time when no initialTimestamp', () => {
+  it('defaults timestamp to current time when no initialTimestamp', () => {
     const fixedNow = new Date(2025, 5, 15, 12, 0).getTime();
     const spy = vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
     render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
-    const input = screen.getByLabelText('Date and time') as HTMLInputElement;
-    expect(input.value).toBe(epochToDatetimeLocal(Math.floor(fixedNow / 1000)));
+    const picker = screen.getByTestId('time-picker');
+    expect(picker).toHaveAttribute('data-value', String(Math.floor(fixedNow / 1000)));
     spy.mockRestore();
   });
 
   it('uses initialTimestamp when provided', () => {
     const ts = new Date(2025, 0, 10, 8, 30).getTime() / 1000;
     render(<LogModal target={makeTarget({ initialTimestamp: ts })} onClose={vi.fn()} />);
-    const input = screen.getByLabelText('Date and time') as HTMLInputElement;
-    expect(input.value).toBe('2025-01-10T08:30');
+    const picker = screen.getByTestId('time-picker');
+    expect(picker).toHaveAttribute('data-value', String(ts));
   });
 
   it('sends timestamp on create', async () => {

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Picker v6</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #f5f5f5; padding: 2rem; font-family: system-ui, -apple-system, sans-serif; }
+
+    .mockup-stage {
+      max-width: 380px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .mockup-label {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 1.25rem;
+      font-style: italic;
+    }
+    .variant-divider {
+      text-align: center;
+      margin: 2.5rem 0 1.5rem;
+      color: #999;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .variant-divider::before { content: '\2014\2014\2014  '; }
+    .variant-divider::after { content: '  \2014\2014\2014'; }
+
+    /* Trigger */
+    .time-trigger {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 8px;
+      background: white; cursor: pointer; font-size: 0.9rem; color: #333;
+      width: 100%; transition: border-color 0.15s;
+    }
+    .time-trigger:hover { border-color: #adb5bd; }
+    .time-trigger.active { border-color: #0d6efd; }
+    .time-trigger .bi-clock { color: #6c757d; }
+    .time-trigger.active .bi-clock { color: #0d6efd; }
+    .time-trigger .chevron { margin-left: auto; color: #adb5bd; font-size: 0.75rem; }
+    .time-trigger.active .chevron { color: #0d6efd; }
+
+    /* Popover */
+    .time-popover {
+      margin-top: 0.5rem; background: white; border: 1px solid #dee2e6;
+      border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); overflow: hidden;
+    }
+
+    /* iOS-style nav bar */
+    .nav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 0.75rem; border-bottom: 1px solid #f0f0f0; background: #fafafa;
+      min-height: 2.25rem;
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: 0.125rem;
+      color: #0d6efd; font-size: 0.8rem; font-weight: 500;
+      cursor: pointer; border: none; background: none; padding: 0.125rem 0;
+    }
+    .nav-back:hover { text-decoration: underline; }
+    .nav-back i { font-size: 0.7rem; }
+    .nav-title {
+      font-size: 0.85rem; font-weight: 600; color: #333;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-bar-inner { position: relative; display: flex; align-items: center; width: 100%; }
+
+    /* Block nav (centered title with arrows) */
+    .block-nav-center {
+      display: flex; align-items: center; gap: 0.5rem;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .block-nav-arrow {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.5rem; height: 1.5rem; border-radius: 6px;
+      border: none; background: transparent; color: #0d6efd;
+      cursor: pointer; font-size: 0.75rem; padding: 0; transition: background 0.1s;
+    }
+    .block-nav-arrow:hover { background: #e8f0fe; }
+    .block-nav-arrow.disabled { color: #ddd; cursor: default; }
+    .block-nav-arrow.disabled:hover { background: transparent; }
+    .block-title { font-size: 0.85rem; font-weight: 600; color: #333; white-space: nowrap; }
+
+    /* Popover content area */
+    .drill-content { padding: 0.75rem 0.5rem; }
+
+    /* Option rows */
+    .drill-row {
+      display: flex; align-items: center; padding: 0.5rem 0.625rem;
+      cursor: pointer; border-radius: 8px; transition: background 0.1s; gap: 0.5rem;
+    }
+    .drill-row:hover { background: #f5f7fa; }
+    .drill-row .row-icon { width: 1.75rem; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+    .drill-row .row-label { flex: 1; font-size: 0.875rem; color: #333; }
+    .drill-row .row-hint { font-size: 0.75rem; color: #aaa; margin-right: 0.25rem; }
+    .drill-row .row-chevron { color: #ccc; font-size: 0.65rem; }
+    .drill-row.disabled { opacity: 0.35; cursor: default; }
+    .drill-row.disabled:hover { background: transparent; }
+
+    /* Time-of-day icon colors (night -> sunrise -> day -> sunset -> night) */
+    .icon-late-night { color: #6366f1; }
+    .icon-morning   { color: #f59e0b; }
+    .icon-midday    { color: #eab308; }
+    .icon-afternoon { color: #f97316; }
+    .icon-evening   { color: #ef4444; }
+    .icon-night     { color: #8b5cf6; }
+
+    /* Chips */
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 0.375rem; padding: 0.25rem 0.375rem; }
+    .time-chip {
+      padding: 0.375rem 0.75rem; border-radius: 20px; border: 1px solid #e0e0e0;
+      background: #fafafa; font-size: 0.825rem; cursor: pointer;
+      transition: all 0.15s; color: #444; white-space: nowrap;
+    }
+    .time-chip:hover { background: #e8f0fe; border-color: #a8c7fa; }
+    .time-chip.selected { background: #0d6efd; color: white; border-color: #0d6efd; }
+
+    .section-divider { height: 1px; background: #f0f0f0; margin: 0.5rem 0.625rem; }
+
+    .drill-footer { border-top: 1px solid #f0f0f0; padding: 0.5rem 0.75rem; }
+    .custom-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.25rem; cursor: pointer; border-radius: 6px;
+      font-size: 0.825rem; color: #6c757d; transition: background 0.1s;
+    }
+    .custom-row:hover { background: #f8f9fa; color: #333; }
+
+    .annotation {
+      background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;
+      padding: 0.75rem 1rem; margin-top: 1rem; font-size: 0.8rem;
+      color: #664d03; line-height: 1.5;
+    }
+    .annotation strong { color: #332700; }
+
+    /* ===== TIME SLIDER ===== */
+    .slider-section { padding: 1rem 1rem 0.75rem; }
+
+    .slider-time-display {
+      text-align: center; font-size: 1.5rem; font-weight: 600; color: #333;
+      margin-bottom: 0.25rem; font-variant-numeric: tabular-nums;
+    }
+    .slider-time-display .period {
+      font-size: 0.9rem; font-weight: 500; color: #666; margin-left: 0.125rem;
+    }
+
+    .slider-track-container { position: relative; padding: 0.75rem 0; }
+
+    /* Range input — z-index 3 so thumb renders above now-dot (z-index 2) */
+    .time-slider {
+      -webkit-appearance: none; appearance: none; width: 100%; height: 12px;
+      border-radius: 6px; background: #e9ecef; outline: none; cursor: pointer;
+      position: relative; z-index: 3;
+    }
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 28px; height: 28px;
+      border-radius: 50%; background: #0d6efd; border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(13,110,253,0.35); cursor: grab;
+      position: relative; z-index: 4;
+    }
+    .time-slider::-webkit-slider-thumb:hover {
+      box-shadow: 0 2px 12px rgba(13,110,253,0.5);
+    }
+    .time-slider::-webkit-slider-thumb:active {
+      cursor: grabbing; box-shadow: 0 2px 16px rgba(13,110,253,0.6);
+    }
+    .time-slider::-moz-range-thumb {
+      width: 28px; height: 28px; border-radius: 50%; background: #0d6efd;
+      border: 3px solid white; box-shadow: 0 2px 8px rgba(13,110,253,0.35); cursor: grab;
+    }
+
+    /* Track coloring for past-only blocks (no now marker) */
+    .time-slider.no-now {
+      background: linear-gradient(to right,
+        #a8c7fa var(--fill),
+        #e9ecef var(--fill)
+      );
+    }
+    /* has-now: slider track is transparent; visible-track div draws the rounded bar */
+    .time-slider.has-now {
+      background: transparent;
+    }
+
+    /* Visible track overlay — rounded bar whose cap center aligns with now */
+    .visible-track {
+      position: absolute;
+      top: 50%; left: 0;
+      height: 12px;
+      border-radius: 6px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      z-index: 1;
+      /* Extend 6px past now so the rounded cap center sits at now */
+      width: calc(var(--now-pos) + 6px);
+      background: linear-gradient(to right,
+        #a8c7fa var(--fill-in-track),
+        #e9ecef var(--fill-in-track)
+      );
+    }
+
+    /* "Now" dot — sits on the rounded track cap center, behind the grabber */
+    .now-dot {
+      position: absolute;
+      top: 50%;
+      width: 8px; height: 8px;
+      background: #dc3545;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .now-label {
+      position: absolute;
+      bottom: -0.85rem;
+      font-size: 0.5rem;
+      font-weight: 700;
+      color: rgba(220, 53, 69, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transform: translateX(-50%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Hour tick marks */
+    .slider-ticks {
+      display: flex; justify-content: space-between;
+      padding: 0 2px; margin-top: 0.375rem;
+    }
+    .slider-tick {
+      display: flex; flex-direction: column; align-items: center; gap: 0.125rem;
+    }
+    .slider-tick .tick-mark { width: 1px; height: 8px; background: #ccc; }
+    .slider-tick .tick-label { font-size: 0.65rem; color: #aaa; white-space: nowrap; }
+
+    /* Confirm button */
+    .slider-confirm { display: flex; justify-content: center; padding: 0.5rem 1rem 0.75rem; }
+    .confirm-btn {
+      padding: 0.5rem 2rem; border-radius: 8px; border: none; background: #0d6efd;
+      color: white; font-size: 0.875rem; font-weight: 500; cursor: pointer;
+      transition: background 0.15s; width: 100%;
+    }
+    .confirm-btn:hover { background: #0b5ed7; }
+
+    /* ===== INTERACTIVE DEMO ===== */
+    .demo-popover {
+      margin-top: 0.5rem; background: white; border: 1px solid #dee2e6;
+      border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); overflow: hidden;
+    }
+
+    /* Sliding tick track */
+    .demo-ticks-wrapper {
+      position: relative;
+      overflow: hidden;
+      min-height: 1.5rem;
+    }
+    .demo-ticks-track {
+      display: flex;
+    }
+    .demo-ticks-track > .slider-ticks {
+      flex: 0 0 100%;
+      min-width: 100%;
+    }
+
+    /* Grace edge glow — gentle blue gradient on card edge */
+    .grace-glow {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 60px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+    .grace-glow.visible { opacity: 1; }
+    .grace-glow-left {
+      left: 0;
+      border-radius: 12px 0 0 12px;
+      background: linear-gradient(to right, rgba(13, 110, 253, 0.18), transparent);
+    }
+    .grace-glow-right {
+      right: 0;
+      border-radius: 0 12px 12px 0;
+      background: linear-gradient(to left, rgba(13, 110, 253, 0.18), transparent);
+    }
+  </style>
+</head>
+<body>
+
+  <h4 class="text-center mb-1">Time Picker v6</h4>
+  <p class="text-center text-muted mb-4" style="font-size:0.85rem">Auto-navigation in grace zones with debounced transitions</p>
+
+  <!-- ============================================ -->
+  <!-- INTERACTIVE DEMO -->
+  <!-- ============================================ -->
+  <div class="mockup-stage mb-3" id="interactive-demo">
+    <div class="mockup-label">Interactive demo — drag through buffer zones (hold the grabber!)</div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;">
+      <label style="font-size: 0.85rem; font-weight: 500; color: #555; white-space: nowrap;">When</label>
+      <div class="time-trigger active">
+        <i class="bi bi-clock"></i>
+        <span id="demo-trigger">Today, 12:00 PM</span>
+        <i class="bi bi-chevron-up chevron"></i>
+      </div>
+    </div>
+
+    <div class="demo-popover" style="position: relative;">
+      <div class="grace-glow grace-glow-left" id="demo-glow-left"></div>
+      <div class="grace-glow grace-glow-right" id="demo-glow-right"></div>
+      <div class="nav-bar">
+        <div class="nav-bar-inner">
+          <button class="nav-back">
+            <i class="bi bi-chevron-left"></i> Today
+          </button>
+          <div class="block-nav-center">
+            <button class="block-nav-arrow" id="demo-prev" onclick="demoNavBlock(-1)"><i class="bi bi-chevron-left"></i></button>
+            <span class="block-title" id="demo-block-title">Midday</span>
+            <button class="block-nav-arrow" id="demo-next" onclick="demoNavBlock(1)"><i class="bi bi-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-section">
+        <div class="slider-time-display" id="demo-time-display">
+          12:00 <span class="period">PM</span>
+        </div>
+
+        <div class="slider-track-container">
+          <!-- Single persistent slider — never gets destroyed -->
+          <input type="range" class="time-slider no-now"
+                 id="demo-slider"
+                 min="570" max="870" value="720" step="5"
+                 style="--fill: 50%"
+                 oninput="demoSliderInput(this)">
+        </div>
+
+        <div class="demo-ticks-wrapper">
+          <div class="demo-ticks-track" id="demo-ticks-track">
+            <div class="slider-ticks" id="demo-ticks"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-confirm">
+        <button class="confirm-btn"><i class="bi bi-check2"></i> Set time</button>
+      </div>
+    </div>
+
+    <div class="annotation" style="margin-top: 1rem;">
+      <strong>Try it:</strong> Grab the slider and drag it into the buffer zone past the last tick mark. The grace indicator appears, but the block won't switch while you're holding. Release to switch to the adjacent block.
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- STATIC EXAMPLES (same as v5) -->
+  <!-- ============================================ -->
+  <div class="variant-divider">Static examples from v5</div>
+
+  <!-- LEVEL 0: Root -->
+  <div class="mockup-stage mb-3" id="level0">
+    <div class="mockup-label">Level 0 — Root</div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;">
+      <label style="font-size: 0.85rem; font-weight: 500; color: #555; white-space: nowrap;">When</label>
+      <div class="time-trigger active">
+        <i class="bi bi-clock"></i>
+        <span>Now</span>
+        <i class="bi bi-chevron-up chevron"></i>
+      </div>
+    </div>
+
+    <div class="time-popover">
+      <div class="drill-content">
+        <div class="chip-grid">
+          <span class="time-chip selected">Now</span>
+          <span class="time-chip">15m ago</span>
+          <span class="time-chip">30m ago</span>
+          <span class="time-chip">1hr ago</span>
+          <span class="time-chip">2hr ago</span>
+          <span class="time-chip">3hr ago</span>
+        </div>
+        <div class="section-divider"></div>
+        <div class="drill-row" onclick="scrollToLevel('level1')">
+          <span class="row-icon"><i class="bi bi-sun icon-midday"></i></span>
+          <span class="row-label">Today</span>
+          <span class="row-hint">Feb 15</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+        <div class="drill-row">
+          <span class="row-icon"><i class="bi bi-clock-history" style="color: #6c757d;"></i></span>
+          <span class="row-label">Yesterday</span>
+          <span class="row-hint">Feb 14</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+      </div>
+      <div class="drill-footer">
+        <div class="custom-row">
+          <i class="bi bi-calendar3"></i>
+          <span>Pick a specific date & time...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL 1: Today > Time blocks -->
+  <div class="variant-divider">Drill into "Today"</div>
+
+  <div class="mockup-stage mb-3" id="level1">
+    <div class="mockup-label">Level 1 — Full day, colored icons</div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;">
+      <label style="font-size: 0.85rem; font-weight: 500; color: #555; white-space: nowrap;">When</label>
+      <div class="time-trigger active">
+        <i class="bi bi-clock"></i>
+        <span>Now</span>
+        <i class="bi bi-chevron-up chevron"></i>
+      </div>
+    </div>
+
+    <div class="time-popover">
+      <div class="nav-bar">
+        <div class="nav-bar-inner">
+          <button class="nav-back" onclick="scrollToLevel('level0')">
+            <i class="bi bi-chevron-left"></i> When
+          </button>
+          <span class="nav-title">Today</span>
+        </div>
+      </div>
+      <div class="drill-content">
+        <div class="drill-row">
+          <span class="row-icon"><i class="bi bi-moon-stars icon-late-night"></i></span>
+          <span class="row-label">Late Night</span>
+          <span class="row-hint">12 – 5 AM</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+        <div class="drill-row">
+          <span class="row-icon"><i class="bi bi-sunrise icon-morning"></i></span>
+          <span class="row-label">Morning</span>
+          <span class="row-hint">5 – 10 AM</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+        <div class="drill-row" onclick="scrollToLevel('level2')">
+          <span class="row-icon"><i class="bi bi-sun icon-midday"></i></span>
+          <span class="row-label">Midday</span>
+          <span class="row-hint">10 AM – 2 PM</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+        <div class="drill-row" onclick="scrollToLevel('level2now')">
+          <span class="row-icon"><i class="bi bi-cloud-sun icon-afternoon"></i></span>
+          <span class="row-label">Afternoon</span>
+          <span class="row-hint">2 – 5 PM</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+        <div class="drill-row disabled">
+          <span class="row-icon"><i class="bi bi-sunset icon-evening"></i></span>
+          <span class="row-label">Evening</span>
+          <span class="row-hint">5 – 9 PM</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+        <div class="drill-row disabled">
+          <span class="row-icon"><i class="bi bi-moon icon-night"></i></span>
+          <span class="row-label">Night</span>
+          <span class="row-hint">9 PM – 12 AM</span>
+          <i class="bi bi-chevron-right row-chevron"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL 2: Afternoon slider (NOW MARKER + CLAMP) -->
+  <div class="variant-divider">Afternoon (current block)</div>
+
+  <div class="mockup-stage mb-3" id="level2now">
+    <div class="mockup-label">Truncated track at now, red dot end cap, clamped</div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;">
+      <label style="font-size: 0.85rem; font-weight: 500; color: #555; white-space: nowrap;">When</label>
+      <div class="time-trigger active">
+        <i class="bi bi-clock"></i>
+        <span id="trigger-label-2">Today, 3:15 PM</span>
+        <i class="bi bi-chevron-up chevron"></i>
+      </div>
+    </div>
+
+    <div class="time-popover">
+      <div class="nav-bar">
+        <div class="nav-bar-inner">
+          <button class="nav-back" onclick="scrollToLevel('level1')">
+            <i class="bi bi-chevron-left"></i> Today
+          </button>
+          <div class="block-nav-center">
+            <button class="block-nav-arrow" title="Midday"><i class="bi bi-chevron-left"></i></button>
+            <span class="block-title">Afternoon</span>
+            <button class="block-nav-arrow disabled" title="Evening (future)"><i class="bi bi-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-section">
+        <div class="slider-time-display" id="time-display-2">
+          3:15 <span class="period">PM</span>
+        </div>
+
+        <div class="slider-track-container">
+          <div class="visible-track" id="visible-track-2"
+               style="--now-pos: 47.9%; --fill-in-track: 91.3%"></div>
+          <div class="now-dot" style="left: 47.9%;"></div>
+          <span class="now-label" style="left: 47.9%;">NOW</span>
+          <input type="range" class="time-slider has-now"
+                 id="slider-2"
+                 min="810" max="1050" value="915" step="5"
+                 style="--fill: 43.75%"
+                 oninput="updateSliderWithNow(this, 'time-display-2', 'trigger-label-2', 'visible-track-2', 'Today', 925)">
+        </div>
+
+        <div class="slider-ticks" style="padding-left: 12.5%; padding-right: 12.5%">
+          <div class="slider-tick">
+            <div class="tick-mark"></div>
+            <span class="tick-label">2 PM</span>
+          </div>
+          <div class="slider-tick">
+            <div class="tick-mark"></div>
+            <span class="tick-label">3 PM</span>
+          </div>
+          <div class="slider-tick">
+            <div class="tick-mark"></div>
+            <span class="tick-label">4 PM</span>
+          </div>
+          <div class="slider-tick">
+            <div class="tick-mark"></div>
+            <span class="tick-label">5 PM</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-confirm">
+        <button class="confirm-btn"><i class="bi bi-check2"></i> Set time</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== BLOCK DEFINITIONS ===== */
+    const BLOCKS = [
+      { name: 'Late Night', icon: 'bi-moon-stars', iconClass: 'icon-late-night', coreStart: 0,    coreEnd: 300  },
+      { name: 'Morning',    icon: 'bi-sunrise',    iconClass: 'icon-morning',    coreStart: 300,  coreEnd: 600  },
+      { name: 'Midday',     icon: 'bi-sun',         iconClass: 'icon-midday',     coreStart: 600,  coreEnd: 840  },
+      { name: 'Afternoon',  icon: 'bi-cloud-sun',   iconClass: 'icon-afternoon',  coreStart: 840,  coreEnd: 1020 },
+      { name: 'Evening',    icon: 'bi-sunset',      iconClass: 'icon-evening',    coreStart: 1020, coreEnd: 1260 },
+      { name: 'Night',      icon: 'bi-moon',         iconClass: 'icon-night',      coreStart: 1260, coreEnd: 1440 },
+    ];
+    const BUFFER = 30; // minutes
+    const DEBOUNCE_MS = 800;
+
+    /* ===== DEMO STATE ===== */
+    let currentBlockIdx = 2; // Start on Midday
+    let graceTimer = null;
+    let currentMinutes = 720; // 12:00 PM
+    let isDragging = false;
+    let pendingGraceIdx = null; // target block index while held in buffer
+    let springAnimId = null; // active spring animation frame
+
+    function blockSliderMin(idx) { return Math.max(0, BLOCKS[idx].coreStart - BUFFER); }
+    function blockSliderMax(idx) { return Math.min(1440, BLOCKS[idx].coreEnd + BUFFER); }
+
+    function formatTime(totalMinutes) {
+      const h24 = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      const period = h24 >= 12 ? 'PM' : 'AM';
+      const h12 = h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24;
+      return { h12, m, period, display: `${h12}:${m.toString().padStart(2,'0')}`, full: `${h12}:${m.toString().padStart(2,'0')} ${period}` };
+    }
+
+    function buildCoreTicks(block) {
+      const ticks = [];
+      let startHour = Math.ceil(block.coreStart / 60);
+      let endHour = Math.floor(block.coreEnd / 60);
+      for (let h = startHour; h <= endHour; h++) {
+        const t = formatTime(h * 60);
+        ticks.push(`<div class="slider-tick"><div class="tick-mark"></div><span class="tick-label">${t.h12} ${t.period}</span></div>`);
+      }
+      return ticks.join('');
+    }
+
+    function tickPadding(idx) {
+      const sliderMin = blockSliderMin(idx);
+      const sliderMax = blockSliderMax(idx);
+      const totalRange = sliderMax - sliderMin;
+      const left = ((BLOCKS[idx].coreStart - sliderMin) / totalRange) * 100;
+      const right = ((sliderMax - BLOCKS[idx].coreEnd) / totalRange) * 100;
+      return { left, right };
+    }
+
+    /* Sync the single slider to the current block */
+    function syncSlider() {
+      const slider = document.getElementById('demo-slider');
+      const sliderMin = blockSliderMin(currentBlockIdx);
+      const sliderMax = blockSliderMax(currentBlockIdx);
+      slider.min = sliderMin;
+      slider.max = sliderMax;
+      slider.value = Math.max(sliderMin, Math.min(sliderMax, currentMinutes));
+      const fillPct = ((slider.value - sliderMin) / (sliderMax - sliderMin)) * 100;
+      slider.style.setProperty('--fill', fillPct + '%');
+    }
+
+    /* Update ticks immediately */
+    function updateTicks() {
+      const ticksEl = document.getElementById('demo-ticks');
+      const block = BLOCKS[currentBlockIdx];
+      const pad = tickPadding(currentBlockIdx);
+      ticksEl.innerHTML = buildCoreTicks(block);
+      ticksEl.style.paddingLeft = pad.left + '%';
+      ticksEl.style.paddingRight = pad.right + '%';
+    }
+
+    function updateDemoDisplay() {
+      const t = formatTime(currentMinutes);
+      document.getElementById('demo-time-display').innerHTML =
+        `${t.display} <span class="period">${t.period}</span>`;
+      document.getElementById('demo-trigger').textContent = `Today, ${t.full}`;
+    }
+
+    function updateDemoNav() {
+      document.getElementById('demo-block-title').textContent = BLOCKS[currentBlockIdx].name;
+      document.getElementById('demo-prev').classList.toggle('disabled', currentBlockIdx === 0);
+      document.getElementById('demo-next').classList.toggle('disabled', currentBlockIdx === BLOCKS.length - 1);
+    }
+
+    /* Called on every slider input event */
+    function demoSliderInput(slider) {
+      if (springAnimId) { cancelAnimationFrame(springAnimId); springAnimId = null; slider.step = 5; cleanupTickSlide(); }
+      const val = parseInt(slider.value);
+      currentMinutes = val;
+
+      const sliderMin = parseInt(slider.min);
+      const sliderMax = parseInt(slider.max);
+      const fillPct = ((val - sliderMin) / (sliderMax - sliderMin)) * 100;
+      slider.style.setProperty('--fill', fillPct + '%');
+
+      updateDemoDisplay();
+
+      // Check grace zones — show edge glow
+      const block = BLOCKS[currentBlockIdx];
+      const inLeftGrace = val < block.coreStart && currentBlockIdx > 0;
+      const inRightGrace = val > block.coreEnd && currentBlockIdx < BLOCKS.length - 1;
+      const glowL = document.getElementById('demo-glow-left');
+      const glowR = document.getElementById('demo-glow-right');
+
+      if (inLeftGrace || inRightGrace) {
+        const targetIdx = inLeftGrace ? currentBlockIdx - 1 : currentBlockIdx + 1;
+        glowL.classList.toggle('visible', inLeftGrace);
+        glowR.classList.toggle('visible', inRightGrace);
+        pendingGraceIdx = targetIdx;
+
+        if (!isDragging) {
+          clearTimeout(graceTimer);
+          graceTimer = setTimeout(() => switchBlock(targetIdx), DEBOUNCE_MS);
+        }
+      } else {
+        glowL.classList.remove('visible');
+        glowR.classList.remove('visible');
+        pendingGraceIdx = null;
+        clearTimeout(graceTimer);
+      }
+    }
+
+    /* Switch block context — slider element stays, ticks/title crossfade */
+    function switchBlock(targetIdx) {
+      const slider = document.getElementById('demo-slider');
+      const oldMin = parseInt(slider.min);
+      const oldMax = parseInt(slider.max);
+      const oldPct = ((currentMinutes - oldMin) / (oldMax - oldMin)) * 100;
+      const direction = targetIdx > currentBlockIdx ? 1 : -1;
+
+      document.getElementById('demo-glow-left').classList.remove('visible');
+      document.getElementById('demo-glow-right').classList.remove('visible');
+
+      currentBlockIdx = targetIdx;
+      const newMin = blockSliderMin(targetIdx);
+      const newMax = blockSliderMax(targetIdx);
+      slider.min = newMin;
+      slider.max = newMax;
+
+      const finalValue = Math.max(newMin, Math.min(newMax, currentMinutes));
+      const newPct = ((finalValue - newMin) / (newMax - newMin)) * 100;
+
+      // Set up tick slide — add new ticks beside old
+      setupTickSlide(targetIdx, direction);
+
+      // Spring animate thumb + ticks together
+      springAnimate(slider, oldPct, newPct, newMin, newMax, finalValue, direction);
+
+      updateDemoNav();
+      updateDemoDisplay();
+    }
+
+    /* Prepare tick track for sliding animation */
+    function setupTickSlide(targetIdx, direction) {
+      const track = document.getElementById('demo-ticks-track');
+      const oldTicks = document.getElementById('demo-ticks');
+
+      // Build new ticks
+      const newBlock = BLOCKS[targetIdx];
+      const pad = tickPadding(targetIdx);
+      const newTicks = document.createElement('div');
+      newTicks.className = 'slider-ticks';
+      newTicks.id = 'demo-ticks';
+      newTicks.innerHTML = buildCoreTicks(newBlock);
+      newTicks.style.paddingLeft = pad.left + '%';
+      newTicks.style.paddingRight = pad.right + '%';
+
+      oldTicks.removeAttribute('id');
+
+      if (direction > 0) {
+        // Going right → new ticks after old
+        track.appendChild(newTicks);
+      } else {
+        // Going left → new ticks before old, start shifted
+        track.insertBefore(newTicks, oldTicks);
+        track.style.transform = 'translateX(-100%)';
+      }
+    }
+
+    /* Clean up after tick slide */
+    function cleanupTickSlide() {
+      const track = document.getElementById('demo-ticks-track');
+      // Remove old ticks (the one without id)
+      const children = Array.from(track.children);
+      children.forEach(child => {
+        if (!child.id) child.remove();
+      });
+      track.style.transform = '';
+    }
+
+    /* Spring animation — slider thumb + tick track slide together */
+    function springAnimate(slider, fromPct, toPct, sliderMin, sliderMax, finalValue, direction) {
+      if (springAnimId) cancelAnimationFrame(springAnimId);
+
+      slider.step = 1; // smooth motion during animation
+      const track = document.getElementById('demo-ticks-track');
+      const duration = 450;
+      const startTime = performance.now();
+
+      // Tick track: slide from old position to new
+      const trackFrom = direction > 0 ? 0 : -100;
+      const trackTo = direction > 0 ? -100 : 0;
+
+      function easeOutBack(t) {
+        const c1 = 0.8;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+      }
+
+      function tick(now) {
+        const t = Math.min((now - startTime) / duration, 1);
+        const eased = easeOutBack(t);
+
+        // Slider thumb
+        const pct = fromPct + (toPct - fromPct) * eased;
+        const clampedPct = Math.max(0, Math.min(100, pct));
+        slider.style.setProperty('--fill', clampedPct + '%');
+        slider.value = sliderMin + (clampedPct / 100) * (sliderMax - sliderMin);
+
+        // Tick track slide
+        const trackX = trackFrom + (trackTo - trackFrom) * eased;
+        track.style.transform = `translateX(${trackX}%)`;
+
+        if (t < 1) {
+          springAnimId = requestAnimationFrame(tick);
+        } else {
+          slider.step = 5;
+          slider.value = finalValue;
+          slider.style.setProperty('--fill', ((finalValue - sliderMin) / (sliderMax - sliderMin)) * 100 + '%');
+          cleanupTickSlide();
+          springAnimId = null;
+        }
+      }
+
+      springAnimId = requestAnimationFrame(tick);
+    }
+
+    /* Arrow nav */
+    function demoNavBlock(delta) {
+      const targetIdx = currentBlockIdx + delta;
+      if (targetIdx < 0 || targetIdx >= BLOCKS.length) return;
+      clearTimeout(graceTimer);
+      const target = BLOCKS[targetIdx];
+      currentMinutes = Math.round((target.coreStart + target.coreEnd) / 2 / 5) * 5;
+      currentBlockIdx = targetIdx;
+      syncSlider();
+      updateTicks();
+      updateDemoNav();
+      updateDemoDisplay();
+    }
+
+    // Track drag state — defer block switch until release
+    const demoSlider = document.getElementById('demo-slider');
+    function onGrabStart() { isDragging = true; }
+    function onGrabEnd() {
+      isDragging = false;
+      if (pendingGraceIdx !== null) {
+        switchBlock(pendingGraceIdx);
+        pendingGraceIdx = null;
+      }
+    }
+    demoSlider.addEventListener('mousedown', onGrabStart);
+    demoSlider.addEventListener('touchstart', onGrabStart);
+    window.addEventListener('mouseup', onGrabEnd);
+    window.addEventListener('touchend', onGrabEnd);
+
+    // Initialize demo
+    syncSlider();
+    updateTicks();
+    updateDemoNav();
+    updateDemoDisplay();
+
+    /* ===== STATIC SLIDER HELPERS ===== */
+    function scrollToLevel(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateSlider(slider, displayId, triggerId, dayLabel, nowMinutes) {
+      let totalMinutes = parseInt(slider.value);
+      if (nowMinutes !== null && totalMinutes > nowMinutes) {
+        totalMinutes = nowMinutes;
+        slider.value = nowMinutes;
+      }
+      const hours24 = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      const period = hours24 >= 12 ? 'PM' : 'AM';
+      const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24;
+      const minuteStr = minutes.toString().padStart(2, '0');
+
+      document.getElementById(displayId).innerHTML =
+        `${hours12}:${minuteStr} <span class="period">${period}</span>`;
+      document.getElementById(triggerId).textContent =
+        `${dayLabel}, ${hours12}:${minuteStr} ${period}`;
+
+      const min = parseInt(slider.min);
+      const max = parseInt(slider.max);
+      const pct = ((totalMinutes - min) / (max - min)) * 100;
+      slider.style.setProperty('--fill', pct + '%');
+    }
+
+    function updateSliderWithNow(slider, displayId, triggerId, trackId, dayLabel, nowMinutes) {
+      updateSlider(slider, displayId, triggerId, dayLabel, nowMinutes);
+      // Update the visible-track fill ratio
+      const min = parseInt(slider.min);
+      const max = parseInt(slider.max);
+      const val = Math.min(parseInt(slider.value), nowMinutes);
+      const fillPct = ((val - min) / (max - min)) * 100;
+      const nowPct = ((nowMinutes - min) / (max - min)) * 100;
+      const fillInTrack = nowPct > 0 ? (fillPct / nowPct) * 100 : 0;
+      document.getElementById(trackId).style.setProperty('--fill-in-track', fillInTrack + '%');
+    }
+
+    document.querySelectorAll('.time-slider').forEach(s => {
+      if (s.id.startsWith('demo-slider-')) return;
+      const min = parseInt(s.min);
+      const max = parseInt(s.max);
+      const val = parseInt(s.value);
+      s.style.setProperty('--fill', ((val - min) / (max - min)) * 100 + '%');
+    });
+  </script>
+</body>
+</html>
