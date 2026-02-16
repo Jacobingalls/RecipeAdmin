@@ -131,7 +131,7 @@ function LogModalInner({
         )}
         {target.name}
       </ModalHeader>
-      <div className="modal-body border-bottom py-2">
+      <div className="modal-body border-bottom py-2 flex-shrink-0 overflow-visible">
         <div className="d-flex justify-content-between align-items-end">
           <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
           <div>
