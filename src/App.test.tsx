@@ -134,6 +134,12 @@ describe('App', () => {
     expect(screen.getByTestId('products-page')).toBeInTheDocument();
   });
 
+  it('redirects /admin to /admin/products', () => {
+    window.history.pushState({}, '', '/admin');
+    render(<App />);
+    expect(screen.getByTestId('products-page')).toBeInTheDocument();
+  });
+
   it('renders admin product editor on /admin/products/:id', () => {
     window.history.pushState({}, '', '/admin/products/p1');
     render(<App />);

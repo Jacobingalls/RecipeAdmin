@@ -88,7 +88,7 @@ export default function UserDropdownMenu() {
         </li>
         {isAdmin && (
           <li>
-            <Link className="dropdown-item d-flex align-items-center" to="/admin/users">
+            <Link className="dropdown-item d-flex align-items-center" to="/admin">
               <i
                 className="bi bi-shield-lock d-inline-block text-center"
                 aria-hidden="true"

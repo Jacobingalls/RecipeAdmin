@@ -285,7 +285,7 @@ describe('Header', () => {
     });
     renderWithRouter(<Header />);
     const adminLink = screen.getByRole('link', { name: /^admin$/i });
-    expect(adminLink).toHaveAttribute('href', '/admin/users');
+    expect(adminLink).toHaveAttribute('href', '/admin');
   });
 
   it('does not show Admin link when user is not admin', () => {
