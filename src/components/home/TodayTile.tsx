@@ -33,9 +33,9 @@ export default function TodayTile() {
     error,
     entryNutritionById,
     logTarget,
-    logAgainLoading,
-    editLoading,
-    deleteLoading,
+    logAgainLoadingId,
+    editLoadingId,
+    deleteLoadingId,
     handleLogAgainClick,
     handleEditClick,
     handleDeleteClick,
@@ -185,11 +185,11 @@ export default function TodayTile() {
             calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
             timeDisplay="time"
             onLogAgain={handleLogAgainClick}
-            logAgainLoading={logAgainLoading}
+            logAgainLoadingId={logAgainLoadingId}
             onEdit={handleEditClick}
-            editLoading={editLoading}
+            editLoadingId={editLoadingId}
             onDelete={handleDeleteClick}
-            deleteLoading={deleteLoading}
+            deleteLoadingId={deleteLoadingId}
           />
         ))}
       </div>

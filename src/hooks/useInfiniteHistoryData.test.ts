@@ -467,7 +467,7 @@ describe('useInfiniteHistoryData', () => {
       expect(mockGetGroup).toHaveBeenCalledWith('group-1');
     });
 
-    it('manages logAgainLoading state', async () => {
+    it('manages logAgainLoadingId state', async () => {
       mockGetLogs.mockResolvedValue([]);
       const entry = makeProductEntry('log-1', 1700000000);
       let resolveProduct: (p: ApiProduct) => void;
@@ -489,14 +489,14 @@ describe('useInfiniteHistoryData', () => {
         promise = result.current.handleLogAgainClick(entry);
       });
 
-      expect(result.current.logAgainLoading).toBe(true);
+      expect(result.current.logAgainLoadingId).toBe('log-1');
 
       await act(async () => {
         resolveProduct!(sampleProduct);
         await promise!;
       });
 
-      expect(result.current.logAgainLoading).toBe(false);
+      expect(result.current.logAgainLoadingId).toBeNull();
     });
 
     it('does not set logTarget when buildLogTarget returns null', async () => {
@@ -549,7 +549,7 @@ describe('useInfiniteHistoryData', () => {
       expect(result.current.logTarget).toHaveProperty('editEntryId', 'log-1');
     });
 
-    it('manages editLoading state', async () => {
+    it('manages editLoadingId state', async () => {
       mockGetLogs.mockResolvedValue([]);
       const entry = makeProductEntry('log-1', 1700000000);
       let resolveProduct: (p: ApiProduct) => void;
@@ -571,14 +571,14 @@ describe('useInfiniteHistoryData', () => {
         promise = result.current.handleEditClick(entry);
       });
 
-      expect(result.current.editLoading).toBe(true);
+      expect(result.current.editLoadingId).toBe('log-1');
 
       await act(async () => {
         resolveProduct!(sampleProduct);
         await promise!;
       });
 
-      expect(result.current.editLoading).toBe(false);
+      expect(result.current.editLoadingId).toBeNull();
     });
   });
 
@@ -607,7 +607,7 @@ describe('useInfiniteHistoryData', () => {
       expect(result.current.logs[0].id).toBe('log-2');
     });
 
-    it('manages deleteLoading state', async () => {
+    it('manages deleteLoadingId state', async () => {
       mockGetLogs.mockResolvedValue([]);
       let resolveDelete: () => void;
       mockDeleteLog.mockReturnValue(
@@ -628,17 +628,17 @@ describe('useInfiniteHistoryData', () => {
         promise = result.current.handleDeleteClick(entry);
       });
 
-      expect(result.current.deleteLoading).toBe(true);
+      expect(result.current.deleteLoadingId).toBe('log-1');
 
       await act(async () => {
         resolveDelete!();
         await promise!;
       });
 
-      expect(result.current.deleteLoading).toBe(false);
+      expect(result.current.deleteLoadingId).toBeNull();
     });
 
-    it('sets deleteLoading to false on error', async () => {
+    it('sets deleteLoadingId to null on error', async () => {
       mockGetLogs.mockResolvedValue([]);
       mockDeleteLog.mockRejectedValue(new Error('fail'));
 
@@ -653,7 +653,7 @@ describe('useInfiniteHistoryData', () => {
         await result.current.handleDeleteClick(entry).catch(() => {});
       });
 
-      expect(result.current.deleteLoading).toBe(false);
+      expect(result.current.deleteLoadingId).toBeNull();
     });
   });
 

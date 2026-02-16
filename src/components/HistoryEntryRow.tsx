@@ -20,11 +20,11 @@ interface HistoryEntryRowProps {
   calories: number | null;
   timeDisplay?: 'relative' | 'time';
   onLogAgain: (entry: ApiLogEntry) => void;
-  logAgainLoading: boolean;
+  logAgainLoadingId: string | null;
   onEdit: (entry: ApiLogEntry) => void;
-  editLoading: boolean;
+  editLoadingId: string | null;
   onDelete: (entry: ApiLogEntry) => void;
-  deleteLoading: boolean;
+  deleteLoadingId: string | null;
 }
 
 export default function HistoryEntryRow({
@@ -34,11 +34,11 @@ export default function HistoryEntryRow({
   calories,
   timeDisplay = 'relative',
   onLogAgain,
-  logAgainLoading,
+  logAgainLoadingId,
   onEdit,
-  editLoading,
+  editLoadingId,
   onDelete,
-  deleteLoading,
+  deleteLoadingId,
 }: HistoryEntryRowProps) {
   const navigate = useNavigate();
   const detailPath = entryDetailPath(entry);
@@ -68,14 +68,14 @@ export default function HistoryEntryRow({
         <CircularButton
           aria-label={`Log ${name}`}
           title="Add to log"
-          disabled={logAgainLoading}
+          disabled={logAgainLoadingId === entry.id}
           onClick={(e) => {
             e.stopPropagation();
             onLogAgain(entry);
           }}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          {logAgainLoading ? (
+          {logAgainLoadingId === entry.id ? (
             <span role="status">
               <span className="spinner-border spinner-border-sm" aria-hidden="true" />
               <span className="visually-hidden">Loading</span>
@@ -99,7 +99,7 @@ export default function HistoryEntryRow({
               <button
                 type="button"
                 className="dropdown-item"
-                disabled={editLoading}
+                disabled={editLoadingId === entry.id}
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(entry);
@@ -112,7 +112,7 @@ export default function HistoryEntryRow({
               <button
                 type="button"
                 className="dropdown-item"
-                disabled={deleteLoading}
+                disabled={deleteLoadingId === entry.id}
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(entry);

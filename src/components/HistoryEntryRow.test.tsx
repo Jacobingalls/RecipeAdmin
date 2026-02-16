@@ -56,11 +56,11 @@ describe('HistoryEntryRow', () => {
     name: 'Oats',
     calories: 320,
     onLogAgain: vi.fn(),
-    logAgainLoading: false,
+    logAgainLoadingId: null,
     onEdit: vi.fn(),
-    editLoading: false,
+    editLoadingId: null,
     onDelete: vi.fn(),
-    deleteLoading: false,
+    deleteLoadingId: null,
   };
 
   beforeEach(() => {
@@ -168,13 +168,13 @@ describe('HistoryEntryRow', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('disables log button when logAgainLoading is true', () => {
-    renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoading />);
+  it('disables log button when logAgainLoadingId matches entry', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoadingId="log1" />);
     expect(screen.getByRole('button', { name: 'Log Oats' })).toBeDisabled();
   });
 
-  it('shows spinner when logAgainLoading is true', () => {
-    renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoading />);
+  it('shows spinner when logAgainLoadingId matches entry', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} logAgainLoadingId="log1" />);
     const btn = screen.getByRole('button', { name: 'Log Oats' });
     expect(btn.querySelector('.spinner-border')).toBeInTheDocument();
   });
@@ -197,8 +197,8 @@ describe('HistoryEntryRow', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('disables Edit when editLoading is true', () => {
-    renderWithRouter(<HistoryEntryRow {...defaultProps} editLoading />);
+  it('disables Edit when editLoadingId matches entry', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} editLoadingId="log1" />);
     expect(screen.getByText('Edit')).toBeDisabled();
   });
 
@@ -220,8 +220,8 @@ describe('HistoryEntryRow', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('disables Remove when deleteLoading is true', () => {
-    renderWithRouter(<HistoryEntryRow {...defaultProps} deleteLoading />);
+  it('disables Remove when deleteLoadingId matches entry', () => {
+    renderWithRouter(<HistoryEntryRow {...defaultProps} deleteLoadingId="log1" />);
     expect(screen.getByText('Remove')).toBeDisabled();
   });
 

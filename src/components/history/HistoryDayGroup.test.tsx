@@ -99,11 +99,11 @@ describe('HistoryDayGroup', () => {
     entryNutritionById: defaultNutritionById,
     onViewFullNutrition: vi.fn(),
     onLogAgain: vi.fn(),
-    logAgainLoading: false,
+    logAgainLoadingId: null,
     onEdit: vi.fn(),
-    editLoading: false,
+    editLoadingId: null,
     onDelete: vi.fn(),
-    deleteLoading: false,
+    deleteLoadingId: null,
   };
 
   beforeEach(() => {

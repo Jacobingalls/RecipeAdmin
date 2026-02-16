@@ -145,12 +145,12 @@ describe('useHistoryData', () => {
       expect(result.current.logTarget).toBeNull();
     });
 
-    it('returns false for all action loading states', () => {
+    it('returns null for all action loading states', () => {
       const { result } = renderHook(() => useHistoryData());
 
-      expect(result.current.logAgainLoading).toBe(false);
-      expect(result.current.editLoading).toBe(false);
-      expect(result.current.deleteLoading).toBe(false);
+      expect(result.current.logAgainLoadingId).toBeNull();
+      expect(result.current.editLoadingId).toBeNull();
+      expect(result.current.deleteLoadingId).toBeNull();
     });
   });
 
@@ -431,7 +431,7 @@ describe('useHistoryData', () => {
       expect(mockBuildLogTarget).toHaveBeenCalledWith(entry, null, sampleGroupData);
     });
 
-    it('manages logAgainLoading state', async () => {
+    it('manages logAgainLoadingId state', async () => {
       mockQuery({ data: [] });
       const entry = makeProductEntry();
       let resolveProduct: (p: ApiProduct) => void;
@@ -449,17 +449,17 @@ describe('useHistoryData', () => {
         promise = result.current.handleLogAgainClick(entry);
       });
 
-      expect(result.current.logAgainLoading).toBe(true);
+      expect(result.current.logAgainLoadingId).toBe('log-1');
 
       await act(async () => {
         resolveProduct!(sampleProduct);
         await promise!;
       });
 
-      expect(result.current.logAgainLoading).toBe(false);
+      expect(result.current.logAgainLoadingId).toBeNull();
     });
 
-    it('sets logAgainLoading to false even on error', async () => {
+    it('sets logAgainLoadingId to null even on error', async () => {
       mockQuery({ data: [] });
       const entry = makeProductEntry();
       mockGetProduct.mockRejectedValue(new Error('fail'));
@@ -470,7 +470,7 @@ describe('useHistoryData', () => {
         await result.current.handleLogAgainClick(entry).catch(() => {});
       });
 
-      expect(result.current.logAgainLoading).toBe(false);
+      expect(result.current.logAgainLoadingId).toBeNull();
     });
 
     it('does not set logTarget when buildLogTarget returns null', async () => {
@@ -537,7 +537,7 @@ describe('useHistoryData', () => {
       expect(mockGetGroup).toHaveBeenCalledWith('group-1');
     });
 
-    it('manages editLoading state', async () => {
+    it('manages editLoadingId state', async () => {
       mockQuery({ data: [] });
       const entry = makeProductEntry();
       let resolveProduct: (p: ApiProduct) => void;
@@ -555,17 +555,17 @@ describe('useHistoryData', () => {
         promise = result.current.handleEditClick(entry);
       });
 
-      expect(result.current.editLoading).toBe(true);
+      expect(result.current.editLoadingId).toBe('log-1');
 
       await act(async () => {
         resolveProduct!(sampleProduct);
         await promise!;
       });
 
-      expect(result.current.editLoading).toBe(false);
+      expect(result.current.editLoadingId).toBeNull();
     });
 
-    it('sets editLoading to false even on error', async () => {
+    it('sets editLoadingId to null even on error', async () => {
       mockQuery({ data: [] });
       const entry = makeProductEntry();
       mockGetProduct.mockRejectedValue(new Error('fail'));
@@ -576,7 +576,7 @@ describe('useHistoryData', () => {
         await result.current.handleEditClick(entry).catch(() => {});
       });
 
-      expect(result.current.editLoading).toBe(false);
+      expect(result.current.editLoadingId).toBeNull();
     });
   });
 
@@ -598,7 +598,7 @@ describe('useHistoryData', () => {
       expect(refetchFn).toHaveBeenCalled();
     });
 
-    it('manages deleteLoading state', async () => {
+    it('manages deleteLoadingId state', async () => {
       const refetchFn = vi.fn();
       mockQuery({ data: [], refetch: refetchFn });
       let resolveDelete: () => void;
@@ -616,17 +616,17 @@ describe('useHistoryData', () => {
         promise = result.current.handleDeleteClick(entry);
       });
 
-      expect(result.current.deleteLoading).toBe(true);
+      expect(result.current.deleteLoadingId).toBe('log-1');
 
       await act(async () => {
         resolveDelete!();
         await promise!;
       });
 
-      expect(result.current.deleteLoading).toBe(false);
+      expect(result.current.deleteLoadingId).toBeNull();
     });
 
-    it('sets deleteLoading to false even on error', async () => {
+    it('sets deleteLoadingId to null even on error', async () => {
       const refetchFn = vi.fn();
       mockQuery({ data: [], refetch: refetchFn });
       mockDeleteLog.mockRejectedValue(new Error('fail'));
@@ -638,7 +638,7 @@ describe('useHistoryData', () => {
         await result.current.handleDeleteClick(entry).catch(() => {});
       });
 
-      expect(result.current.deleteLoading).toBe(false);
+      expect(result.current.deleteLoadingId).toBeNull();
     });
   });
 

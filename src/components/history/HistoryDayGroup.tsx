@@ -13,11 +13,11 @@ interface HistoryDayGroupProps {
   entryNutritionById: Map<string, NutritionInformation>;
   onViewFullNutrition: () => void;
   onLogAgain: (entry: ApiLogEntry) => void;
-  logAgainLoading: boolean;
+  logAgainLoadingId: string | null;
   onEdit: (entry: ApiLogEntry) => void;
-  editLoading: boolean;
+  editLoadingId: string | null;
   onDelete: (entry: ApiLogEntry) => void;
-  deleteLoading: boolean;
+  deleteLoadingId: string | null;
 }
 
 export default function HistoryDayGroup({
@@ -29,11 +29,11 @@ export default function HistoryDayGroup({
   entryNutritionById,
   onViewFullNutrition,
   onLogAgain,
-  logAgainLoading,
+  logAgainLoadingId,
   onEdit,
-  editLoading,
+  editLoadingId,
   onDelete,
-  deleteLoading,
+  deleteLoadingId,
 }: HistoryDayGroupProps) {
   return (
     <div className="mb-4">
@@ -66,11 +66,11 @@ export default function HistoryDayGroup({
             calories={entryNutritionById.get(entry.id)?.calories?.amount ?? null}
             timeDisplay="time"
             onLogAgain={onLogAgain}
-            logAgainLoading={logAgainLoading}
+            logAgainLoadingId={logAgainLoadingId}
             onEdit={onEdit}
-            editLoading={editLoading}
+            editLoadingId={editLoadingId}
             onDelete={onDelete}
-            deleteLoading={deleteLoading}
+            deleteLoadingId={deleteLoadingId}
           />
         ))}
       </div>

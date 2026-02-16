@@ -32,29 +32,29 @@ vi.mock('../components/HistoryEntryRow', () => ({
     name,
     calories,
     onLogAgain,
-    logAgainLoading,
+    logAgainLoadingId,
     onEdit,
-    editLoading,
+    editLoadingId,
     onDelete,
-    deleteLoading,
+    deleteLoadingId,
   }: {
     entry: ApiLogEntry;
     name: string;
     calories: number | null;
     onLogAgain: (entry: ApiLogEntry) => void;
-    logAgainLoading: boolean;
+    logAgainLoadingId: string | null;
     onEdit: (entry: ApiLogEntry) => void;
-    editLoading: boolean;
+    editLoadingId: string | null;
     onDelete: (entry: ApiLogEntry) => void;
-    deleteLoading: boolean;
+    deleteLoadingId: string | null;
   }) => (
     <div
       data-testid={`entry-row-${entry.id}`}
       data-name={name}
       data-calories={calories === null ? 'null' : String(calories)}
-      data-edit-loading={editLoading}
-      data-delete-loading={deleteLoading}
-      data-log-again-loading={logAgainLoading}
+      data-edit-loading={editLoadingId === entry.id}
+      data-delete-loading={deleteLoadingId === entry.id}
+      data-log-again-loading={logAgainLoadingId === entry.id}
     >
       <span>{name}</span>
       <button data-testid={`log-again-${entry.id}`} onClick={() => onLogAgain(entry)}>

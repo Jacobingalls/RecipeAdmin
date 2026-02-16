@@ -52,9 +52,9 @@ export default function HistoryPage() {
     loadMore,
     entryNutritionById,
     logTarget,
-    logAgainLoading,
-    editLoading,
-    deleteLoading,
+    logAgainLoadingId,
+    editLoadingId,
+    deleteLoadingId,
     handleLogAgainClick,
     handleEditClick,
     handleDeleteClick,
@@ -157,11 +157,11 @@ export default function HistoryPage() {
             entryNutritionById={entryNutritionById}
             onViewFullNutrition={() => setSelectedDay(day)}
             onLogAgain={handleLogAgainClick}
-            logAgainLoading={logAgainLoading}
+            logAgainLoadingId={logAgainLoadingId}
             onEdit={handleEditClick}
-            editLoading={editLoading}
+            editLoadingId={editLoadingId}
             onDelete={handleDeleteClick}
-            deleteLoading={deleteLoading}
+            deleteLoadingId={deleteLoadingId}
           />
         ))}
 

@@ -55,9 +55,9 @@ export interface UseHistoryDataResult {
   refetchLogs: () => void;
   entryNutritionById: Map<string, NutritionInformation>;
   logTarget: LogTarget | null;
-  logAgainLoading: boolean;
-  editLoading: boolean;
-  deleteLoading: boolean;
+  logAgainLoadingId: string | null;
+  editLoadingId: string | null;
+  deleteLoadingId: string | null;
   handleLogAgainClick: (entry: ApiLogEntry) => Promise<void>;
   handleEditClick: (entry: ApiLogEntry) => Promise<void>;
   handleDeleteClick: (entry: ApiLogEntry) => Promise<void>;
@@ -84,9 +84,9 @@ export function useHistoryData(options?: {
     errorMessage: "Couldn't load history. Try again later.",
   });
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
-  const [logAgainLoading, setLogAgainLoading] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [logAgainLoadingId, setLogAgainLoadingId] = useState<string | null>(null);
+  const [editLoadingId, setEditLoadingId] = useState<string | null>(null);
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [productDetails, setProductDetails] = useState<Record<string, ApiProduct>>({});
   const [groupDetails, setGroupDetails] = useState<Record<string, ProductGroupData>>({});
 
@@ -186,7 +186,7 @@ export function useHistoryData(options?: {
   }, [logs, productDetails, groupDetails]);
 
   const handleLogAgainClick = useCallback(async (entry: ApiLogEntry) => {
-    setLogAgainLoading(true);
+    setLogAgainLoadingId(entry.id);
     try {
       let product: ApiProduct | null = null;
       let groupData: ProductGroupData | null = null;
@@ -203,12 +203,12 @@ export function useHistoryData(options?: {
         setLogTarget(createTarget);
       }
     } finally {
-      setLogAgainLoading(false);
+      setLogAgainLoadingId(null);
     }
   }, []);
 
   const handleEditClick = useCallback(async (entry: ApiLogEntry) => {
-    setEditLoading(true);
+    setEditLoadingId(entry.id);
     try {
       let product: ApiProduct | null = null;
       let groupData: ProductGroupData | null = null;
@@ -224,18 +224,18 @@ export function useHistoryData(options?: {
         setLogTarget(target);
       }
     } finally {
-      setEditLoading(false);
+      setEditLoadingId(null);
     }
   }, []);
 
   const handleDeleteClick = useCallback(
     async (entry: ApiLogEntry) => {
-      setDeleteLoading(true);
+      setDeleteLoadingId(entry.id);
       try {
         await deleteLog(entry.id);
         refetchLogs();
       } finally {
-        setDeleteLoading(false);
+        setDeleteLoadingId(null);
       }
     },
     [refetchLogs],
@@ -258,9 +258,9 @@ export function useHistoryData(options?: {
     refetchLogs,
     entryNutritionById,
     logTarget,
-    logAgainLoading,
-    editLoading,
-    deleteLoading,
+    logAgainLoadingId,
+    editLoadingId,
+    deleteLoadingId,
     handleLogAgainClick,
     handleEditClick,
     handleDeleteClick,
