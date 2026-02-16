@@ -159,7 +159,7 @@ describe('FavoriteRow', () => {
     renderRow();
     const group = screen.getByRole('group');
     expect(group).toBeInTheDocument();
-    expect(group.style.borderRadius).toBe('1.375rem');
+    expect(group.style.borderRadius).toBe('1.125rem');
   });
 
   it('calls onRemove from dropdown', () => {
