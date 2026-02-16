@@ -3,7 +3,7 @@
 
 [data-bs-theme='light'] {
   --sparkline-card-bg: rgba(0, 0, 0, 0.02);
-  --nutrition-row-hover-bg: rgba(33, 37, 41, 0.12);
+  --app-row-hover-bg: var(--bs-tertiary-bg);
   --app-header-bg: #ffffff;
   --app-header-border-color: rgba(33, 37, 41, 0.2);
   --app-header-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
@@ -17,7 +17,7 @@
 
 [data-bs-theme='dark'] {
   --sparkline-card-bg: rgba(0, 0, 0, 0.2);
-  --nutrition-row-hover-bg: rgba(255, 255, 255, 0.16);
+  --app-row-hover-bg: var(--bs-tertiary-bg);
   --app-header-bg: var(--bs-dark);
   --app-header-border-color: rgba(255, 255, 255, 0.14);
   --app-header-shadow: 0 0 12px rgba(0, 0, 0, 0.45);

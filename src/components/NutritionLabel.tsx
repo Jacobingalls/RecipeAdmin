@@ -65,7 +65,7 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
           border-radius: 6px; background-color: transparent;
           pointer-events: none; transition: background-color 0.1s ease; z-index: -1;
         }
-        .nutrition-row:hover > th::after { background-color: var(--nutrition-row-hover-bg, var(--bs-border-color)); }
+        .nutrition-row:hover > th::after { background-color: var(--app-row-hover-bg); }
         .nutrition-row:hover td,
         .nutrition-row:hover th,
         .nutrition-row:has(+ .nutrition-row:hover) td,
