@@ -1,47 +1,51 @@
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { GroupItem } from '../../domain';
-import { ServingSize } from '../../domain';
+import { ProductGroup, ServingSize } from '../../domain';
+import { FoodItemRow } from '../common';
 
 interface GroupItemRowProps {
   item: GroupItem;
 }
 
 export default function GroupItemRow({ item }: GroupItemRowProps) {
-  const servingSizeObj = item.servingSize ? ServingSize.fromObject(item.servingSize) : null;
-  const servingSizeDisplay = servingSizeObj ? servingSizeObj.toString() : null;
+  const navigate = useNavigate();
 
-  if (item.product) {
-    const { product } = item;
-    return (
-      <Link to={`/products/${product.id}`} className="list-group-item list-group-item-action">
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <span className="badge bg-primary me-2">Product</span>
-            <span className="fw-medium">{product.name}</span>
-            {product.brand && <span className="text-secondary ms-2 small">{product.brand}</span>}
-          </div>
-          {servingSizeDisplay && <span className="text-secondary small">{servingSizeDisplay}</span>}
-        </div>
-      </Link>
-    );
-  }
+  const isProduct = !!item.product;
+  const name = isProduct ? (item.product?.name ?? 'Product') : (item.group?.name ?? 'Group');
+  const brand = isProduct ? item.product?.brand : item.group?.brand;
 
-  if (item.group) {
-    const { group } = item;
-    return (
-      <Link to={`/groups/${group.id}`} className="list-group-item list-group-item-action">
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <span className="badge bg-secondary me-2">Group</span>
-            <span className="fw-medium">{group.name}</span>
-            {group.brand && <span className="text-secondary ms-2 small">{group.brand}</span>}
-          </div>
-          {servingSizeDisplay && <span className="text-secondary small">{servingSizeDisplay}</span>}
-        </div>
-      </Link>
-    );
-  }
+  const servingSize = useMemo(
+    () =>
+      (item.servingSize ? ServingSize.fromObject(item.servingSize) : null) ??
+      ServingSize.servings(1),
+    [item.servingSize],
+  );
 
-  return null;
+  const calories = useMemo(() => {
+    const serving = ProductGroup.getItemServing(item);
+    return serving?.nutrition?.calories?.amount ?? null;
+  }, [item]);
+
+  if (!item.product && !item.group) return null;
+
+  const detailPath = isProduct ? `/products/${item.product!.id}` : `/groups/${item.group!.id}`;
+
+  const subtitle = (
+    <>
+      {brand && <>{brand} &middot; </>}
+      {servingSize.toString()}
+    </>
+  );
+
+  return (
+    <FoodItemRow
+      name={name}
+      subtitle={subtitle}
+      calories={calories}
+      ariaLabel={`View ${name}`}
+      onClick={() => navigate(detailPath)}
+    />
+  );
 }

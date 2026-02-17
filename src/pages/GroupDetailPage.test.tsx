@@ -21,6 +21,26 @@ vi.mock('../components/common', () => ({
     <div data-testid="content-unavailable-view">{title}</div>
   ),
   SubsectionTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
+  FoodItemRow: ({
+    name,
+    ariaLabel,
+    onClick,
+  }: {
+    name: string;
+    ariaLabel: string;
+    onClick: () => void;
+  }) => (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <div
+      data-testid="food-item-row"
+      role="button"
+      tabIndex={0}
+      aria-label={ariaLabel}
+      onClick={onClick}
+    >
+      {name}
+    </div>
+  ),
 }));
 
 vi.mock('../components/NutritionLabel', () => ({
@@ -156,18 +176,16 @@ describe('GroupDetailPage', () => {
     expect(screen.getByTestId('add-to-favorites-button')).toBeInTheDocument();
   });
 
-  it('renders item rows with product badge', () => {
+  it('renders item rows for products', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
     expect(screen.getByText('Oats')).toBeInTheDocument();
-    expect(screen.getByText('Product')).toBeInTheDocument();
   });
 
-  it('renders item rows with group badge', () => {
+  it('renders item rows for groups', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
     expect(screen.getByText('Fruit Mix')).toBeInTheDocument();
-    expect(screen.getByText('Group')).toBeInTheDocument();
   });
 
   it('renders barcode section when barcodes exist', () => {
@@ -194,18 +212,16 @@ describe('GroupDetailPage', () => {
     expect(screen.getByText('1 item')).toBeInTheDocument();
   });
 
-  it('links product items to product detail page', () => {
+  it('product items have correct aria-label', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
-    const productLink = screen.getByText('Oats').closest('a');
-    expect(productLink).toHaveAttribute('href', '/products/p1');
+    expect(screen.getByLabelText('View Oats')).toBeInTheDocument();
   });
 
-  it('links group items to group detail page', () => {
+  it('group items have correct aria-label', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
-    const groupLink = screen.getByText('Fruit Mix').closest('a');
-    expect(groupLink).toHaveAttribute('href', '/groups/g2');
+    expect(screen.getByLabelText('View Fruit Mix')).toBeInTheDocument();
   });
 
   it('displays nutrition error when serving calculation throws', () => {
@@ -275,8 +291,8 @@ describe('GroupDetailPage', () => {
     renderWithRoute('/groups/g-null');
     // The empty item renders null (no DOM), but the real product still renders
     expect(screen.getByText('Real Product')).toBeInTheDocument();
-    // Only one list-group-item link should exist (for the product, not the empty item)
-    const listItems = document.querySelectorAll('.list-group-item');
-    expect(listItems).toHaveLength(1);
+    // Only one food-item-row should exist (for the product, not the empty item)
+    const itemRows = screen.getAllByTestId('food-item-row');
+    expect(itemRows).toHaveLength(1);
   });
 });
