@@ -359,6 +359,20 @@ describe('TodayTile', () => {
     expect(refetchLogs).not.toHaveBeenCalled();
   });
 
+  it('renders history rows newest to oldest', () => {
+    mockHistoryData({
+      logs: sampleLogs,
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
+    });
+    renderTile();
+
+    const rows = screen.getAllByTestId(/^entry-row-/);
+    // log1 is at noon, log2 is one hour earlier — newest first
+    expect(rows[0]).toHaveAttribute('data-name', 'Oats');
+    expect(rows[1]).toHaveAttribute('data-name', 'Breakfast Bowl');
+  });
+
   it('shows empty state when backend returns only yesterday logs', () => {
     const yesterdayTimestamp = Date.now() / 1000 - 24 * 3600;
     const yesterdayLogs: ApiLogEntry[] = [

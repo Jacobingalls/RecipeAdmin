@@ -68,7 +68,7 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
       new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000;
     return logs
       .filter((entry) => entry.timestamp >= todayStart && entry.timestamp < tomorrowStart)
-      .sort((a, b) => a.timestamp - b.timestamp);
+      .sort((a, b) => b.timestamp - a.timestamp);
   }, [logs]);
 
   const totalNutrition = useMemo(() => {
@@ -85,12 +85,13 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
     if (!todayLogs || todayLogs.length === 0) return null;
 
     const data: Record<string, SparklinePoint[]> = {};
+    const chronological = [...todayLogs].reverse();
 
     for (const { key } of NUTRIENTS) {
       const cumulative: SparklinePoint[] = [{ hour: 0, amount: 0 }];
       let runningTotal = 0;
 
-      for (const entry of todayLogs) {
+      for (const entry of chronological) {
         const nutrition = entryNutritionById.get(entry.id);
         if (!nutrition) continue;
 
