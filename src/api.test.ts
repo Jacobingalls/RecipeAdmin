@@ -4,7 +4,6 @@ import {
   getProduct,
   listGroups,
   getGroup,
-  getVersion,
   getStatus,
   logEntry,
   getTokenExpiry,
@@ -186,18 +185,6 @@ describe('lookupBarcode', () => {
   });
 });
 
-describe('getVersion', () => {
-  it('calls /version endpoint', async () => {
-    const version = { version: '1.2.3' };
-    mockFetch.mockResolvedValue(mockResponse(version));
-
-    const result = await getVersion();
-
-    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/version`, { credentials: 'include' });
-    expect(result).toEqual(version);
-  });
-});
-
 describe('getStatus', () => {
   it('calls /status endpoint', async () => {
     const status = { version: '1.2.3', environment: 'production', debug: false, user: null };
@@ -211,16 +198,15 @@ describe('getStatus', () => {
 });
 
 describe('logEntry', () => {
-  it('POSTs to /logs with IndirectItem product format', async () => {
-    const response = { id: 'log-1' };
-    mockFetch.mockResolvedValue(mockResponse(response));
+  it('POSTs to /logs with product format', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null));
 
     const entry = {
       productId: 'p1',
       preparationId: 'prep1',
       servingSize: { kind: 'servings', amount: 2 },
     };
-    const result = await logEntry(entry);
+    await logEntry(entry);
 
     expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/logs`, {
       method: 'POST',
@@ -235,11 +221,10 @@ describe('logEntry', () => {
       }),
       credentials: 'include',
     });
-    expect(result).toEqual(response);
   });
 
-  it('POSTs with IndirectItem group format', async () => {
-    mockFetch.mockResolvedValue(mockResponse({ id: 'log-2' }));
+  it('POSTs with group format', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null));
 
     await logEntry({
       groupId: 'g1',
@@ -258,6 +243,14 @@ describe('logEntry', () => {
       }),
       credentials: 'include',
     });
+  });
+
+  it('returns void on success', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null));
+
+    const result = await logEntry({ servingSize: { kind: 'servings', amount: 1 } });
+
+    expect(result).toBeUndefined();
   });
 
   it('throws on non-ok response', async () => {

@@ -105,7 +105,6 @@ const sampleLogs: ApiLogEntry[] = [
   {
     id: 'log1',
     timestamp: todayNoonEpoch,
-    userID: 'u1',
     item: {
       kind: 'product',
       productID: 'p1',
@@ -116,7 +115,6 @@ const sampleLogs: ApiLogEntry[] = [
   {
     id: 'log2',
     timestamp: todayNoonEpoch - 3600,
-    userID: 'u1',
     item: {
       kind: 'group',
       groupID: 'g1',
@@ -379,7 +377,6 @@ describe('TodayTile', () => {
       {
         id: 'yesterday1',
         timestamp: yesterdayTimestamp,
-        userID: 'u1',
         item: {
           kind: 'product',
           productID: 'p1',

@@ -44,7 +44,6 @@ function makeProductEntry(overrides: Partial<ApiLogEntry> = {}): ApiLogEntry {
   return {
     id: 'log-1',
     timestamp: 1700000000,
-    userID: 'user-1',
     item: {
       kind: 'product',
       productID: 'prod-1',
@@ -59,7 +58,6 @@ function makeGroupEntry(overrides: Partial<ApiLogEntry> = {}): ApiLogEntry {
   return {
     id: 'log-2',
     timestamp: 1700000000,
-    userID: 'user-1',
     item: {
       kind: 'group',
       groupID: 'group-1',
@@ -360,13 +358,11 @@ describe('useHistoryData', () => {
       expect(result.current.entryNutritionById.has('log-2')).toBe(false);
     });
 
-    it('returns null nutrition for entries with unknown kind', () => {
+    it('returns null nutrition for entries with no product or group ID', () => {
       const entry: ApiLogEntry = {
         id: 'log-x',
         timestamp: 1700000000,
-        userID: 'user-1',
         item: {
-          kind: 'unknown',
           servingSize: { servings: 1 },
         },
       };

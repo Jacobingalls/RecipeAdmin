@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
-import type { ApiFavorite } from '../api';
+import type { ApiFavorite, ApiProduct } from '../api';
+import type { ProductGroupData } from '../domain';
 import {
   favoriteName,
   favoriteBrand,
@@ -14,6 +15,8 @@ import { CircularButton, CircularButtonGroup, FoodItemRow, MoreButton } from './
 
 interface FavoriteRowProps {
   favorite: ApiFavorite;
+  products: Record<string, ApiProduct>;
+  groups: Record<string, ProductGroupData>;
   onLog: (favorite: ApiFavorite) => void;
   onRemove: (favorite: ApiFavorite) => void;
   removeLoading: boolean;
@@ -21,14 +24,16 @@ interface FavoriteRowProps {
 
 export default function FavoriteRow({
   favorite,
+  products,
+  groups,
   onLog,
   onRemove,
   removeLoading,
 }: FavoriteRowProps) {
   const navigate = useNavigate();
-  const name = favoriteName(favorite);
-  const brand = favoriteBrand(favorite);
-  const calories = favoriteCalories(favorite);
+  const name = favoriteName(favorite, products, groups);
+  const brand = favoriteBrand(favorite, products, groups);
+  const calories = favoriteCalories(favorite, products, groups);
   const servingSizeDesc = favoriteServingSizeDescription(favorite);
   const detailPath = favoriteDetailPath(favorite);
 

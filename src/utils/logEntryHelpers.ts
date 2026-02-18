@@ -49,7 +49,7 @@ export function resolveEntryName(
   productDetails: Record<string, { name: string }>,
   groupDetails: Record<string, { name?: string }>,
 ): string {
-  if (entry.item.kind === 'group' && entry.item.groupID) {
+  if (entry.item.groupID) {
     const group = groupDetails[entry.item.groupID];
     return group?.name ?? 'Unknown Group';
   }
@@ -66,11 +66,11 @@ export function resolveEntryBrand(
   productDetails: Record<string, { brand?: string }>,
   groupDetails: Record<string, { brand?: string }>,
 ): string | undefined {
-  if (entry.item.kind === 'product' && entry.item.productID) {
+  if (entry.item.productID) {
     const product = productDetails[entry.item.productID];
     return product?.brand;
   }
-  if (entry.item.kind === 'group' && entry.item.groupID) {
+  if (entry.item.groupID) {
     const group = groupDetails[entry.item.groupID];
     return group?.brand;
   }
@@ -82,7 +82,7 @@ export function entryDetailPath(entry: ApiLogEntry): string {
   const ss = ServingSize.fromObject(entry.item.servingSize);
   const ssParams = ss ? servingSizeSearchParams(ss) : null;
 
-  if (entry.item.kind === 'group' && entry.item.groupID) {
+  if (entry.item.groupID) {
     const search = ssParams?.toString();
     return `/groups/${entry.item.groupID}${search ? `?${search}` : ''}`;
   }
@@ -112,7 +112,7 @@ export function buildLogTarget(
   const initialServingSize =
     ServingSize.fromObject(entry.item.servingSize) ?? ServingSize.servings(1);
 
-  if (entry.item.kind === 'product' && product) {
+  if (entry.item.productID && product) {
     const prepData =
       product.preparations?.find((p) => p.id === entry.item.preparationID) ??
       product.preparations?.[0];
@@ -130,7 +130,7 @@ export function buildLogTarget(
     };
   }
 
-  if (entry.item.kind === 'group' && groupData) {
+  if (entry.item.groupID && groupData) {
     return {
       name: groupData.name ?? 'Group',
       brand: groupData.brand,

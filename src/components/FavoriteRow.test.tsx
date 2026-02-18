@@ -2,7 +2,8 @@ import type { ReactElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 
-import type { ApiFavorite } from '../api';
+import type { ApiFavorite, ApiProduct } from '../api';
+import type { ProductGroupData } from '../domain';
 
 import FavoriteRow from './FavoriteRow';
 
@@ -22,21 +23,10 @@ function renderWithRouter(ui: ReactElement) {
 
 const productFavorite: ApiFavorite = {
   id: 'fav1',
-  createdAt: 1700000000,
   lastUsedAt: 1700001000,
   item: {
-    product: {
-      id: 'p1',
-      name: 'Peanut Butter',
-      brand: 'NutCo',
-      preparations: [
-        {
-          id: 'prep1',
-          nutritionalInformation: { calories: { amount: 190, unit: 'kcal' } },
-          mass: { amount: 32, unit: 'g' },
-        },
-      ],
-    },
+    kind: 'product',
+    productID: 'p1',
     preparationID: 'prep1',
     servingSize: { kind: 'servings', amount: 2 },
   },
@@ -44,20 +34,41 @@ const productFavorite: ApiFavorite = {
 
 const groupFavorite: ApiFavorite = {
   id: 'fav2',
-  createdAt: 1700000000,
   lastUsedAt: 1700001000,
   item: {
-    group: {
-      id: 'g1',
-      name: 'Breakfast Bowl',
-      items: [],
-    },
+    kind: 'group',
+    groupID: 'g1',
     servingSize: { kind: 'servings', amount: 1 },
+  },
+};
+
+const products: Record<string, ApiProduct> = {
+  p1: {
+    id: 'p1',
+    name: 'Peanut Butter',
+    brand: 'NutCo',
+    preparations: [
+      {
+        id: 'prep1',
+        nutritionalInformation: { calories: { amount: 190, unit: 'kcal' } },
+        mass: { amount: 32, unit: 'g' },
+      },
+    ],
+  },
+};
+
+const groups: Record<string, ProductGroupData> = {
+  g1: {
+    id: 'g1',
+    name: 'Breakfast Bowl',
+    items: [],
   },
 };
 
 interface RenderOptions {
   favorite?: ApiFavorite;
+  products?: Record<string, ApiProduct>;
+  groups?: Record<string, ProductGroupData>;
   onLog?: (fav: ApiFavorite) => void;
   onRemove?: (fav: ApiFavorite) => void;
   removeLoading?: boolean;
@@ -66,6 +77,8 @@ interface RenderOptions {
 function renderRow(options: RenderOptions = {}) {
   const {
     favorite = productFavorite,
+    products: prods = products,
+    groups: grps = groups,
     onLog = vi.fn(),
     onRemove = vi.fn(),
     removeLoading = false,
@@ -74,6 +87,8 @@ function renderRow(options: RenderOptions = {}) {
   return renderWithRouter(
     <FavoriteRow
       favorite={favorite}
+      products={prods}
+      groups={grps}
       onLog={onLog}
       onRemove={onRemove}
       removeLoading={removeLoading}
@@ -119,7 +134,8 @@ describe('FavoriteRow', () => {
   it('navigates to product detail with serving size params on click', () => {
     renderRow();
     fireEvent.click(screen.getByRole('button', { name: 'View Peanut Butter' }));
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
+    // favoriteDetailPath always includes prep when preparationID is set
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2&prep=prep1');
   });
 
   it('navigates to group detail with serving size params on click', () => {
@@ -133,7 +149,7 @@ describe('FavoriteRow', () => {
     fireEvent.keyDown(screen.getByRole('button', { name: 'View Peanut Butter' }), {
       key: 'Enter',
     });
-    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2');
+    expect(mockNavigate).toHaveBeenCalledWith('/products/p1?st=servings&sa=2&prep=prep1');
   });
 
   it('calls onLog when log button is clicked', () => {

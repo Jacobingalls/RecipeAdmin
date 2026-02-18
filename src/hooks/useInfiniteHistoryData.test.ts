@@ -28,7 +28,6 @@ function makeProductEntry(id: string, timestamp: number): ApiLogEntry {
   return {
     id,
     timestamp,
-    userID: 'user-1',
     item: {
       kind: 'product',
       productID: 'prod-1',
@@ -42,7 +41,6 @@ function makeGroupEntry(id: string, timestamp: number): ApiLogEntry {
   return {
     id,
     timestamp,
-    userID: 'user-1',
     item: {
       kind: 'group',
       groupID: 'group-1',

@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 
-import type { ApiFavorite } from '../api';
-import { deleteFavorite as deleteFavoriteApi } from '../api';
+import type { ApiFavorite, ApiProduct } from '../api';
+import { deleteFavorite as deleteFavoriteApi, getProduct, getGroup } from '../api';
+import type { ProductGroupData } from '../domain';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils';
 import { LoadingState, ContentUnavailableView, ListFilter } from '../components/common';
@@ -16,32 +17,79 @@ export default function FavoritesPage() {
   const [brandFilter, setBrandFilter] = useState('');
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [removeLoading, setRemoveLoading] = useState(false);
+  const [products, setProducts] = useState<Record<string, ApiProduct>>({});
+  const [groups, setGroups] = useState<Record<string, ProductGroupData>>({});
+
+  useEffect(() => {
+    const productIDs = [
+      ...new Set(favorites.filter((f) => f.item.productID).map((f) => f.item.productID!)),
+    ];
+    const groupIDs = [
+      ...new Set(favorites.filter((f) => f.item.groupID).map((f) => f.item.groupID!)),
+    ];
+
+    const fetchAll = async () => {
+      const productResults: Record<string, ApiProduct> = {};
+      const groupResults: Record<string, ProductGroupData> = {};
+
+      await Promise.all([
+        ...productIDs.map(async (id) => {
+          try {
+            productResults[id] = await getProduct(id);
+          } catch {
+            // Skip products that can't be fetched
+          }
+        }),
+        ...groupIDs.map(async (id) => {
+          try {
+            groupResults[id] = await getGroup(id);
+          } catch {
+            // Skip groups that can't be fetched
+          }
+        }),
+      ]);
+
+      setProducts(productResults);
+      setGroups(groupResults);
+    };
+
+    if (productIDs.length > 0 || groupIDs.length > 0) {
+      fetchAll();
+    }
+  }, [favorites]);
 
   const brands = useMemo(() => {
     const uniqueBrands = [
-      ...new Set(favorites.map((fav) => favoriteBrand(fav)).filter((b): b is string => Boolean(b))),
+      ...new Set(
+        favorites
+          .map((fav) => favoriteBrand(fav, products, groups))
+          .filter((b): b is string => Boolean(b)),
+      ),
     ];
     return uniqueBrands.sort((a, b) => a.localeCompare(b));
-  }, [favorites]);
+  }, [favorites, products, groups]);
 
   const filteredFavorites = useMemo(
     () =>
       favorites.filter((fav) => {
-        const name = favoriteName(fav).toLowerCase();
-        const brand = favoriteBrand(fav)?.toLowerCase();
+        const name = favoriteName(fav, products, groups).toLowerCase();
+        const brand = favoriteBrand(fav, products, groups)?.toLowerCase();
         const matchesName = !nameFilter || name.includes(nameFilter.toLowerCase());
         const matchesBrand = !brandFilter || brand === brandFilter.toLowerCase();
         return matchesName && matchesBrand;
       }),
-    [favorites, nameFilter, brandFilter],
+    [favorites, products, groups, nameFilter, brandFilter],
   );
 
-  const handleLog = useCallback((favorite: ApiFavorite) => {
-    const target = buildFavoriteLogTarget(favorite);
-    if (target) {
-      setLogTarget(target);
-    }
-  }, []);
+  const handleLog = useCallback(
+    (favorite: ApiFavorite) => {
+      const target = buildFavoriteLogTarget(favorite, products, groups);
+      if (target) {
+        setLogTarget(target);
+      }
+    },
+    [products, groups],
+  );
 
   const handleModalSaved = useCallback(() => {
     refetch();
@@ -100,6 +148,8 @@ export default function FavoritesPage() {
             <FavoriteRow
               key={fav.id}
               favorite={fav}
+              products={products}
+              groups={groups}
               onLog={handleLog}
               onRemove={handleRemove}
               removeLoading={removeLoading}

@@ -36,10 +36,10 @@ function servingSizesEqual(a: ServingSizeData, b: ServingSizeData): boolean {
 
 function matchesFavorite(fav: ApiFavorite, opts: FindFavoriteOptions): boolean {
   if (opts.productId) {
-    if (!fav.item.product || fav.item.product.id !== opts.productId) return false;
+    if (fav.item.productID !== opts.productId) return false;
     if (opts.preparationId && fav.item.preparationID !== opts.preparationId) return false;
   } else if (opts.groupId) {
-    if (!fav.item.group || fav.item.group.id !== opts.groupId) return false;
+    if (fav.item.groupID !== opts.groupId) return false;
   } else {
     return false;
   }

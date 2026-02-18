@@ -168,7 +168,7 @@ describe('LogModal', () => {
   it('sends timestamp on create', async () => {
     const fixedNow = new Date(2025, 5, 15, 12, 0).getTime();
     const spy = vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
-    mockLogEntry.mockResolvedValue({ id: 'log-1' });
+    mockLogEntry.mockResolvedValue(undefined);
     render(<LogModal target={makeTarget()} onClose={vi.fn()} />);
     spy.mockRestore();
 
@@ -191,8 +191,8 @@ describe('LogModal', () => {
     vi.useFakeTimers();
     mockLogEntry.mockImplementation(
       () =>
-        new Promise((resolve) => {
-          queueMicrotask(() => resolve({ id: 'log-1' }));
+        new Promise<void>((resolve) => {
+          queueMicrotask(() => resolve());
         }),
     );
     const onClose = vi.fn();
@@ -229,7 +229,7 @@ describe('LogModal', () => {
   });
 
   it('fires onSaved callback on successful create', async () => {
-    mockLogEntry.mockResolvedValue({ id: 'log-1' });
+    mockLogEntry.mockResolvedValue(undefined);
     const onSaved = vi.fn();
     render(<LogModal target={makeTarget()} onClose={vi.fn()} onSaved={onSaved} />);
 
@@ -241,9 +241,9 @@ describe('LogModal', () => {
   });
 
   it('disables Log button while logging', async () => {
-    let resolveLog: (value: { id: string }) => void;
+    let resolveLog: () => void;
     mockLogEntry.mockReturnValue(
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         resolveLog = resolve;
       }),
     );
@@ -254,7 +254,7 @@ describe('LogModal', () => {
     expect(screen.getByText('Logging...')).toBeDisabled();
 
     await act(async () => {
-      resolveLog!({ id: 'log-1' });
+      resolveLog!();
     });
   });
 
@@ -306,7 +306,6 @@ describe('LogModal', () => {
       mockUpdateLogEntry.mockResolvedValue({
         id: 'entry-1',
         timestamp: editTimestamp,
-        userID: 'u1',
         item: {
           kind: 'product',
           productID: 'prod-1',
@@ -343,7 +342,6 @@ describe('LogModal', () => {
       mockUpdateLogEntry.mockResolvedValue({
         id: 'entry-2',
         timestamp: editTimestamp,
-        userID: 'u1',
         item: {
           kind: 'group',
           groupID: 'group-1',
@@ -402,7 +400,6 @@ describe('LogModal', () => {
         resolveUpdate!({
           id: 'entry-1',
           timestamp: editTimestamp,
-          userID: 'u1',
           item: {
             kind: 'product',
             productID: 'prod-1',
@@ -416,7 +413,6 @@ describe('LogModal', () => {
       mockUpdateLogEntry.mockResolvedValue({
         id: 'entry-1',
         timestamp: editTimestamp,
-        userID: 'u1',
         item: {
           kind: 'product',
           productID: 'prod-1',

@@ -1,43 +1,27 @@
 import type { BarcodeData, PreparationData, ProductGroupData, ServingSizeData } from './domain';
 
-export interface ApiProductSummary {
-  id: string;
-  name: string;
-  brand?: string;
-}
-
 export interface ApiProduct {
   id: string;
   name: string;
-  brand?: string;
-  barcodes?: BarcodeData[];
-  preparations?: PreparationData[];
+  brand: string;
+  barcodes: BarcodeData[];
+  preparations: PreparationData[];
   defaultPreparationID?: string;
-  notes?: unknown[];
-}
-
-export interface ApiGroupSummary {
-  id: string;
-  name: string;
-  brand?: string;
-  items: { id?: string; name?: string; product?: unknown; group?: unknown }[];
+  notes: unknown[];
 }
 
 export interface ApiLookupItem {
+  kind?: string;
   product?: ApiProduct;
   preparationID?: string;
   group?: ProductGroupData;
+  servingSize?: ServingSizeData;
 }
 
 export interface ApiSearchResult {
   item: ApiLookupItem;
   servingSize: ServingSizeData;
   relevance: number;
-}
-
-export interface ApiVersion {
-  version: string;
-  debug?: boolean;
 }
 
 export interface ApiStatus {
@@ -225,7 +209,6 @@ export interface ApiLogItem {
 export interface ApiLogEntry {
   id: string;
   timestamp: number;
-  userID: string;
   item: ApiLogItem;
 }
 
@@ -237,10 +220,6 @@ export interface LogEntryRequest {
   timestamp?: number;
 }
 
-export interface LogEntryResponse {
-  id: string;
-}
-
 export async function lookupBarcode(barcode: string): Promise<ApiSearchResult[]> {
   return apiFetch<ApiSearchResult[]>(`/lookup/${encodeURIComponent(barcode)}`);
 }
@@ -249,24 +228,20 @@ export async function searchItems(query: string): Promise<ApiSearchResult[]> {
   return apiPost<{ query: string }, ApiSearchResult[]>('/search', { query });
 }
 
-export async function listProducts(): Promise<ApiProductSummary[]> {
-  return apiFetch<ApiProductSummary[]>('/products');
+export async function listProducts(): Promise<ApiProduct[]> {
+  return apiFetch<ApiProduct[]>('/products');
 }
 
 export async function getProduct(id: string): Promise<ApiProduct> {
   return apiFetch<ApiProduct>(`/products/${encodeURIComponent(id)}`);
 }
 
-export async function listGroups(): Promise<ApiGroupSummary[]> {
-  return apiFetch<ApiGroupSummary[]>('/groups');
+export async function listGroups(): Promise<ProductGroupData[]> {
+  return apiFetch<ProductGroupData[]>('/groups');
 }
 
 export async function getGroup(id: string): Promise<ProductGroupData> {
   return apiFetch<ProductGroupData>(`/groups/${encodeURIComponent(id)}`);
-}
-
-export async function getVersion(): Promise<ApiVersion> {
-  return apiFetch<ApiVersion>('/version');
 }
 
 export async function getStatus(): Promise<ApiStatus> {
@@ -289,7 +264,7 @@ export async function getLogs(options?: {
   return apiFetch<ApiLogEntry[]>(`/logs${query ? `?${query}` : ''}`);
 }
 
-export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse> {
+export async function logEntry(entry: LogEntryRequest): Promise<void> {
   const item = entry.groupId
     ? { kind: 'group', groupID: entry.groupId, servingSize: entry.servingSize }
     : {
@@ -302,7 +277,7 @@ export async function logEntry(entry: LogEntryRequest): Promise<LogEntryResponse
   if (entry.timestamp !== undefined) {
     body.timestamp = entry.timestamp;
   }
-  return apiPost<typeof body, LogEntryResponse>('/logs', body);
+  await apiPost<typeof body, unknown>('/logs', body);
 }
 
 export async function updateLogEntryServingSize(
@@ -333,15 +308,16 @@ export async function deleteLog(id: string): Promise<void> {
 // Favorites types
 
 export interface ApiFavoriteItem {
-  product?: ApiProduct;
+  kind?: string;
+  productID?: string;
+  groupID?: string;
   preparationID?: string;
-  group?: ProductGroupData;
   servingSize: ServingSizeData;
 }
 
 export interface ApiFavorite {
   id: string;
-  createdAt: number;
+  createdAt?: number;
   lastUsedAt: number;
   item: ApiFavoriteItem;
 }
@@ -363,8 +339,12 @@ export async function listFavorites(options?: {
   return apiFetch<ApiFavorite[]>(`/favorites${query ? `?${query}` : ''}`);
 }
 
-export async function createFavorite(request: CreateFavoriteRequest): Promise<ApiFavorite> {
-  return apiPost<CreateFavoriteRequest, ApiFavorite>('/favorites', request);
+export async function createFavorite(request: CreateFavoriteRequest): Promise<void> {
+  const body = {
+    lastUsedAt: Math.floor(Date.now() / 1000),
+    item: request,
+  };
+  await apiPost<typeof body, unknown>('/favorites', body);
 }
 
 export async function updateFavoriteServingSize(
@@ -377,15 +357,15 @@ export async function updateFavoriteServingSize(
   );
 }
 
+export async function deleteFavorite(id: string): Promise<void> {
+  return apiDelete(`/favorites/${encodeURIComponent(id)}`);
+}
+
 export async function touchFavoriteLastUsed(id: string): Promise<ApiFavorite> {
   return apiPut<Record<string, never>, ApiFavorite>(
     `/favorites/${encodeURIComponent(id)}/last-used`,
     {},
   );
-}
-
-export async function deleteFavorite(id: string): Promise<void> {
-  return apiDelete(`/favorites/${encodeURIComponent(id)}`);
 }
 
 // Auth types
@@ -466,6 +446,7 @@ export interface AdminUserDetail {
   createdAt: number | null;
   passkeys: PasskeyInfo[];
   apiKeys: AdminAPIKeyInfo[];
+  sessions: SessionInfo[];
 }
 
 export interface AdminTempAPIKeyResponse {
@@ -515,10 +496,6 @@ export async function authLoginFinish(
   );
 }
 
-export async function authMe(): Promise<AuthUser> {
-  return apiFetch<AuthUser>('/auth/me');
-}
-
 export async function authLogout(): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/logout`, {
     method: 'POST',
@@ -527,51 +504,7 @@ export async function authLogout(): Promise<void> {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
-export async function authListPasskeys(): Promise<PasskeyInfo[]> {
-  return apiFetch<PasskeyInfo[]>('/auth/passkeys');
-}
-
-export async function authAddPasskeyBegin(): Promise<{ options: unknown; sessionID: string }> {
-  return apiPost<Record<string, never>, { options: unknown; sessionID: string }>(
-    '/auth/passkeys/begin',
-    {},
-  );
-}
-
-export async function authAddPasskeyFinish(
-  sessionID: string,
-  credential: unknown,
-  name: string,
-): Promise<PasskeyInfo> {
-  return apiPost<{ sessionID: string; credential: unknown; name: string }, PasskeyInfo>(
-    '/auth/passkeys/finish',
-    { sessionID, credential, name },
-  );
-}
-
-export async function authDeletePasskey(id: string): Promise<void> {
-  return apiDelete(`/auth/passkeys/${encodeURIComponent(id)}`);
-}
-
-export async function authListAPIKeys(): Promise<APIKeyInfo[]> {
-  return apiFetch<APIKeyInfo[]>('/auth/api-keys');
-}
-
-export async function authCreateAPIKey(
-  name: string,
-  expiresAt?: number,
-): Promise<CreateAPIKeyResponse> {
-  return apiPost<{ name: string; expiresAt?: number }, CreateAPIKeyResponse>('/auth/api-keys', {
-    name,
-    expiresAt,
-  });
-}
-
-export async function authRevokeAPIKey(id: string): Promise<void> {
-  return apiDelete(`/auth/api-keys/${encodeURIComponent(id)}`);
-}
-
-// Settings API functions (replaces /auth/passkeys/* and /auth/api-keys/*)
+// Settings API functions
 
 export async function settingsListPasskeys(): Promise<PasskeyInfo[]> {
   return apiFetch<PasskeyInfo[]>('/settings/passkeys');

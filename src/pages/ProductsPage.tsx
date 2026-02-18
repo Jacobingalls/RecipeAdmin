@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 
-import type { ApiProductSummary } from '../api';
+import type { ApiProduct } from '../api';
 import { listProducts } from '../api';
 import { useApiQuery } from '../hooks';
 import {
@@ -16,7 +16,7 @@ export default function ProductsPage() {
     data: products,
     loading,
     error,
-  } = useApiQuery<ApiProductSummary[]>(listProducts, [], {
+  } = useApiQuery<ApiProduct[]>(listProducts, [], {
     errorMessage: "Couldn't load products. Try again later.",
   });
   const [nameFilter, setNameFilter] = useState('');

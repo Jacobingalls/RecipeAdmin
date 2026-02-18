@@ -14,6 +14,7 @@ export {
   buildFavoriteLogParams,
   buildFavoriteLogTarget,
 } from './favoriteHelpers';
+export type { ProductLookup, GroupLookup } from './favoriteHelpers';
 export { generateName } from './generateName';
 export { servingSizeSearchParams } from './servingSizeParams';
 export {

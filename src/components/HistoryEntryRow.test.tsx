@@ -40,7 +40,6 @@ function makeEntry(overrides?: Partial<ApiLogEntry>): ApiLogEntry {
   return {
     id: 'log1',
     timestamp: Date.now() / 1000 - 5 * 60,
-    userID: 'u1',
     item: {
       kind: 'product',
       productID: 'p1',

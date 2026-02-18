@@ -24,7 +24,7 @@ describe('AddToLogButton', () => {
   });
 
   it('calls logEntry with correct params for a product', async () => {
-    mockLogEntry.mockResolvedValue({ id: 'log-1' });
+    mockLogEntry.mockResolvedValue(undefined);
     render(
       <AddToLogButton
         productId="p1"
@@ -46,7 +46,7 @@ describe('AddToLogButton', () => {
   });
 
   it('calls logEntry with correct params for a group', async () => {
-    mockLogEntry.mockResolvedValue({ id: 'log-2' });
+    mockLogEntry.mockResolvedValue(undefined);
     render(<AddToLogButton groupId="g1" servingSize={ServingSize.servings(1)} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Add to Log' }));
@@ -62,9 +62,9 @@ describe('AddToLogButton', () => {
   });
 
   it('shows "Logging..." while request is in flight', async () => {
-    let resolveLog: (value: { id: string }) => void;
+    let resolveLog: () => void;
     mockLogEntry.mockReturnValue(
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         resolveLog = resolve;
       }),
     );
@@ -75,7 +75,7 @@ describe('AddToLogButton', () => {
     expect(screen.getByText('Logging...')).toBeDisabled();
 
     await act(async () => {
-      resolveLog!({ id: 'log-1' });
+      resolveLog!();
     });
   });
 
@@ -83,8 +83,8 @@ describe('AddToLogButton', () => {
     vi.useFakeTimers();
     mockLogEntry.mockImplementation(
       () =>
-        new Promise((resolve) => {
-          queueMicrotask(() => resolve({ id: 'log-1' }));
+        new Promise<void>((resolve) => {
+          queueMicrotask(() => resolve());
         }),
     );
 
@@ -122,7 +122,7 @@ describe('AddToLogButton', () => {
 
   it('clears error on next attempt', async () => {
     mockLogEntry.mockRejectedValueOnce(new Error('HTTP 500'));
-    mockLogEntry.mockResolvedValueOnce({ id: 'log-1' });
+    mockLogEntry.mockResolvedValueOnce(undefined);
     render(<AddToLogButton productId="p1" servingSize={ServingSize.servings(1)} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Add to Log' }));
@@ -137,7 +137,7 @@ describe('AddToLogButton', () => {
   });
 
   it('uses current servingSize prop value when logging', async () => {
-    mockLogEntry.mockResolvedValue({ id: 'log-1' });
+    mockLogEntry.mockResolvedValue(undefined);
     const { rerender } = render(
       <AddToLogButton productId="p1" servingSize={ServingSize.servings(1)} />,
     );

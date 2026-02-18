@@ -97,7 +97,6 @@ describe('resolveEntryName', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryName(entry, products, groups)).toBe('Oats');
@@ -107,7 +106,6 @@ describe('resolveEntryName', () => {
     const entry: ApiLogEntry = {
       id: 'log2',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryName(entry, products, groups)).toBe('Breakfast Bowl');
@@ -117,7 +115,6 @@ describe('resolveEntryName', () => {
     const entry: ApiLogEntry = {
       id: 'log3',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'missing', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryName(entry, products, groups)).toBe('Unknown Product');
@@ -127,7 +124,6 @@ describe('resolveEntryName', () => {
     const entry: ApiLogEntry = {
       id: 'log4',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'group', groupID: 'missing', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryName(entry, products, groups)).toBe('Unknown Group');
@@ -137,8 +133,7 @@ describe('resolveEntryName', () => {
     const entry: ApiLogEntry = {
       id: 'log5',
       timestamp: nowSeconds(),
-      userID: 'u1',
-      item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
+      item: { kind: 'product', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryName(entry, products, groups)).toBe('Unknown Item');
   });
@@ -158,7 +153,6 @@ describe('resolveEntryBrand', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBe('QuakerCo');
@@ -168,7 +162,6 @@ describe('resolveEntryBrand', () => {
     const entry: ApiLogEntry = {
       id: 'log2',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBe('HomeMade');
@@ -178,8 +171,7 @@ describe('resolveEntryBrand', () => {
     const entry: ApiLogEntry = {
       id: 'log3',
       timestamp: nowSeconds(),
-      userID: 'u1',
-      item: { kind: 'product', productID: 'p2', servingSize: { kind: 'servings', amount: 1 } },
+      item: { productID: 'p2', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
   });
@@ -188,18 +180,16 @@ describe('resolveEntryBrand', () => {
     const entry: ApiLogEntry = {
       id: 'log4',
       timestamp: nowSeconds(),
-      userID: 'u1',
-      item: { kind: 'group', groupID: 'g2', servingSize: { kind: 'servings', amount: 1 } },
+      item: { groupID: 'g2', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
   });
 
-  it('returns undefined for unknown kind', () => {
+  it('returns undefined when no product or group ID', () => {
     const entry: ApiLogEntry = {
       id: 'log5',
       timestamp: nowSeconds(),
-      userID: 'u1',
-      item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
+      item: { kind: 'product', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
   });
@@ -210,7 +200,6 @@ describe('entryDetailPath', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(entryDetailPath(entry)).toBe('/products/p1?st=servings&sa=1');
@@ -220,7 +209,6 @@ describe('entryDetailPath', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: {
         kind: 'product',
         productID: 'p1',
@@ -240,7 +228,6 @@ describe('entryDetailPath', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: {
         kind: 'product',
         productID: 'p1',
@@ -258,7 +245,6 @@ describe('entryDetailPath', () => {
     const entry: ApiLogEntry = {
       id: 'log2',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'group', groupID: 'g1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(entryDetailPath(entry)).toBe('/groups/g1?st=servings&sa=1');
@@ -268,8 +254,7 @@ describe('entryDetailPath', () => {
     const entry: ApiLogEntry = {
       id: 'log3',
       timestamp: nowSeconds(),
-      userID: 'u1',
-      item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
+      item: { kind: 'product', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(entryDetailPath(entry)).toBe('#');
   });
@@ -280,7 +265,6 @@ describe('formatServingSizeDescription', () => {
     const entry: ApiLogEntry = {
       id: 'log1',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 2 } },
     };
     expect(formatServingSizeDescription(entry)).toBe('2 servings');
@@ -290,7 +274,6 @@ describe('formatServingSizeDescription', () => {
     const entry: ApiLogEntry = {
       id: 'log2',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(formatServingSizeDescription(entry)).toBe('1 serving');
@@ -300,7 +283,6 @@ describe('formatServingSizeDescription', () => {
     const entry: ApiLogEntry = {
       id: 'log3',
       timestamp: nowSeconds(),
-      userID: 'u1',
       item: { kind: 'product', productID: 'p1', servingSize: {} },
     };
     expect(formatServingSizeDescription(entry)).toBe('');
@@ -332,7 +314,6 @@ describe('buildLogTarget', () => {
     const entry: ApiLogEntry = {
       id: 'log-1',
       timestamp: 1700000000,
-      userID: 'u1',
       item: {
         kind: 'product',
         productID: 'prod-1',
@@ -353,7 +334,6 @@ describe('buildLogTarget', () => {
     const entry: ApiLogEntry = {
       id: 'log-2',
       timestamp: 1700001000,
-      userID: 'u1',
       item: {
         kind: 'group',
         groupID: 'group-1',
@@ -378,7 +358,6 @@ describe('buildLogTarget', () => {
     const entry: ApiLogEntry = {
       id: 'log-5',
       timestamp: 1700002000,
-      userID: 'u1',
       item: {
         kind: 'group',
         groupID: 'group-2',
@@ -395,7 +374,6 @@ describe('buildLogTarget', () => {
     const entry: ApiLogEntry = {
       id: 'log-3',
       timestamp: 1700000000,
-      userID: 'u1',
       item: {
         kind: 'product',
         productID: 'prod-2',
@@ -407,12 +385,11 @@ describe('buildLogTarget', () => {
     expect(buildLogTarget(entry, noPrepProduct, null)).toBeNull();
   });
 
-  it('returns null for unknown entry kind', () => {
+  it('returns null for entry with no product or group ID', () => {
     const entry: ApiLogEntry = {
       id: 'log-4',
       timestamp: 1700000000,
-      userID: 'u1',
-      item: { kind: 'other', servingSize: { kind: 'servings', amount: 1 } },
+      item: { kind: 'product', servingSize: { kind: 'servings', amount: 1 } },
     };
 
     expect(buildLogTarget(entry, null, null)).toBeNull();

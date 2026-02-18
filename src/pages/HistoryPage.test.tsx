@@ -129,7 +129,6 @@ function makeEntry(
   overrides: Partial<ApiLogEntry> & { id: string; timestamp: number },
 ): ApiLogEntry {
   return {
-    userID: 'u1',
     item: {
       kind: 'product',
       productID: 'p1',

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 
-import type { ApiGroupSummary } from '../api';
+import type { ProductGroupData } from '../domain';
 import { listGroups } from '../api';
 import { useApiQuery } from '../hooks';
 import {
@@ -16,7 +16,7 @@ export default function GroupsPage() {
     data: groups,
     loading,
     error,
-  } = useApiQuery<ApiGroupSummary[]>(listGroups, [], {
+  } = useApiQuery<ProductGroupData[]>(listGroups, [], {
     errorMessage: "Couldn't load groups. Try again later.",
   });
   const [nameFilter, setNameFilter] = useState('');
@@ -66,7 +66,7 @@ export default function GroupsPage() {
               key={g.id}
               to={`/admin/groups/${g.id}`}
               title={g.name}
-              subtitle={g.brand ?? `${g.items.length} item(s)`}
+              subtitle={g.brand ?? `${g.items?.length ?? 0} item(s)`}
             />
           ))}
         </div>

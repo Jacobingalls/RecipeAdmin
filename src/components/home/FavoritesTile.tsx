@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-import type { ApiFavorite } from '../../api';
-import { deleteFavorite as deleteFavoriteApi } from '../../api';
+import type { ApiFavorite, ApiProduct } from '../../api';
+import { deleteFavorite as deleteFavoriteApi, getProduct, getGroup } from '../../api';
+import type { ProductGroupData } from '../../domain';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { buildFavoriteLogTarget } from '../../utils';
 import { LoadingState, ContentUnavailableView } from '../common';
@@ -24,13 +25,56 @@ export default function FavoritesTile({ onItemLogged }: FavoritesTileProps) {
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [removeLoading, setRemoveLoading] = useState(false);
+  const [products, setProducts] = useState<Record<string, ApiProduct>>({});
+  const [groups, setGroups] = useState<Record<string, ProductGroupData>>({});
 
-  const handleLog = useCallback((favorite: ApiFavorite) => {
-    const target = buildFavoriteLogTarget(favorite);
-    if (target) {
-      setLogTarget(target);
+  useEffect(() => {
+    const productIDs = [
+      ...new Set(favorites.filter((f) => f.item.productID).map((f) => f.item.productID!)),
+    ];
+    const groupIDs = [
+      ...new Set(favorites.filter((f) => f.item.groupID).map((f) => f.item.groupID!)),
+    ];
+
+    const fetchAll = async () => {
+      const productResults: Record<string, ApiProduct> = {};
+      const groupResults: Record<string, ProductGroupData> = {};
+
+      await Promise.all([
+        ...productIDs.map(async (id) => {
+          try {
+            productResults[id] = await getProduct(id);
+          } catch {
+            // Skip products that can't be fetched
+          }
+        }),
+        ...groupIDs.map(async (id) => {
+          try {
+            groupResults[id] = await getGroup(id);
+          } catch {
+            // Skip groups that can't be fetched
+          }
+        }),
+      ]);
+
+      setProducts(productResults);
+      setGroups(groupResults);
+    };
+
+    if (productIDs.length > 0 || groupIDs.length > 0) {
+      fetchAll();
     }
-  }, []);
+  }, [favorites]);
+
+  const handleLog = useCallback(
+    (favorite: ApiFavorite) => {
+      const target = buildFavoriteLogTarget(favorite, products, groups);
+      if (target) {
+        setLogTarget(target);
+      }
+    },
+    [products, groups],
+  );
 
   const handleModalSaved = useCallback(() => {
     refetch();
@@ -85,6 +129,8 @@ export default function FavoritesTile({ onItemLogged }: FavoritesTileProps) {
           <FavoriteRow
             key={fav.id}
             favorite={fav}
+            products={products}
+            groups={groups}
             onLog={handleLog}
             onRemove={handleRemove}
             removeLoading={removeLoading}

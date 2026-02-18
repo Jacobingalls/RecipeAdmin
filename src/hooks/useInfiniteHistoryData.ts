@@ -16,7 +16,7 @@ function resolveEntryNutrition(
 ): NutritionInformation | null {
   const servingSize = ServingSize.fromObject(entry.item.servingSize) ?? ServingSize.servings(1);
 
-  if (entry.item.kind === 'product' && entry.item.productID) {
+  if (entry.item.productID) {
     const product = productDetails[entry.item.productID];
     const prepData =
       product?.preparations?.find((prep) => prep.id === entry.item.preparationID) ??
@@ -31,7 +31,7 @@ function resolveEntryNutrition(
     }
   }
 
-  if (entry.item.kind === 'group' && entry.item.groupID) {
+  if (entry.item.groupID) {
     const groupData = groupDetails[entry.item.groupID];
     if (!groupData) return null;
 
@@ -167,7 +167,7 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
     const productIds = Array.from(
       new Set(
         allLogs
-          .filter((entry) => entry.item.kind === 'product' && !!entry.item.productID)
+          .filter((entry) => !!entry.item.productID)
           .map((entry) => entry.item.productID!)
           .filter((id) => !currentProductDetails[id]),
       ),
@@ -176,7 +176,7 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
     const groupIds = Array.from(
       new Set(
         allLogs
-          .filter((entry) => entry.item.kind === 'group' && !!entry.item.groupID)
+          .filter((entry) => !!entry.item.groupID)
           .map((entry) => entry.item.groupID!)
           .filter((id) => !currentGroupDetails[id]),
       ),
@@ -258,9 +258,9 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
       let product: ApiProduct | null = null;
       let groupData: ProductGroupData | null = null;
 
-      if (entry.item.kind === 'product' && entry.item.productID) {
+      if (entry.item.productID) {
         product = await getProduct(entry.item.productID);
-      } else if (entry.item.kind === 'group' && entry.item.groupID) {
+      } else if (entry.item.groupID) {
         groupData = await getGroup(entry.item.groupID);
       }
 
@@ -280,9 +280,9 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
       let product: ApiProduct | null = null;
       let groupData: ProductGroupData | null = null;
 
-      if (entry.item.kind === 'product' && entry.item.productID) {
+      if (entry.item.productID) {
         product = await getProduct(entry.item.productID);
-      } else if (entry.item.kind === 'group' && entry.item.groupID) {
+      } else if (entry.item.groupID) {
         groupData = await getGroup(entry.item.groupID);
       }
 

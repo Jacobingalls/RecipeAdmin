@@ -17,13 +17,10 @@ const mockDeleteFavorite = vi.mocked(deleteFavorite);
 
 const productFavorite: ApiFavorite = {
   id: 'fav-1',
-  createdAt: 1700000000,
   lastUsedAt: 1700000000,
   item: {
-    product: {
-      id: 'p1',
-      name: 'Oats',
-    },
+    kind: 'product',
+    productID: 'p1',
     preparationID: 'prep-1',
     servingSize: { kind: 'servings', amount: 2 },
   },
@@ -31,10 +28,10 @@ const productFavorite: ApiFavorite = {
 
 const groupFavorite: ApiFavorite = {
   id: 'fav-2',
-  createdAt: 1700000000,
   lastUsedAt: 1700000000,
   item: {
-    group: { id: 'g1', name: 'Breakfast Bowl', items: [] },
+    kind: 'group',
+    groupID: 'g1',
     servingSize: { kind: 'mass', amount: { amount: 100, unit: 'g' } },
   },
 };
@@ -95,7 +92,6 @@ function TestConsumer() {
         data-testid="add"
         onClick={() =>
           addFavorite({
-            kind: 'product',
             productID: 'p1',
             preparationID: 'prep-1',
             servingSize: { kind: 'servings', amount: 1 },
@@ -118,7 +114,7 @@ describe('FavoritesContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockListFavorites.mockResolvedValue([productFavorite, groupFavorite]);
-    mockCreateFavorite.mockResolvedValue(productFavorite);
+    mockCreateFavorite.mockResolvedValue(undefined);
     mockDeleteFavorite.mockResolvedValue(undefined);
   });
 
@@ -196,7 +192,6 @@ describe('FavoritesContext', () => {
     });
 
     expect(mockCreateFavorite).toHaveBeenCalledWith({
-      kind: 'product',
       productID: 'p1',
       preparationID: 'prep-1',
       servingSize: { kind: 'servings', amount: 1 },
@@ -307,10 +302,9 @@ describe('FavoritesContext', () => {
   it('matches serving sizes across API and legacy formats', async () => {
     const apiFavorite: ApiFavorite = {
       id: 'fav-api',
-      createdAt: 1700000000,
       lastUsedAt: 1700000000,
       item: {
-        product: { id: 'p-api', name: 'Chips' },
+        productID: 'p-api',
         preparationID: 'prep-api',
         servingSize: { servings: 3 },
       },

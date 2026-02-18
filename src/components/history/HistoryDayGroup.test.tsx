@@ -60,7 +60,6 @@ function makeEntry(id: string, productID = 'p1'): ApiLogEntry {
   return {
     id,
     timestamp: Date.now() / 1000 - 5 * 60,
-    userID: 'u1',
     item: {
       kind: 'product',
       productID,

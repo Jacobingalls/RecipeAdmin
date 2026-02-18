@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { ApiFavorite } from '../../api';
@@ -18,6 +18,8 @@ vi.mock('../../api', async () => {
   return {
     ...actual,
     deleteFavorite: vi.fn(),
+    getProduct: vi.fn(),
+    getGroup: vi.fn(),
   };
 });
 
@@ -79,6 +81,8 @@ vi.mock('../LogModal', () => ({
 }));
 
 const mockDeleteFavorite = vi.mocked(api.deleteFavorite);
+const mockGetProduct = vi.mocked(api.getProduct);
+const mockGetGroup = vi.mocked(api.getGroup);
 
 function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -87,34 +91,20 @@ function renderWithRouter(ui: ReactElement) {
 const sampleFavorites: ApiFavorite[] = [
   {
     id: 'fav1',
-    createdAt: 1700000000,
     lastUsedAt: 1700001000,
     item: {
-      product: {
-        id: 'p1',
-        name: 'Peanut Butter',
-        brand: 'NutCo',
-        preparations: [
-          {
-            id: 'prep1',
-            nutritionalInformation: { calories: { amount: 190, unit: 'kcal' } },
-          },
-        ],
-      },
+      kind: 'product',
+      productID: 'p1',
       preparationID: 'prep1',
       servingSize: { kind: 'servings', amount: 2 },
     },
   },
   {
     id: 'fav2',
-    createdAt: 1700000000,
     lastUsedAt: 1700001000,
     item: {
-      group: {
-        id: 'g1',
-        name: 'Breakfast Bowl',
-        items: [],
-      },
+      kind: 'group',
+      groupID: 'g1',
       servingSize: { kind: 'servings', amount: 1 },
     },
   },
@@ -135,6 +125,13 @@ describe('FavoritesTile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseFavorites.mockReturnValue(defaultContextValue);
+    mockGetProduct.mockResolvedValue({
+      id: 'p1',
+      name: 'Peanut Butter',
+      brand: 'NutCo',
+      preparations: [{ id: 'prep1', nutritionalInformation: {} }],
+    });
+    mockGetGroup.mockResolvedValue({ id: 'g1', name: 'Breakfast Bowl', items: [] });
   });
 
   it('renders loading state', () => {
@@ -204,12 +201,15 @@ describe('FavoritesTile', () => {
     expect(screen.queryByTestId('favorite-row-fav-7')).not.toBeInTheDocument();
   });
 
-  it('opens log modal when log button is clicked', () => {
+  it('opens log modal when log button is clicked', async () => {
     mockUseFavorites.mockReturnValue({
       ...defaultContextValue,
       favorites: sampleFavorites,
     });
     renderWithRouter(<FavoritesTile />);
+
+    // Wait for products/groups to be fetched so buildFavoriteLogTarget can resolve
+    await act(async () => {});
 
     fireEvent.click(screen.getByTestId('log-fav1'));
 
@@ -225,6 +225,9 @@ describe('FavoritesTile', () => {
     });
 
     renderWithRouter(<FavoritesTile />);
+
+    // Wait for products/groups to be fetched so buildFavoriteLogTarget can resolve
+    await act(async () => {});
 
     fireEvent.click(screen.getByTestId('log-fav1'));
     fireEvent.click(screen.getByTestId('modal-saved'));
@@ -243,6 +246,9 @@ describe('FavoritesTile', () => {
 
     renderWithRouter(<FavoritesTile onItemLogged={onItemLogged} />);
 
+    // Wait for products/groups to be fetched so buildFavoriteLogTarget can resolve
+    await act(async () => {});
+
     fireEvent.click(screen.getByTestId('log-fav1'));
     fireEvent.click(screen.getByTestId('modal-saved'));
 
@@ -257,6 +263,9 @@ describe('FavoritesTile', () => {
       favorites: sampleFavorites,
     });
     renderWithRouter(<FavoritesTile />);
+
+    // Wait for products/groups to be fetched so buildFavoriteLogTarget can resolve
+    await act(async () => {});
 
     fireEvent.click(screen.getByTestId('log-fav1'));
     expect(screen.getByTestId('log-modal')).toBeInTheDocument();
