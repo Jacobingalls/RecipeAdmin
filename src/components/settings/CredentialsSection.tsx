@@ -25,6 +25,7 @@ export default function CredentialsSection({
   refetchPasskeys,
   refetchApiKeys,
 }: CredentialsSectionProps) {
+  const [now] = useState(Date.now);
   const [isAddingPasskey, setIsAddingPasskey] = useState(false);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
@@ -134,25 +135,29 @@ export default function CredentialsSection({
               onDelete={() => setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name })}
             />
           ))}
-          {apiKeys?.map((ak) => (
-            <CredentialRow
-              key={ak.id}
-              kind="apiKey"
-              name={ak.name}
-              keyPrefix={ak.keyPrefix}
-              createdAt={ak.createdAt}
-              expiresAt={ak.expiresAt}
-              isTemporary={ak.isTemporary}
-              onDelete={async () => {
-                if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
-                  await settingsRevokeAPIKey(ak.id);
-                  refetchApiKeys();
-                } else {
-                  setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
-                }
-              }}
-            />
-          ))}
+          {apiKeys?.map((ak) => {
+            const expired = ak.expiresAt != null && ak.expiresAt * 1000 < now;
+            return (
+              <CredentialRow
+                key={ak.id}
+                kind="apiKey"
+                name={ak.name}
+                keyPrefix={ak.keyPrefix}
+                createdAt={ak.createdAt}
+                expiresAt={ak.expiresAt}
+                isTemporary={ak.isTemporary}
+                isExpired={expired}
+                onDelete={async () => {
+                  if (expired) {
+                    await settingsRevokeAPIKey(ak.id);
+                    refetchApiKeys();
+                  } else {
+                    setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
+                  }
+                }}
+              />
+            );
+          })}
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials</p>

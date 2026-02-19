@@ -4,6 +4,7 @@ interface ListRowProps {
   icon?: string;
   content: ReactNode;
   secondary?: ReactNode;
+  className?: string;
   children?: ReactNode;
 }
 
@@ -18,9 +19,9 @@ interface ListRowProps {
  * </ListRow>
  * ```
  */
-export default function ListRow({ icon, content, secondary, children }: ListRowProps) {
+export default function ListRow({ icon, content, secondary, className, children }: ListRowProps) {
   return (
-    <div className="list-group-item d-flex align-items-center">
+    <div className={`list-group-item d-flex align-items-center${className ? ` ${className}` : ''}`}>
       {icon && <i className={`bi ${icon} me-3`} aria-hidden="true" />}
       <div className="me-auto">{content}</div>
       {secondary && <small className="text-body-secondary me-2 flex-shrink-0">{secondary}</small>}

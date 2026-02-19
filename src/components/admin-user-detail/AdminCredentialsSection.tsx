@@ -25,6 +25,7 @@ export default function AdminCredentialsSection({
   apiKeys,
   onChanged,
 }: AdminCredentialsSectionProps) {
+  const [now] = useState(Date.now);
   const [tempKeyModal, setTempKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
   const [deleteCredential, setDeleteCredential] = useState<{
@@ -77,24 +78,28 @@ export default function AdminCredentialsSection({
               onDelete={() => setDeleteCredential({ type: 'passkey', id: pk.id, name: pk.name })}
             />
           ))}
-          {apiKeys.map((ak) => (
-            <CredentialRow
-              key={ak.id}
-              kind="apiKey"
-              name={ak.name}
-              createdAt={ak.createdAt}
-              expiresAt={ak.expiresAt}
-              isTemporary={ak.isTemporary}
-              onDelete={async () => {
-                if (ak.expiresAt && ak.expiresAt * 1000 < Date.now()) {
-                  await adminDeleteUserAPIKey(userId, ak.id);
-                  onChanged();
-                } else {
-                  setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
-                }
-              }}
-            />
-          ))}
+          {apiKeys.map((ak) => {
+            const expired = ak.expiresAt != null && ak.expiresAt * 1000 < now;
+            return (
+              <CredentialRow
+                key={ak.id}
+                kind="apiKey"
+                name={ak.name}
+                createdAt={ak.createdAt}
+                expiresAt={ak.expiresAt}
+                isTemporary={ak.isTemporary}
+                isExpired={expired}
+                onDelete={async () => {
+                  if (expired) {
+                    await adminDeleteUserAPIKey(userId, ak.id);
+                    onChanged();
+                  } else {
+                    setDeleteCredential({ type: 'apiKey', id: ak.id, name: ak.name });
+                  }
+                }}
+              />
+            );
+          })}
         </div>
       ) : (
         <p className="text-body-secondary small">No credentials.</p>

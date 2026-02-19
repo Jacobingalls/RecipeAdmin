@@ -66,6 +66,56 @@ describe('CredentialRow', () => {
     expect(screen.getByText(/Created time-1700000000/)).toBeInTheDocument();
   });
 
+  it('shows expired state when isExpired is true', () => {
+    render(
+      <CredentialRow
+        kind="apiKey"
+        name="Old Key"
+        keyPrefix="rk_old"
+        expiresAt={1700100000}
+        createdAt={1700000000}
+        isExpired
+        onDelete={vi.fn()}
+      />,
+    );
+    expect(screen.getByText(/Expired time-1700100000/)).toBeInTheDocument();
+    expect(screen.queryByText(/Created/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Expires/)).not.toBeInTheDocument();
+  });
+
+  it('applies muted styling to expired API key name and prefix', () => {
+    render(
+      <CredentialRow
+        kind="apiKey"
+        name="Old Key"
+        keyPrefix="rk_old"
+        isExpired
+        expiresAt={1700100000}
+        onDelete={vi.fn()}
+      />,
+    );
+    const nameEl = screen.getByText('Old Key');
+    expect(nameEl).toHaveClass('text-body-tertiary');
+    const codeEl = screen.getByText('rk_old...');
+    expect(codeEl).toHaveClass('text-body-tertiary');
+  });
+
+  it('does not apply expired styling when isExpired is false', () => {
+    render(
+      <CredentialRow
+        kind="apiKey"
+        name="Active Key"
+        keyPrefix="rk_act"
+        isExpired={false}
+        expiresAt={1700100000}
+        createdAt={1700000000}
+        onDelete={vi.fn()}
+      />,
+    );
+    const nameEl = screen.getByText('Active Key');
+    expect(nameEl).not.toHaveClass('text-body-tertiary');
+  });
+
   it('calls onDelete when delete button is clicked', () => {
     const onDelete = vi.fn();
     render(<CredentialRow kind="passkey" name="MacBook" onDelete={onDelete} />);

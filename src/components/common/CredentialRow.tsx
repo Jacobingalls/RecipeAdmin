@@ -10,6 +10,7 @@ interface CredentialRowProps {
   createdAt?: number;
   expiresAt?: number;
   isTemporary?: boolean;
+  isExpired?: boolean;
   onDelete: () => void;
 }
 
@@ -28,12 +29,17 @@ export default function CredentialRow({
   createdAt,
   expiresAt,
   isTemporary,
+  isExpired,
   onDelete,
 }: CredentialRowProps) {
   const icon = kind === 'passkey' ? 'bi-fingerprint' : 'bi-key';
 
   let secondary;
-  if (isTemporary && expiresAt) {
+  if (isExpired && expiresAt) {
+    secondary = (
+      <span className="text-danger-emphasis">Expired {formatRelativeTime(expiresAt)}</span>
+    );
+  } else if (isTemporary && expiresAt) {
     secondary = <>Expires {formatRelativeTime(expiresAt)}</>;
   } else if (createdAt) {
     secondary = <>Created {formatRelativeTime(createdAt)}</>;
@@ -42,17 +48,22 @@ export default function CredentialRow({
   const content =
     kind === 'apiKey' && keyPrefix ? (
       <>
-        <strong>{name}</strong>
-        <code className="ms-2">{keyPrefix}...</code>
+        <strong className={isExpired ? 'text-body-tertiary' : undefined}>{name}</strong>
+        <code className={`ms-2${isExpired ? ' text-body-tertiary' : ''}`}>{keyPrefix}...</code>
       </>
     ) : (
-      <strong>{name}</strong>
+      <strong className={isExpired ? 'text-body-tertiary' : undefined}>{name}</strong>
     );
 
   const deleteLabel = kind === 'passkey' ? `Delete passkey ${name}` : `Revoke API key ${name}`;
 
   return (
-    <ListRow icon={icon} content={content} secondary={secondary}>
+    <ListRow
+      icon={icon}
+      content={content}
+      secondary={secondary}
+      className={isExpired ? 'opacity-75' : undefined}
+    >
       <DeleteButton ariaLabel={deleteLabel} onClick={onDelete} />
     </ListRow>
   );
