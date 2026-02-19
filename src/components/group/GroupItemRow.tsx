@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { GroupItem } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
+import { servingSizeSearchParams } from '../../utils';
 import { FoodItemRow } from '../common';
 
 interface GroupItemRowProps {
@@ -28,9 +29,20 @@ export default function GroupItemRow({ item }: GroupItemRowProps) {
     return serving?.nutrition?.calories?.amount ?? null;
   }, [item]);
 
-  if (!item.product && !item.group) return null;
+  const detailPath = useMemo(() => {
+    const id = item.product?.id ?? item.group?.id;
+    if (!id) return '#';
+    const ssParams = servingSizeSearchParams(servingSize);
+    if (isProduct) {
+      if (item.preparationID) {
+        ssParams.set('prep', item.preparationID);
+      }
+      return `/products/${id}?${ssParams}`;
+    }
+    return `/groups/${id}?${ssParams}`;
+  }, [isProduct, servingSize, item.preparationID, item.product, item.group]);
 
-  const detailPath = isProduct ? `/products/${item.product!.id}` : `/groups/${item.group!.id}`;
+  if (!item.product && !item.group) return null;
 
   const subtitle = (
     <>
