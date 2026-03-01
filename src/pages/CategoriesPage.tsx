@@ -22,7 +22,9 @@ export default function CategoriesPage() {
   const { topLevel, lookup } = useMemo(() => {
     if (!categories) return { topLevel: [], lookup: new Map<string, ApiCategory>() };
     const map = new Map(categories.map((c) => [c.id, c]));
-    const roots = categories.filter((c) => c.parents.length === 0);
+    const roots = categories
+      .filter((c) => c.parents.length === 0)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
     return { topLevel: roots, lookup: map };
   }, [categories]);
 
@@ -39,7 +41,8 @@ export default function CategoriesPage() {
         topLevel.map((root) => {
           const children = root.children
             .map((id) => lookup.get(id))
-            .filter((c): c is ApiCategory => c !== undefined);
+            .filter((c): c is ApiCategory => c !== undefined)
+            .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
           return (
             <section key={root.id} className="mb-4">

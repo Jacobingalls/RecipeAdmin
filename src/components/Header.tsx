@@ -77,6 +77,16 @@ export default function Header() {
                 </span>
               </NavLink>
             </li>
+            <li className="nav-item">
+              <NavLink className={navLinkClass} to="/categories">
+                <span className="d-inline-flex flex-column align-items-center">
+                  Categories
+                  <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
+                    Categories
+                  </span>
+                </span>
+              </NavLink>
+            </li>
           </ul>
           <HeaderSearchBar />
           <UserDropdownMenu />

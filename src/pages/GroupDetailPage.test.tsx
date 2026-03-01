@@ -153,11 +153,10 @@ describe('GroupDetailPage', () => {
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
-  it('renders group name and item count', () => {
+  it('renders group name', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
     expect(screen.getByText('Breakfast Bowl')).toBeInTheDocument();
-    expect(screen.getByText('2 items')).toBeInTheDocument();
   });
 
   it('renders nutrition label and serving size selector', () => {
@@ -209,10 +208,13 @@ describe('GroupDetailPage', () => {
     expect(screen.getByText('No items in this group')).toBeInTheDocument();
   });
 
-  it('renders singular "item" for single item', () => {
-    mockQuery({ data: { ...sampleGroup, items: [sampleGroup.items![0]] } });
+  it('renders brand above the group name', () => {
+    mockQuery({ data: { ...sampleGroup, brand: 'Acme Foods' } });
     renderWithRoute('/groups/g1');
-    expect(screen.getByText('1 item')).toBeInTheDocument();
+    const brand = screen.getByText('Acme Foods');
+    const title = screen.getByText('Breakfast Bowl');
+    // Brand appears before the title in DOM order
+    expect(brand.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('product items have correct aria-label', () => {

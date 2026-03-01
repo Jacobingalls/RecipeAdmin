@@ -75,8 +75,8 @@ export default function ProductDetailPage() {
       )}
       {!loading && !error && product && (
         <>
-          <h1 className="mb-1">{product.name}</h1>
           <p className="text-secondary mb-1">{product.brand}</p>
+          <h1 className="mb-1">{product.name}</h1>
           <CategoryPaths categoryIds={currentPrep?.categories ?? []} />
 
           {(product.notes as Note[] | undefined)?.length ? (

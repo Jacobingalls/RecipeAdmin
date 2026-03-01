@@ -69,7 +69,12 @@ export default function CategoryDetailPage() {
           {children && children.length > 0 && (
             <section className="mt-4">
               <SubsectionTitle>Subcategories</SubsectionTitle>
-              <CategoryGrid categories={children} parentPath={path} />
+              <CategoryGrid
+                categories={[...children].sort((a, b) =>
+                  a.displayName.localeCompare(b.displayName),
+                )}
+                parentPath={path}
+              />
             </section>
           )}
 

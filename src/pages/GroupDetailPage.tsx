@@ -58,11 +58,8 @@ export default function GroupDetailPage() {
       )}
       {!loading && !error && groupData && (
         <>
-          <h1 className="mb-1">{groupData.name}</h1>
           {groupData.brand && <p className="text-secondary mb-1">{groupData.brand}</p>}
-          <p className="text-secondary mb-1">
-            {items.length} item{items.length !== 1 ? 's' : ''}
-          </p>
+          <h1 className="mb-1">{groupData.name}</h1>
           <CategoryPaths categoryIds={groupData.categories ?? []} />
 
           <section className="mt-4">
