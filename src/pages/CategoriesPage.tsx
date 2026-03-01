@@ -15,7 +15,7 @@ export default function CategoriesPage() {
     data: categories,
     loading,
     error,
-  } = useApiQuery<ApiCategory[]>(listCategories, [], {
+  } = useApiQuery<ApiCategory[]>(() => listCategories({ depth: 1 }), [], {
     errorMessage: "Couldn't load categories. Try again later.",
   });
 

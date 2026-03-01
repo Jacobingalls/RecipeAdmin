@@ -382,8 +382,11 @@ export interface ApiCategory {
 
 // Category API functions
 
-export async function listCategories(): Promise<ApiCategory[]> {
-  return apiFetch<ApiCategory[]>('/categories');
+export async function listCategories(options?: { depth?: number }): Promise<ApiCategory[]> {
+  const params = new URLSearchParams();
+  if (options?.depth !== undefined) params.set('depth', String(options.depth));
+  const query = params.toString();
+  return apiFetch<ApiCategory[]>(`/categories${query ? `?${query}` : ''}`);
 }
 
 export async function getCategory(id: string): Promise<ApiCategory> {
