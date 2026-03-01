@@ -118,11 +118,12 @@ describe('AdminCategoriesPage', () => {
     expect(links[2]).toHaveAttribute('href', '/admin/categories/fruit');
   });
 
-  it('shows parent and children counts in subtitle', () => {
+  it('shows slug paths as subtitle', () => {
     mockQuery({ data: sampleCategories });
     renderWithRouter(<AdminCategoriesPage />);
-    expect(screen.getByText('0 parents · 2 children')).toBeInTheDocument();
-    expect(screen.getAllByText('1 parent · 0 children')).toHaveLength(2);
+    expect(screen.getByText('fruit.citrus')).toBeInTheDocument();
+    expect(screen.getByText('dairy')).toBeInTheDocument();
+    expect(screen.getByText('fruit')).toBeInTheDocument();
   });
 
   it('filters by name (case-insensitive)', () => {
@@ -133,6 +134,26 @@ describe('AdminCategoriesPage', () => {
     expect(screen.getByText('Dairy')).toBeInTheDocument();
     expect(screen.queryByText('Fruit')).not.toBeInTheDocument();
     expect(screen.queryByText('Citrus')).not.toBeInTheDocument();
+  });
+
+  it('filters by slug path', () => {
+    mockQuery({ data: sampleCategories });
+    renderWithRouter(<AdminCategoriesPage />);
+    const input = screen.getByPlaceholderText('Search by name...');
+    fireEvent.change(input, { target: { value: 'fruit.citrus' } });
+    expect(screen.getByText('Citrus')).toBeInTheDocument();
+    expect(screen.queryByText('Dairy')).not.toBeInTheDocument();
+  });
+
+  it('filters by parent slug in path', () => {
+    mockQuery({ data: sampleCategories });
+    renderWithRouter(<AdminCategoriesPage />);
+    const input = screen.getByPlaceholderText('Search by name...');
+    // Searching "fruit" matches both Fruit (name) and Citrus (path contains "fruit")
+    fireEvent.change(input, { target: { value: 'fruit' } });
+    expect(screen.getByText('Fruit')).toBeInTheDocument();
+    expect(screen.getByText('Citrus')).toBeInTheDocument();
+    expect(screen.queryByText('Dairy')).not.toBeInTheDocument();
   });
 
   it('shows empty state when filter matches nothing', () => {

@@ -3,7 +3,6 @@ import { useState, useMemo, useId } from 'react';
 import type { ApiCategory } from '../api';
 import { adminListCategories } from '../api';
 import { useApiQuery } from '../hooks';
-import { buildSlugPath } from '../utils';
 import {
   LoadingState,
   ErrorState,
@@ -11,10 +10,28 @@ import {
   LinkListItem,
 } from '../components/common';
 
-function formatCounts(parents: number, children: number): string {
-  const p = parents === 1 ? '1 parent' : `${parents} parents`;
-  const c = children === 1 ? '1 child' : `${children} children`;
-  return `${p} · ${c}`;
+function buildAllSlugPaths(categoryId: string, lookup: Map<string, ApiCategory>): string[] {
+  const cat = lookup.get(categoryId);
+  if (!cat) return [];
+  if (cat.parents.length === 0) return [cat.slug];
+  const paths: string[] = [];
+  for (const parentId of cat.parents) {
+    const parentPaths = buildAllSlugPaths(parentId, lookup);
+    if (parentPaths.length === 0) {
+      paths.push(cat.slug);
+    } else {
+      for (const pp of parentPaths) {
+        paths.push(`${pp}.${cat.slug}`);
+      }
+    }
+  }
+  return paths;
+}
+
+interface CategoryEntry {
+  category: ApiCategory;
+  paths: string[];
+  linkPath: string;
 }
 
 export default function AdminCategoriesPage() {
@@ -28,16 +45,24 @@ export default function AdminCategoriesPage() {
   const [nameFilter, setNameFilter] = useState('');
   const nameId = useId();
 
-  const { filteredCategories, lookup } = useMemo(() => {
-    if (!categories) return { filteredCategories: [], lookup: new Map<string, ApiCategory>() };
-    const map = new Map(categories.map((c) => [c.id, c]));
-    const sorted = [...categories].sort((a, b) => a.displayName.localeCompare(b.displayName));
-    if (!nameFilter) return { filteredCategories: sorted, lookup: map };
+  const filteredEntries = useMemo(() => {
+    if (!categories) return [];
+    const lookup = new Map(categories.map((c) => [c.id, c]));
+
+    const entries: CategoryEntry[] = categories
+      .map((c) => {
+        const paths = buildAllSlugPaths(c.id, lookup);
+        return { category: c, paths, linkPath: paths[0] ?? c.slug };
+      })
+      .sort((a, b) => a.category.displayName.localeCompare(b.category.displayName));
+
+    if (!nameFilter) return entries;
     const q = nameFilter.toLowerCase();
-    return {
-      filteredCategories: sorted.filter((c) => c.displayName.toLowerCase().includes(q)),
-      lookup: map,
-    };
+    return entries.filter(
+      (e) =>
+        e.category.displayName.toLowerCase().includes(q) ||
+        e.paths.some((p) => p.toLowerCase().includes(q)),
+    );
   }, [categories, nameFilter]);
 
   return (
@@ -58,21 +83,21 @@ export default function AdminCategoriesPage() {
       </div>
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
-      {!loading && !error && filteredCategories.length === 0 && (
+      {!loading && !error && filteredEntries.length === 0 && (
         <ContentUnavailableView
           icon="bi-folder"
           title="No categories"
           description="Try adjusting your search."
         />
       )}
-      {!loading && !error && filteredCategories.length > 0 && (
+      {!loading && !error && filteredEntries.length > 0 && (
         <div className="list-group">
-          {filteredCategories.map((c) => (
+          {filteredEntries.map((e) => (
             <LinkListItem
-              key={c.id}
-              to={`/admin/categories/${buildSlugPath(c.id, lookup)}`}
-              title={c.displayName}
-              subtitle={formatCounts(c.parents.length, c.children.length)}
+              key={e.category.id}
+              to={`/admin/categories/${e.linkPath}`}
+              title={e.category.displayName}
+              subtitle={e.paths.join(', ')}
             />
           ))}
         </div>
