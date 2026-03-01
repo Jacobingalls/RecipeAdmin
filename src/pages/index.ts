@@ -2,6 +2,8 @@ export { default as AdminGroupEditorPage } from './AdminGroupEditorPage';
 export { default as AdminProductEditorPage } from './AdminProductEditorPage';
 export { default as AdminUserDetailPage } from './AdminUserDetailPage';
 export { default as AdminUsersPage } from './AdminUsersPage';
+export { default as CategoriesPage } from './CategoriesPage';
+export { default as CategoryDetailPage } from './CategoryDetailPage';
 export { default as FavoritesPage } from './FavoritesPage';
 export { default as GroupDetailPage } from './GroupDetailPage';
 export { default as GroupsPage } from './GroupsPage';

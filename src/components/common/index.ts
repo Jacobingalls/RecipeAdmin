@@ -1,4 +1,5 @@
 export { default as Button } from './Button';
+export { default as CategoryGrid } from './CategoryGrid';
 export { default as CategoryPaths } from './CategoryPaths';
 export { default as CircularButton } from './CircularButton';
 export { default as CircularButtonGroup } from './CircularButtonGroup';

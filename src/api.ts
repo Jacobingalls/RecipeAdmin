@@ -390,8 +390,16 @@ export async function getCategory(id: string): Promise<ApiCategory> {
   return apiFetch<ApiCategory>(`/categories/${encodeURIComponent(id)}`);
 }
 
+export async function getCategoryParents(id: string): Promise<ApiCategory[]> {
+  return apiFetch<ApiCategory[]>(`/categories/${encodeURIComponent(id)}/parents`);
+}
+
 export async function getCategoryAncestors(id: string): Promise<ApiCategory[]> {
   return apiFetch<ApiCategory[]>(`/categories/${encodeURIComponent(id)}/ancestors`);
+}
+
+export async function getCategoryChildren(id: string): Promise<ApiCategory[]> {
+  return apiFetch<ApiCategory[]>(`/categories/${encodeURIComponent(id)}/children`);
 }
 
 export async function getCategoryDescendants(id: string): Promise<ApiCategory[]> {

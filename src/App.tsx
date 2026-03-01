@@ -10,6 +10,8 @@ import {
   AdminProductEditorPage,
   AdminUserDetailPage,
   AdminUsersPage,
+  CategoriesPage,
+  CategoryDetailPage,
   FavoritesPage,
   GroupDetailPage,
   GroupsPage,
@@ -50,6 +52,8 @@ export default function App() {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/lookup/:barcode?" element={<LookupPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/categories/:id" element={<CategoryDetailPage />} />
               <Route path="/groups/:id" element={<GroupDetailPage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/history" element={<HistoryPage />} />

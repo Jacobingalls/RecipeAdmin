@@ -35,6 +35,11 @@ export default function CategoryPaths({ categoryIds }: CategoryPathsProps) {
         return (
           <nav aria-label="Category" key={id}>
             <ol className="breadcrumb mb-0 small">
+              <li className="breadcrumb-item">
+                <Link to="/categories" className="text-decoration-none">
+                  Categories
+                </Link>
+              </li>
               {path.map((cat, i) => (
                 <li
                   key={cat.id}

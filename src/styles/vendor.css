@@ -34,6 +34,12 @@
   border: 1px solid var(--bs-card-border-color);
 }
 
+.category-grid {
+  --bs-list-group-action-color: var(--bs-secondary-color);
+  --bs-list-group-action-hover-color: var(--bs-emphasis-color);
+  --bs-list-group-action-hover-bg: var(--bs-tertiary-bg);
+}
+
 .app-header-navbar {
   background-color: var(--app-header-bg);
   border-bottom: 1px solid var(--app-header-border-color);

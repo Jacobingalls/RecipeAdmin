@@ -90,6 +90,7 @@ describe('CategoryPaths', () => {
   it('renders full ancestor path for a leaf category', () => {
     mockQuery({ data: sampleCategories });
     renderComponent(['leaf']);
+    expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Food')).toBeInTheDocument();
     expect(screen.getByText('Dairy')).toBeInTheDocument();
     expect(screen.getByText('Cheese')).toBeInTheDocument();
@@ -98,18 +99,20 @@ describe('CategoryPaths', () => {
   it('renders a single breadcrumb for a root category', () => {
     mockQuery({ data: sampleCategories });
     renderComponent(['standalone']);
+    expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Snacks')).toBeInTheDocument();
     expect(screen.queryByText('Food')).not.toBeInTheDocument();
   });
 
-  it('renders clickable links for each ancestor', () => {
+  it('renders clickable links with root Categories link first', () => {
     mockQuery({ data: sampleCategories });
     renderComponent(['leaf']);
     const links = screen.getAllByRole('link');
-    expect(links).toHaveLength(3);
-    expect(links[0]).toHaveAttribute('href', '/categories/root');
-    expect(links[1]).toHaveAttribute('href', '/categories/mid');
-    expect(links[2]).toHaveAttribute('href', '/categories/leaf');
+    expect(links).toHaveLength(4);
+    expect(links[0]).toHaveAttribute('href', '/categories');
+    expect(links[1]).toHaveAttribute('href', '/categories/root');
+    expect(links[2]).toHaveAttribute('href', '/categories/mid');
+    expect(links[3]).toHaveAttribute('href', '/categories/leaf');
   });
 
   it('renders multiple breadcrumb navs for multiple category IDs', () => {
@@ -134,5 +137,15 @@ describe('CategoryPaths', () => {
     const lastItem = items[items.length - 1];
     expect(lastItem).toHaveClass('active');
     expect(lastItem).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('renders root Categories link for each breadcrumb trail', () => {
+    mockQuery({ data: sampleCategories });
+    renderComponent(['leaf', 'standalone']);
+    const categoriesLinks = screen.getAllByText('Categories');
+    expect(categoriesLinks).toHaveLength(2);
+    categoriesLinks.forEach((link) => {
+      expect(link.closest('a')).toHaveAttribute('href', '/categories');
+    });
   });
 });
