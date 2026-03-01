@@ -126,11 +126,11 @@ describe('AdminCategoryDetailPage', () => {
     expect(screen.getByText('Category not found')).toBeInTheDocument();
   });
 
-  it('displays category displayName, slug, and description', () => {
+  it('displays category displayName, path, and description', () => {
     mockQueries({ data: fruitCategory }, { data: allCategories });
     renderWithRoute(<AdminCategoryDetailPage />);
     expect(screen.getByText('Fruit')).toBeInTheDocument();
-    expect(screen.getByText('fruit')).toBeInTheDocument();
+    expect(screen.getByText('food.fruit')).toBeInTheDocument();
     expect(screen.getByText('Fresh fruit')).toBeInTheDocument();
   });
 
@@ -153,6 +153,27 @@ describe('AdminCategoryDetailPage', () => {
     // Sorted: Berries before Citrus
     expect(childLinks[0]).toHaveAttribute('href', '/admin/categories/food.fruit.berries');
     expect(childLinks[1]).toHaveAttribute('href', '/admin/categories/food.fruit.citrus');
+  });
+
+  it('renders multiple paths for a category with multiple parents', () => {
+    const altRoot: ApiCategory = {
+      id: 'cat-alt',
+      slug: 'grocery',
+      displayName: 'Grocery',
+      description: null,
+      parents: [],
+      children: ['cat-1'],
+      notes: [],
+    };
+    const multiParentFruit: ApiCategory = {
+      ...fruitCategory,
+      parents: ['cat-root', 'cat-alt'],
+    };
+    const cats = [multiParentFruit, rootCategory, citrusCategory, berriesCategory, altRoot];
+    mockQueries({ data: multiParentFruit }, { data: cats });
+    renderWithRoute(<AdminCategoryDetailPage />);
+    expect(screen.getByText('food.fruit')).toBeInTheDocument();
+    expect(screen.getByText('grocery.fruit')).toBeInTheDocument();
   });
 
   it('shows "No parents" for root categories', () => {

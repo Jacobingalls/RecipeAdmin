@@ -3,30 +3,13 @@ import { useState, useMemo, useId } from 'react';
 import type { ApiCategory } from '../api';
 import { adminListCategories } from '../api';
 import { useApiQuery } from '../hooks';
+import { buildAllSlugPaths } from '../utils';
 import {
   LoadingState,
   ErrorState,
   ContentUnavailableView,
   LinkListItem,
 } from '../components/common';
-
-function buildAllSlugPaths(categoryId: string, lookup: Map<string, ApiCategory>): string[] {
-  const cat = lookup.get(categoryId);
-  if (!cat) return [];
-  if (cat.parents.length === 0) return [cat.slug];
-  const paths: string[] = [];
-  for (const parentId of cat.parents) {
-    const parentPaths = buildAllSlugPaths(parentId, lookup);
-    if (parentPaths.length === 0) {
-      paths.push(cat.slug);
-    } else {
-      for (const pp of parentPaths) {
-        paths.push(`${pp}.${cat.slug}`);
-      }
-    }
-  }
-  return paths;
-}
 
 interface CategoryEntry {
   category: ApiCategory;

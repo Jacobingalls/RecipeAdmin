@@ -27,4 +27,4 @@ export {
   buildLogTarget,
 } from './logEntryHelpers';
 export { buildSearchResultLogTarget } from './searchResultLogTarget';
-export { buildSlugPath, resolvePathSegments } from './categoryPaths';
+export { buildSlugPath, buildAllSlugPaths, resolvePathSegments } from './categoryPaths';

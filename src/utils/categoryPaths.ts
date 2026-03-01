@@ -16,6 +16,28 @@ export function buildSlugPath(categoryId: string, lookup: Map<string, ApiCategor
 }
 
 /**
+ * Computes all possible dot-separated slug paths for a category by walking
+ * up every parent chain. Categories with multiple parents produce multiple paths.
+ */
+export function buildAllSlugPaths(categoryId: string, lookup: Map<string, ApiCategory>): string[] {
+  const cat = lookup.get(categoryId);
+  if (!cat) return [];
+  if (cat.parents.length === 0) return [cat.slug];
+  const paths: string[] = [];
+  for (const parentId of cat.parents) {
+    const parentPaths = buildAllSlugPaths(parentId, lookup);
+    if (parentPaths.length === 0) {
+      paths.push(cat.slug);
+    } else {
+      for (const pp of parentPaths) {
+        paths.push(`${pp}.${cat.slug}`);
+      }
+    }
+  }
+  return paths;
+}
+
+/**
  * Splits a dot-separated slug path and resolves each segment to an ApiCategory
  * by matching slug + parent relationship. Returns the ordered ancestor chain.
  */

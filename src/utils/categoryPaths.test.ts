@@ -1,6 +1,6 @@
 import type { ApiCategory } from '../api';
 
-import { buildSlugPath, resolvePathSegments } from './categoryPaths';
+import { buildAllSlugPaths, buildSlugPath, resolvePathSegments } from './categoryPaths';
 
 function makeCategory(
   overrides: Partial<ApiCategory> & Pick<ApiCategory, 'id' | 'slug'>,
@@ -42,6 +42,38 @@ describe('buildSlugPath', () => {
 
   it('returns empty string for unknown ID', () => {
     expect(buildSlugPath('nonexistent', lookup)).toBe('');
+  });
+});
+
+describe('buildAllSlugPaths', () => {
+  it('returns single path for a root category', () => {
+    expect(buildAllSlugPaths('root', lookup)).toEqual(['food']);
+  });
+
+  it('returns single path for a linear chain', () => {
+    expect(buildAllSlugPaths('leaf', lookup)).toEqual(['food.dairy.cheese']);
+  });
+
+  it('returns multiple paths for a category with multiple parents', () => {
+    const extra = makeCategory({ id: 'alt-parent', slug: 'grocery', children: ['leaf'] });
+    const multiParentCheese = makeCategory({
+      id: 'leaf',
+      slug: 'cheese',
+      parents: ['mid', 'alt-parent'],
+    });
+    const cats = [food, dairy, multiParentCheese, snacks, extra];
+    const lk = new Map(cats.map((c) => [c.id, c]));
+    expect(buildAllSlugPaths('leaf', lk)).toEqual(['food.dairy.cheese', 'grocery.cheese']);
+  });
+
+  it('returns empty array for unknown ID', () => {
+    expect(buildAllSlugPaths('nonexistent', lookup)).toEqual([]);
+  });
+
+  it('falls back to slug when parent is not in lookup', () => {
+    const orphan = makeCategory({ id: 'orphan', slug: 'orphan', parents: ['missing'] });
+    const lk = new Map([['orphan', orphan]]);
+    expect(buildAllSlugPaths('orphan', lk)).toEqual(['orphan']);
   });
 });
 

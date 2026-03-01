@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import type { ApiCategory } from '../api';
 import { getCategory, adminListCategories } from '../api';
 import { useApiQuery } from '../hooks';
-import { buildSlugPath } from '../utils';
+import { buildAllSlugPaths, buildSlugPath } from '../utils';
 import {
   ContentUnavailableView,
   ErrorState,
@@ -30,6 +30,11 @@ export default function AdminCategoryDetailPage() {
     if (!allCategories) return new Map<string, ApiCategory>();
     return new Map(allCategories.map((c) => [c.id, c]));
   }, [allCategories]);
+
+  const allPaths = useMemo(() => {
+    if (!category || lookup.size === 0) return [];
+    return buildAllSlugPaths(category.id, lookup);
+  }, [category, lookup]);
 
   const parentCategories = useMemo(() => {
     if (!category) return [];
@@ -60,7 +65,15 @@ export default function AdminCategoryDetailPage() {
       {!loading && !error && category && (
         <>
           <h1 className="mb-1">{category.displayName}</h1>
-          <p className="text-body-secondary mb-0">{category.slug}</p>
+          {allPaths.length > 0 && (
+            <div className="mb-0">
+              {allPaths.map((p) => (
+                <p key={p} className="text-body-tertiary small font-monospace mb-0">
+                  {p}
+                </p>
+              ))}
+            </div>
+          )}
           {category.description && <p className="mt-2 mb-0">{category.description}</p>}
 
           <section className="mt-4">
