@@ -15,7 +15,7 @@ import { GroupItemRow } from '../components/group';
 import { useApiQuery } from '../hooks';
 
 export default function CategoryDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { path } = useParams<{ path: string }>();
   const [includeDescendants, setIncludeDescendants] = useState(true);
   const [nameFilter, setNameFilter] = useState('');
 
@@ -23,15 +23,15 @@ export default function CategoryDetailPage() {
     data: category,
     loading: categoryLoading,
     error: categoryError,
-  } = useApiQuery<ApiCategory>(() => getCategory(id!), [id], {
+  } = useApiQuery<ApiCategory>(() => getCategory(path!), [path], {
     errorMessage: "Couldn't load this category. Try again later.",
   });
 
-  const { data: children } = useApiQuery<ApiCategory[]>(() => getCategoryChildren(id!), [id]);
+  const { data: children } = useApiQuery<ApiCategory[]>(() => getCategoryChildren(path!), [path]);
 
   const { data: items, loading: itemsLoading } = useApiQuery<ApiLookupItem[]>(
-    () => getCategoryItems(id!, { includeDescendants }),
-    [id, includeDescendants],
+    () => getCategoryItems(path!, { includeDescendants }),
+    [path, includeDescendants],
   );
 
   const filteredItems = useMemo(() => {
@@ -64,12 +64,12 @@ export default function CategoryDetailPage() {
       {!loading && !error && category && (
         <>
           <h1 className="mb-1">{category.displayName}</h1>
-          <CategoryPaths categoryIds={[id!]} />
+          <CategoryPaths path={path!} />
 
           {children && children.length > 0 && (
             <section className="mt-4">
               <SubsectionTitle>Subcategories</SubsectionTitle>
-              <CategoryGrid categories={children} />
+              <CategoryGrid categories={children} parentPath={path} />
             </section>
           )}
 

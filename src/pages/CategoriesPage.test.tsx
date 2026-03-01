@@ -23,6 +23,24 @@ vi.mock('../components/common', async () => {
     ContentUnavailableView: ({ title }: { title: string }) => (
       <div data-testid="content-unavailable-view">{title}</div>
     ),
+    CategoryGrid: ({
+      categories,
+      parentPath,
+    }: {
+      categories: { id: string; slug: string; displayName: string }[];
+      parentPath?: string;
+    }) => (
+      <div data-testid="category-grid" data-parent-path={parentPath}>
+        {categories.map((c) => {
+          const slugPath = parentPath ? `${parentPath}.${c.slug}` : c.slug;
+          return (
+            <a key={c.id} href={`/categories/${slugPath}`}>
+              {c.displayName}
+            </a>
+          );
+        })}
+      </div>
+    ),
   };
 });
 
@@ -104,12 +122,20 @@ describe('CategoriesPage', () => {
     expect(screen.getByText('Produce')).toBeInTheDocument();
   });
 
-  it('renders children as cards within their parent section', () => {
+  it('renders children as cards with slug-path links', () => {
     mockQuery({ data: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByText('Cheese')).toBeInTheDocument();
     const cheeseLink = screen.getByText('Cheese').closest('a');
-    expect(cheeseLink).toHaveAttribute('href', '/categories/child1');
+    expect(cheeseLink).toHaveAttribute('href', '/categories/dairy.cheese');
+  });
+
+  it('passes parentPath to CategoryGrid with root slug', () => {
+    mockQuery({ data: sampleCategories });
+    renderWithRouter(<CategoriesPage />);
+    const grids = screen.getAllByTestId('category-grid');
+    // Dairy section grid should have parentPath="dairy"
+    expect(grids[0]).toHaveAttribute('data-parent-path', 'dairy');
   });
 
   it('renders section headings for top-level categories', () => {

@@ -22,19 +22,26 @@ vi.mock('../components/common', () => ({
       {description && <span data-testid="cuv-description">{description}</span>}
     </div>
   ),
-  CategoryPaths: ({ categoryIds }: { categoryIds: string[] }) => (
-    <div data-testid="category-paths">{categoryIds.join(',')}</div>
-  ),
+  CategoryPaths: ({ path }: { path: string }) => <div data-testid="category-paths">{path}</div>,
   SubsectionTitle: ({ children }: { children: ReactNode }) => (
     <h2 data-testid="subsection-title">{children}</h2>
   ),
-  CategoryGrid: ({ categories }: { categories: { id: string; displayName: string }[] }) => (
-    <div data-testid="category-grid">
-      {categories.map((c) => (
-        <a key={c.id} href={`/categories/${c.id}`}>
-          {c.displayName}
-        </a>
-      ))}
+  CategoryGrid: ({
+    categories,
+    parentPath,
+  }: {
+    categories: { id: string; slug: string; displayName: string }[];
+    parentPath?: string;
+  }) => (
+    <div data-testid="category-grid" data-parent-path={parentPath}>
+      {categories.map((c) => {
+        const slugPath = parentPath ? `${parentPath}.${c.slug}` : c.slug;
+        return (
+          <a key={c.id} href={`/categories/${slugPath}`}>
+            {c.displayName}
+          </a>
+        );
+      })}
     </div>
   ),
 }));
@@ -75,9 +82,9 @@ const sampleItems: ApiLookupItem[] = [
 ];
 
 // The component calls useApiQuery 3 times in order:
-// 1. getCategory(id)
-// 2. getCategoryChildren(id)
-// 3. getCategoryItems(id, { includeDescendants })
+// 1. getCategory(path)
+// 2. getCategoryChildren(path)
+// 3. getCategoryItems(path, { includeDescendants })
 function mockQueries(
   overrides: {
     category?: Partial<UseApiQueryResult<ApiCategory>>;
@@ -104,11 +111,11 @@ function mockQueries(
   });
 }
 
-function renderPage(route = '/categories/cat1') {
+function renderPage(route = '/categories/dairy') {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <Routes>
-        <Route path="/categories/:id" element={<CategoryDetailPage />} />
+        <Route path="/categories/:path" element={<CategoryDetailPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -139,23 +146,27 @@ describe('CategoryDetailPage', () => {
     expect(screen.getByTestId('cuv-title')).toHaveTextContent('Category not found');
   });
 
-  it('renders category name and breadcrumbs', () => {
+  it('renders category name and breadcrumbs with slug path', () => {
     mockQueries();
     renderPage();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dairy');
-    expect(screen.getByTestId('category-paths')).toHaveTextContent('cat1');
+    expect(screen.getByTestId('category-paths')).toHaveTextContent('dairy');
   });
 
-  it('renders subcategory cards with links', () => {
+  it('passes path as parentPath to CategoryGrid for subcategories', () => {
     mockQueries();
     renderPage();
-    expect(screen.getByText('Cheese')).toBeInTheDocument();
-    expect(screen.getByText('Yogurt')).toBeInTheDocument();
+    const grid = screen.getByTestId('category-grid');
+    expect(grid).toHaveAttribute('data-parent-path', 'dairy');
+  });
 
+  it('renders subcategory links with slug paths', () => {
+    mockQueries();
+    renderPage();
     const cheeseLink = screen.getByText('Cheese').closest('a');
-    expect(cheeseLink).toHaveAttribute('href', '/categories/cat2');
+    expect(cheeseLink).toHaveAttribute('href', '/categories/dairy.cheese');
     const yogurtLink = screen.getByText('Yogurt').closest('a');
-    expect(yogurtLink).toHaveAttribute('href', '/categories/cat3');
+    expect(yogurtLink).toHaveAttribute('href', '/categories/dairy.yogurt');
   });
 
   it('does not render subcategories section when no descendants', () => {

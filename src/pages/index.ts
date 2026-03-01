@@ -1,3 +1,5 @@
+export { default as AdminCategoriesPage } from './AdminCategoriesPage';
+export { default as AdminCategoryDetailPage } from './AdminCategoryDetailPage';
 export { default as AdminGroupEditorPage } from './AdminGroupEditorPage';
 export { default as AdminProductEditorPage } from './AdminProductEditorPage';
 export { default as AdminUserDetailPage } from './AdminUserDetailPage';

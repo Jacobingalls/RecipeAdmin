@@ -29,6 +29,17 @@ export default function AdminSidebar() {
         </li>
         <li className="nav-item">
           <NavLink
+            to="/admin/categories"
+            className={({ isActive }) =>
+              `nav-link rounded-2 py-2 ${isActive ? 'bg-body-secondary fw-semibold text-body' : 'text-body-secondary'}`
+            }
+          >
+            <i className="bi bi-folder me-2" aria-hidden="true" />
+            Categories
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink
             to="/admin/users"
             className={({ isActive }) =>
               `nav-link rounded-2 py-2 ${isActive ? 'bg-body-secondary fw-semibold text-body' : 'text-body-secondary'}`

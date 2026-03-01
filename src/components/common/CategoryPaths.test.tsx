@@ -62,7 +62,15 @@ function mockQuery(overrides: Partial<UseApiQueryResult<ApiCategory[]>>) {
   } as UseApiQueryResult<ApiCategory[]>);
 }
 
-function renderComponent(categoryIds: string[]) {
+function renderWithPath(path: string) {
+  return render(
+    <MemoryRouter>
+      <CategoryPaths path={path} />
+    </MemoryRouter>,
+  );
+}
+
+function renderWithIds(categoryIds: string[]) {
   return render(
     <MemoryRouter>
       <CategoryPaths categoryIds={categoryIds} />
@@ -75,77 +83,111 @@ describe('CategoryPaths', () => {
     vi.clearAllMocks();
   });
 
-  it('returns null when categoryIds is empty', () => {
-    mockQuery({ data: sampleCategories });
-    const { container } = renderComponent([]);
-    expect(container.innerHTML).toBe('');
+  describe('path mode', () => {
+    it('returns null when categories have not loaded', () => {
+      mockQuery({ data: null, loading: true });
+      const { container } = renderWithPath('food.dairy.cheese');
+      expect(container.innerHTML).toBe('');
+    });
+
+    it('renders full ancestor path for a slug path', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithPath('food.dairy.cheese');
+      expect(screen.getByText('Categories')).toBeInTheDocument();
+      expect(screen.getByText('Food')).toBeInTheDocument();
+      expect(screen.getByText('Dairy')).toBeInTheDocument();
+      expect(screen.getByText('Cheese')).toBeInTheDocument();
+    });
+
+    it('renders clickable links with cumulative slug paths', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithPath('food.dairy.cheese');
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(4);
+      expect(links[0]).toHaveAttribute('href', '/categories');
+      expect(links[1]).toHaveAttribute('href', '/categories/food');
+      expect(links[2]).toHaveAttribute('href', '/categories/food.dairy');
+      expect(links[3]).toHaveAttribute('href', '/categories/food.dairy.cheese');
+    });
+
+    it('renders a single breadcrumb for a root slug', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithPath('snacks');
+      expect(screen.getByText('Categories')).toBeInTheDocument();
+      expect(screen.getByText('Snacks')).toBeInTheDocument();
+      expect(screen.queryByText('Food')).not.toBeInTheDocument();
+    });
+
+    it('marks the leaf breadcrumb item as active', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithPath('food.dairy.cheese');
+      const items = screen.getAllByRole('listitem');
+      const lastItem = items[items.length - 1];
+      expect(lastItem).toHaveClass('active');
+      expect(lastItem).toHaveAttribute('aria-current', 'page');
+    });
+
+    it('returns null for unknown slug path', () => {
+      mockQuery({ data: sampleCategories });
+      const { container } = renderWithPath('nonexistent');
+      expect(container.innerHTML).toBe('');
+    });
   });
 
-  it('returns null when categories have not loaded', () => {
-    mockQuery({ data: null, loading: true });
-    const { container } = renderComponent(['leaf']);
-    expect(container.innerHTML).toBe('');
-  });
+  describe('categoryIds mode', () => {
+    it('returns null when categoryIds is empty', () => {
+      mockQuery({ data: sampleCategories });
+      const { container } = renderWithIds([]);
+      expect(container.innerHTML).toBe('');
+    });
 
-  it('renders full ancestor path for a leaf category', () => {
-    mockQuery({ data: sampleCategories });
-    renderComponent(['leaf']);
-    expect(screen.getByText('Categories')).toBeInTheDocument();
-    expect(screen.getByText('Food')).toBeInTheDocument();
-    expect(screen.getByText('Dairy')).toBeInTheDocument();
-    expect(screen.getByText('Cheese')).toBeInTheDocument();
-  });
+    it('returns null when categories have not loaded', () => {
+      mockQuery({ data: null, loading: true });
+      const { container } = renderWithIds(['leaf']);
+      expect(container.innerHTML).toBe('');
+    });
 
-  it('renders a single breadcrumb for a root category', () => {
-    mockQuery({ data: sampleCategories });
-    renderComponent(['standalone']);
-    expect(screen.getByText('Categories')).toBeInTheDocument();
-    expect(screen.getByText('Snacks')).toBeInTheDocument();
-    expect(screen.queryByText('Food')).not.toBeInTheDocument();
-  });
+    it('renders full ancestor path for a leaf category ID', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithIds(['leaf']);
+      expect(screen.getByText('Categories')).toBeInTheDocument();
+      expect(screen.getByText('Food')).toBeInTheDocument();
+      expect(screen.getByText('Dairy')).toBeInTheDocument();
+      expect(screen.getByText('Cheese')).toBeInTheDocument();
+    });
 
-  it('renders clickable links with root Categories link first', () => {
-    mockQuery({ data: sampleCategories });
-    renderComponent(['leaf']);
-    const links = screen.getAllByRole('link');
-    expect(links).toHaveLength(4);
-    expect(links[0]).toHaveAttribute('href', '/categories');
-    expect(links[1]).toHaveAttribute('href', '/categories/root');
-    expect(links[2]).toHaveAttribute('href', '/categories/mid');
-    expect(links[3]).toHaveAttribute('href', '/categories/leaf');
-  });
+    it('renders slug-based links for category IDs', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithIds(['leaf']);
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(4);
+      expect(links[0]).toHaveAttribute('href', '/categories');
+      expect(links[1]).toHaveAttribute('href', '/categories/food');
+      expect(links[2]).toHaveAttribute('href', '/categories/food.dairy');
+      expect(links[3]).toHaveAttribute('href', '/categories/food.dairy.cheese');
+    });
 
-  it('renders multiple breadcrumb navs for multiple category IDs', () => {
-    mockQuery({ data: sampleCategories });
-    renderComponent(['leaf', 'standalone']);
-    const navs = screen.getAllByRole('navigation');
-    expect(navs).toHaveLength(2);
-  });
+    it('renders multiple breadcrumb navs for multiple category IDs', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithIds(['leaf', 'standalone']);
+      const navs = screen.getAllByRole('navigation');
+      expect(navs).toHaveLength(2);
+    });
 
-  it('skips unknown category IDs', () => {
-    mockQuery({ data: sampleCategories });
-    const { container } = renderComponent(['nonexistent']);
-    // The unknown ID produces an empty path, so null is returned for that entry
-    // but the wrapper div still renders
-    expect(container.querySelectorAll('nav')).toHaveLength(0);
-  });
+    it('skips unknown category IDs', () => {
+      mockQuery({ data: sampleCategories });
+      const { container } = renderWithIds(['nonexistent']);
+      expect(container.innerHTML).toBe('');
+    });
 
-  it('marks the leaf breadcrumb item as active', () => {
-    mockQuery({ data: sampleCategories });
-    renderComponent(['leaf']);
-    const items = screen.getAllByRole('listitem');
-    const lastItem = items[items.length - 1];
-    expect(lastItem).toHaveClass('active');
-    expect(lastItem).toHaveAttribute('aria-current', 'page');
-  });
-
-  it('renders root Categories link for each breadcrumb trail', () => {
-    mockQuery({ data: sampleCategories });
-    renderComponent(['leaf', 'standalone']);
-    const categoriesLinks = screen.getAllByText('Categories');
-    expect(categoriesLinks).toHaveLength(2);
-    categoriesLinks.forEach((link) => {
-      expect(link.closest('a')).toHaveAttribute('href', '/categories');
+    it('renders root Categories link for each breadcrumb trail', () => {
+      mockQuery({ data: sampleCategories });
+      renderWithIds(['leaf', 'standalone']);
+      const categoriesLinks = screen.getAllByText('Categories');
+      expect(categoriesLinks).toHaveLength(2);
+      categoriesLinks.forEach((link) => {
+        expect(link.closest('a')).toHaveAttribute('href', '/categories');
+      });
     });
   });
 });

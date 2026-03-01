@@ -6,6 +6,8 @@ import { ErrorBoundary, RequireAuth, RequireAdmin } from './components/common';
 import { AuthProvider } from './contexts/AuthContext';
 import { useTheme } from './hooks';
 import {
+  AdminCategoriesPage,
+  AdminCategoryDetailPage,
   AdminGroupEditorPage,
   AdminProductEditorPage,
   AdminUserDetailPage,
@@ -53,7 +55,7 @@ export default function App() {
               <Route path="/lookup/:barcode?" element={<LookupPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/categories/:id" element={<CategoryDetailPage />} />
+              <Route path="/categories/:path" element={<CategoryDetailPage />} />
               <Route path="/groups/:id" element={<GroupDetailPage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/history" element={<HistoryPage />} />
@@ -68,6 +70,8 @@ export default function App() {
                 <Route path="/admin/products/:id" element={<AdminProductEditorPage />} />
                 <Route path="/admin/groups" element={<GroupsPage />} />
                 <Route path="/admin/groups/:id" element={<AdminGroupEditorPage />} />
+                <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+                <Route path="/admin/categories/:path" element={<AdminCategoryDetailPage />} />
                 <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
               </Route>

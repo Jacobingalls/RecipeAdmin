@@ -71,12 +71,19 @@ describe('AdminSidebar', () => {
     expect(groupsLink.className).toContain('fw-semibold');
   });
 
+  it('renders Categories link pointing to /admin/categories', () => {
+    renderWithRoute();
+    const link = screen.getByRole('link', { name: /Categories/ });
+    expect(link).toHaveAttribute('href', '/admin/categories');
+  });
+
   it('renders icons with aria-hidden for accessibility', () => {
     const { container } = renderWithRoute();
     const icons = container.querySelectorAll('[aria-hidden="true"]');
-    expect(icons).toHaveLength(3);
+    expect(icons).toHaveLength(4);
     expect(container.querySelector('.bi-box-seam')).toBeInTheDocument();
     expect(container.querySelector('.bi-collection')).toBeInTheDocument();
+    expect(container.querySelector('.bi-folder')).toBeInTheDocument();
     expect(container.querySelector('.bi-people')).toBeInTheDocument();
   });
 
@@ -84,6 +91,6 @@ describe('AdminSidebar', () => {
     renderWithRoute();
     const list = screen.getByRole('list');
     const items = list.querySelectorAll('li');
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
   });
 });

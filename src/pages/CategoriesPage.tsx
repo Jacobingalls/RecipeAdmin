@@ -47,7 +47,7 @@ export default function CategoriesPage() {
                 {root.displayName}
               </h2>
               {children.length > 0 ? (
-                <CategoryGrid categories={children} />
+                <CategoryGrid categories={children} parentPath={root.slug} />
               ) : (
                 <p className="text-body-secondary small mb-0">No subcategories</p>
               )}
