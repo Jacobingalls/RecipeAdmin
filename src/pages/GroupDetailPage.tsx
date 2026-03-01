@@ -8,6 +8,7 @@ import {
   LoadingState,
   ErrorState,
   ContentUnavailableView,
+  CategoryPaths,
   SubsectionTitle,
 } from '../components/common';
 import { GroupItemRow } from '../components/group';
@@ -59,9 +60,10 @@ export default function GroupDetailPage() {
         <>
           <h1 className="mb-1">{groupData.name}</h1>
           {groupData.brand && <p className="text-secondary mb-1">{groupData.brand}</p>}
-          <p className="text-secondary mb-3">
+          <p className="text-secondary mb-1">
             {items.length} item{items.length !== 1 ? 's' : ''}
           </p>
+          <CategoryPaths categoryIds={groupData.categories ?? []} />
 
           <section className="mt-4">
             <SubsectionTitle>Nutrition Estimate</SubsectionTitle>

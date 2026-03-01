@@ -20,6 +20,9 @@ vi.mock('../components/common', () => ({
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
   ),
+  CategoryPaths: ({ categoryIds }: { categoryIds: string[] }) => (
+    <div data-testid="category-paths">{categoryIds.join(',')}</div>
+  ),
   SubsectionTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }));
 

@@ -9,6 +9,7 @@ import {
   LoadingState,
   ErrorState,
   ContentUnavailableView,
+  CategoryPaths,
   SubsectionTitle,
 } from '../components/common';
 import { PreparationDetails } from '../components/product';
@@ -75,7 +76,8 @@ export default function ProductDetailPage() {
       {!loading && !error && product && (
         <>
           <h1 className="mb-1">{product.name}</h1>
-          <p className="text-secondary mb-3">{product.brand}</p>
+          <p className="text-secondary mb-1">{product.brand}</p>
+          <CategoryPaths categoryIds={currentPrep?.categories ?? []} />
 
           {(product.notes as Note[] | undefined)?.length ? (
             <div className="mb-3">
