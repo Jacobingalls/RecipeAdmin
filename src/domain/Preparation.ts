@@ -16,6 +16,7 @@ export interface PreparationData {
   customSizes?: CustomSizeData[];
   servingSizeDescription?: string | null;
   defaultServingSize?: ServingSizeData;
+  categories?: string[];
   notes?: string[];
 }
 
@@ -34,6 +35,7 @@ export class Preparation {
   volume: NutritionUnit | null;
   customSizes: CustomSize[];
   servingSizeDescription: string | null;
+  categories: string[];
   notes: string[];
 
   constructor(data: PreparationData = {}) {
@@ -54,6 +56,9 @@ export class Preparation {
 
     // Human-readable serving size description (e.g., "1 tbsp (14g)")
     this.servingSizeDescription = data.servingSizeDescription || null;
+
+    // Category IDs this preparation belongs to
+    this.categories = data.categories || [];
 
     // Notes about the preparation
     this.notes = data.notes || [];

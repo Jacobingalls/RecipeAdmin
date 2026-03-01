@@ -36,6 +36,7 @@ export interface ProductGroupData {
   customSizes?: CustomSizeData[];
   barcodes?: BarcodeData[];
   defaultServingSize?: ServingSizeData;
+  categories?: string[];
 }
 
 interface ItemServing {
@@ -63,6 +64,7 @@ export class ProductGroup {
   volume: NutritionUnit | null;
   customSizes: CustomSize[];
   barcodes: BarcodeData[];
+  categories: string[];
 
   constructor(data: ProductGroupData = {}) {
     this.id = data.id;
@@ -82,6 +84,9 @@ export class ProductGroup {
     this.customSizes = (data.customSizes || []).map((cs) => new CustomSize(cs));
 
     this.barcodes = data.barcodes || [];
+
+    // Category IDs this group belongs to
+    this.categories = data.categories || [];
   }
 
   /**

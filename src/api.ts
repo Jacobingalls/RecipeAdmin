@@ -368,6 +368,50 @@ export async function touchFavoriteLastUsed(id: string): Promise<ApiFavorite> {
   );
 }
 
+// Category types
+
+export interface ApiCategory {
+  id: string;
+  slug: string;
+  displayName: string;
+  description: string | null;
+  parents: string[];
+  children: string[];
+  notes: unknown[];
+}
+
+// Category API functions
+
+export async function listCategories(): Promise<ApiCategory[]> {
+  return apiFetch<ApiCategory[]>('/categories');
+}
+
+export async function getCategory(id: string): Promise<ApiCategory> {
+  return apiFetch<ApiCategory>(`/categories/${encodeURIComponent(id)}`);
+}
+
+export async function getCategoryAncestors(id: string): Promise<ApiCategory[]> {
+  return apiFetch<ApiCategory[]>(`/categories/${encodeURIComponent(id)}/ancestors`);
+}
+
+export async function getCategoryDescendants(id: string): Promise<ApiCategory[]> {
+  return apiFetch<ApiCategory[]>(`/categories/${encodeURIComponent(id)}/descendants`);
+}
+
+export async function getCategoryItems(
+  id: string,
+  options?: { includeDescendants?: boolean },
+): Promise<ApiLookupItem[]> {
+  const params = new URLSearchParams();
+  if (options?.includeDescendants !== undefined) {
+    params.set('includeDescendants', String(options.includeDescendants));
+  }
+  const query = params.toString();
+  return apiFetch<ApiLookupItem[]>(
+    `/categories/${encodeURIComponent(id)}/items${query ? `?${query}` : ''}`,
+  );
+}
+
 // Auth types
 
 export interface AuthUser {
@@ -660,4 +704,24 @@ export async function adminRevokeUserSessions(userId: string): Promise<void> {
     }
     throw new Error(`HTTP ${res.status}`);
   }
+}
+
+// Admin Category API functions
+
+export async function adminListCategories(): Promise<ApiCategory[]> {
+  return apiFetch<ApiCategory[]>('/admin/categories');
+}
+
+export async function adminUpsertCategories(
+  categories: ApiCategory | ApiCategory[],
+): Promise<ApiCategory[]> {
+  return apiPost<ApiCategory | ApiCategory[], ApiCategory[]>('/admin/categories', categories);
+}
+
+export async function adminDeleteAllCategories(): Promise<void> {
+  return apiDelete('/admin/categories');
+}
+
+export async function adminDeleteCategory(id: string): Promise<void> {
+  return apiDelete(`/admin/categories/${encodeURIComponent(id)}`);
 }
