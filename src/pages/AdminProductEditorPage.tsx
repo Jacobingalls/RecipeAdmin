@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import type { ApiProduct } from '../api';
-import { getProduct, adminUpsertProducts } from '../api';
+import { adminGetProduct, adminUpsertProducts } from '../api';
 import { useApiQuery } from '../hooks';
 import {
   LoadingState,
@@ -23,9 +23,13 @@ import {
 
 export default function AdminProductEditorPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, loading, error, refetch } = useApiQuery<ApiProduct>(() => getProduct(id!), [id], {
-    errorMessage: "Couldn't load this product. Try again later.",
-  });
+  const { data, loading, error, refetch } = useApiQuery<ApiProduct>(
+    () => adminGetProduct(id!),
+    [id],
+    {
+      errorMessage: "Couldn't load this product. Try again later.",
+    },
+  );
 
   const [draftProduct, setDraftProduct] = useState<ApiProduct | null>(null);
   const [activePrep, setActivePrep] = useState<string | null>(null);

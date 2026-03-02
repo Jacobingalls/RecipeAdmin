@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 import type { ApiCategory } from '../api';
-import { getCategory } from '../api';
+import { adminGetCategory } from '../api';
 import {
   AddCategoryModal,
   CategoryDangerZone,
@@ -40,7 +40,7 @@ export default function AdminCategoryDetailPage() {
     data: fetchedCategory,
     loading: categoryLoading,
     error: categoryError,
-  } = useApiQuery<ApiCategory>(() => getCategory(path!), [path], {
+  } = useApiQuery<ApiCategory>(() => adminGetCategory(path!), [path], {
     enabled: !cachedCategory,
     errorMessage: "Couldn't load this category. Try again later.",
   });

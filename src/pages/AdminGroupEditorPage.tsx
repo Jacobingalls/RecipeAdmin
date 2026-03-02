@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 
-import { getGroup } from '../api';
+import { adminGetGroup } from '../api';
 import type { ProductGroupData } from '../domain';
 import { useApiQuery } from '../hooks';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';
@@ -11,7 +11,7 @@ export default function AdminGroupEditorPage() {
     data: groupData,
     loading,
     error,
-  } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id], {
+  } = useApiQuery<ProductGroupData>(() => adminGetGroup(id!), [id], {
     errorMessage: "Couldn't load this group. Try again later.",
   });
 

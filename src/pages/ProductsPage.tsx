@@ -1,26 +1,31 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { ApiProduct } from '../api';
-import { listProducts } from '../api';
-import { useApiQuery } from '../hooks';
+import { adminListProducts } from '../api';
+import { CreateProductModal } from '../components/admin';
 import {
   LoadingState,
   ErrorState,
   ContentUnavailableView,
+  Button,
   LinkListItem,
   ListFilter,
 } from '../components/common';
+import { useApiQuery } from '../hooks';
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const {
     data: products,
     loading,
     error,
-  } = useApiQuery<ApiProduct[]>(listProducts, [], {
+  } = useApiQuery<ApiProduct[]>(adminListProducts, [], {
     errorMessage: "Couldn't load products. Try again later.",
   });
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const brands = useMemo(() => {
     if (!products) return [];
@@ -41,7 +46,19 @@ export default function ProductsPage() {
 
   return (
     <>
-      <h1 className="mb-4">Products</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="mb-0">Products</h1>
+        <Button variant="success" onClick={() => setShowCreateModal(true)}>
+          New
+        </Button>
+      </div>
+
+      <CreateProductModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onProductCreated={(id) => navigate(`/admin/products/${id}`)}
+      />
+
       <ListFilter
         nameFilter={nameFilter}
         onNameFilterChange={setNameFilter}

@@ -771,6 +771,14 @@ export async function adminDeleteCategory(id: string): Promise<void> {
 
 // Admin Product API functions
 
+export async function adminListProducts(): Promise<ApiProduct[]> {
+  return apiFetch<ApiProduct[]>('/admin/products');
+}
+
+export async function adminGetProduct(id: string): Promise<ApiProduct> {
+  return apiFetch<ApiProduct>(`/admin/products/${encodeURIComponent(id)}`);
+}
+
 export async function adminUpsertProducts(
   products: ApiProduct | ApiProduct[],
 ): Promise<ApiProduct[]> {
@@ -779,4 +787,20 @@ export async function adminUpsertProducts(
 
 export async function adminDeleteProduct(id: string): Promise<void> {
   return apiDelete(`/admin/products/${encodeURIComponent(id)}`);
+}
+
+// Admin Group API functions
+
+export async function adminListGroups(): Promise<ProductGroupData[]> {
+  return apiFetch<ProductGroupData[]>('/admin/groups');
+}
+
+export async function adminGetGroup(id: string): Promise<ProductGroupData> {
+  return apiFetch<ProductGroupData>(`/admin/groups/${encodeURIComponent(id)}`);
+}
+
+// Admin Category GET-by-ID
+
+export async function adminGetCategory(id: string): Promise<ApiCategory> {
+  return apiFetch<ApiCategory>(`/admin/categories/${encodeURIComponent(id)}`);
 }

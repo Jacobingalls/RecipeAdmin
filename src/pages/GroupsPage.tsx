@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 
 import type { ProductGroupData } from '../domain';
-import { listGroups } from '../api';
+import { adminListGroups } from '../api';
 import { useApiQuery } from '../hooks';
 import {
   LoadingState,
@@ -16,7 +16,7 @@ export default function GroupsPage() {
     data: groups,
     loading,
     error,
-  } = useApiQuery<ProductGroupData[]>(listGroups, [], {
+  } = useApiQuery<ProductGroupData[]>(adminListGroups, [], {
     errorMessage: "Couldn't load groups. Try again later.",
   });
   const [nameFilter, setNameFilter] = useState('');
