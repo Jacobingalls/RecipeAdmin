@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 
 import type {
   CustomSizeValue,
@@ -9,28 +9,44 @@ import type {
   ServingSizeType,
 } from '../domain';
 import { ServingSize } from '../domain';
-import type { SelectOption } from '../config/unitConfig';
+import type { SelectOption, OptionGroup } from '../config/unitConfig';
 import { buildOptionGroups, filterGroups } from '../config/unitConfig';
 
-function optionId(option: SelectOption): string {
-  return `serving-option-${option.type}-${option.value.replace(/\s+/g, '-')}`;
+function optionElId(prefix: string, option: SelectOption): string {
+  return `${prefix}-option-${option.type}-${option.value.replace(/\s+/g, '-')}`;
 }
 
 interface ServingSizeSelectorProps {
-  prep: Preparation | ProductGroup;
+  prep?: Preparation | ProductGroup;
   value: ServingSize;
   onChange: (servingSize: ServingSize) => void;
+  size?: 'sm';
+  groups?: OptionGroup[];
+  amountAriaLabel?: string;
+  unitAriaLabel?: string;
 }
 
-export default function ServingSizeSelector({ prep, value, onChange }: ServingSizeSelectorProps) {
+export default function ServingSizeSelector({
+  prep,
+  value,
+  onChange,
+  size,
+  groups: groupsOverride,
+  amountAriaLabel,
+  unitAriaLabel,
+}: ServingSizeSelectorProps) {
+  const instanceId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const compact = size === 'sm';
+  const amountInputId = `${instanceId}-amount`;
+  const unitButtonId = `${instanceId}-unit`;
 
-  // Build option groups based on prep capabilities
-  const allGroups = buildOptionGroups(prep);
+  // Build option groups from either groups override or prep
+  const allGroups = groupsOverride ?? (prep ? buildOptionGroups(prep) : []);
   const filteredGroups = filterGroups(allGroups, searchQuery);
 
   // Flat list of all visible options for keyboard navigation
@@ -80,7 +96,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
   };
 
   const handleAmountChange = (newAmount: number): void => {
-    const amount = Math.max(0.01, newAmount);
+    const amount = compact ? newAmount : Math.max(0.01, newAmount);
     onChange(createServingSize(value.type, getUnitValue(), amount));
   };
 
@@ -92,7 +108,7 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
         : option.value === (value.value as NutritionUnit).unit));
 
   const handleUnitSelect = (option: SelectOption): void => {
-    const currentAmount = value.amount || 1;
+    const currentAmount = value.amount || (compact ? 0 : 1);
     onChange(createServingSize(option.type, option.value, currentAmount));
     setIsOpen(false);
     setSearchQuery('');
@@ -119,10 +135,10 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
   // Scroll highlighted option into view
   useEffect(() => {
     if (highlightedIndex >= 0 && highlightedIndex < flatOptions.length) {
-      const el = document.getElementById(optionId(flatOptions[highlightedIndex]));
+      const el = document.getElementById(optionElId(instanceId, flatOptions[highlightedIndex]));
       el?.scrollIntoView({ block: 'nearest' });
     }
-  }, [highlightedIndex, flatOptions]);
+  }, [highlightedIndex, flatOptions, instanceId]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
@@ -164,14 +180,109 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
     }
   };
 
+  const toggleDropdown = () => {
+    if (!isOpen) {
+      const selectedIdx = flatOptions.findIndex(isOptionSelected);
+      setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : 0);
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const dropdownMenu = isOpen && (
+    <div
+      className="dropdown-menu show"
+      role="listbox"
+      tabIndex={-1}
+      style={{ minWidth: 220, maxHeight: 300, overflowY: 'auto' }}
+      onKeyDown={handleKeyDown}
+      aria-activedescendant={
+        highlightedIndex >= 0 && highlightedIndex < flatOptions.length
+          ? optionElId(instanceId, flatOptions[highlightedIndex])
+          : undefined
+      }
+    >
+      <div className="px-2 pb-2">
+        <input
+          ref={searchInputRef}
+          type="text"
+          className="form-control form-control-sm"
+          placeholder="Search units..."
+          aria-label="Search units"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            const newGroups = filterGroups(allGroups, e.target.value);
+            const newFlat = newGroups.flatMap((g) => g.options);
+            setHighlightedIndex(newFlat.length > 0 ? 0 : -1);
+          }}
+        />
+      </div>
+      {filteredGroups.length === 0 ? (
+        <div className="dropdown-item-text text-muted small">No matching units</div>
+      ) : (
+        filteredGroups.map((group, groupIndex) => (
+          <div key={group.label}>
+            {groupIndex > 0 && <div className="dropdown-divider" />}
+            <h6 className="dropdown-header">{group.label}</h6>
+            {group.options.map((option) => {
+              const flatIdx = flatOptions.indexOf(option);
+              const isHighlighted = flatIdx === highlightedIndex;
+              return (
+                <button
+                  key={`${option.type}-${option.value}`}
+                  id={optionElId(instanceId, option)}
+                  className={`dropdown-item${isHighlighted ? ' active' : ''}`}
+                  role="option"
+                  aria-selected={isOptionSelected(option)}
+                  onClick={() => handleUnitSelect(option)}
+                  onMouseEnter={() => setHighlightedIndex(flatIdx)}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <div className="d-flex align-items-center gap-2 flex-shrink-1" style={{ minWidth: 0 }}>
+        <input
+          type="number"
+          className="form-control form-control-sm flex-shrink-0"
+          style={{ width: '5rem' }}
+          step="any"
+          value={value.amount}
+          onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0)}
+          aria-label={amountAriaLabel ?? 'Amount'}
+        />
+        <div ref={dropdownRef} className="dropdown flex-shrink-1" style={{ minWidth: '5rem' }}>
+          <button
+            className="form-select form-select-sm text-start text-truncate w-100"
+            type="button"
+            onClick={toggleDropdown}
+            style={{ minWidth: '5rem' }}
+            aria-label={unitAriaLabel ?? 'Unit'}
+          >
+            {getCurrentLabel()}
+          </button>
+          {dropdownMenu}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="row g-2 align-items-end">
       <div className="col-auto">
-        <label htmlFor="serving-amount" className="form-label small mb-1">
+        <label htmlFor={amountInputId} className="form-label small mb-1">
           Amount
         </label>
         <input
-          id="serving-amount"
+          id={amountInputId}
           type="number"
           className="form-control"
           style={{ width: '6.25rem' }}
@@ -182,83 +293,20 @@ export default function ServingSizeSelector({ prep, value, onChange }: ServingSi
         />
       </div>
       <div className="col-auto" ref={dropdownRef}>
-        <label htmlFor="serving-unit" className="form-label small mb-1">
+        <label htmlFor={unitButtonId} className="form-label small mb-1">
           Unit
         </label>
         <div className="dropdown">
           <button
-            id="serving-unit"
+            id={unitButtonId}
             className="form-select text-start"
             type="button"
-            onClick={() => {
-              if (!isOpen) {
-                const selectedIdx = flatOptions.findIndex(isOptionSelected);
-                setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : 0);
-              }
-              setIsOpen(!isOpen);
-            }}
+            onClick={toggleDropdown}
             style={{ minWidth: '11.25rem' }}
           >
             {getCurrentLabel()}
           </button>
-          {isOpen && (
-            <div
-              className="dropdown-menu show"
-              role="listbox"
-              tabIndex={-1}
-              style={{ minWidth: 220, maxHeight: 300, overflowY: 'auto' }}
-              onKeyDown={handleKeyDown}
-              aria-activedescendant={
-                highlightedIndex >= 0 && highlightedIndex < flatOptions.length
-                  ? optionId(flatOptions[highlightedIndex])
-                  : undefined
-              }
-            >
-              <div className="px-2 pb-2">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  className="form-control form-control-sm"
-                  placeholder="Search units..."
-                  aria-label="Search units"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    const newGroups = filterGroups(allGroups, e.target.value);
-                    const newFlat = newGroups.flatMap((g) => g.options);
-                    setHighlightedIndex(newFlat.length > 0 ? 0 : -1);
-                  }}
-                />
-              </div>
-              {filteredGroups.length === 0 ? (
-                <div className="dropdown-item-text text-muted small">No matching units</div>
-              ) : (
-                filteredGroups.map((group, groupIndex) => (
-                  <div key={group.label}>
-                    {groupIndex > 0 && <div className="dropdown-divider" />}
-                    <h6 className="dropdown-header">{group.label}</h6>
-                    {group.options.map((option) => {
-                      const flatIdx = flatOptions.indexOf(option);
-                      const isHighlighted = flatIdx === highlightedIndex;
-                      return (
-                        <button
-                          key={`${option.type}-${option.value}`}
-                          id={optionId(option)}
-                          className={`dropdown-item${isHighlighted ? ' active' : ''}`}
-                          role="option"
-                          aria-selected={isOptionSelected(option)}
-                          onClick={() => handleUnitSelect(option)}
-                          onMouseEnter={() => setHighlightedIndex(flatIdx)}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+          {dropdownMenu}
         </div>
       </div>
     </div>

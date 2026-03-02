@@ -70,6 +70,50 @@ export const energyUnits: UnitDefinition[] = [
   { value: 'Wh', label: 'Watt-hours (Wh)', aliases: ['watt-hour', 'watt-hours', 'wh', 'Wh'] },
 ];
 
+// Nutrition-label units: separate mass and energy subsets for nutrition facts
+export const nutritionMassUnits: UnitDefinition[] = [
+  { value: 'g', label: 'Grams (g)', aliases: ['gram', 'grams', 'g'] },
+  { value: 'mg', label: 'Milligrams (mg)', aliases: ['milligram', 'milligrams', 'mg'] },
+  {
+    value: 'μg',
+    label: 'Micrograms (μg)',
+    aliases: ['microgram', 'micrograms', 'mcg', 'μg', 'ug'],
+  },
+];
+
+export const nutritionEnergyUnits: UnitDefinition[] = [
+  { value: 'kcal', label: 'Calories (kcal)', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
+  { value: 'kJ', label: 'Kilojoules (kJ)', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
+];
+
+/** Static option groups with servings, mass, and volume (no prep-specific data). */
+export const fallbackOptionGroups: OptionGroup[] = [
+  {
+    label: 'Servings',
+    options: [
+      { type: 'servings', value: 'servings', label: 'Servings', aliases: ['serving', 'servings'] },
+    ],
+  },
+  {
+    label: 'Mass',
+    options: massUnits.map((u) => ({
+      type: 'mass' as ServingSizeType,
+      value: u.value,
+      label: u.label,
+      aliases: u.aliases,
+    })),
+  },
+  {
+    label: 'Volume',
+    options: volumeUnits.map((u) => ({
+      type: 'volume' as ServingSizeType,
+      value: u.value,
+      label: u.label,
+      aliases: u.aliases,
+    })),
+  },
+];
+
 /**
  * Build option groups for the serving size selector based on preparation/group capabilities.
  * Works with both Preparation and ProductGroup objects.

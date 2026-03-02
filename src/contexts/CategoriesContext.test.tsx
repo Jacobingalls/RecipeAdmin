@@ -118,7 +118,7 @@ describe('CategoriesContext', () => {
     expect(screen.getByTestId('count')).toHaveTextContent('0');
   });
 
-  it('calls listCategoriesWithMeta with depth: 1', async () => {
+  it('calls listCategoriesWithMeta to fetch all categories', async () => {
     mockApiResponse();
     render(
       <CategoriesProvider>
@@ -127,7 +127,7 @@ describe('CategoriesContext', () => {
     );
 
     await waitFor(() => {
-      expect(mockListCategoriesWithMeta).toHaveBeenCalledWith({ depth: 1 });
+      expect(mockListCategoriesWithMeta).toHaveBeenCalledWith();
     });
   });
 

@@ -1,7 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
-import type { ProductGroup } from '../domain';
+import type { ProductGroup, ServingSizeType } from '../domain';
 import { Preparation, ServingSize } from '../domain';
+import type { OptionGroup } from '../config/unitConfig';
 
 import ServingSizeSelector from './ServingSizeSelector';
 
@@ -26,6 +27,10 @@ function renderSelector(
     prep?: Preparation | ProductGroup;
     value?: ServingSize;
     onChange?: (s: ServingSize) => void;
+    size?: 'sm';
+    groups?: OptionGroup[];
+    amountAriaLabel?: string;
+    unitAriaLabel?: string;
   } = {},
 ) {
   const prep = overrides.prep ?? makePrep();
@@ -34,7 +39,17 @@ function renderSelector(
 
   return {
     onChange,
-    ...render(<ServingSizeSelector prep={prep} value={value} onChange={onChange} />),
+    ...render(
+      <ServingSizeSelector
+        prep={overrides.groups ? undefined : prep}
+        value={value}
+        onChange={onChange}
+        size={overrides.size}
+        groups={overrides.groups}
+        amountAriaLabel={overrides.amountAriaLabel}
+        unitAriaLabel={overrides.unitAriaLabel}
+      />,
+    ),
   };
 }
 
@@ -264,5 +279,104 @@ describe('ServingSizeSelector', () => {
     const result = onChange.mock.calls[0][0] as ServingSize;
     expect(result.type).toBe('mass');
     expect(result.amount).toBe(200);
+  });
+
+  // --- Compact mode (size="sm") ---
+
+  describe('compact mode (size="sm")', () => {
+    it('renders without labels', () => {
+      renderSelector({ size: 'sm' });
+      expect(screen.queryByText('Amount')).not.toBeInTheDocument();
+      expect(screen.queryByText('Unit')).not.toBeInTheDocument();
+    });
+
+    it('uses sm classes on amount input and unit button', () => {
+      renderSelector({ size: 'sm' });
+      const input = screen.getByLabelText('Amount');
+      expect(input).toHaveClass('form-control-sm');
+      const button = screen.getByLabelText('Unit');
+      expect(button).toHaveClass('form-select-sm');
+    });
+
+    it('uses custom aria-labels', () => {
+      renderSelector({
+        size: 'sm',
+        amountAriaLabel: 'Mass amount',
+        unitAriaLabel: 'Mass unit',
+      });
+      expect(screen.getByLabelText('Mass amount')).toBeInTheDocument();
+      expect(screen.getByLabelText('Mass unit')).toBeInTheDocument();
+    });
+
+    it('allows amount of 0 in compact mode', () => {
+      const onChange = vi.fn();
+      renderSelector({ size: 'sm', onChange });
+      const input = screen.getByLabelText('Amount');
+      fireEvent.change(input, { target: { value: '-5' } });
+      const result = onChange.mock.calls[0][0] as ServingSize;
+      expect(result.amount).toBe(-5);
+    });
+
+    it('defaults to 0 when amount input is empty in compact mode', () => {
+      const onChange = vi.fn();
+      renderSelector({ size: 'sm', onChange });
+      const input = screen.getByLabelText('Amount');
+      fireEvent.change(input, { target: { value: '' } });
+      const result = onChange.mock.calls[0][0] as ServingSize;
+      expect(result.amount).toBe(0);
+    });
+
+    it('opens searchable dropdown in compact mode', () => {
+      renderSelector({ size: 'sm' });
+      fireEvent.click(screen.getByLabelText('Unit'));
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search units...')).toBeInTheDocument();
+    });
+  });
+
+  // --- groups prop ---
+
+  describe('groups prop', () => {
+    const massOnlyGroups: OptionGroup[] = [
+      {
+        label: 'Mass',
+        options: [
+          {
+            type: 'mass' as ServingSizeType,
+            value: 'g',
+            label: 'Grams (g)',
+            aliases: ['gram', 'grams', 'g'],
+          },
+          {
+            type: 'mass' as ServingSizeType,
+            value: 'mg',
+            label: 'Milligrams (mg)',
+            aliases: ['milligram', 'milligrams', 'mg'],
+          },
+        ],
+      },
+    ];
+
+    it('uses provided groups instead of building from prep', () => {
+      renderSelector({
+        groups: massOnlyGroups,
+        value: ServingSize.mass(100, 'g'),
+      });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      expect(screen.getByText('Mass')).toBeInTheDocument();
+      expect(screen.getByText('Milligrams (mg)')).toBeInTheDocument();
+      // Should not show servings, volume, etc. since groups override
+      expect(screen.queryByText('Servings')).not.toBeInTheDocument();
+      expect(screen.queryByText('Volume')).not.toBeInTheDocument();
+    });
+
+    it('does not require prep when groups is provided', () => {
+      // No prep passed, only groups — should render without errors
+      renderSelector({
+        groups: massOnlyGroups,
+        value: ServingSize.mass(50, 'g'),
+      });
+      expect(screen.getByText('Grams (g)')).toBeInTheDocument();
+    });
   });
 });

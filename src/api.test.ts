@@ -7,6 +7,8 @@ import {
   getStatus,
   logEntry,
   getTokenExpiry,
+  adminUpsertProducts,
+  adminDeleteProduct,
   API_BASE,
   API_DISPLAY_URL,
 } from './api';
@@ -417,5 +419,70 @@ describe('error handling', () => {
     mockFetch.mockResolvedValue(mockResponse(null, false, 500));
 
     await expect(getProduct('1')).rejects.toThrow('HTTP 500');
+  });
+});
+
+describe('adminUpsertProducts', () => {
+  it('posts a single product to /admin/products', async () => {
+    const product = { id: 'p1', name: 'Butter' };
+    mockFetch.mockResolvedValue(mockResponse([product]));
+
+    const result = await adminUpsertProducts(product as never);
+
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/admin/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(product),
+      credentials: 'include',
+    });
+    expect(result).toEqual([product]);
+  });
+
+  it('posts an array of products', async () => {
+    const products = [
+      { id: 'p1', name: 'A' },
+      { id: 'p2', name: 'B' },
+    ];
+    mockFetch.mockResolvedValue(mockResponse(products));
+
+    const result = await adminUpsertProducts(products as never);
+
+    expect(result).toEqual(products);
+  });
+
+  it('throws on non-ok response', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null, false, 500));
+
+    await expect(adminUpsertProducts({ id: 'p1' } as never)).rejects.toThrow('HTTP 500');
+  });
+});
+
+describe('adminDeleteProduct', () => {
+  it('sends DELETE to /admin/products/:id', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null, true, 200));
+
+    await adminDeleteProduct('p1');
+
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/admin/products/p1`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+  });
+
+  it('encodes the id parameter', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null, true, 200));
+
+    await adminDeleteProduct('foo/bar');
+
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/admin/products/foo%2Fbar`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+  });
+
+  it('throws on non-ok response', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null, false, 404));
+
+    await expect(adminDeleteProduct('p1')).rejects.toThrow('HTTP 404');
   });
 });

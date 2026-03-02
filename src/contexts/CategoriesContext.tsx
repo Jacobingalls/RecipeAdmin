@@ -37,7 +37,7 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    listCategoriesWithMeta({ depth: 1 })
+    listCategoriesWithMeta()
       .then(({ data, meta }) => {
         if (cancelled) return;
         const map = new Map<string, ApiCategory>();

@@ -12,6 +12,7 @@ export interface BarcodeData {
   code: string;
   notes?: unknown[];
   servingSize?: ServingSizeData;
+  preparationID?: string;
 }
 
 export interface GroupItem {

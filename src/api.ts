@@ -768,3 +768,15 @@ export async function adminDeleteAllCategories(): Promise<void> {
 export async function adminDeleteCategory(id: string): Promise<void> {
   return apiDelete(`/admin/categories/${encodeURIComponent(id)}`);
 }
+
+// Admin Product API functions
+
+export async function adminUpsertProducts(
+  products: ApiProduct | ApiProduct[],
+): Promise<ApiProduct[]> {
+  return apiPost<ApiProduct | ApiProduct[], ApiProduct[]>('/admin/products', products);
+}
+
+export async function adminDeleteProduct(id: string): Promise<void> {
+  return apiDelete(`/admin/products/${encodeURIComponent(id)}`);
+}
