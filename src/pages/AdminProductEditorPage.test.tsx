@@ -137,11 +137,11 @@ vi.mock('../components/admin-product-editor', () => ({
       </button>
     </div>
   ),
-}));
-
-vi.mock('../components/NotesDisplay', () => ({
-  __esModule: true,
-  default: () => <div data-testid="notes-display" />,
+  NotesSection: ({ notes }: { notes: unknown[] }) => (
+    <div data-testid="notes-section">
+      {notes.length === 0 ? 'No notes' : `${notes.length} notes`}
+    </div>
+  ),
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -248,11 +248,11 @@ describe('AdminProductEditorPage', () => {
     expect(screen.getByTestId('preparation-card-body')).toHaveTextContent('prep-2');
   });
 
-  it('renders section headers for preparations, notes', () => {
+  it('renders section headers for preparations and notes section', () => {
     mockQuery({ data: sampleProduct });
     renderWithRoute('/admin/products/p1');
     expect(screen.getByTestId('section-header-preparations')).toBeInTheDocument();
-    expect(screen.getByTestId('section-header-notes')).toBeInTheDocument();
+    expect(screen.getByTestId('notes-section')).toBeInTheDocument();
   });
 
   it('hides tab strip when only one preparation', () => {
@@ -278,15 +278,15 @@ describe('AdminProductEditorPage', () => {
     expect(screen.getByText('No notes')).toBeInTheDocument();
   });
 
-  it('renders notes display when product has notes', () => {
+  it('renders notes section when product has notes', () => {
     mockQuery({
       data: {
         ...sampleProduct,
-        notes: [{ source: 'test', information: ['Some note'] }],
+        notes: [{ information: { markdown: 'Some note' } }],
       },
     });
     renderWithRoute('/admin/products/p1');
-    expect(screen.getByTestId('notes-display')).toBeInTheDocument();
+    expect(screen.getByTestId('notes-section')).toHaveTextContent('1 notes');
   });
 
   it('renders add preparation button', () => {

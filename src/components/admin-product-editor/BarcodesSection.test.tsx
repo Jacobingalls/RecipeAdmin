@@ -1,16 +1,22 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import type { ApiProduct } from '../../api';
+import type * as CommonModule from '../common';
 
 import BarcodesSection from './BarcodesSection';
 
 // jsdom does not implement scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
-vi.mock('../NotesDisplay', () => ({
-  __esModule: true,
-  default: () => <div data-testid="notes-display" />,
-}));
+vi.mock('../common', async (importOriginal) => {
+  const actual = await importOriginal<typeof CommonModule>();
+  return {
+    ...actual,
+    NoteContent: ({ note }: { note: unknown }) => (
+      <span data-testid="note-content">{JSON.stringify(note)}</span>
+    ),
+  };
+});
 
 const onChange = vi.fn();
 

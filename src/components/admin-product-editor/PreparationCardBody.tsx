@@ -1,7 +1,7 @@
 import type { ApiProduct } from '../../api';
-import NotesDisplay from '../NotesDisplay';
 import type { Note } from '../NotesDisplay';
 
+import NotesSection from './NotesSection';
 import PreparationServingSection from './PreparationServingSection';
 import PreparationNutritionSection from './PreparationNutritionSection';
 import PreparationCategoriesSection from './PreparationCategoriesSection';
@@ -49,18 +49,17 @@ export default function PreparationCardBody({
         onChange={onChange}
       />
 
-      {notes.length > 0 && (
-        <div className="px-3 pt-3 pb-2">
-          <div className="card">
-            <div className="card-header">
-              <strong>Notes</strong>
-            </div>
-            <div className="card-body">
-              <NotesDisplay notes={notes} />
-            </div>
-          </div>
-        </div>
-      )}
+      <NotesSection
+        notes={notes}
+        onChange={(updated) => {
+          const updatedPreps = product.preparations.map((p) =>
+            p.id === preparationId ? { ...p, notes: updated } : p,
+          );
+          onChange({ ...product, preparations: updatedPreps });
+        }}
+        variant="card"
+        className="px-3 pt-3 pb-2"
+      />
 
       <PreparationDangerZone
         product={product}

@@ -4,7 +4,6 @@ import type { ApiProduct } from '../../api';
 import type { BarcodeData } from '../../domain';
 import { ServingSize } from '../../domain';
 import { formatSignificant } from '../../utils';
-import NotesDisplay from '../NotesDisplay';
 import type { Note } from '../NotesDisplay';
 import {
   SectionHeader,
@@ -12,6 +11,7 @@ import {
   CircularButton,
   CircularButtonGroup,
   DeleteButton,
+  NoteContent,
 } from '../common';
 
 import BarcodeModal, { resolvePrep } from './AddBarcodeModal';
@@ -60,9 +60,15 @@ function BarcodeRow({
         </CircularButtonGroup>
       </div>
       {notes.length > 0 && (
-        <div className="mt-1">
-          <NotesDisplay notes={notes} />
-        </div>
+        <ul className="list-unstyled mb-0 mt-1 small">
+          {/* eslint-disable react/no-array-index-key -- Notes lack stable IDs */}
+          {notes.map((note, i) => (
+            <li key={i}>
+              <NoteContent note={note} />
+            </li>
+          ))}
+          {/* eslint-enable react/no-array-index-key */}
+        </ul>
       )}
     </div>
   );

@@ -11,7 +11,6 @@ import {
   SectionHeader,
   Button,
 } from '../components/common';
-import NotesDisplay from '../components/NotesDisplay';
 import type { Note } from '../components/NotesDisplay';
 import {
   ProductProfileForm,
@@ -19,6 +18,7 @@ import {
   PreparationCardBody,
   BarcodesSection,
   AddPreparationModal,
+  NotesSection,
 } from '../components/admin-product-editor';
 
 export default function AdminProductEditorPage() {
@@ -168,12 +168,11 @@ export default function AdminProductEditorPage() {
 
           <BarcodesSection product={product} onChange={handleDraftChange} />
 
-          <SectionHeader title="Notes" className="mt-5" />
-          {notes.length > 0 ? (
-            <NotesDisplay notes={notes} />
-          ) : (
-            <p className="text-body-secondary small">No notes</p>
-          )}
+          <NotesSection
+            notes={notes}
+            onChange={(updated) => handleDraftChange({ ...product, notes: updated })}
+            className="mt-5"
+          />
 
           <ProductDangerZone product={product} />
 

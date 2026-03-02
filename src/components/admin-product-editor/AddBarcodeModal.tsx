@@ -4,8 +4,11 @@ import type { ApiProduct } from '../../api';
 import type { BarcodeData, PreparationData } from '../../domain';
 import { Preparation, ServingSize } from '../../domain';
 import { buildOptionGroups, fallbackOptionGroups } from '../../config/unitConfig';
+import type { Note } from '../NotesDisplay';
 import ServingSizeSelector from '../ServingSizeSelector';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
+
+import NotesSection from './NotesSection';
 
 /** barcode.preparationID -> product.defaultPreparationID -> first preparation */
 export function resolvePrep(
@@ -34,6 +37,7 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
     (barcode?.servingSize ? ServingSize.fromObject(barcode.servingSize) : null) ??
       ServingSize.servings(1),
   );
+  const [notesState, setNotesState] = useState<Note[]>((barcode?.notes ?? []) as Note[]);
 
   const preps = product.preparations ?? [];
   const draftBarcode: BarcodeData = { code, preparationID: prepId };
@@ -49,8 +53,7 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
     if (servingSize.type !== 'servings' || servingSize.amount !== 1) {
       result.servingSize = servingSize.toApiObject();
     }
-    // Preserve notes from the original barcode when editing
-    if (barcode?.notes) result.notes = barcode.notes;
+    if (notesState.length > 0) result.notes = notesState;
     onSave(result);
   }
 
@@ -93,7 +96,7 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
             </select>
           </div>
         )}
-        <div>
+        <div className="mb-3">
           <span className="form-label d-block">Serving size</span>
           <ServingSizeSelector
             size="sm"
@@ -104,6 +107,7 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
             unitAriaLabel="Barcode serving unit"
           />
         </div>
+        <NotesSection notes={notesState} onChange={setNotesState} />
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>

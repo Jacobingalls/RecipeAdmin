@@ -1,5 +1,7 @@
 export { default as AddPreparationModal } from './AddPreparationModal';
 export { default as BarcodesSection } from './BarcodesSection';
+export { default as NoteModal } from './NoteModal';
+export { default as NotesSection } from './NotesSection';
 export { default as PreparationCardBody } from './PreparationCardBody';
 export { default as PreparationCategoriesSection } from './PreparationCategoriesSection';
 export { default as PreparationCustomSizesSection } from './PreparationCustomSizesSection';
