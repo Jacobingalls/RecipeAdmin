@@ -1,32 +1,24 @@
 import { useMemo } from 'react';
 
 import type { ApiCategory } from '../api';
-import { listCategories } from '../api';
-import { useApiQuery } from '../hooks';
 import {
   CategoryGrid,
   LoadingState,
   ErrorState,
   ContentUnavailableView,
 } from '../components/common';
+import { useCategories } from '../contexts/CategoriesContext';
 
 export default function CategoriesPage() {
-  const {
-    data: categories,
-    loading,
-    error,
-  } = useApiQuery<ApiCategory[]>(() => listCategories({ depth: 1 }), [], {
-    errorMessage: "Couldn't load categories. Try again later.",
-  });
+  const { allCategories: categories, lookup, loading, error } = useCategories();
 
-  const { topLevel, lookup } = useMemo(() => {
-    if (!categories) return { topLevel: [], lookup: new Map<string, ApiCategory>() };
-    const map = new Map(categories.map((c) => [c.id, c]));
-    const roots = categories
-      .filter((c) => c.parents.length === 0)
-      .sort((a, b) => a.displayName.localeCompare(b.displayName));
-    return { topLevel: roots, lookup: map };
-  }, [categories]);
+  const topLevel = useMemo(
+    () =>
+      categories
+        .filter((c) => c.parents.length === 0)
+        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+    [categories],
+  );
 
   return (
     <>

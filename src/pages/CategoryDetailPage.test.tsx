@@ -6,11 +6,16 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { ApiCategory, ApiLookupItem } from '../api';
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import { useApiQuery } from '../hooks';
+import { useCategories } from '../contexts/CategoriesContext';
 
 import CategoryDetailPage from './CategoryDetailPage';
 
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
+}));
+
+vi.mock('../contexts/CategoriesContext', () => ({
+  useCategories: vi.fn(),
 }));
 
 vi.mock('../components/common', () => ({
@@ -53,6 +58,7 @@ vi.mock('../components/group', () => ({
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseCategories = vi.mocked(useCategories);
 
 const sampleCategory: ApiCategory = {
   id: 'cat1',
@@ -60,11 +66,29 @@ const sampleCategory: ApiCategory = {
   displayName: 'Dairy',
   description: null,
   parents: [],
+  children: ['cat2', 'cat3'],
+  notes: [],
 };
 
-const sampleDescendants: ApiCategory[] = [
-  { id: 'cat2', slug: 'cheese', displayName: 'Cheese', description: null, parents: ['cat1'] },
-  { id: 'cat3', slug: 'yogurt', displayName: 'Yogurt', description: null, parents: ['cat1'] },
+const sampleChildren: ApiCategory[] = [
+  {
+    id: 'cat2',
+    slug: 'cheese',
+    displayName: 'Cheese',
+    description: null,
+    parents: ['cat1'],
+    children: [],
+    notes: [],
+  },
+  {
+    id: 'cat3',
+    slug: 'yogurt',
+    displayName: 'Yogurt',
+    description: null,
+    parents: ['cat1'],
+    children: [],
+    notes: [],
+  },
 ];
 
 const sampleItems: ApiLookupItem[] = [
@@ -81,14 +105,27 @@ const sampleItems: ApiLookupItem[] = [
   { group: { id: 'g1', name: 'Mac and Cheese', items: [] } },
 ];
 
-// The component calls useApiQuery 3 times in order:
-// 1. getCategory(path)
-// 2. getCategoryChildren(path)
+function mockCategoriesContext(categories: ApiCategory[] = [sampleCategory, ...sampleChildren]) {
+  const lookup = new Map(categories.map((c) => [c.id, c]));
+  mockUseCategories.mockReturnValue({
+    allCategories: categories,
+    lookup,
+    loading: false,
+    error: null,
+    addCategories: vi.fn(),
+    refresh: vi.fn(),
+    expiresAt: Date.now() + 300_000,
+  });
+}
+
+// The component calls useApiQuery for:
+// 1. getCategory(path) — with enabled: !cachedCategory
+// 2. getCategoryChildren(path) — with enabled: !!category && !childrenCached
 // 3. getCategoryItems(path, { includeDescendants })
 function mockQueries(
   overrides: {
     category?: Partial<UseApiQueryResult<ApiCategory>>;
-    descendants?: Partial<UseApiQueryResult<ApiCategory[]>>;
+    children?: Partial<UseApiQueryResult<ApiCategory[]>>;
     items?: Partial<UseApiQueryResult<ApiLookupItem[]>>;
   } = {},
 ) {
@@ -99,8 +136,8 @@ function mockQueries(
     refetch: vi.fn(),
   };
   const callResults = [
-    { ...defaults, data: sampleCategory, ...overrides.category },
-    { ...defaults, data: sampleDescendants, ...overrides.descendants },
+    { ...defaults, ...overrides.category },
+    { ...defaults, ...overrides.children },
     { ...defaults, data: sampleItems, ...overrides.items },
   ];
   let callIndex = 0;
@@ -126,13 +163,16 @@ describe('CategoryDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state', () => {
+  it('renders loading state when category not cached and fetching', () => {
+    // Empty cache — category not found
+    mockCategoriesContext([]);
     mockQueries({ category: { loading: true, data: null } });
     renderPage();
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
   });
 
-  it('renders error state', () => {
+  it('renders error state when category not cached and fetch fails', () => {
+    mockCategoriesContext([]);
     mockQueries({ category: { error: "Couldn't load this category. Try again later." } });
     renderPage();
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
@@ -140,20 +180,23 @@ describe('CategoryDetailPage', () => {
   });
 
   it('renders not-found state when category is null', () => {
+    mockCategoriesContext([]);
     mockQueries({ category: { data: null } });
     renderPage();
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
     expect(screen.getByTestId('cuv-title')).toHaveTextContent('Category not found');
   });
 
-  it('renders category name and breadcrumbs with slug path', () => {
-    mockQueries();
+  it('renders category from cache without needing API fetch', () => {
+    mockCategoriesContext();
+    mockQueries(); // useApiQuery still called but with enabled:false so returns defaults
     renderPage();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dairy');
     expect(screen.getByTestId('category-paths')).toHaveTextContent('dairy');
   });
 
   it('passes path as parentPath to CategoryGrid for subcategories', () => {
+    mockCategoriesContext();
     mockQueries();
     renderPage();
     const grid = screen.getByTestId('category-grid');
@@ -161,6 +204,7 @@ describe('CategoryDetailPage', () => {
   });
 
   it('renders subcategory links with slug paths', () => {
+    mockCategoriesContext();
     mockQueries();
     renderPage();
     const cheeseLink = screen.getByText('Cheese').closest('a');
@@ -169,13 +213,16 @@ describe('CategoryDetailPage', () => {
     expect(yogurtLink).toHaveAttribute('href', '/categories/dairy.yogurt');
   });
 
-  it('does not render subcategories section when no descendants', () => {
-    mockQueries({ descendants: { data: [] } });
+  it('does not render subcategories section when no children', () => {
+    const catNoChildren = { ...sampleCategory, children: [] };
+    mockCategoriesContext([catNoChildren]);
+    mockQueries();
     renderPage();
     expect(screen.queryByText('Subcategories')).not.toBeInTheDocument();
   });
 
   it('renders items via GroupItemRow', () => {
+    mockCategoriesContext();
     mockQueries();
     renderPage();
     const rows = screen.getAllByTestId('group-item-row');
@@ -185,6 +232,7 @@ describe('CategoryDetailPage', () => {
   });
 
   it('renders empty state when no items', () => {
+    mockCategoriesContext();
     mockQueries({ items: { data: [] } });
     renderPage();
     expect(screen.getByTestId('cuv-title')).toHaveTextContent('No items');
@@ -195,6 +243,7 @@ describe('CategoryDetailPage', () => {
 
   it('filters items by name', async () => {
     const user = userEvent.setup();
+    mockCategoriesContext();
     mockQueries();
     renderPage();
 
@@ -207,6 +256,7 @@ describe('CategoryDetailPage', () => {
 
   it('shows adjusted empty description when filter has no matches', async () => {
     const user = userEvent.setup();
+    mockCategoriesContext();
     mockQueries();
     renderPage();
 
@@ -219,6 +269,7 @@ describe('CategoryDetailPage', () => {
 
   it('toggles include descendants checkbox', async () => {
     const user = userEvent.setup();
+    mockCategoriesContext();
     mockQueries();
     renderPage();
 
@@ -229,29 +280,18 @@ describe('CategoryDetailPage', () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  it('re-fetches items when include descendants changes', async () => {
-    const user = userEvent.setup();
-    mockQueries();
-    renderPage();
-
-    const initialCallCount = mockUseApiQuery.mock.calls.length;
-
-    await user.click(screen.getByLabelText('Include descendants'));
-
-    // Component should re-render, triggering new useApiQuery calls
-    expect(mockUseApiQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
-  });
-
   it('shows items loading state', () => {
+    mockCategoriesContext();
     mockQueries({ items: { loading: true, data: null } });
     renderPage();
-    // Category is loaded, items are loading — should show items loading indicator
+    // Category is loaded from cache, items are loading
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dairy');
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
   });
 
   it('shows different empty description when include descendants is off', async () => {
     const user = userEvent.setup();
+    mockCategoriesContext();
     mockQueries({ items: { data: [] } });
     renderPage();
 
@@ -263,6 +303,7 @@ describe('CategoryDetailPage', () => {
   });
 
   it('renders subsection titles', () => {
+    mockCategoriesContext();
     mockQueries();
     renderPage();
     expect(screen.getByText('Subcategories')).toBeInTheDocument();

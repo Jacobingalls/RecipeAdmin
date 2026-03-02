@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import type { ApiCategory, ApiLookupItem } from '../api';
@@ -12,22 +12,71 @@ import {
   SubsectionTitle,
 } from '../components/common';
 import { GroupItemRow } from '../components/group';
+import { useCategories } from '../contexts/CategoriesContext';
 import { useApiQuery } from '../hooks';
+import { resolvePathSegments } from '../utils';
 
 export default function CategoryDetailPage() {
   const { path } = useParams<{ path: string }>();
   const [includeDescendants, setIncludeDescendants] = useState(true);
   const [nameFilter, setNameFilter] = useState('');
 
+  const { allCategories, lookup, addCategories } = useCategories();
+
+  // Try to resolve category from cache first
+  const cachedCategory = useMemo(() => {
+    if (!path || allCategories.length === 0) return null;
+    const resolved = resolvePathSegments(path, allCategories);
+    return resolved.length > 0 ? resolved[resolved.length - 1] : null;
+  }, [path, allCategories]);
+
+  // Fetch from API only if not in cache
   const {
-    data: category,
+    data: fetchedCategory,
     loading: categoryLoading,
     error: categoryError,
   } = useApiQuery<ApiCategory>(() => getCategory(path!), [path], {
+    enabled: !cachedCategory,
     errorMessage: "Couldn't load this category. Try again later.",
   });
 
-  const { data: children } = useApiQuery<ApiCategory[]>(() => getCategoryChildren(path!), [path]);
+  // Merge fetched category into cache
+  useEffect(() => {
+    if (fetchedCategory) {
+      addCategories([fetchedCategory]);
+    }
+  }, [fetchedCategory, addCategories]);
+
+  const category = cachedCategory ?? fetchedCategory;
+
+  // Check if all child IDs are already in the cache
+  const childrenCached = useMemo(() => {
+    if (!category) return false;
+    return category.children.every((id) => lookup.has(id));
+  }, [category, lookup]);
+
+  // Fetch children only if not all are in cache
+  const { data: fetchedChildren } = useApiQuery<ApiCategory[]>(
+    () => getCategoryChildren(path!),
+    [path],
+    { enabled: !!category && !childrenCached },
+  );
+
+  // Merge fetched children into cache
+  useEffect(() => {
+    if (fetchedChildren && fetchedChildren.length > 0) {
+      addCategories(fetchedChildren);
+    }
+  }, [fetchedChildren, addCategories]);
+
+  // Resolve children from cache
+  const children = useMemo(() => {
+    if (!category) return [];
+    return category.children
+      .map((id) => lookup.get(id))
+      .filter((c): c is ApiCategory => c !== undefined)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }, [category, lookup]);
 
   const { data: items, loading: itemsLoading } = useApiQuery<ApiLookupItem[]>(
     () => getCategoryItems(path!, { includeDescendants }),
@@ -44,8 +93,8 @@ export default function CategoryDetailPage() {
     });
   }, [items, nameFilter]);
 
-  const loading = categoryLoading;
-  const error = categoryError;
+  const loading = !cachedCategory && categoryLoading;
+  const error = !cachedCategory ? categoryError : null;
 
   let emptyDescription = "Nothing's been added to this category.";
   if (nameFilter.trim()) {

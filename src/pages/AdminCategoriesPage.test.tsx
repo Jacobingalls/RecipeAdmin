@@ -5,11 +5,16 @@ import { MemoryRouter } from 'react-router-dom';
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiCategory } from '../api';
 import { useApiQuery } from '../hooks';
+import { useCategories } from '../contexts/CategoriesContext';
 
 import AdminCategoriesPage from './AdminCategoriesPage';
 
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
+}));
+
+vi.mock('../contexts/CategoriesContext', () => ({
+  useCategories: vi.fn(),
 }));
 
 vi.mock('../components/common', async () => {
@@ -27,6 +32,7 @@ vi.mock('../components/common', async () => {
 });
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseCategories = vi.mocked(useCategories);
 
 function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -40,6 +46,18 @@ function mockQuery(overrides: Partial<UseApiQueryResult<ApiCategory[]>>) {
     refetch: vi.fn(),
     ...overrides,
   } as UseApiQueryResult<ApiCategory[]>);
+}
+
+function mockCategoriesContext() {
+  mockUseCategories.mockReturnValue({
+    allCategories: [],
+    lookup: new Map(),
+    loading: false,
+    error: null,
+    addCategories: vi.fn(),
+    refresh: vi.fn(),
+    expiresAt: Date.now() + 300_000,
+  });
 }
 
 const sampleCategories: ApiCategory[] = [
@@ -75,6 +93,7 @@ const sampleCategories: ApiCategory[] = [
 describe('AdminCategoriesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCategoriesContext();
   });
 
   it('renders loading state with page chrome', () => {
@@ -162,5 +181,21 @@ describe('AdminCategoriesPage', () => {
     const input = screen.getByPlaceholderText('Search by name...');
     fireEvent.change(input, { target: { value: 'zzzzz' } });
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
+  });
+
+  it('calls addCategories when data loads', () => {
+    const addCategories = vi.fn();
+    mockUseCategories.mockReturnValue({
+      allCategories: [],
+      lookup: new Map(),
+      loading: false,
+      error: null,
+      addCategories,
+      refresh: vi.fn(),
+      expiresAt: Date.now() + 300_000,
+    });
+    mockQuery({ data: sampleCategories });
+    renderWithRouter(<AdminCategoriesPage />);
+    expect(addCategories).toHaveBeenCalledWith(sampleCategories);
   });
 });

@@ -2,14 +2,13 @@ import type { ReactElement } from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiCategory } from '../api';
-import { useApiQuery } from '../hooks';
+import { useCategories } from '../contexts/CategoriesContext';
 
 import CategoriesPage from './CategoriesPage';
 
-vi.mock('../hooks', () => ({
-  useApiQuery: vi.fn(),
+vi.mock('../contexts/CategoriesContext', () => ({
+  useCategories: vi.fn(),
 }));
 
 vi.mock('../components/common', async () => {
@@ -44,20 +43,30 @@ vi.mock('../components/common', async () => {
   };
 });
 
-const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseCategories = vi.mocked(useCategories);
 
 function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
 
-function mockQuery(overrides: Partial<UseApiQueryResult<ApiCategory[]>>) {
-  mockUseApiQuery.mockReturnValue({
-    data: null,
+function mockContext(overrides: Partial<ReturnType<typeof useCategories>> = {}) {
+  const lookup = new Map<string, ApiCategory>();
+  const cats = overrides.allCategories ?? [];
+  for (const c of cats) {
+    lookup.set(c.id, c);
+  }
+  mockUseCategories.mockReturnValue({
+    allCategories: [],
+    lookup: new Map(),
     loading: false,
     error: null,
-    refetch: vi.fn(),
+    addCategories: vi.fn(),
+    refresh: vi.fn(),
+    expiresAt: Date.now() + 300_000,
     ...overrides,
-  } as UseApiQueryResult<ApiCategory[]>);
+    // Ensure lookup matches allCategories if not explicitly overridden
+    ...(overrides.lookup === undefined && overrides.allCategories ? { lookup } : {}),
+  });
 }
 
 const sampleCategories: ApiCategory[] = [
@@ -96,34 +105,34 @@ describe('CategoriesPage', () => {
   });
 
   it('renders loading state', () => {
-    mockQuery({ loading: true });
+    mockContext({ loading: true });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
   });
 
   it('renders error state', () => {
-    mockQuery({ error: 'Server error' });
+    mockContext({ error: 'Server error' });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Server error')).toBeInTheDocument();
   });
 
   it('renders empty state when no categories', () => {
-    mockQuery({ data: [] });
+    mockContext({ allCategories: [] });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
   });
 
   it('renders a section for each top-level category', () => {
-    mockQuery({ data: sampleCategories });
+    mockContext({ allCategories: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByText('Dairy')).toBeInTheDocument();
     expect(screen.getByText('Produce')).toBeInTheDocument();
   });
 
   it('renders children as cards with slug-path links', () => {
-    mockQuery({ data: sampleCategories });
+    mockContext({ allCategories: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByText('Cheese')).toBeInTheDocument();
     const cheeseLink = screen.getByText('Cheese').closest('a');
@@ -131,7 +140,7 @@ describe('CategoriesPage', () => {
   });
 
   it('passes parentPath to CategoryGrid with root slug', () => {
-    mockQuery({ data: sampleCategories });
+    mockContext({ allCategories: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     const grids = screen.getAllByTestId('category-grid');
     // Dairy section grid should have parentPath="dairy"
@@ -139,20 +148,20 @@ describe('CategoriesPage', () => {
   });
 
   it('renders section headings for top-level categories', () => {
-    mockQuery({ data: sampleCategories });
+    mockContext({ allCategories: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     const dairyHeading = screen.getByRole('heading', { name: 'Dairy' });
     expect(dairyHeading.tagName).toBe('H2');
   });
 
   it('shows fallback text when a top-level category has no children', () => {
-    mockQuery({ data: sampleCategories });
+    mockContext({ allCategories: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByText('No subcategories')).toBeInTheDocument();
   });
 
   it('renders the heading', () => {
-    mockQuery({ data: sampleCategories });
+    mockContext({ allCategories: sampleCategories });
     renderWithRouter(<CategoriesPage />);
     expect(screen.getByText('Categories')).toBeInTheDocument();
   });

@@ -5,11 +5,16 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiCategory } from '../api';
 import { useApiQuery } from '../hooks';
+import { useCategories } from '../contexts/CategoriesContext';
 
 import AdminCategoryDetailPage from './AdminCategoryDetailPage';
 
 vi.mock('../hooks', () => ({
   useApiQuery: vi.fn(),
+}));
+
+vi.mock('../contexts/CategoriesContext', () => ({
+  useCategories: vi.fn(),
 }));
 
 vi.mock('../components/common', async () => {
@@ -27,6 +32,7 @@ vi.mock('../components/common', async () => {
 });
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseCategories = vi.mocked(useCategories);
 
 function renderWithRoute(ui: ReactElement, path = '/admin/categories/food.fruit') {
   return render(
@@ -80,25 +86,27 @@ const berriesCategory: ApiCategory = {
 
 const allCategories: ApiCategory[] = [fruitCategory, rootCategory, citrusCategory, berriesCategory];
 
-function mockQueries(
-  categoryResult: Partial<UseApiQueryResult<ApiCategory>>,
-  allCategoriesResult: Partial<UseApiQueryResult<ApiCategory[]>>,
-) {
-  mockUseApiQuery
-    .mockReturnValueOnce({
-      data: null,
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-      ...categoryResult,
-    } as UseApiQueryResult<ApiCategory>)
-    .mockReturnValueOnce({
-      data: null,
-      loading: false,
-      error: null,
-      refetch: vi.fn(),
-      ...allCategoriesResult,
-    } as UseApiQueryResult<ApiCategory[]>);
+function mockCategoriesContext(categories: ApiCategory[] = allCategories) {
+  const lookup = new Map(categories.map((c) => [c.id, c]));
+  mockUseCategories.mockReturnValue({
+    allCategories: categories,
+    lookup,
+    loading: false,
+    error: null,
+    addCategories: vi.fn(),
+    refresh: vi.fn(),
+    expiresAt: Date.now() + 300_000,
+  });
+}
+
+function mockApiQuery(overrides: Partial<UseApiQueryResult<ApiCategory>> = {}) {
+  mockUseApiQuery.mockReturnValue({
+    data: null,
+    loading: false,
+    error: null,
+    refetch: vi.fn(),
+    ...overrides,
+  } as UseApiQueryResult<ApiCategory>);
 }
 
 describe('AdminCategoryDetailPage', () => {
@@ -106,28 +114,32 @@ describe('AdminCategoryDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state', () => {
-    mockQueries({ loading: true }, {});
+  it('renders loading state when not in cache and fetching', () => {
+    mockCategoriesContext([]);
+    mockApiQuery({ loading: true });
     renderWithRoute(<AdminCategoryDetailPage />);
     expect(screen.getByTestId('loading-state')).toBeInTheDocument();
   });
 
   it('renders error state', () => {
-    mockQueries({ error: 'Server error' }, {});
+    mockCategoriesContext([]);
+    mockApiQuery({ error: 'Server error' });
     renderWithRoute(<AdminCategoryDetailPage />);
     expect(screen.getByTestId('error-state')).toBeInTheDocument();
     expect(screen.getByText('Server error')).toBeInTheDocument();
   });
 
   it('renders not-found state when category is null', () => {
-    mockQueries({ data: null }, {});
+    mockCategoriesContext([]);
+    mockApiQuery({ data: null });
     renderWithRoute(<AdminCategoryDetailPage />);
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
     expect(screen.getByText('Category not found')).toBeInTheDocument();
   });
 
-  it('displays category displayName, path, and description', () => {
-    mockQueries({ data: fruitCategory }, { data: allCategories });
+  it('displays category displayName, path, and description from cache', () => {
+    mockCategoriesContext(allCategories);
+    mockApiQuery(); // Will be called with enabled:false
     renderWithRoute(<AdminCategoryDetailPage />);
     expect(screen.getByText('Fruit')).toBeInTheDocument();
     expect(screen.getByText('food.fruit')).toBeInTheDocument();
@@ -135,7 +147,8 @@ describe('AdminCategoryDetailPage', () => {
   });
 
   it('renders parent categories with canonical slug-path links', () => {
-    mockQueries({ data: fruitCategory }, { data: allCategories });
+    mockCategoriesContext(allCategories);
+    mockApiQuery();
     renderWithRoute(<AdminCategoryDetailPage />);
     const links = screen.getAllByRole('link');
     const parentLink = links.find((l) => l.textContent?.includes('Food'));
@@ -143,7 +156,8 @@ describe('AdminCategoryDetailPage', () => {
   });
 
   it('renders children categories with extended slug-path links sorted alphabetically', () => {
-    mockQueries({ data: fruitCategory }, { data: allCategories });
+    mockCategoriesContext(allCategories);
+    mockApiQuery();
     renderWithRoute(<AdminCategoryDetailPage />);
     const links = screen.getAllByRole('link');
     const childLinks = links.filter(
@@ -170,20 +184,23 @@ describe('AdminCategoryDetailPage', () => {
       parents: ['cat-root', 'cat-alt'],
     };
     const cats = [multiParentFruit, rootCategory, citrusCategory, berriesCategory, altRoot];
-    mockQueries({ data: multiParentFruit }, { data: cats });
+    mockCategoriesContext(cats);
+    mockApiQuery();
     renderWithRoute(<AdminCategoryDetailPage />);
     expect(screen.getByText('food.fruit')).toBeInTheDocument();
     expect(screen.getByText('grocery.fruit')).toBeInTheDocument();
   });
 
   it('shows "No parents" for root categories', () => {
-    mockQueries({ data: rootCategory }, { data: allCategories });
+    mockCategoriesContext(allCategories);
+    mockApiQuery();
     renderWithRoute(<AdminCategoryDetailPage />, '/admin/categories/food');
     expect(screen.getByText('No parents')).toBeInTheDocument();
   });
 
   it('shows "No children" for leaf categories', () => {
-    mockQueries({ data: citrusCategory }, { data: allCategories });
+    mockCategoriesContext(allCategories);
+    mockApiQuery();
     renderWithRoute(<AdminCategoryDetailPage />, '/admin/categories/food.fruit.citrus');
     expect(screen.getByText('No children')).toBeInTheDocument();
   });

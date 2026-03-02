@@ -2,16 +2,15 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { ApiCategory } from '../../api';
-import type { UseApiQueryResult } from '../../hooks/useApiQuery';
-import { useApiQuery } from '../../hooks';
+import { useCategories } from '../../contexts/CategoriesContext';
 
 import CategoryPaths from './CategoryPaths';
 
-vi.mock('../../hooks', () => ({
-  useApiQuery: vi.fn(),
+vi.mock('../../contexts/CategoriesContext', () => ({
+  useCategories: vi.fn(),
 }));
 
-const mockUseApiQuery = vi.mocked(useApiQuery);
+const mockUseCategories = vi.mocked(useCategories);
 
 const sampleCategories: ApiCategory[] = [
   {
@@ -52,14 +51,18 @@ const sampleCategories: ApiCategory[] = [
   },
 ];
 
-function mockQuery(overrides: Partial<UseApiQueryResult<ApiCategory[]>>) {
-  mockUseApiQuery.mockReturnValue({
-    data: null,
-    loading: false,
+function mockContext(categories: ApiCategory[] | null) {
+  const cats = categories ?? [];
+  const lookup = new Map(cats.map((c) => [c.id, c]));
+  mockUseCategories.mockReturnValue({
+    allCategories: cats,
+    lookup,
+    loading: categories === null,
     error: null,
-    refetch: vi.fn(),
-    ...overrides,
-  } as UseApiQueryResult<ApiCategory[]>);
+    addCategories: vi.fn(),
+    refresh: vi.fn(),
+    expiresAt: Date.now() + 300_000,
+  });
 }
 
 function renderWithPath(path: string) {
@@ -85,13 +88,13 @@ describe('CategoryPaths', () => {
 
   describe('path mode', () => {
     it('returns null when categories have not loaded', () => {
-      mockQuery({ data: null, loading: true });
+      mockContext(null);
       const { container } = renderWithPath('food.dairy.cheese');
       expect(container.innerHTML).toBe('');
     });
 
     it('renders full ancestor path for a slug path', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithPath('food.dairy.cheese');
       expect(screen.getByText('Categories')).toBeInTheDocument();
       expect(screen.getByText('Food')).toBeInTheDocument();
@@ -100,7 +103,7 @@ describe('CategoryPaths', () => {
     });
 
     it('renders clickable links with cumulative slug paths', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithPath('food.dairy.cheese');
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(4);
@@ -111,7 +114,7 @@ describe('CategoryPaths', () => {
     });
 
     it('renders a single breadcrumb for a root slug', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithPath('snacks');
       expect(screen.getByText('Categories')).toBeInTheDocument();
       expect(screen.getByText('Snacks')).toBeInTheDocument();
@@ -119,7 +122,7 @@ describe('CategoryPaths', () => {
     });
 
     it('marks the leaf breadcrumb item as active', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithPath('food.dairy.cheese');
       const items = screen.getAllByRole('listitem');
       const lastItem = items[items.length - 1];
@@ -128,7 +131,7 @@ describe('CategoryPaths', () => {
     });
 
     it('returns null for unknown slug path', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       const { container } = renderWithPath('nonexistent');
       expect(container.innerHTML).toBe('');
     });
@@ -136,19 +139,19 @@ describe('CategoryPaths', () => {
 
   describe('categoryIds mode', () => {
     it('returns null when categoryIds is empty', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       const { container } = renderWithIds([]);
       expect(container.innerHTML).toBe('');
     });
 
     it('returns null when categories have not loaded', () => {
-      mockQuery({ data: null, loading: true });
+      mockContext(null);
       const { container } = renderWithIds(['leaf']);
       expect(container.innerHTML).toBe('');
     });
 
     it('renders full ancestor path for a leaf category ID', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithIds(['leaf']);
       expect(screen.getByText('Categories')).toBeInTheDocument();
       expect(screen.getByText('Food')).toBeInTheDocument();
@@ -157,7 +160,7 @@ describe('CategoryPaths', () => {
     });
 
     it('renders slug-based links for category IDs', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithIds(['leaf']);
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(4);
@@ -168,20 +171,20 @@ describe('CategoryPaths', () => {
     });
 
     it('renders multiple breadcrumb navs for multiple category IDs', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithIds(['leaf', 'standalone']);
       const navs = screen.getAllByRole('navigation');
       expect(navs).toHaveLength(2);
     });
 
     it('skips unknown category IDs', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       const { container } = renderWithIds(['nonexistent']);
       expect(container.innerHTML).toBe('');
     });
 
     it('renders root Categories link for each breadcrumb trail', () => {
-      mockQuery({ data: sampleCategories });
+      mockContext(sampleCategories);
       renderWithIds(['leaf', 'standalone']);
       const categoriesLinks = screen.getAllByText('Categories');
       expect(categoriesLinks).toHaveLength(2);

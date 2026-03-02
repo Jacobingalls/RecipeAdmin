@@ -1,8 +1,9 @@
-import { useState, useMemo, useId } from 'react';
+import { useState, useMemo, useId, useEffect } from 'react';
 
 import type { ApiCategory } from '../api';
 import { adminListCategories } from '../api';
 import { useApiQuery } from '../hooks';
+import { useCategories } from '../contexts/CategoriesContext';
 import { buildAllSlugPaths } from '../utils';
 import {
   LoadingState,
@@ -18,6 +19,8 @@ interface CategoryEntry {
 }
 
 export default function AdminCategoriesPage() {
+  const { addCategories } = useCategories();
+
   const {
     data: categories,
     loading,
@@ -27,6 +30,13 @@ export default function AdminCategoriesPage() {
   });
   const [nameFilter, setNameFilter] = useState('');
   const nameId = useId();
+
+  // Merge admin categories into shared cache
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      addCategories(categories);
+    }
+  }, [categories, addCategories]);
 
   const filteredEntries = useMemo(() => {
     if (!categories) return [];

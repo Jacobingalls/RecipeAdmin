@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import type { ApiCategory } from '../../api';
-import { listCategories } from '../../api';
-import { useApiQuery } from '../../hooks';
+import { useCategories } from '../../contexts/CategoriesContext';
 import { buildSlugPath, resolvePathSegments } from '../../utils';
 
 type CategoryPathsProps =
@@ -23,9 +22,9 @@ function buildBreadcrumbs(
 }
 
 export default function CategoryPaths(props: CategoryPathsProps) {
-  const { data: allCategories } = useApiQuery(listCategories, []);
+  const { allCategories, lookup } = useCategories();
 
-  if (!allCategories) return null;
+  if (allCategories.length === 0) return null;
 
   const trails: { key: string; crumbs: { name: string; to: string }[] }[] = [];
 
@@ -35,7 +34,6 @@ export default function CategoryPaths(props: CategoryPathsProps) {
     trails.push({ key: props.path, crumbs: buildBreadcrumbs(resolved, '/categories') });
   } else {
     if (props.categoryIds.length === 0) return null;
-    const lookup = new Map(allCategories.map((c) => [c.id, c]));
     for (const id of props.categoryIds) {
       const slugPath = buildSlugPath(id, lookup);
       if (!slugPath) continue;

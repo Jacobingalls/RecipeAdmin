@@ -153,6 +153,29 @@ async function apiFetch<T>(endpoint: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface ApiFetchMeta {
+  maxAge: number | null;
+}
+
+function parseMaxAge(res: Response): number | null {
+  const cc = res.headers.get('Cache-Control');
+  if (!cc) return null;
+  const match = cc.match(/max-age=(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+async function apiFetchWithMeta<T>(endpoint: string): Promise<{ data: T; meta: ApiFetchMeta }> {
+  const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, { credentials: 'include' });
+  if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
+    throw new Error(`HTTP ${res.status}`);
+  }
+  const data = (await res.json()) as T;
+  return { data, meta: { maxAge: parseMaxAge(res) } };
+}
+
 async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
   const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, {
     method: 'POST',
@@ -387,6 +410,15 @@ export async function listCategories(options?: { depth?: number }): Promise<ApiC
   if (options?.depth !== undefined) params.set('depth', String(options.depth));
   const query = params.toString();
   return apiFetch<ApiCategory[]>(`/categories${query ? `?${query}` : ''}`);
+}
+
+export async function listCategoriesWithMeta(options?: {
+  depth?: number;
+}): Promise<{ data: ApiCategory[]; meta: ApiFetchMeta }> {
+  const params = new URLSearchParams();
+  if (options?.depth !== undefined) params.set('depth', String(options.depth));
+  const query = params.toString();
+  return apiFetchWithMeta<ApiCategory[]>(`/categories${query ? `?${query}` : ''}`);
 }
 
 export async function getCategory(id: string): Promise<ApiCategory> {

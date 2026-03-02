@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import type { ApiCategory } from '../api';
-import { getCategory, adminListCategories } from '../api';
+import { getCategory } from '../api';
+import { useCategories } from '../contexts/CategoriesContext';
 import { useApiQuery } from '../hooks';
-import { buildAllSlugPaths, buildSlugPath } from '../utils';
+import { buildAllSlugPaths, buildSlugPath, resolvePathSegments } from '../utils';
 import {
   ContentUnavailableView,
   ErrorState,
@@ -15,21 +16,33 @@ import {
 
 export default function AdminCategoryDetailPage() {
   const { path } = useParams<{ path: string }>();
+  const { allCategories, lookup, addCategories } = useCategories();
 
+  // Try to resolve from cache
+  const cachedCategory = useMemo(() => {
+    if (!path || allCategories.length === 0) return null;
+    const resolved = resolvePathSegments(path, allCategories);
+    return resolved.length > 0 ? resolved[resolved.length - 1] : null;
+  }, [path, allCategories]);
+
+  // Fetch from API only if not in cache
   const {
-    data: category,
+    data: fetchedCategory,
     loading: categoryLoading,
     error: categoryError,
   } = useApiQuery<ApiCategory>(() => getCategory(path!), [path], {
+    enabled: !cachedCategory,
     errorMessage: "Couldn't load this category. Try again later.",
   });
 
-  const { data: allCategories } = useApiQuery<ApiCategory[]>(adminListCategories, []);
+  // Merge fetched category into cache
+  useEffect(() => {
+    if (fetchedCategory) {
+      addCategories([fetchedCategory]);
+    }
+  }, [fetchedCategory, addCategories]);
 
-  const lookup = useMemo(() => {
-    if (!allCategories) return new Map<string, ApiCategory>();
-    return new Map(allCategories.map((c) => [c.id, c]));
-  }, [allCategories]);
+  const category = cachedCategory ?? fetchedCategory;
 
   const allPaths = useMemo(() => {
     if (!category || lookup.size === 0) return [];
@@ -52,8 +65,8 @@ export default function AdminCategoryDetailPage() {
       .sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [category, lookup]);
 
-  const loading = categoryLoading;
-  const error = categoryError;
+  const loading = !cachedCategory && categoryLoading;
+  const error = !cachedCategory ? categoryError : null;
 
   return (
     <>
