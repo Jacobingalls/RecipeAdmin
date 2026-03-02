@@ -2,15 +2,17 @@ import { useState, useMemo, useId, useEffect } from 'react';
 
 import type { ApiCategory } from '../api';
 import { adminListCategories } from '../api';
-import { useApiQuery } from '../hooks';
-import { useCategories } from '../contexts/CategoriesContext';
-import { buildAllSlugPaths } from '../utils';
+import { CreateCategoryModal } from '../components/admin-category-detail';
 import {
   LoadingState,
   ErrorState,
   ContentUnavailableView,
   LinkListItem,
+  Button,
 } from '../components/common';
+import { useCategories } from '../contexts/CategoriesContext';
+import { useApiQuery } from '../hooks';
+import { buildAllSlugPaths } from '../utils';
 
 interface CategoryEntry {
   category: ApiCategory;
@@ -25,10 +27,12 @@ export default function AdminCategoriesPage() {
     data: categories,
     loading,
     error,
+    refetch,
   } = useApiQuery<ApiCategory[]>(adminListCategories, [], {
     errorMessage: "Couldn't load categories. Try again later.",
   });
   const [nameFilter, setNameFilter] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const nameId = useId();
 
   // Merge admin categories into shared cache
@@ -60,7 +64,12 @@ export default function AdminCategoriesPage() {
 
   return (
     <>
-      <h1 className="mb-4">Categories</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="mb-0">Categories</h1>
+        <Button variant="success" onClick={() => setShowCreateModal(true)}>
+          New
+        </Button>
+      </div>
       <div className="mb-4">
         <label htmlFor={nameId} className="visually-hidden">
           Filter by name
@@ -74,6 +83,11 @@ export default function AdminCategoriesPage() {
           onChange={(e) => setNameFilter(e.target.value)}
         />
       </div>
+
+      {showCreateModal && (
+        <CreateCategoryModal onClose={() => setShowCreateModal(false)} onSaved={refetch} />
+      )}
+
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && filteredEntries.length === 0 && (

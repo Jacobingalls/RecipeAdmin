@@ -1,29 +1,39 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 import type { ApiCategory } from '../api';
 import { getCategory } from '../api';
+import {
+  AddCategoryModal,
+  CategoryDangerZone,
+  CategoryProfileForm,
+  CategoryRelationSection,
+  CreateCategoryModal,
+} from '../components/admin-category-detail';
+import { ContentUnavailableView, ErrorState, LoadingState } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
 import { useApiQuery } from '../hooks';
 import { buildAllSlugPaths, buildSlugPath, resolvePathSegments } from '../utils';
-import {
-  ContentUnavailableView,
-  ErrorState,
-  LinkListItem,
-  LoadingState,
-  SubsectionTitle,
-} from '../components/common';
+
+type RelationType = 'parents' | 'children';
+type ModalState =
+  | { kind: 'add'; relationType: RelationType }
+  | { kind: 'create'; relationType: RelationType }
+  | null;
 
 export default function AdminCategoryDetailPage() {
   const { path } = useParams<{ path: string }>();
   const { allCategories, lookup, addCategories } = useCategories();
+  const [modal, setModal] = useState<ModalState>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Try to resolve from cache
   const cachedCategory = useMemo(() => {
     if (!path || allCategories.length === 0) return null;
     const resolved = resolvePathSegments(path, allCategories);
     return resolved.length > 0 ? resolved[resolved.length - 1] : null;
-  }, [path, allCategories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, allCategories, refreshKey]);
 
   // Fetch from API only if not in cache
   const {
@@ -65,6 +75,12 @@ export default function AdminCategoryDetailPage() {
       .sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [category, lookup]);
 
+  const handleSaved = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
+
+  const closeModal = useCallback(() => setModal(null), []);
+
   const loading = !cachedCategory && categoryLoading;
   const error = !cachedCategory ? categoryError : null;
 
@@ -89,39 +105,47 @@ export default function AdminCategoryDetailPage() {
           )}
           {category.description && <p className="mt-2 mb-0">{category.description}</p>}
 
-          <section className="mt-4">
-            <SubsectionTitle>Parents</SubsectionTitle>
-            {parentCategories.length > 0 ? (
-              <div className="list-group">
-                {parentCategories.map((c) => (
-                  <LinkListItem
-                    key={c.id}
-                    to={`/admin/categories/${buildSlugPath(c.id, lookup)}`}
-                    title={c.displayName}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-body-secondary small mb-0">No parents</p>
-            )}
-          </section>
+          <CategoryProfileForm category={category} onSaved={handleSaved} />
 
-          <section className="mt-4">
-            <SubsectionTitle>Children</SubsectionTitle>
-            {childCategories.length > 0 ? (
-              <div className="list-group">
-                {childCategories.map((c) => (
-                  <LinkListItem
-                    key={c.id}
-                    to={`/admin/categories/${path}.${c.slug}`}
-                    title={c.displayName}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-body-secondary small mb-0">No children</p>
-            )}
-          </section>
+          <CategoryRelationSection
+            category={category}
+            relationType="parents"
+            relatedCategories={parentCategories}
+            linkFor={(c) => `/admin/categories/${buildSlugPath(c.id, lookup)}`}
+            onAdd={() => setModal({ kind: 'add', relationType: 'parents' })}
+            onCreateNew={() => setModal({ kind: 'create', relationType: 'parents' })}
+            onSaved={handleSaved}
+          />
+
+          <CategoryRelationSection
+            category={category}
+            relationType="children"
+            relatedCategories={childCategories}
+            linkFor={(c) => `/admin/categories/${path}.${c.slug}`}
+            onAdd={() => setModal({ kind: 'add', relationType: 'children' })}
+            onCreateNew={() => setModal({ kind: 'create', relationType: 'children' })}
+            onSaved={handleSaved}
+          />
+
+          <CategoryDangerZone category={category} />
+
+          {modal?.kind === 'add' && (
+            <AddCategoryModal
+              category={category}
+              relationType={modal.relationType}
+              onClose={closeModal}
+              onSaved={handleSaved}
+            />
+          )}
+
+          {modal?.kind === 'create' && (
+            <CreateCategoryModal
+              category={category}
+              relationType={modal.relationType}
+              onClose={closeModal}
+              onSaved={handleSaved}
+            />
+          )}
         </>
       )}
     </>

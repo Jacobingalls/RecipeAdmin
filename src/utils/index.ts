@@ -28,3 +28,4 @@ export {
 } from './logEntryHelpers';
 export { buildSearchResultLogTarget } from './searchResultLogTarget';
 export { buildSlugPath, buildAllSlugPaths, resolvePathSegments } from './categoryPaths';
+export { isValidSlug, toSlug } from './slugValidation';
