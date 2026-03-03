@@ -1,5 +1,5 @@
 import type { ApiProduct } from '../../api';
-import type { NutritionUnit, ServingSizeType } from '../../domain';
+import type { ServingSizeType } from '../../domain';
 import { ServingSize } from '../../domain';
 import { massUnits, volumeUnits } from '../../config/unitConfig';
 import type { OptionGroup } from '../../config/unitConfig';
@@ -54,13 +54,13 @@ export default function PreparationServingSection({
   }
 
   function handleMassChange(ss: ServingSize) {
-    const nu = ss.value as NutritionUnit;
-    update({ mass: nu.amount > 0 ? { amount: nu.amount, unit: nu.unit } : null });
+    const nu = ss.value as { amount: number; unit: string };
+    update({ mass: { amount: nu.amount, unit: nu.unit } });
   }
 
   function handleVolumeChange(ss: ServingSize) {
-    const nu = ss.value as NutritionUnit;
-    update({ volume: nu.amount > 0 ? { amount: nu.amount, unit: nu.unit } : null });
+    const nu = ss.value as { amount: number; unit: string };
+    update({ volume: { amount: nu.amount, unit: nu.unit } });
   }
 
   return (
@@ -90,8 +90,9 @@ export default function PreparationServingSection({
             <ServingSizeSelector
               size="sm"
               groups={massGroups}
-              value={ServingSize.mass(prep.mass?.amount ?? 0, prep.mass?.unit ?? 'g')}
+              value={prep.mass ? ServingSize.mass(prep.mass.amount, prep.mass.unit) : null}
               onChange={handleMassChange}
+              onClear={() => update({ mass: null })}
               amountAriaLabel="Mass amount"
               unitAriaLabel="Mass unit"
             />
@@ -101,8 +102,9 @@ export default function PreparationServingSection({
             <ServingSizeSelector
               size="sm"
               groups={volumeGroups}
-              value={ServingSize.volume(prep.volume?.amount ?? 0, prep.volume?.unit ?? 'mL')}
+              value={prep.volume ? ServingSize.volume(prep.volume.amount, prep.volume.unit) : null}
               onChange={handleVolumeChange}
+              onClear={() => update({ volume: null })}
               amountAriaLabel="Volume amount"
               unitAriaLabel="Volume unit"
             />

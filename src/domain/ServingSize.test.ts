@@ -377,31 +377,36 @@ describe('ServingSize', () => {
   });
 
   describe('toApiObject', () => {
-    it('serializes servings as tagged union', () => {
-      expect(ServingSize.servings(2).toApiObject()).toEqual({ servings: 2 });
+    it('serializes servings in kind-based format', () => {
+      expect(ServingSize.servings(2).toApiObject()).toEqual({ kind: 'servings', amount: 2 });
     });
 
-    it('serializes mass as tagged union', () => {
+    it('serializes mass in kind-based format', () => {
       expect(ServingSize.mass(100, 'g').toApiObject()).toEqual({
-        mass: { amount: 100, unit: 'g' },
+        kind: 'mass',
+        amount: { amount: 100, unit: 'g' },
       });
     });
 
-    it('serializes volume as tagged union', () => {
+    it('serializes volume in kind-based format', () => {
       expect(ServingSize.volume(250, 'mL').toApiObject()).toEqual({
-        volume: { amount: 250, unit: 'mL' },
+        kind: 'volume',
+        amount: { amount: 250, unit: 'mL' },
       });
     });
 
-    it('serializes energy as tagged union', () => {
+    it('serializes energy in kind-based format', () => {
       expect(ServingSize.energy(200, 'kcal').toApiObject()).toEqual({
-        energy: { amount: 200, unit: 'kcal' },
+        kind: 'energy',
+        amount: { amount: 200, unit: 'kcal' },
       });
     });
 
-    it('serializes customSize as tagged union', () => {
+    it('serializes customSize in kind-based format', () => {
       expect(ServingSize.customSize('cookie', 3).toApiObject()).toEqual({
-        customSize: { name: 'cookie', amount: 3 },
+        kind: 'customSize',
+        name: 'cookie',
+        amount: 3,
       });
     });
 

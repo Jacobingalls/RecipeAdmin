@@ -10,14 +10,26 @@ export interface CustomSizeValue {
 
 export type ServingSizeValue = number | NutritionUnit | CustomSizeValue;
 
-/** Plain object format for deserializing a ServingSize from an API response. */
+/**
+ * Plain object format for a ServingSize.
+ *
+ * The API (RecipeKit) uses a kind-based format:
+ *   { kind: "servings", amount: 2 }
+ *   { kind: "mass", amount: { amount: 100, unit: "g" } }
+ *   { kind: "customSize", name: "Cookie", amount: 3 }
+ *
+ * The tagged union keys below are accepted by `fromObject()` for backwards
+ * compatibility but should NOT be sent to the API.
+ */
 export interface ServingSizeData {
+  // API format (kind-based)
   kind?: string;
-  type?: string;
   amount?: number | NutritionUnitData;
-  value?: number | NutritionUnitData;
   name?: string;
-  // Tagged union keys (API format)
+  // Legacy aliases accepted by fromObject()
+  type?: string;
+  value?: number | NutritionUnitData;
+  // Tagged union keys accepted by fromObject()
   servings?: number;
   mass?: NutritionUnitData;
   volume?: NutritionUnitData;
@@ -162,7 +174,7 @@ export class ServingSize {
     }
   }
 
-  /** Serialize to plain object format (inverse of fromObject). */
+  /** Serialize to the kind-based format used by the RecipeKit API. */
   toObject(): ServingSizeData {
     switch (this.type) {
       case 'servings':
@@ -182,24 +194,9 @@ export class ServingSize {
     }
   }
 
-  /** Serialize to the API's tagged union format. */
+  /** Serialize to the API's kind-based format expected by RecipeKit. */
   toApiObject(): ServingSizeData {
-    switch (this.type) {
-      case 'servings':
-        return { servings: this.value as number };
-      case 'mass':
-      case 'volume':
-      case 'energy': {
-        const nu = this.value as NutritionUnit;
-        return { [this.type]: { amount: nu.amount, unit: nu.unit } };
-      }
-      case 'customSize': {
-        const { name, amount } = this.value as CustomSizeValue;
-        return { customSize: { name, amount } };
-      }
-      default:
-        return {};
-    }
+    return this.toObject();
   }
 
   toString(): string {

@@ -25,8 +25,9 @@ function makePrep(overrides = {}) {
 function renderSelector(
   overrides: {
     prep?: Preparation | ProductGroup;
-    value?: ServingSize;
+    value?: ServingSize | null;
     onChange?: (s: ServingSize) => void;
+    onClear?: () => void;
     size?: 'sm';
     groups?: OptionGroup[];
     amountAriaLabel?: string;
@@ -34,7 +35,7 @@ function renderSelector(
   } = {},
 ) {
   const prep = overrides.prep ?? makePrep();
-  const value = overrides.value ?? ServingSize.servings(1);
+  const value = overrides.value === undefined ? ServingSize.servings(1) : overrides.value;
   const onChange = overrides.onChange ?? vi.fn();
 
   return {
@@ -44,6 +45,7 @@ function renderSelector(
         prep={overrides.groups ? undefined : prep}
         value={value}
         onChange={onChange}
+        onClear={overrides.onClear}
         size={overrides.size}
         groups={overrides.groups}
         amountAriaLabel={overrides.amountAriaLabel}
@@ -377,6 +379,138 @@ describe('ServingSizeSelector', () => {
         value: ServingSize.mass(50, 'g'),
       });
       expect(screen.getByText('Grams (g)')).toBeInTheDocument();
+    });
+  });
+
+  // --- Nullable / onClear ---
+
+  describe('nullable (onClear)', () => {
+    const massGroups: OptionGroup[] = [
+      {
+        label: 'Mass',
+        options: [
+          {
+            type: 'mass' as ServingSizeType,
+            value: 'g',
+            label: 'Grams (g)',
+            aliases: ['gram', 'grams', 'g'],
+          },
+        ],
+      },
+    ];
+
+    it('shows "None" label when value is null', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: null, onClear });
+      expect(screen.getByText('None')).toBeInTheDocument();
+    });
+
+    it('hides amount input when value is null', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: null, onClear });
+      expect(screen.queryByLabelText('Amount')).not.toBeInTheDocument();
+    });
+
+    it('hides amount input in compact mode when value is null', () => {
+      const onClear = vi.fn();
+      renderSelector({
+        groups: massGroups,
+        value: null,
+        onClear,
+        size: 'sm',
+        unitAriaLabel: 'Mass unit',
+      });
+      expect(screen.queryByLabelText('Amount')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Mass unit')).toHaveTextContent('None');
+    });
+
+    it('shows "None" option in dropdown when onClear is provided', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g'), onClear });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      // "None" appears in the dropdown as an option
+      expect(screen.getByRole('option', { name: 'None' })).toBeInTheDocument();
+    });
+
+    it('does not show "None" option when onClear is absent', () => {
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g') });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      expect(screen.queryByRole('option', { name: 'None' })).not.toBeInTheDocument();
+    });
+
+    it('calls onClear when "None" option is clicked', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g'), onClear });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      fireEvent.click(screen.getByRole('option', { name: 'None' }));
+      expect(onClear).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes dropdown after selecting "None"', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g'), onClear });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      fireEvent.click(screen.getByRole('option', { name: 'None' }));
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+
+    it('calls onChange with amount 1 when selecting a unit from null', () => {
+      const onChange = vi.fn();
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: null, onChange, onClear });
+      fireEvent.click(screen.getByText('None'));
+      fireEvent.click(screen.getByText('Grams (g)'));
+      expect(onChange).toHaveBeenCalledTimes(1);
+      const result = onChange.mock.calls[0][0] as ServingSize;
+      expect(result.type).toBe('mass');
+      expect(result.amount).toBe(1);
+    });
+
+    it('marks "None" as aria-selected when value is null', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: null, onClear });
+      fireEvent.click(screen.getByText('None'));
+      const noneOption = screen.getByRole('option', { name: 'None' });
+      expect(noneOption).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('does not mark "None" as aria-selected when value is set', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g'), onClear });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      const noneOption = screen.getByRole('option', { name: 'None' });
+      expect(noneOption).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('selects "None" via Enter key', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: null, onClear });
+      fireEvent.click(screen.getByText('None'));
+      const listbox = screen.getByRole('listbox');
+      // Value is null, so "None" should be highlighted; press Enter
+      fireEvent.keyDown(listbox, { key: 'Enter' });
+      expect(onClear).toHaveBeenCalledTimes(1);
+    });
+
+    it('navigates to "None" with ArrowUp from first option', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g'), onClear });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      const listbox = screen.getByRole('listbox');
+      // Open highlights the selected option (index 0). ArrowUp should go to None (index -1).
+      fireEvent.keyDown(listbox, { key: 'ArrowUp' });
+      fireEvent.keyDown(listbox, { key: 'Enter' });
+      expect(onClear).toHaveBeenCalledTimes(1);
+    });
+
+    it('"None" stays visible when search filters all options', () => {
+      const onClear = vi.fn();
+      renderSelector({ groups: massGroups, value: ServingSize.mass(100, 'g'), onClear });
+      fireEvent.click(screen.getByText('Grams (g)'));
+      const searchInput = screen.getByPlaceholderText('Search units...');
+      fireEvent.change(searchInput, { target: { value: 'zzzzz' } });
+      expect(screen.getByRole('option', { name: 'None' })).toBeInTheDocument();
+      expect(screen.getByText('No matching units')).toBeInTheDocument();
     });
   });
 });

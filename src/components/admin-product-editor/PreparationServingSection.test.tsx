@@ -82,14 +82,46 @@ describe('PreparationServingSection', () => {
     );
   });
 
-  it('calls onChange with null mass when amount is cleared', () => {
+  it('sets mass amount to 0 when amount input is cleared', () => {
     renderSection();
     fireEvent.change(screen.getByLabelText('Mass amount'), { target: { value: '' } });
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preparations: [expect.objectContaining({ mass: { amount: 0, unit: 'g' } })],
+      }),
+    );
+  });
+
+  it('calls onChange with null mass when "None" is selected', () => {
+    renderSection();
+    fireEvent.click(screen.getByLabelText('Mass unit'));
+    fireEvent.click(screen.getByRole('option', { name: 'None' }));
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         preparations: [expect.objectContaining({ mass: null })],
       }),
     );
+  });
+
+  it('calls onChange with null volume when "None" is selected', () => {
+    renderSection();
+    fireEvent.click(screen.getByLabelText('Volume unit'));
+    fireEvent.click(screen.getByRole('option', { name: 'None' }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preparations: [expect.objectContaining({ volume: null })],
+      }),
+    );
+  });
+
+  it('shows "None" when mass is not set', () => {
+    const noMassProduct: ApiProduct = {
+      ...sampleProduct,
+      preparations: [{ ...sampleProduct.preparations[0], mass: undefined }],
+    };
+    renderSection(noMassProduct);
+    expect(screen.getByLabelText('Mass unit')).toHaveTextContent('None');
+    expect(screen.queryByLabelText('Mass amount')).not.toBeInTheDocument();
   });
 
   it('renders mass unit as a searchable dropdown button', () => {

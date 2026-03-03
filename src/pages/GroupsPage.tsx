@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { ProductGroupData } from '../domain';
 import { adminListGroups } from '../api';
@@ -9,9 +10,12 @@ import {
   ContentUnavailableView,
   LinkListItem,
   ListFilter,
+  Button,
 } from '../components/common';
+import { CreateGroupModal } from '../components/admin';
 
 export default function GroupsPage() {
+  const navigate = useNavigate();
   const {
     data: groups,
     loading,
@@ -21,6 +25,7 @@ export default function GroupsPage() {
   });
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const brands = useMemo(() => {
     if (!groups) return [];
@@ -41,7 +46,19 @@ export default function GroupsPage() {
 
   return (
     <>
-      <h1 className="mb-4">Groups</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="mb-0">Groups</h1>
+        <Button variant="success" onClick={() => setShowCreateModal(true)}>
+          New
+        </Button>
+      </div>
+
+      <CreateGroupModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onGroupCreated={(id) => navigate(`/admin/groups/${id}`)}
+      />
+
       <ListFilter
         nameFilter={nameFilter}
         onNameFilterChange={setNameFilter}

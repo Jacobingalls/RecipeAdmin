@@ -26,6 +26,10 @@ vi.mock('../components/common', async () => {
   };
 });
 
+vi.mock('../components/admin', () => ({
+  CreateGroupModal: () => <div data-testid="create-group-modal" />,
+}));
+
 const mockUseApiQuery = vi.mocked(useApiQuery);
 
 function renderWithRouter(ui: ReactElement) {
@@ -125,5 +129,11 @@ describe('GroupsPage', () => {
     mockQuery({ data: sampleGroups });
     renderWithRouter(<GroupsPage />);
     expect(screen.getByText('Groups')).toBeInTheDocument();
+  });
+
+  it('renders the New button', () => {
+    mockQuery({ data: sampleGroups });
+    renderWithRouter(<GroupsPage />);
+    expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
   });
 });

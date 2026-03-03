@@ -6,193 +6,14 @@ import { ServingSize } from '../../domain';
 import type { CustomSizeData } from '../../domain/CustomSize';
 import { massUnits, volumeUnits, energyUnits } from '../../config/unitConfig';
 import type { OptionGroup } from '../../config/unitConfig';
+import {
+  PRESET_CUSTOM_SIZES,
+  formatPresetServing,
+  presetToCustomSizeData,
+} from '../../config/customSizePresets';
+import type { PresetCustomSize } from '../../config/customSizePresets';
 import { DeleteButton, Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';
-
-// ---------------------------------------------------------------------------
-// Preset custom sizes (from RecipeKit/CustomSize+Helpers.swift)
-// ---------------------------------------------------------------------------
-
-interface PresetCustomSize {
-  name: string;
-  singularName: string;
-  pluralName: string;
-  servingSize:
-    | { servings: number }
-    | { mass: { amount: number; unit: string } }
-    | { volume: { amount: number; unit: string } };
-  group: string;
-}
-
-const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
-  // Generic containers
-  {
-    name: 'Bag',
-    singularName: 'bag',
-    pluralName: 'bags',
-    servingSize: { servings: 1 },
-    group: 'Containers',
-  },
-  {
-    name: 'Box',
-    singularName: 'box',
-    pluralName: 'boxes',
-    servingSize: { servings: 1 },
-    group: 'Containers',
-  },
-  {
-    name: 'Bottle',
-    singularName: 'bottle',
-    pluralName: 'bottles',
-    servingSize: { servings: 1 },
-    group: 'Containers',
-  },
-  {
-    name: 'Jar',
-    singularName: 'jar',
-    pluralName: 'jars',
-    servingSize: { servings: 1 },
-    group: 'Containers',
-  },
-  {
-    name: 'Jug',
-    singularName: 'jug',
-    pluralName: 'jugs',
-    servingSize: { servings: 1 },
-    group: 'Containers',
-  },
-  {
-    name: 'Package',
-    singularName: 'package',
-    pluralName: 'packages',
-    servingSize: { servings: 1 },
-    group: 'Containers',
-  },
-  // Units
-  {
-    name: 'Chip',
-    singularName: 'chip',
-    pluralName: 'chips',
-    servingSize: { servings: 1 },
-    group: 'Units',
-  },
-  {
-    name: 'Loaf',
-    singularName: 'loaf',
-    pluralName: 'loaves',
-    servingSize: { servings: 1 },
-    group: 'Units',
-  },
-  {
-    name: 'Shot',
-    singularName: 'shot',
-    pluralName: 'shots',
-    servingSize: { servings: 1 },
-    group: 'Units',
-  },
-  {
-    name: 'Slice',
-    singularName: 'slice',
-    pluralName: 'slices',
-    servingSize: { servings: 1 },
-    group: 'Units',
-  },
-  {
-    name: 'Stick',
-    singularName: 'stick',
-    pluralName: 'sticks',
-    servingSize: { servings: 1 },
-    group: 'Units',
-  },
-  {
-    name: 'Pump',
-    singularName: 'pump',
-    pluralName: 'pumps',
-    servingSize: { servings: 1 },
-    group: 'Units',
-  },
-  // Soda cans
-  {
-    name: 'Mini Soda Can',
-    singularName: 'mini can',
-    pluralName: 'mini cans',
-    servingSize: { volume: { amount: 8, unit: 'fl oz' } },
-    group: 'Soda sizes',
-  },
-  {
-    name: 'Soda Can',
-    singularName: 'can',
-    pluralName: 'cans',
-    servingSize: { volume: { amount: 12, unit: 'fl oz' } },
-    group: 'Soda sizes',
-  },
-  {
-    name: 'Soda Bottle',
-    singularName: 'bottle',
-    pluralName: 'bottles',
-    servingSize: { volume: { amount: 20, unit: 'fl oz' } },
-    group: 'Soda sizes',
-  },
-  {
-    name: 'Two-Liter Soda Bottle',
-    singularName: 'two-liter bottle',
-    pluralName: 'two-liter bottles',
-    servingSize: { volume: { amount: 2, unit: 'L' } },
-    group: 'Soda sizes',
-  },
-  // Eggs
-  {
-    name: 'Small Egg',
-    singularName: 'small egg',
-    pluralName: 'small eggs',
-    servingSize: { mass: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
-  },
-  {
-    name: 'Medium Egg',
-    singularName: 'medium egg',
-    pluralName: 'medium eggs',
-    servingSize: { mass: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
-  },
-  {
-    name: 'Large Egg',
-    singularName: 'large egg',
-    pluralName: 'large eggs',
-    servingSize: { mass: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
-  },
-  {
-    name: 'Extra-Large Egg',
-    singularName: 'extra-large egg',
-    pluralName: 'extra-large eggs',
-    servingSize: { mass: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
-  },
-  {
-    name: 'Jumbo Egg',
-    singularName: 'jumbo egg',
-    pluralName: 'jumbo eggs',
-    servingSize: { servings: 1 },
-    group: 'Eggs',
-  },
-];
-
-function formatPresetServing(s: PresetCustomSize['servingSize']): string {
-  if ('servings' in s) return `${s.servings} serving(s)`;
-  if ('mass' in s) return `${s.mass.amount} ${s.mass.unit}`;
-  return `${s.volume.amount} ${s.volume.unit}`;
-}
-
-function presetToCustomSizeData(preset: PresetCustomSize): CustomSizeData {
-  return {
-    id: crypto.randomUUID(),
-    name: preset.name,
-    singularName: preset.singularName,
-    pluralName: preset.pluralName,
-    servingSize: preset.servingSize,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Add custom size modal (preset picker)
@@ -307,7 +128,7 @@ function CreateCustomSizeModal({
       name: name.trim(),
       singularName: singularName.trim(),
       pluralName: pluralName.trim(),
-      servingSize: { servings: 1 },
+      servingSize: { kind: 'servings', amount: 1 },
     });
   }
 

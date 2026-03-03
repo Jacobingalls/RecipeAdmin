@@ -18,8 +18,9 @@ function optionElId(prefix: string, option: SelectOption): string {
 
 interface ServingSizeSelectorProps {
   prep?: Preparation | ProductGroup;
-  value: ServingSize;
+  value: ServingSize | null;
   onChange: (servingSize: ServingSize) => void;
+  onClear?: () => void;
   size?: 'sm';
   groups?: OptionGroup[];
   amountAriaLabel?: string;
@@ -30,6 +31,7 @@ export default function ServingSizeSelector({
   prep,
   value,
   onChange,
+  onClear,
   size,
   groups: groupsOverride,
   amountAriaLabel,
@@ -44,6 +46,7 @@ export default function ServingSizeSelector({
   const compact = size === 'sm';
   const amountInputId = `${instanceId}-amount`;
   const unitButtonId = `${instanceId}-unit`;
+  const noneOptionId = `${instanceId}-option-none`;
 
   // Build option groups from either groups override or prep
   const allGroups = groupsOverride ?? (prep ? buildOptionGroups(prep) : []);
@@ -53,6 +56,7 @@ export default function ServingSizeSelector({
   const flatOptions = filteredGroups.flatMap((group) => group.options);
 
   const getCurrentLabel = (): string => {
+    if (!value) return 'None';
     if (value.type === 'servings') {
       return 'Servings';
     }
@@ -69,6 +73,7 @@ export default function ServingSizeSelector({
   };
 
   const getUnitValue = (): string => {
+    if (!value) return '';
     if (value.type === 'servings') return 'Servings';
     if (value.type === 'customSize') return (value.value as CustomSizeValue).name;
     return (value.value as NutritionUnit).unit;
@@ -96,22 +101,35 @@ export default function ServingSizeSelector({
   };
 
   const handleAmountChange = (newAmount: number): void => {
+    if (!value) return;
     const amount = compact ? newAmount : Math.max(0.01, newAmount);
     onChange(createServingSize(value.type, getUnitValue(), amount));
   };
 
-  const isOptionSelected = (option: SelectOption): boolean =>
-    option.type === value.type &&
-    (option.type === 'servings' ||
-      (option.type === 'customSize'
-        ? option.value === (value.value as CustomSizeValue).name
-        : option.value === (value.value as NutritionUnit).unit));
+  const isOptionSelected = (option: SelectOption): boolean => {
+    if (!value) return false;
+    return (
+      option.type === value.type &&
+      (option.type === 'servings' ||
+        (option.type === 'customSize'
+          ? option.value === (value.value as CustomSizeValue).name
+          : option.value === (value.value as NutritionUnit).unit))
+    );
+  };
 
   const handleUnitSelect = (option: SelectOption): void => {
-    const currentAmount = value.amount || (compact ? 0 : 1);
+    const currentAmount = value ? value.amount || (compact ? 0 : 1) : 1;
     onChange(createServingSize(option.type, option.value, currentAmount));
     setIsOpen(false);
     setSearchQuery('');
+  };
+
+  const handleNoneSelect = (): void => {
+    if (onClear) {
+      onClear();
+      setIsOpen(false);
+      setSearchQuery('');
+    }
   };
 
   useEffect(() => {
@@ -134,11 +152,13 @@ export default function ServingSizeSelector({
 
   // Scroll highlighted option into view
   useEffect(() => {
-    if (highlightedIndex >= 0 && highlightedIndex < flatOptions.length) {
+    if (highlightedIndex === -1 && onClear) {
+      document.getElementById(noneOptionId)?.scrollIntoView({ block: 'nearest' });
+    } else if (highlightedIndex >= 0 && highlightedIndex < flatOptions.length) {
       const el = document.getElementById(optionElId(instanceId, flatOptions[highlightedIndex]));
       el?.scrollIntoView({ block: 'nearest' });
     }
-  }, [highlightedIndex, flatOptions, instanceId]);
+  }, [highlightedIndex, flatOptions, instanceId, onClear, noneOptionId]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
@@ -147,28 +167,42 @@ export default function ServingSizeSelector({
       return;
     }
 
-    if (flatOptions.length === 0) return;
+    if (flatOptions.length === 0 && !onClear) return;
+
+    // When onClear is set, index -1 represents the "None" option.
+    // Navigation wraps circularly: None <-> 0 <-> ... <-> N <-> None
+    const min = onClear ? -1 : 0;
+    const max = flatOptions.length - 1;
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex((prev) => (prev + 1) % flatOptions.length);
+        setHighlightedIndex((prev) => {
+          if (flatOptions.length === 0) return min;
+          return prev >= max ? min : prev + 1;
+        });
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setHighlightedIndex((prev) => (prev - 1 + flatOptions.length) % flatOptions.length);
+        setHighlightedIndex((prev) => {
+          if (flatOptions.length === 0) return min;
+          return prev <= min ? max : prev - 1;
+        });
         break;
       case 'Home':
         e.preventDefault();
-        setHighlightedIndex(0);
+        setHighlightedIndex(min);
         break;
       case 'End':
         e.preventDefault();
-        setHighlightedIndex(flatOptions.length - 1);
+        setHighlightedIndex(max >= 0 ? max : min);
         break;
       case 'Enter':
       case ' ':
-        if (highlightedIndex >= 0 && highlightedIndex < flatOptions.length) {
+        if (highlightedIndex === -1 && onClear) {
+          e.preventDefault();
+          handleNoneSelect();
+        } else if (highlightedIndex >= 0 && highlightedIndex < flatOptions.length) {
           // Allow space to type in search input
           if (e.key === ' ' && e.target === searchInputRef.current) return;
           e.preventDefault();
@@ -182,10 +216,36 @@ export default function ServingSizeSelector({
 
   const toggleDropdown = () => {
     if (!isOpen) {
-      const selectedIdx = flatOptions.findIndex(isOptionSelected);
-      setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : 0);
+      if (!value && onClear) {
+        setHighlightedIndex(-1);
+      } else {
+        const selectedIdx = flatOptions.findIndex(isOptionSelected);
+        const fallback = onClear ? -1 : 0;
+        setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : fallback);
+      }
     }
     setIsOpen(!isOpen);
+  };
+
+  const noneItem = onClear && (
+    <button
+      id={noneOptionId}
+      className={`dropdown-item${highlightedIndex === -1 ? ' active' : ''}`}
+      role="option"
+      aria-selected={!value}
+      onClick={handleNoneSelect}
+      onMouseEnter={() => setHighlightedIndex(-1)}
+    >
+      None
+    </button>
+  );
+
+  const getActiveDescendant = (): string | undefined => {
+    if (highlightedIndex === -1 && onClear) return noneOptionId;
+    if (highlightedIndex >= 0 && highlightedIndex < flatOptions.length) {
+      return optionElId(instanceId, flatOptions[highlightedIndex]);
+    }
+    return undefined;
   };
 
   const dropdownMenu = isOpen && (
@@ -195,11 +255,7 @@ export default function ServingSizeSelector({
       tabIndex={-1}
       style={{ minWidth: 220, maxHeight: 300, overflowY: 'auto' }}
       onKeyDown={handleKeyDown}
-      aria-activedescendant={
-        highlightedIndex >= 0 && highlightedIndex < flatOptions.length
-          ? optionElId(instanceId, flatOptions[highlightedIndex])
-          : undefined
-      }
+      aria-activedescendant={getActiveDescendant()}
     >
       <div className="px-2 pb-2">
         <input
@@ -217,6 +273,8 @@ export default function ServingSizeSelector({
           }}
         />
       </div>
+      {noneItem}
+      {onClear && filteredGroups.length > 0 && <div className="dropdown-divider" />}
       {filteredGroups.length === 0 ? (
         <div className="dropdown-item-text text-muted small">No matching units</div>
       ) : (
@@ -250,15 +308,17 @@ export default function ServingSizeSelector({
   if (compact) {
     return (
       <div className="d-flex align-items-center gap-2 flex-shrink-1" style={{ minWidth: 0 }}>
-        <input
-          type="number"
-          className="form-control form-control-sm flex-shrink-0"
-          style={{ width: '5rem' }}
-          step="any"
-          value={value.amount}
-          onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0)}
-          aria-label={amountAriaLabel ?? 'Amount'}
-        />
+        {value && (
+          <input
+            type="number"
+            className="form-control form-control-sm flex-shrink-0"
+            style={{ width: '5rem' }}
+            step="any"
+            value={value.amount}
+            onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0)}
+            aria-label={amountAriaLabel ?? 'Amount'}
+          />
+        )}
         <div ref={dropdownRef} className="dropdown flex-shrink-1" style={{ minWidth: '5rem' }}>
           <button
             className="form-select form-select-sm text-start text-truncate w-100"
@@ -277,21 +337,23 @@ export default function ServingSizeSelector({
 
   return (
     <div className="row g-2 align-items-end">
-      <div className="col-auto">
-        <label htmlFor={amountInputId} className="form-label small mb-1">
-          Amount
-        </label>
-        <input
-          id={amountInputId}
-          type="number"
-          className="form-control"
-          style={{ width: '6.25rem' }}
-          min="0.01"
-          step="0.25"
-          value={value.amount}
-          onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 1)}
-        />
-      </div>
+      {value && (
+        <div className="col-auto">
+          <label htmlFor={amountInputId} className="form-label small mb-1">
+            Amount
+          </label>
+          <input
+            id={amountInputId}
+            type="number"
+            className="form-control"
+            style={{ width: '6.25rem' }}
+            min="0.01"
+            step="0.25"
+            value={value.amount}
+            onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 1)}
+          />
+        </div>
+      )}
       <div className="col-auto" ref={dropdownRef}>
         <label htmlFor={unitButtonId} className="form-label small mb-1">
           Unit

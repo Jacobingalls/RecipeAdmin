@@ -1,4 +1,12 @@
-import type { BarcodeData, PreparationData, ProductGroupData, ServingSizeData } from './domain';
+import type {
+  BarcodeData,
+  CustomSizeData,
+  GroupItem,
+  NutritionUnitData,
+  PreparationData,
+  ProductGroupData,
+  ServingSizeData,
+} from './domain';
 
 export interface ApiProduct {
   id: string;
@@ -795,8 +803,153 @@ export async function adminListGroups(): Promise<ProductGroupData[]> {
   return apiFetch<ProductGroupData[]>('/admin/groups');
 }
 
-export async function adminGetGroup(id: string): Promise<ProductGroupData> {
-  return apiFetch<ProductGroupData>(`/admin/groups/${encodeURIComponent(id)}`);
+export async function adminGetGroup(id: string): Promise<IndirectGroup> {
+  return apiFetch<IndirectGroup>(`/admin/groups/${encodeURIComponent(id)}`);
+}
+
+export async function resolveIndirectGroup(indirect: IndirectGroup): Promise<ProductGroupData> {
+  const productIds = Array.from(
+    new Set(
+      indirect.items
+        .filter((item) => item.kind === 'product' && item.productID)
+        .map((item) => item.productID!),
+    ),
+  );
+  const groupIds = Array.from(
+    new Set(
+      indirect.items
+        .filter((item) => item.kind === 'group' && item.groupID)
+        .map((item) => item.groupID!),
+    ),
+  );
+
+  const [products, groups] = await Promise.all([
+    Promise.all(
+      productIds.map(async (id) => {
+        try {
+          return [id, await getProduct(id)] as const;
+        } catch {
+          return [
+            id,
+            { id, name: id, brand: '', barcodes: [], preparations: [], notes: [] },
+          ] as const;
+        }
+      }),
+    ),
+    Promise.all(
+      groupIds.map(async (id) => {
+        try {
+          return [id, await getGroup(id)] as const;
+        } catch {
+          return [id, { id, name: id } as ProductGroupData] as const;
+        }
+      }),
+    ),
+  ]);
+
+  const productMap = Object.fromEntries(products);
+  const groupMap = Object.fromEntries(groups);
+
+  const items: GroupItem[] = indirect.items.map((item) => {
+    if (item.kind === 'product' && item.productID) {
+      const product = productMap[item.productID];
+      return {
+        product: product
+          ? {
+              id: product.id,
+              name: product.name,
+              brand: product.brand,
+              preparations: product.preparations,
+            }
+          : { id: item.productID, name: item.productID },
+        preparationID: item.preparationID,
+        servingSize: item.servingSize,
+      };
+    }
+    return {
+      group: item.groupID ? groupMap[item.groupID] : undefined,
+      servingSize: item.servingSize,
+    };
+  });
+
+  return {
+    id: indirect.id,
+    brand: indirect.brand,
+    name: indirect.name,
+    items,
+    mass: indirect.mass,
+    volume: indirect.volume,
+    customSizes: indirect.customSizes,
+    defaultServingSize: indirect.defaultServingSize,
+    barcodes: indirect.barcodes,
+    categories: indirect.categories,
+    notes: indirect.notes,
+  };
+}
+
+// --- Indirect types for group upsert (API stores items as unresolved references) ---
+
+export interface IndirectGroupItem {
+  kind: 'product' | 'group';
+  productID?: string;
+  groupID?: string;
+  preparationID?: string;
+  servingSize?: ServingSizeData;
+}
+
+export interface IndirectGroup {
+  id: string;
+  brand: string;
+  name: string;
+  items: IndirectGroupItem[];
+  mass?: NutritionUnitData | null;
+  volume?: NutritionUnitData | null;
+  customSizes?: CustomSizeData[];
+  defaultServingSize?: ServingSizeData | null;
+  barcodes?: BarcodeData[];
+  categories?: string[];
+  notes?: unknown[];
+}
+
+function groupItemToIndirect(item: GroupItem): IndirectGroupItem {
+  if (item.product) {
+    return {
+      kind: 'product',
+      productID: item.product.id,
+      preparationID: item.preparationID,
+      servingSize: item.servingSize,
+    };
+  }
+  return {
+    kind: 'group',
+    groupID: item.group?.id,
+    servingSize: item.servingSize,
+  };
+}
+
+export function toIndirectGroup(data: ProductGroupData): IndirectGroup {
+  return {
+    id: data.id!,
+    brand: data.brand ?? '',
+    name: data.name ?? '',
+    items: (data.items ?? []).map(groupItemToIndirect),
+    mass: data.mass,
+    volume: data.volume,
+    customSizes: data.customSizes ?? [],
+    defaultServingSize: data.defaultServingSize,
+    barcodes: data.barcodes ?? [],
+    categories: data.categories ?? [],
+    notes: data.notes ?? [],
+  };
+}
+
+export async function adminUpsertGroups(group: ProductGroupData): Promise<IndirectGroup[]> {
+  const indirect = toIndirectGroup(group);
+  return apiPost<IndirectGroup, IndirectGroup[]>('/admin/groups', indirect);
+}
+
+export async function adminDeleteGroup(id: string): Promise<void> {
+  return apiDelete(`/admin/groups/${encodeURIComponent(id)}`);
 }
 
 // Admin Category GET-by-ID

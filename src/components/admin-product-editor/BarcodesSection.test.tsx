@@ -162,7 +162,7 @@ describe('BarcodesSection', () => {
     const added = passedProduct.barcodes[passedProduct.barcodes.length - 1];
     expect(added.code).toBe('555');
     expect(added.preparationID).toBe('prep-cooked');
-    expect(added.servingSize).toEqual({ servings: 50 });
+    expect(added.servingSize).toEqual({ kind: 'servings', amount: 50 });
   });
 
   it('omits default serving size and prep from added barcode', () => {
@@ -201,7 +201,7 @@ describe('BarcodesSection', () => {
     const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
     expect(passedProduct.barcodes[0].code).toBe('012345678905');
     expect(passedProduct.barcodes[1].code).toBe('EDITED');
-    expect(passedProduct.barcodes[1].servingSize).toEqual({ servings: 2 });
+    expect(passedProduct.barcodes[1].servingSize).toEqual({ kind: 'servings', amount: 2 });
   });
 
   it('edit modal shows prep dropdown when product has preparations', () => {

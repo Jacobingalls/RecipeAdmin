@@ -119,7 +119,7 @@ describe('PreparationCustomSizesSection', () => {
     expect(onChange).toHaveBeenCalled();
     const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
     const cs = passedProduct.preparations[0].customSizes![0];
-    expect(cs.servingSize).toEqual({ servings: 2.5 });
+    expect(cs.servingSize).toEqual({ kind: 'servings', amount: 2.5 });
   });
 
   it('calls onChange when unit is changed to mass', () => {
@@ -129,7 +129,7 @@ describe('PreparationCustomSizesSection', () => {
     expect(onChange).toHaveBeenCalled();
     const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
     const cs = passedProduct.preparations[0].customSizes![0];
-    expect(cs.servingSize).toEqual({ mass: { amount: 1, unit: 'g' } });
+    expect(cs.servingSize).toEqual({ kind: 'mass', amount: { amount: 1, unit: 'g' } });
   });
 
   it('renders mass serving size correctly', () => {
@@ -205,6 +205,6 @@ describe('PreparationCustomSizesSection', () => {
     expect(onChange).toHaveBeenCalled();
     const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
     const cs = passedProduct.preparations[0].customSizes![0];
-    expect(cs.servingSize).toEqual({ mass: { amount: 113, unit: 'oz' } });
+    expect(cs.servingSize).toEqual({ kind: 'mass', amount: { amount: 113, unit: 'oz' } });
   });
 });

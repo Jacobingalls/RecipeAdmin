@@ -38,6 +38,7 @@ export interface ProductGroupData {
   barcodes?: BarcodeData[];
   defaultServingSize?: ServingSizeData;
   categories?: string[];
+  notes?: unknown[];
 }
 
 interface ItemServing {
