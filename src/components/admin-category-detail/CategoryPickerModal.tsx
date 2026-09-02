@@ -3,6 +3,7 @@ import { useState, useMemo, useId } from 'react';
 import type { ApiCategory } from '../../api';
 import { adminUpsertCategories } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath, isValidSlug, toSlug } from '../../utils';
 import { ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 
@@ -23,6 +24,7 @@ export function AddCategoryModal({
   onClose,
   onSaved,
 }: AddCategoryModalProps) {
+  const { t } = useTranslation();
   const { allCategories, lookup, addCategories } = useCategories();
   const titleId = useId();
 
@@ -32,7 +34,9 @@ export function AddCategoryModal({
   const [error, setError] = useState<string | null>(null);
 
   const reciprocal: RelationType = relationType === 'parents' ? 'children' : 'parents';
-  const title = relationType === 'parents' ? 'Add parent' : 'Add child';
+  const title = t(
+    relationType === 'parents' ? 'categoryEditor.addParent' : 'categoryEditor.addChild',
+  );
 
   const excludedIds = useMemo(() => {
     const ids = new Set(category[relationType]);
@@ -78,7 +82,7 @@ export function AddCategoryModal({
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't add this category. Try again.");
+      setError(err instanceof Error ? err.message : t('categoryEditor.addError'));
     } finally {
       setIsSaving(false);
     }
@@ -98,7 +102,7 @@ export function AddCategoryModal({
         <input
           type="text"
           className="form-control form-control-sm mb-3"
-          placeholder="Search categories..."
+          placeholder={t('editor.searchCategories')}
           value={searchText}
           onChange={(e) => {
             setSearchText(e.target.value);
@@ -123,17 +127,17 @@ export function AddCategoryModal({
             ))
           ) : (
             <p className="text-body-secondary small mb-0">
-              {searchText ? 'No matching categories' : 'No categories available'}
+              {t(searchText ? 'editor.noMatchingCategories' : 'editor.noCategoriesAvailable')}
             </p>
           )}
         </div>
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button onClick={handleAdd} disabled={!selectedId} loading={isSaving}>
-          Add
+          {t('common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -157,6 +161,7 @@ export function CreateCategoryModal({
   onClose,
   onSaved,
 }: CreateCategoryModalProps) {
+  const { t } = useTranslation();
   const { addCategories } = useCategories();
   const titleId = useId();
 
@@ -169,9 +174,9 @@ export function CreateCategoryModal({
   const derivedSlug = slugTouched ? newSlug : toSlug(newName);
   const slugValid = derivedSlug.length === 0 || isValidSlug(derivedSlug);
 
-  let title = 'New category';
-  if (relationType === 'parents') title = 'Create new parent';
-  if (relationType === 'children') title = 'Create new child';
+  let title = t('categoryEditor.newCategory');
+  if (relationType === 'parents') title = t('categoryEditor.createParent');
+  if (relationType === 'children') title = t('categoryEditor.createChild');
 
   function handleNameChange(value: string) {
     setNewName(value);
@@ -219,7 +224,7 @@ export function CreateCategoryModal({
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't create this category. Try again.");
+      setError(err instanceof Error ? err.message : t('categoryEditor.createError'));
     } finally {
       setIsSaving(false);
     }
@@ -238,7 +243,7 @@ export function CreateCategoryModal({
         )}
         <div className="mb-3">
           <label htmlFor="new-cat-name" className="form-label">
-            Display name
+            {t('categoryEditor.displayName')}
           </label>
           <input
             type="text"
@@ -251,7 +256,7 @@ export function CreateCategoryModal({
         </div>
         <div>
           <label htmlFor="new-cat-slug" className="form-label">
-            Slug
+            {t('categoryEditor.slug')}
           </label>
           <input
             type="text"
@@ -262,18 +267,16 @@ export function CreateCategoryModal({
             required
           />
           {!slugValid && (
-            <div className="invalid-feedback">
-              Slug must be lowercase letters, numbers, and hyphens (e.g. &quot;fresh-fruit&quot;).
-            </div>
+            <div className="invalid-feedback">{t('categoryEditor.slugInvalidHint')}</div>
           )}
         </div>
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button onClick={handleCreate} disabled={!canCreate} loading={isSaving}>
-          Create
+          {t('editor.create')}
         </Button>
       </ModalFooter>
     </ModalBase>

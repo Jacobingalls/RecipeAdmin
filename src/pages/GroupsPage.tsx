@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ProductGroupData } from '../domain';
 import { adminListGroups } from '../api';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import {
   LoadingState,
@@ -15,13 +16,14 @@ import {
 import { CreateGroupModal } from '../components/admin';
 
 export default function GroupsPage() {
+  const { t, tPlural } = useTranslation();
   const navigate = useNavigate();
   const {
     data: groups,
     loading,
     error,
   } = useApiQuery<ProductGroupData[]>(adminListGroups, [], {
-    errorMessage: "Couldn't load groups. Try again later.",
+    errorMessage: t('adminGroups.error'),
   });
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
@@ -47,9 +49,9 @@ export default function GroupsPage() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="mb-0">Groups</h1>
+        <h1 className="mb-0">{t('adminGroups.title')}</h1>
         <Button variant="success" onClick={() => setShowCreateModal(true)}>
-          New
+          {t('list.new')}
         </Button>
       </div>
 
@@ -64,7 +66,7 @@ export default function GroupsPage() {
         onNameFilterChange={setNameFilter}
         dropdownFilter={brandFilter}
         onDropdownFilterChange={setBrandFilter}
-        dropdownLabel="All brands"
+        dropdownLabel={t('filter.allBrands')}
         dropdownOptions={brands}
       />
       {loading && <LoadingState />}
@@ -72,8 +74,8 @@ export default function GroupsPage() {
       {!loading && !error && filteredGroups.length === 0 && (
         <ContentUnavailableView
           icon="bi-collection"
-          title="No groups"
-          description="Try adjusting your search or filters."
+          title={t('adminGroups.empty.title')}
+          description={t('list.adjustFilters')}
         />
       )}
       {!loading && !error && filteredGroups.length > 0 && (
@@ -83,7 +85,7 @@ export default function GroupsPage() {
               key={g.id}
               to={`/admin/groups/${g.id}`}
               title={g.name}
-              subtitle={g.brand ?? `${g.items?.length ?? 0} item(s)`}
+              subtitle={g.brand ?? tPlural('adminGroups.itemCount', g.items?.length ?? 0)}
             />
           ))}
         </div>

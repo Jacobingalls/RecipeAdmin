@@ -10,22 +10,24 @@ import {
   ListFilter,
 } from '../components/common';
 import { CreateUserModal } from '../components/admin';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { formatLastLogin } from '../utils';
 
-const ROLE_OPTIONS = [
-  { value: 'admin', label: 'Admins' },
-  { value: 'normal', label: 'Normal users' },
-];
-
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
+  const roleOptions = [
+    { value: 'admin', label: t('adminUsers.role.admins') },
+    { value: 'normal', label: t('adminUsers.role.normal') },
+  ];
+
   const {
     data: users,
     loading,
     error,
     refetch,
   } = useApiQuery(adminListUsers, [], {
-    errorMessage: "Couldn't load users. Try again later.",
+    errorMessage: t('adminUsers.error'),
   });
   const [nameFilter, setNameFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -51,22 +53,22 @@ export default function AdminUsersPage() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="mb-0">Users</h1>
+        <h1 className="mb-0">{t('adminUsers.title')}</h1>
         <Button variant="success" onClick={() => setShowCreateModal(true)}>
-          New
+          {t('list.new')}
         </Button>
       </div>
 
       <ListFilter
         nameFilter={nameFilter}
         onNameFilterChange={setNameFilter}
-        nameLabel="Search users"
-        namePlaceholder="Search users..."
+        nameLabel={t('adminUsers.searchLabel')}
+        namePlaceholder={t('adminUsers.searchPlaceholder')}
         nameColumnClass="col-md-8"
         dropdownFilter={roleFilter}
         onDropdownFilterChange={setRoleFilter}
-        dropdownLabel="All users"
-        dropdownOptions={ROLE_OPTIONS}
+        dropdownLabel={t('adminUsers.allUsers')}
+        dropdownOptions={roleOptions}
         dropdownColumnClass="col-md-4"
       />
 
@@ -81,8 +83,8 @@ export default function AdminUsersPage() {
       {!loading && !error && filteredUsers.length === 0 && (
         <ContentUnavailableView
           icon="bi-people"
-          title="No users"
-          description="Try adjusting your search or filters."
+          title={t('adminUsers.empty.title')}
+          description={t('list.adjustFilters')}
         />
       )}
       {!loading && !error && filteredUsers.length > 0 && (

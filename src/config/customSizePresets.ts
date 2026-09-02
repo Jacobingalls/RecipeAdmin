@@ -7,13 +7,20 @@
 
 import type { CustomSizeData, ServingSizeData } from '../domain';
 import { ServingSize } from '../domain';
+import { getTranslator } from '../i18n';
+import type { MessageKey } from '../i18n';
 
 export interface PresetCustomSize {
+  /**
+   * Saved onto the product as-is, so these names stay in English rather than being
+   * translated — they're data, not interface text.
+   */
   name: string;
   singularName: string;
   pluralName: string;
   servingSize: ServingSizeData;
-  group: string;
+  /** Message key for the heading this preset is listed under. */
+  groupKey: MessageKey;
 }
 
 export const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
@@ -23,42 +30,42 @@ export const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
     singularName: 'bag',
     pluralName: 'bags',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Containers',
+    groupKey: 'customSizeGroup.containers',
   },
   {
     name: 'Box',
     singularName: 'box',
     pluralName: 'boxes',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Containers',
+    groupKey: 'customSizeGroup.containers',
   },
   {
     name: 'Bottle',
     singularName: 'bottle',
     pluralName: 'bottles',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Containers',
+    groupKey: 'customSizeGroup.containers',
   },
   {
     name: 'Jar',
     singularName: 'jar',
     pluralName: 'jars',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Containers',
+    groupKey: 'customSizeGroup.containers',
   },
   {
     name: 'Jug',
     singularName: 'jug',
     pluralName: 'jugs',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Containers',
+    groupKey: 'customSizeGroup.containers',
   },
   {
     name: 'Package',
     singularName: 'package',
     pluralName: 'packages',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Containers',
+    groupKey: 'customSizeGroup.containers',
   },
   // Units
   {
@@ -66,42 +73,42 @@ export const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
     singularName: 'chip',
     pluralName: 'chips',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Units',
+    groupKey: 'customSizeGroup.units',
   },
   {
     name: 'Loaf',
     singularName: 'loaf',
     pluralName: 'loaves',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Units',
+    groupKey: 'customSizeGroup.units',
   },
   {
     name: 'Shot',
     singularName: 'shot',
     pluralName: 'shots',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Units',
+    groupKey: 'customSizeGroup.units',
   },
   {
     name: 'Slice',
     singularName: 'slice',
     pluralName: 'slices',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Units',
+    groupKey: 'customSizeGroup.units',
   },
   {
     name: 'Stick',
     singularName: 'stick',
     pluralName: 'sticks',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Units',
+    groupKey: 'customSizeGroup.units',
   },
   {
     name: 'Pump',
     singularName: 'pump',
     pluralName: 'pumps',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Units',
+    groupKey: 'customSizeGroup.units',
   },
   // Soda cans
   {
@@ -109,28 +116,28 @@ export const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
     singularName: 'mini can',
     pluralName: 'mini cans',
     servingSize: { kind: 'volume', amount: { amount: 8, unit: 'fl oz' } },
-    group: 'Soda sizes',
+    groupKey: 'customSizeGroup.sodaSizes',
   },
   {
     name: 'Soda Can',
     singularName: 'can',
     pluralName: 'cans',
     servingSize: { kind: 'volume', amount: { amount: 12, unit: 'fl oz' } },
-    group: 'Soda sizes',
+    groupKey: 'customSizeGroup.sodaSizes',
   },
   {
     name: 'Soda Bottle',
     singularName: 'bottle',
     pluralName: 'bottles',
     servingSize: { kind: 'volume', amount: { amount: 20, unit: 'fl oz' } },
-    group: 'Soda sizes',
+    groupKey: 'customSizeGroup.sodaSizes',
   },
   {
     name: 'Two-Liter Soda Bottle',
     singularName: 'two-liter bottle',
     pluralName: 'two-liter bottles',
     servingSize: { kind: 'volume', amount: { amount: 2, unit: 'L' } },
-    group: 'Soda sizes',
+    groupKey: 'customSizeGroup.sodaSizes',
   },
   // Eggs
   {
@@ -138,40 +145,43 @@ export const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
     singularName: 'small egg',
     pluralName: 'small eggs',
     servingSize: { kind: 'mass', amount: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
+    groupKey: 'customSizeGroup.eggs',
   },
   {
     name: 'Medium Egg',
     singularName: 'medium egg',
     pluralName: 'medium eggs',
     servingSize: { kind: 'mass', amount: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
+    groupKey: 'customSizeGroup.eggs',
   },
   {
     name: 'Large Egg',
     singularName: 'large egg',
     pluralName: 'large eggs',
     servingSize: { kind: 'mass', amount: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
+    groupKey: 'customSizeGroup.eggs',
   },
   {
     name: 'Extra-Large Egg',
     singularName: 'extra-large egg',
     pluralName: 'extra-large eggs',
     servingSize: { kind: 'mass', amount: { amount: 1.5, unit: 'oz' } },
-    group: 'Eggs',
+    groupKey: 'customSizeGroup.eggs',
   },
   {
     name: 'Jumbo Egg',
     singularName: 'jumbo egg',
     pluralName: 'jumbo eggs',
     servingSize: { kind: 'servings', amount: 1 },
-    group: 'Eggs',
+    groupKey: 'customSizeGroup.eggs',
   },
 ];
 
 export function formatPresetServing(s: ServingSizeData): string {
-  if (s.kind === 'servings' && typeof s.amount === 'number') return `${s.amount} serving(s)`;
+  const { t } = getTranslator();
+  if (s.kind === 'servings' && typeof s.amount === 'number') {
+    return t('customSizePreset.servings', { count: s.amount });
+  }
   if (s.kind === 'mass' && typeof s.amount === 'object' && s.amount) {
     return `${s.amount.amount} ${s.amount.unit}`;
   }
@@ -179,10 +189,10 @@ export function formatPresetServing(s: ServingSizeData): string {
     return `${s.amount.amount} ${s.amount.unit}`;
   }
   // Fallback for tagged union format (backwards compatibility)
-  if (s.servings != null) return `${s.servings} serving(s)`;
+  if (s.servings != null) return t('customSizePreset.servings', { count: s.servings });
   if (s.mass) return `${s.mass.amount} ${s.mass.unit}`;
   if (s.volume) return `${s.volume.amount} ${s.volume.unit}`;
-  return '1 serving(s)';
+  return t('customSizePreset.servings', { count: 1 });
 }
 
 export function presetToCustomSizeData(preset: PresetCustomSize): CustomSizeData {

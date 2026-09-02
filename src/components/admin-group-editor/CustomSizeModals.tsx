@@ -6,6 +6,8 @@ import {
   formatPresetServing,
   presetToCustomSizeData,
 } from '../../config/customSizePresets';
+import { useTranslation } from '../../contexts/LocaleContext';
+import type { MessageKey } from '../../i18n';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 
 // ---------------------------------------------------------------------------
@@ -21,6 +23,7 @@ export function AddCustomSizeModal({
   onAdd: (data: CustomSizeData) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const titleId = useId();
   const [selectedName, setSelectedName] = useState<string | null>(null);
 
@@ -30,11 +33,11 @@ export function AddCustomSizeModal({
   );
 
   const groups = useMemo(() => {
-    const map = new Map<string, (typeof PRESET_CUSTOM_SIZES)[number][]>();
+    const map = new Map<MessageKey, (typeof PRESET_CUSTOM_SIZES)[number][]>();
     for (const p of available) {
-      const list = map.get(p.group) ?? [];
+      const list = map.get(p.groupKey) ?? [];
       list.push(p);
-      map.set(p.group, list);
+      map.set(p.groupKey, list);
     }
     return map;
   }, [available]);
@@ -42,17 +45,17 @@ export function AddCustomSizeModal({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId} scrollable>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        Add custom size
+        {t('editor.addCustomSize')}
       </ModalHeader>
       <ModalBody>
         {available.length === 0 ? (
-          <p className="text-body-secondary small mb-0">All preset sizes have been added</p>
+          <p className="text-body-secondary small mb-0">{t('editor.allPresetsAdded')}</p>
         ) : (
           <div className="list-group" style={{ maxHeight: '20rem', overflowY: 'auto' }}>
             {[...groups.entries()].map(([group, items]) => (
               <div key={group}>
                 <div className="list-group-item bg-body-tertiary py-1 px-3">
-                  <small className="fw-bold text-body-secondary">{group}</small>
+                  <small className="fw-bold text-body-secondary">{t(group)}</small>
                 </div>
                 {items.map((p) => (
                   <button
@@ -80,7 +83,7 @@ export function AddCustomSizeModal({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           disabled={!selectedName}
@@ -89,7 +92,7 @@ export function AddCustomSizeModal({
             if (preset) onAdd(presetToCustomSizeData(preset));
           }}
         >
-          Add
+          {t('common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -107,6 +110,7 @@ export function CreateCustomSizeModal({
   onAdd: (data: CustomSizeData) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const titleId = useId();
   const [name, setName] = useState('');
   const [singularName, setSingularName] = useState('');
@@ -118,44 +122,44 @@ export function CreateCustomSizeModal({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId}>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        New custom size
+        {t('editor.newCustomSize')}
       </ModalHeader>
       <ModalBody>
         <div className="mb-3">
           <label htmlFor="cs-name" className="form-label">
-            Name
+            {t('common.name')}
           </label>
           <input
             type="text"
             className="form-control form-control-sm"
             id="cs-name"
-            placeholder="e.g. Cookie"
+            placeholder={t('editor.customSizeNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="mb-3">
           <label htmlFor="cs-singular" className="form-label">
-            Singular name
+            {t('editor.singularName')}
           </label>
           <input
             type="text"
             className="form-control form-control-sm"
             id="cs-singular"
-            placeholder="e.g. cookie"
+            placeholder={t('editor.customSizeSingularPlaceholder')}
             value={singularName}
             onChange={(e) => setSingularName(e.target.value)}
           />
         </div>
         <div>
           <label htmlFor="cs-plural" className="form-label">
-            Plural name
+            {t('editor.pluralName')}
           </label>
           <input
             type="text"
             className="form-control form-control-sm"
             id="cs-plural"
-            placeholder="e.g. cookies"
+            placeholder={t('editor.customSizePluralPlaceholder')}
             value={pluralName}
             onChange={(e) => setPluralName(e.target.value)}
           />
@@ -163,7 +167,7 @@ export function CreateCustomSizeModal({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           disabled={!canCreate}
@@ -178,7 +182,7 @@ export function CreateCustomSizeModal({
             });
           }}
         >
-          Create
+          {t('editor.create')}
         </Button>
       </ModalFooter>
     </ModalBase>

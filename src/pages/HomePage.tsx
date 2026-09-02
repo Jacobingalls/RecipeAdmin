@@ -3,17 +3,20 @@ import { useCallback, useState } from 'react';
 import { PasskeySetupPrompt } from '../components/common';
 import { TodayTile, FavoritesTile } from '../components/home';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/LocaleContext';
+import type { MessageKey } from '../i18n';
 
-function getTimeOfDayGreeting(): string {
+function getTimeOfDayGreetingKey(): MessageKey {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return 'home.greeting.morning';
+  if (hour < 17) return 'home.greeting.afternoon';
+  return 'home.greeting.evening';
 }
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const name = user?.displayName || user?.username || 'there';
+  const name = user?.displayName || user?.username || t('home.greeting.fallbackName');
   const [todayRefreshSignal, setTodayRefreshSignal] = useState(0);
 
   const handleItemLogged = useCallback(() => {
@@ -23,7 +26,7 @@ export default function HomePage() {
   return (
     <>
       <h1 className="h2 mb-4">
-        {getTimeOfDayGreeting()}, {name}
+        {t(getTimeOfDayGreetingKey())}, {name}
       </h1>
       <PasskeySetupPrompt />
       <div className="row g-4">

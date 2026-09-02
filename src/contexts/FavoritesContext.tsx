@@ -5,6 +5,8 @@ import type { ApiFavorite, CreateFavoriteRequest, ServingSizeData } from '../api
 import { listFavorites, createFavorite, deleteFavorite } from '../api';
 import { ServingSize } from '../domain';
 
+import { useTranslation } from './LocaleContext';
+
 interface FindFavoriteOptions {
   productId?: string;
   preparationId?: string;
@@ -52,6 +54,7 @@ function matchesFavorite(fav: ApiFavorite, opts: FindFavoriteOptions): boolean {
 }
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [favorites, setFavorites] = useState<ApiFavorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,14 +73,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         if (!cancelled) {
           setFavorites([]);
-          setError("Couldn't load favorites. Try again later.");
+          setError(t('favorites.loadError'));
           setLoading(false);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [fetchKey]);
+  }, [fetchKey, t]);
 
   const refetch = useCallback(() => {
     setLoading(true);

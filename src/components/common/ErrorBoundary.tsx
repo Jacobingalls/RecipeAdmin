@@ -1,6 +1,8 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
 
+import { getTranslator } from '../../i18n';
+
 interface ErrorBoundaryProps {
   children: ReactNode;
 }
@@ -34,14 +36,17 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   render() {
     if (this.state.hasError) {
+      // A class component can't use hooks, so read the active language directly.
+      const { t } = getTranslator();
+
       return (
         <div className="container py-4" style={{ maxWidth: 600 }}>
           <div className="alert alert-danger">
-            <h4 className="alert-heading">Something went wrong</h4>
-            <p className="mb-2">{this.state.error?.message || 'An unexpected error occurred'}</p>
+            <h4 className="alert-heading">{t('error.unexpected.title')}</h4>
+            <p className="mb-2">{this.state.error?.message || t('error.unexpected.description')}</p>
             <hr />
             <button className="btn btn-outline-danger btn-sm" onClick={this.handleReset}>
-              Try again
+              {t('common.tryAgain')}
             </button>
           </div>
         </div>

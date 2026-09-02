@@ -6,6 +6,7 @@ import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
 import { buildLogTarget } from '../utils';
+import { useTranslation } from '../contexts/LocaleContext';
 
 const DAYS_PER_PAGE = 7;
 
@@ -73,6 +74,7 @@ export interface UseInfiniteHistoryDataResult {
  * Unlike `useHistoryData`, which loads a fixed date range, this hook supports incremental loading via `loadMore`.
  */
 export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
+  const { t } = useTranslation();
   const [allLogs, setAllLogs] = useState<ApiLogEntry[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -115,7 +117,7 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
       })
       .catch(() => {
         if (cancelled) return;
-        setLogsError("Couldn't load history. Try again later.");
+        setLogsError(t('history.error'));
       })
       .finally(() => {
         if (cancelled) return;
@@ -126,7 +128,7 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
     return () => {
       cancelled = true;
     };
-  }, [resetKey]);
+  }, [resetKey, t]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current || cursorRef.current === null) return;

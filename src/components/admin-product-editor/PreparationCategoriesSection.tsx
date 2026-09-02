@@ -2,6 +2,7 @@ import { useState, useMemo, useId } from 'react';
 
 import type { ApiProduct } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath } from '../../utils';
 import { DeleteButton, Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 import { CreateCategoryModal } from '../admin-category-detail';
@@ -23,6 +24,7 @@ function CategoryPickerForPrep({
   onAdd: (id: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { allCategories, lookup } = useCategories();
   const titleId = useId();
 
@@ -46,13 +48,13 @@ function CategoryPickerForPrep({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId} scrollable>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        Add existing category
+        {t('editor.addExistingCategory')}
       </ModalHeader>
       <ModalBody>
         <input
           type="text"
           className="form-control form-control-sm mb-3"
-          placeholder="Search categories..."
+          placeholder={t('editor.searchCategories')}
           value={searchText}
           onChange={(e) => {
             setSearchText(e.target.value);
@@ -77,14 +79,14 @@ function CategoryPickerForPrep({
             ))
           ) : (
             <p className="text-body-secondary small mb-0">
-              {searchText ? 'No matching categories' : 'No categories available'}
+              {t(searchText ? 'editor.noMatchingCategories' : 'editor.noCategoriesAvailable')}
             </p>
           )}
         </div>
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           disabled={!selectedId}
@@ -92,7 +94,7 @@ function CategoryPickerForPrep({
             if (selectedId) onAdd(selectedId);
           }}
         >
-          Add
+          {t('common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -108,6 +110,7 @@ export default function PreparationCategoriesSection({
   preparationId,
   onChange,
 }: PreparationCategoriesSectionProps) {
+  const { t } = useTranslation();
   const { lookup } = useCategories();
   const prep = product.preparations.find((p) => p.id === preparationId);
   const categoryIds = useMemo(() => prep?.categories ?? [], [prep?.categories]);
@@ -155,7 +158,7 @@ export default function PreparationCategoriesSection({
     <div className="px-3 pt-3 pb-2">
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <strong>Categories</strong>
+          <strong>{t('editor.categories')}</strong>
           <div className="dropdown">
             <button
               className="btn btn-dark btn-sm dropdown-toggle px-3"
@@ -163,7 +166,7 @@ export default function PreparationCategoriesSection({
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Add
+              {t('common.add')}
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
               <li>
@@ -173,13 +176,13 @@ export default function PreparationCategoriesSection({
                   onClick={() => setModal('existing')}
                 >
                   <i className="bi bi-link-45deg me-2" aria-hidden="true" />
-                  Existing category
+                  {t('editor.existingCategory')}
                 </button>
               </li>
               <li>
                 <button className="dropdown-item" type="button" onClick={() => setModal('new')}>
                   <i className="bi bi-plus-circle me-2" aria-hidden="true" />
-                  New category
+                  {t('editor.newCategory')}
                 </button>
               </li>
             </ul>
@@ -197,13 +200,16 @@ export default function PreparationCategoriesSection({
                   <br />
                   <small className="text-body-secondary font-monospace">{c.path}</small>
                 </div>
-                <DeleteButton ariaLabel={`Remove ${c.name}`} onClick={() => handleRemove(c.id)} />
+                <DeleteButton
+                  ariaLabel={t('editor.removeItem', { name: c.name })}
+                  onClick={() => handleRemove(c.id)}
+                />
               </div>
             ))}
           </div>
         ) : (
           <div className="card-body">
-            <p className="text-body-secondary small mb-0">No categories</p>
+            <p className="text-body-secondary small mb-0">{t('editor.noCategories')}</p>
           </div>
         )}
       </div>

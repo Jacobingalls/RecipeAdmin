@@ -8,6 +8,7 @@ import {
   settingsDeletePasskey,
   settingsRevokeAPIKey,
 } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, CredentialRow, TypeToConfirmModal } from '../common';
 
 import CreateAPIKeyModal from './CreateAPIKeyModal';
@@ -25,6 +26,7 @@ export default function CredentialsSection({
   refetchPasskeys,
   refetchApiKeys,
 }: CredentialsSectionProps) {
+  const { t, raw } = useTranslation();
   const [now] = useState(Date.now);
   const [isAddingPasskey, setIsAddingPasskey] = useState(false);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
@@ -44,15 +46,11 @@ export default function CredentialsSection({
       await settingsAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       refetchPasskeys();
     } catch (err) {
-      setPasskeyError(
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong registering your passkey. Try again.',
-      );
+      setPasskeyError(err instanceof Error ? err.message : t('passkey.registerError'));
     } finally {
       setIsAddingPasskey(false);
     }
-  }, [refetchPasskeys]);
+  }, [refetchPasskeys, t]);
 
   async function handleConfirmDeleteCredential() {
     if (!deleteCredential) return;
@@ -66,9 +64,15 @@ export default function CredentialsSection({
     setDeleteCredential(null);
   }
 
+  const isPasskey = deleteCredential?.type === 'passkey';
+  // The credential name is emphasized inside the sentence, so render around the placeholder.
+  const [beforeName, afterName] = raw(
+    isPasskey ? 'credentials.deleteMessage' : 'credentials.revokeMessage',
+  ).split('{name}');
+
   return (
     <>
-      <SectionHeader title="Credentials" className="mt-4">
+      <SectionHeader title={t('credentials.title')} className="mt-4">
         <div className="dropdown">
           <button
             className="btn btn-dark btn-sm dropdown-toggle px-3"
@@ -76,7 +80,7 @@ export default function CredentialsSection({
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Add
+            {t('common.add')}
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
@@ -87,7 +91,7 @@ export default function CredentialsSection({
                 disabled={isAddingPasskey}
               >
                 <i className="bi bi-fingerprint me-2" aria-hidden="true" />
-                Passkey
+                {t('credentials.passkey')}
               </button>
             </li>
             <li>
@@ -97,7 +101,7 @@ export default function CredentialsSection({
                 onClick={() => setShowCreateKeyModal(true)}
               >
                 <i className="bi bi-key me-2" aria-hidden="true" />
-                API Key
+                {t('credentials.apiKey')}
               </button>
             </li>
           </ul>
@@ -106,13 +110,13 @@ export default function CredentialsSection({
 
       {passkeyError && (
         <div className="alert alert-danger alert-dismissible small" role="alert">
-          <strong style={{ opacity: 0.8 }}>Something went wrong registering your passkey</strong>
+          <strong style={{ opacity: 0.8 }}>{t('passkey.registerErrorTitle')}</strong>
           <p className="mb-0 mt-1">{passkeyError}</p>
           <button
             type="button"
             className="btn-close btn-close-white"
             style={{ opacity: 0.8 }}
-            aria-label="Dismiss"
+            aria-label={t('credentials.dismiss')}
             onClick={() => setPasskeyError(null)}
           />
         </div>
@@ -160,20 +164,23 @@ export default function CredentialsSection({
           })}
         </div>
       ) : (
-        <p className="text-body-secondary small">No credentials</p>
+        <p className="text-body-secondary small">{t('credentials.empty')}</p>
       )}
 
       <TypeToConfirmModal
         isOpen={!!deleteCredential}
-        title={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke API key'}
+        title={t(isPasskey ? 'credentials.deletePasskeyTitle' : 'credentials.revokeApiKeyTitle')}
         message={
           <>
-            This will permanently {deleteCredential?.type === 'passkey' ? 'delete' : 'revoke'}{' '}
-            <strong>{deleteCredential?.name}</strong>. This action cannot be undone.
+            {beforeName}
+            <strong>{deleteCredential?.name}</strong>
+            {afterName}
           </>
         }
         itemName={deleteCredential?.name ?? ''}
-        confirmButtonText={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
+        confirmButtonText={t(
+          isPasskey ? 'credentials.deletePasskeyTitle' : 'credentials.revokeKeyConfirm',
+        )}
         onConfirm={handleConfirmDeleteCredential}
         onCancel={() => setDeleteCredential(null)}
       />

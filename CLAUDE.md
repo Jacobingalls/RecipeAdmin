@@ -23,6 +23,8 @@ npm run format:check # Check formatting without writing
 
 All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/writing-style` skill when adding or changing user-facing text.** Never skip this step.
 
+User-facing text lives in the message catalogs, not in components — see [Localization](#localization). The style guide applies to every language: the Dutch catalog follows the same voice, sentence case and error phrasing as the English one.
+
 ### Engineering Philosophy
 
 - Follow the [React documentation](https://react.dev/) and [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) conventions
@@ -178,6 +180,7 @@ src/
 │   │   ├── ProfileSection # Display name viewing/editing
 │   │   ├── CredentialsSection # Passkey + API key list with add dropdown
 │   │   ├── CreateAPIKeyModal # Key creation form with expiry toggle
+│   │   ├── LanguageSection # Language picker (browser default or an explicit language)
 │   │   └── SessionsSection # Session list with sign-out controls
 │   ├── BarcodeSection     # Barcode list with serving size links
 │   ├── CustomSizesSection # Custom size buttons
@@ -192,7 +195,8 @@ src/
 │   ├── constants.ts       # FDA daily values
 │   └── unitConfig.ts      # Unit definitions for serving selector
 ├── contexts/
-│   └── AuthContext.tsx     # Auth state, login/logout/passkey methods
+│   ├── AuthContext.tsx     # Auth state, login/logout/passkey methods
+│   └── LocaleContext.tsx   # Active language + the useTranslation hook
 ├── domain/                # Business logic classes
 │   ├── index.ts           # Barrel exports
 │   ├── CustomSize.ts      # Custom serving size (e.g., "1 cookie")
@@ -201,6 +205,15 @@ src/
 │   ├── Preparation.ts     # Product preparation with nutrition calc
 │   ├── ProductGroup.ts    # Product group with aggregate nutrition
 │   └── ServingSize.ts     # Serving size types (mass, volume, etc.)
+├── i18n/                  # Translations and the translator
+│   ├── index.ts           # translatorFor / getTranslator + barrel exports
+│   ├── locale.ts          # Language detection, preference storage, active locale
+│   ├── translator.ts      # Message lookup, interpolation, plurals
+│   ├── types.ts           # Locale, LocalePreference, TranslationValues
+│   └── messages/
+│       ├── en.ts, nl.ts   # Merged catalogs (en defines the key set)
+│       ├── en/            # English messages, split by area
+│       └── nl/            # Dutch messages, typed against their English section
 ├── hooks/
 │   ├── index.ts           # Barrel exports
 │   ├── useApiQuery.ts     # Data fetching with cancellation
@@ -289,6 +302,78 @@ Admin functions: `adminListUsers`, `adminCreateUser`, `adminUpdateUser`, `adminD
 
 When authenticated: shows nav links, barcode search, and a user dropdown (username, Settings link, Sign out). Admins see an "Admin" nav link. When not authenticated: shows only the brand.
 
+## Localization
+
+The app ships English and Dutch. Every user-facing string lives in a message catalog under
+`src/i18n/messages/`; components look messages up by key rather than embedding text.
+
+### Using translations
+
+```tsx
+import { useTranslation } from '../contexts/LocaleContext';
+
+const { t, tPlural, raw, locale } = useTranslation();
+
+t('settings.title');                                  // "Settings"
+t('credential.created', { time: '3d ago' });          // fills in {time}
+tPlural('format.servings', count);                    // singular/plural by count
+```
+
+Outside the React tree — formatting helpers, domain classes, `ErrorBoundary` — use
+`getTranslator()` from `src/i18n`, which returns a translator for the language currently
+being rendered:
+
+```ts
+import { getActiveLocale, getTranslator } from '../i18n';
+
+const { t } = getTranslator();
+value.toLocaleString(getActiveLocale());
+```
+
+When a value has to render as an element inside a sentence (bold, a link), split the raw
+message on its placeholder rather than breaking the sentence into fragments:
+
+```tsx
+const [before, after] = raw('confirm.typeToConfirm').split('{name}');
+// {before}<strong>{name}</strong>{after}
+```
+
+### Adding a string
+
+1. Add the key to the matching section file in `src/i18n/messages/en/` — group by area, not by
+   component, and keep each file under 200 lines.
+2. Add the Dutch translation to the same key in `src/i18n/messages/nl/`. The Dutch section is
+   typed as `Record<keyof typeof enSection, string>`, so a missing or misspelled key fails to
+   compile.
+3. Use it via `t('your.key')`.
+
+Message keys are dot-separated and lowercase-camel: `area.thing.variant`. Plural messages use
+`.one` / `.other` suffixes and are read with `tPlural`, which selects the form via
+`Intl.PluralRules` for the active language.
+
+### What stays in English
+
+Values that are saved to the API or shown as identifiers are data, not interface text, and are
+not translated: preset custom size names, session device names, deployment environment
+identifiers, and unit symbols (`g`, `kcal`).
+
+### Choosing a language
+
+`LocaleProvider` (in `App.tsx`) resolves the language from the saved preference, falling back to
+the browser's language and then to English. The preference is stored in `localStorage` under
+`recipeadmin.locale`, and the provider keeps `<html lang>` in sync. Users change it in
+**Settings → Language**.
+
+`useTranslation` works without a provider and falls back to English, so components stay
+renderable in isolation and in tests.
+
+### Formatting
+
+Numbers, dates and times follow the active language — pass `getActiveLocale()` to
+`toLocaleString` and friends rather than relying on the browser default. The time picker reads
+the language's hour cycle, so Dutch shows a 24-hour clock and English shows AM/PM.
+
+
 ## Key Patterns
 
 ### Data Fetching with useApiQuery
@@ -322,6 +407,7 @@ import {
   ListRow, DeleteButton, CopyButton, TypeToConfirmModal,
   Button, ModalBase, ModalHeader, ModalBody, ModalFooter,
 } from '../components/common'
+import { useTranslation } from '../contexts/LocaleContext'
 
 // Status displays
 if (loading) return <LoadingState />

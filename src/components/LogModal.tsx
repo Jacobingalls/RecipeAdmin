@@ -3,6 +3,8 @@ import { useState, useCallback } from 'react';
 import type { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ApiLogItem } from '../api';
 import { logEntry, updateLogEntry } from '../api';
+import { useTranslation } from '../contexts/LocaleContext';
+import type { MessageKey } from '../i18n';
 
 import { ModalBase, ModalHeader, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
@@ -31,15 +33,15 @@ interface LogModalProps {
 
 type LogState = 'idle' | 'logging' | 'success';
 
-function getButtonLabel(state: LogState, isEdit: boolean): string {
+function buttonLabelKey(state: LogState, isEdit: boolean): MessageKey {
   if (isEdit) {
-    if (state === 'logging') return 'Saving...';
-    if (state === 'success') return 'Saved!';
-    return 'Save';
+    if (state === 'logging') return 'log.button.saving';
+    if (state === 'success') return 'log.button.saved';
+    return 'log.button.save';
   }
-  if (state === 'logging') return 'Logging...';
-  if (state === 'success') return 'Logged!';
-  return 'Add to Log';
+  if (state === 'logging') return 'log.button.logging';
+  if (state === 'success') return 'log.button.logged';
+  return 'log.button.add';
 }
 
 /** Inner component that resets state when key changes. */
@@ -52,6 +54,7 @@ function LogModalInner({
   onClose: () => void;
   onSaved?: () => void;
 }) {
+  const { t } = useTranslation();
   const [servingSize, setServingSize] = useState(() => target.initialServingSize);
   const [timestamp, setTimestamp] = useState(
     () => target.initialTimestamp ?? Math.floor(Date.now() / 1000),
@@ -124,7 +127,7 @@ function LogModalInner({
             <ServingSizeSelector prep={prepOrGroup} value={servingSize} onChange={setServingSize} />
             <div className="col-auto">
               <label htmlFor="log-when" className="form-label small mb-1">
-                When
+                {t('log.when')}
               </label>
               <div id="log-when">
                 <TimePicker value={timestamp} onChange={setTimestamp} />
@@ -143,7 +146,7 @@ function LogModalInner({
               onClick={handleLog}
               disabled={logState !== 'idle'}
             >
-              {getButtonLabel(logState, isEdit)}
+              {t(buttonLabelKey(logState, isEdit))}
             </button>
           </div>
         </div>

@@ -3,7 +3,8 @@ import { useState, useId } from 'react';
 import type { ApiProduct } from '../../api';
 import type { BarcodeData, PreparationData } from '../../domain';
 import { Preparation, ServingSize } from '../../domain';
-import { buildOptionGroups, fallbackOptionGroups } from '../../config/unitConfig';
+import { buildOptionGroups, buildFallbackOptionGroups } from '../../config/unitConfig';
+import { useTranslation } from '../../contexts/LocaleContext';
 import type { Note } from '../NotesDisplay';
 import ServingSizeSelector from '../ServingSizeSelector';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
@@ -29,6 +30,7 @@ interface BarcodeModalProps {
 }
 
 export default function BarcodeModal({ product, barcode, onSave, onClose }: BarcodeModalProps) {
+  const { t } = useTranslation();
   const titleId = useId();
   const editing = !!barcode;
   const [code, setCode] = useState(barcode?.code ?? '');
@@ -43,9 +45,12 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
   const draftBarcode: BarcodeData = { code, preparationID: prepId };
   const resolvedPrepData = resolvePrep(draftBarcode, product);
   const resolvedPrep = resolvedPrepData ? new Preparation(resolvedPrepData) : undefined;
-  const selectorGroups = resolvedPrep ? buildOptionGroups(resolvedPrep) : fallbackOptionGroups;
+  const selectorGroups = resolvedPrep
+    ? buildOptionGroups(resolvedPrep)
+    : buildFallbackOptionGroups();
   const defaultLabel =
-    (preps.find((p) => p.id === product.defaultPreparationID) ?? preps[0])?.name ?? 'Default';
+    (preps.find((p) => p.id === product.defaultPreparationID) ?? preps[0])?.name ??
+    t('editor.default');
 
   function handleSubmit() {
     const result: BarcodeData = { code: code.trim() };
@@ -60,12 +65,12 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId}>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        {editing ? 'Edit barcode' : 'Add barcode'}
+        {t(editing ? 'editor.editBarcode' : 'editor.addBarcode')}
       </ModalHeader>
       <ModalBody>
         <div className="mb-3">
           <label htmlFor="barcode-code" className="form-label">
-            Barcode
+            {t('editor.barcode')}
           </label>
           <input
             type="text"
@@ -73,13 +78,13 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
             id="barcode-code"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="e.g. 012345678905"
+            placeholder={t('editor.barcodePlaceholder')}
           />
         </div>
         {preps.length > 0 && (
           <div className="mb-3">
             <label htmlFor="barcode-prep" className="form-label">
-              Preparation
+              {t('productEditor.preparation')}
             </label>
             <select
               className="form-select form-select-sm"
@@ -87,7 +92,9 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
               value={prepId ?? ''}
               onChange={(e) => setPrepId(e.target.value || undefined)}
             >
-              <option value="">Default ({defaultLabel})</option>
+              <option value="">
+                {t('productEditor.defaultPreparationOption', { name: defaultLabel })}
+              </option>
               {preps.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name ?? p.id}
@@ -97,24 +104,24 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
           </div>
         )}
         <div className="mb-3">
-          <span className="form-label d-block">Serving size</span>
+          <span className="form-label d-block">{t('editor.servingSize')}</span>
           <ServingSizeSelector
             size="sm"
             groups={selectorGroups}
             value={servingSize}
             onChange={setServingSize}
-            amountAriaLabel="Barcode serving amount"
-            unitAriaLabel="Barcode serving unit"
+            amountAriaLabel={t('editor.barcodeServingAmount')}
+            unitAriaLabel={t('editor.barcodeServingUnit')}
           />
         </div>
         <NotesSection notes={notesState} onChange={setNotesState} />
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button disabled={!code.trim()} onClick={handleSubmit}>
-          {editing ? 'Save' : 'Add'}
+          {t(editing ? 'common.save' : 'common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>

@@ -6,6 +6,7 @@ import {
   Preparation,
   ServingSize,
 } from '../domain';
+import { useTranslation } from '../contexts/LocaleContext';
 
 import { ModalBase, ModalHeader, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';
@@ -79,21 +80,23 @@ export default function DayNutritionModal({
   nutritionInfo,
   onClose,
 }: DayNutritionModalProps) {
+  const { t } = useTranslation();
+
   const prep = useMemo(
     () =>
       new Preparation({
-        name: `Daily total (${dayLabel})`,
-        servingSizeDescription: `Total nutrition consumed on ${dayLabel}`,
+        name: t('dayNutrition.prepName', { day: dayLabel }),
+        servingSizeDescription: t('dayNutrition.servingDescription', { day: dayLabel }),
         nutritionalInformation: toNutritionInformationData(nutritionInfo),
       }),
-    [dayLabel, nutritionInfo],
+    [dayLabel, nutritionInfo, t],
   );
 
   return (
     <ModalBase onClose={onClose} ariaLabelledBy="day-nutrition-title" scrollable>
       <ModalHeader onClose={onClose} titleId="day-nutrition-title">
         <span className="text-secondary small d-block fw-normal">{dayLabel}</span>
-        Daily nutrition
+        {t('dayNutrition.title')}
       </ModalHeader>
       <ModalBody>
         <div className="bg-body shadow-lg">

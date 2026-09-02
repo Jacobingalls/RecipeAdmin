@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 
 import type { PreparationData, ProductGroupData, ServingSize } from '../../domain';
 import { Preparation, ProductGroup } from '../../domain';
-import { buildOptionGroups, fallbackOptionGroups } from '../../config/unitConfig';
+import { buildOptionGroups, buildFallbackOptionGroups } from '../../config/unitConfig';
+import { useTranslation } from '../../contexts/LocaleContext';
 import ServingSizeSelector from '../ServingSizeSelector';
 
 interface SelectedItemConfigProps {
@@ -24,7 +25,10 @@ export default function SelectedItemConfig({
   onServingSizeChange,
   onClear,
 }: SelectedItemConfigProps) {
-  const name = product ? (product.name ?? 'Product') : (group?.name ?? 'Group');
+  const { t } = useTranslation();
+  const name = product
+    ? (product.name ?? t('groupItem.product'))
+    : (group?.name ?? t('groupItem.group'));
   const brand = product ? product.brand : group?.brand;
   const icon = product ? 'bi-box-seam' : 'bi-collection';
   const preps = product?.preparations ?? [];
@@ -36,7 +40,7 @@ export default function SelectedItemConfig({
     } else if (group) {
       return buildOptionGroups(new ProductGroup(group));
     }
-    return fallbackOptionGroups;
+    return buildFallbackOptionGroups();
   }, [product, group, preps, prepId]);
 
   return (
@@ -50,7 +54,7 @@ export default function SelectedItemConfig({
         <button
           type="button"
           className="btn-close btn-close-sm"
-          aria-label="Clear selection"
+          aria-label={t('groupEditor.clearSelection')}
           onClick={onClear}
         />
       </div>
@@ -58,7 +62,7 @@ export default function SelectedItemConfig({
       {product && preps.length > 1 && (
         <div className="mb-3">
           <label htmlFor="item-modal-prep" className="form-label">
-            Preparation
+            {t('productEditor.preparation')}
           </label>
           <select
             className="form-select form-select-sm"
@@ -68,7 +72,7 @@ export default function SelectedItemConfig({
           >
             {preps.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name || 'Default'}
+                {p.name || t('editor.default')}
               </option>
             ))}
           </select>
@@ -76,14 +80,14 @@ export default function SelectedItemConfig({
       )}
 
       <div className="mb-3">
-        <span className="form-label d-block">Serving size</span>
+        <span className="form-label d-block">{t('editor.servingSize')}</span>
         <ServingSizeSelector
           size="sm"
           groups={selectorGroups}
           value={servingSize}
           onChange={onServingSizeChange}
-          amountAriaLabel="Item serving amount"
-          unitAriaLabel="Item serving unit"
+          amountAriaLabel={t('groupEditor.itemServingAmount')}
+          unitAriaLabel={t('groupEditor.itemServingUnit')}
         />
       </div>
     </>

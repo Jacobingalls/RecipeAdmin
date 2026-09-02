@@ -1,34 +1,9 @@
 import type { ApiProduct } from '../../api';
-import type { ServingSizeType } from '../../domain';
 import { ServingSize } from '../../domain';
-import { massUnits, volumeUnits } from '../../config/unitConfig';
-import type { OptionGroup } from '../../config/unitConfig';
+import { massUnits, unitGroup, volumeUnits } from '../../config/unitConfig';
+import { useTranslation } from '../../contexts/LocaleContext';
 import type { PreparationData } from '../../domain/Preparation';
 import ServingSizeSelector from '../ServingSizeSelector';
-
-const massGroups: OptionGroup[] = [
-  {
-    label: 'Mass',
-    options: massUnits.map((u) => ({
-      type: 'mass' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-];
-
-const volumeGroups: OptionGroup[] = [
-  {
-    label: 'Volume',
-    options: volumeUnits.map((u) => ({
-      type: 'volume' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-];
 
 interface PreparationServingSectionProps {
   product: ApiProduct;
@@ -41,6 +16,10 @@ export default function PreparationServingSection({
   preparationId,
   onChange,
 }: PreparationServingSectionProps) {
+  const { t } = useTranslation();
+  const massGroups = [unitGroup('unit.group.mass', massUnits, 'mass')];
+  const volumeGroups = [unitGroup('unit.group.volume', volumeUnits, 'volume')];
+
   const prep = product.preparations.find((p) => p.id === preparationId);
   if (!prep) return null;
 
@@ -67,14 +46,16 @@ export default function PreparationServingSection({
     <div className="px-3 pt-3 pb-2">
       <div className="card">
         <div className="card-header">
-          <strong>Serving</strong>
+          <strong>{t('editor.serving')}</strong>
         </div>
         <div className="list-group list-group-flush">
           <label
             htmlFor={`serving-desc-${preparationId}`}
             className="list-group-item d-flex align-items-center justify-content-between py-3"
           >
-            <span className="text-body-secondary me-3 flex-shrink-0">Serving size description</span>
+            <span className="text-body-secondary me-3 flex-shrink-0">
+              {t('productEditor.servingDescription')}
+            </span>
             <input
               type="text"
               className="form-control form-control-sm"
@@ -82,31 +63,35 @@ export default function PreparationServingSection({
               id={`serving-desc-${preparationId}`}
               value={prep.servingSizeDescription ?? ''}
               onChange={(e) => update({ servingSizeDescription: e.target.value || null })}
-              placeholder="e.g. 1 tbsp (14g)"
+              placeholder={t('productEditor.servingDescriptionPlaceholder')}
             />
           </label>
           <div className="list-group-item d-flex align-items-center justify-content-between py-3">
-            <span className="text-body-secondary me-3 flex-shrink-0">Mass per serving</span>
+            <span className="text-body-secondary me-3 flex-shrink-0">
+              {t('editor.massPerServing')}
+            </span>
             <ServingSizeSelector
               size="sm"
               groups={massGroups}
               value={prep.mass ? ServingSize.mass(prep.mass.amount, prep.mass.unit) : null}
               onChange={handleMassChange}
               onClear={() => update({ mass: null })}
-              amountAriaLabel="Mass amount"
-              unitAriaLabel="Mass unit"
+              amountAriaLabel={t('editor.massAmount')}
+              unitAriaLabel={t('editor.massUnit')}
             />
           </div>
           <div className="list-group-item d-flex align-items-center justify-content-between py-3">
-            <span className="text-body-secondary me-3 flex-shrink-0">Volume per serving</span>
+            <span className="text-body-secondary me-3 flex-shrink-0">
+              {t('editor.volumePerServing')}
+            </span>
             <ServingSizeSelector
               size="sm"
               groups={volumeGroups}
               value={prep.volume ? ServingSize.volume(prep.volume.amount, prep.volume.unit) : null}
               onChange={handleVolumeChange}
               onClear={() => update({ volume: null })}
-              amountAriaLabel="Volume amount"
-              unitAriaLabel="Volume unit"
+              amountAriaLabel={t('editor.volumeAmount')}
+              unitAriaLabel={t('editor.volumeUnit')}
             />
           </div>
         </div>

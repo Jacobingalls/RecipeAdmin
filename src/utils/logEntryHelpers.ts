@@ -1,13 +1,14 @@
 import type { ApiLogEntry, ApiProduct } from '../api';
 import type { LogTarget } from '../components/LogModal';
 import type { ProductGroupData } from '../domain';
+import { getActiveLocale, getTranslator } from '../i18n';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 
 import { servingSizeSearchParams } from './servingSizeParams';
 
 /** Formats a Unix epoch timestamp (seconds) as a time-only string (e.g., "2:30 PM"). */
 export function formatTime(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleTimeString(undefined, {
+  return new Date(timestamp * 1000).toLocaleTimeString(getActiveLocale(), {
     hour: 'numeric',
     minute: '2-digit',
   });
@@ -15,6 +16,7 @@ export function formatTime(timestamp: number): string {
 
 /** Formats a Unix epoch timestamp (seconds) as a relative time string. */
 export function formatRelativeTime(timestamp: number): string {
+  const { t } = getTranslator();
   const now = Date.now();
   const thenMs = timestamp * 1000;
   const diffMs = now - thenMs;
@@ -25,22 +27,22 @@ export function formatRelativeTime(timestamp: number): string {
     const futureHours = Math.floor(futurMs / 3_600_000);
     const futureDays = Math.floor(futurMs / 86_400_000);
 
-    if (futureMinutes < 1) return 'just now';
-    if (futureMinutes < 60) return `in ${futureMinutes}m`;
-    if (futureHours < 24) return `in ${futureHours}h`;
-    if (futureDays < 7) return `in ${futureDays}d`;
-    return new Date(thenMs).toLocaleDateString();
+    if (futureMinutes < 1) return t('format.relative.justNow');
+    if (futureMinutes < 60) return t('format.relative.inMinutes', { count: futureMinutes });
+    if (futureHours < 24) return t('format.relative.inHours', { count: futureHours });
+    if (futureDays < 7) return t('format.relative.inDays', { count: futureDays });
+    return new Date(thenMs).toLocaleDateString(getActiveLocale());
   }
 
   const diffMinutes = Math.floor(diffMs / 60_000);
   const diffHours = Math.floor(diffMs / 3_600_000);
   const diffDays = Math.floor(diffMs / 86_400_000);
 
-  if (diffMinutes < 1) return 'just now';
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return new Date(thenMs).toLocaleDateString();
+  if (diffMinutes < 1) return t('format.relative.justNow');
+  if (diffMinutes < 60) return t('format.relative.minutesAgo', { count: diffMinutes });
+  if (diffHours < 24) return t('format.relative.hoursAgo', { count: diffHours });
+  if (diffDays < 7) return t('format.relative.daysAgo', { count: diffDays });
+  return new Date(thenMs).toLocaleDateString(getActiveLocale());
 }
 
 /** Resolve the display name for a log entry by looking up its product or group in the provided detail maps. */
@@ -49,15 +51,16 @@ export function resolveEntryName(
   productDetails: Record<string, { name: string }>,
   groupDetails: Record<string, { name?: string }>,
 ): string {
+  const { t } = getTranslator();
   if (entry.item.groupID) {
     const group = groupDetails[entry.item.groupID];
-    return group?.name ?? 'Unknown Group';
+    return group?.name ?? t('entry.unknownGroup');
   }
   if (entry.item.productID) {
     const product = productDetails[entry.item.productID];
-    return product?.name ?? 'Unknown Product';
+    return product?.name ?? t('entry.unknownProduct');
   }
-  return 'Unknown Item';
+  return t('entry.unknownItem');
 }
 
 /** Resolve the brand name for a log entry by looking up its product or group in the provided detail maps. */
@@ -132,7 +135,7 @@ export function buildLogTarget(
 
   if (entry.item.groupID && groupData) {
     return {
-      name: groupData.name ?? 'Group',
+      name: groupData.name ?? getTranslator().t('entry.group'),
       brand: groupData.brand,
       prepOrGroup: new ProductGroup(groupData),
       initialServingSize,

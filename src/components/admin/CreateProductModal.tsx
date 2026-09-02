@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import type { ApiProduct } from '../../api';
 import { adminUpsertProducts } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 
 interface CreateProductModalProps {
@@ -16,6 +17,7 @@ export default function CreateProductModal({
   onClose,
   onProductCreated,
 }: CreateProductModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [brand, setBrand] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export default function CreateProductModal({
       handleClose();
     } catch (err) {
       console.error("Couldn't create product", err);
-      setError("Couldn't create the product. Try again.");
+      setError(t('createProduct.error'));
     } finally {
       setIsCreating(false);
     }
@@ -59,7 +61,7 @@ export default function CreateProductModal({
   return (
     <ModalBase onClose={handleClose} ariaLabelledBy="create-product-modal-title">
       <ModalHeader onClose={handleClose} titleId="create-product-modal-title">
-        Add product
+        {t('createProduct.title')}
       </ModalHeader>
       <form onSubmit={handleSubmit}>
         <ModalBody>
@@ -70,7 +72,7 @@ export default function CreateProductModal({
           )}
           <div className="mb-3">
             <label htmlFor="new-product-name" className="form-label">
-              Name
+              {t('common.name')}
             </label>
             <input
               type="text"
@@ -83,7 +85,7 @@ export default function CreateProductModal({
           </div>
           <div className="mb-3">
             <label htmlFor="new-product-brand" className="form-label">
-              Brand
+              {t('common.brand')}
             </label>
             <input
               type="text"
@@ -96,10 +98,10 @@ export default function CreateProductModal({
         </ModalBody>
         <ModalFooter>
           <Button variant="secondary" onClick={handleClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" loading={isCreating}>
-            Add
+            {t('common.add')}
           </Button>
         </ModalFooter>
       </form>

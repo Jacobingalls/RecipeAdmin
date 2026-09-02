@@ -2,6 +2,7 @@ import type { ApiFavorite, ApiProduct, LogEntryRequest } from '../api';
 import type { LogTarget } from '../components/LogModal';
 import type { ProductGroupData } from '../domain';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
+import { getTranslator } from '../i18n';
 
 import { servingSizeSearchParams } from './servingSizeParams';
 
@@ -15,12 +16,12 @@ export function favoriteName(
   groups: GroupLookup,
 ): string {
   if (fav.item.productID) {
-    return products[fav.item.productID]?.name ?? 'Unknown';
+    return products[fav.item.productID]?.name ?? getTranslator().t('favorite.unknown');
   }
   if (fav.item.groupID) {
-    return groups[fav.item.groupID]?.name ?? 'Group';
+    return groups[fav.item.groupID]?.name ?? getTranslator().t('entry.group');
   }
-  return 'Unknown';
+  return getTranslator().t('favorite.unknown');
 }
 
 /** Returns the brand for a favorite, if available. */
@@ -146,7 +147,7 @@ export function buildFavoriteLogTarget(
     if (!prepData) return null;
 
     return {
-      name: product?.name ?? 'Unknown',
+      name: product?.name ?? getTranslator().t('favorite.unknown'),
       brand: product?.brand,
       prepOrGroup: new Preparation(prepData),
       initialServingSize,
@@ -159,7 +160,7 @@ export function buildFavoriteLogTarget(
     const groupData = groups[fav.item.groupID];
     if (!groupData) return null;
     return {
-      name: groupData.name ?? 'Group',
+      name: groupData.name ?? getTranslator().t('entry.group'),
       brand: groupData.brand,
       prepOrGroup: new ProductGroup(groupData),
       initialServingSize,

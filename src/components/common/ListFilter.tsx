@@ -1,5 +1,7 @@
 import { useId } from 'react';
 
+import { useTranslation } from '../../contexts/LocaleContext';
+
 interface DropdownOption {
   value: string;
   label: string;
@@ -8,7 +10,9 @@ interface DropdownOption {
 interface ListFilterProps {
   nameFilter: string;
   onNameFilterChange: (value: string) => void;
+  /** Overrides the default "Filter by name" screen reader label. */
   nameLabel?: string;
+  /** Overrides the default "Search by name..." placeholder. */
   namePlaceholder?: string;
   nameColumnClass?: string;
   dropdownFilter: string;
@@ -29,8 +33,8 @@ function normalizeOptions(options: string[] | DropdownOption[]): DropdownOption[
 export default function ListFilter({
   nameFilter,
   onNameFilterChange,
-  nameLabel = 'Filter by name',
-  namePlaceholder = 'Search by name...',
+  nameLabel,
+  namePlaceholder,
   nameColumnClass = 'col-md-6',
   dropdownFilter,
   onDropdownFilterChange,
@@ -38,6 +42,7 @@ export default function ListFilter({
   dropdownOptions,
   dropdownColumnClass = 'col-md-6',
 }: ListFilterProps) {
+  const { t } = useTranslation();
   const id = useId();
   const nameId = `${id}-name`;
   const dropdownId = `${id}-dropdown`;
@@ -47,13 +52,13 @@ export default function ListFilter({
     <div className="row g-3 mb-4">
       <div className={nameColumnClass}>
         <label htmlFor={nameId} className="visually-hidden">
-          {nameLabel}
+          {nameLabel ?? t('filter.byName')}
         </label>
         <input
           type="text"
           className="form-control"
           id={nameId}
-          placeholder={namePlaceholder}
+          placeholder={namePlaceholder ?? t('filter.searchByName')}
           value={nameFilter}
           onChange={(e) => onNameFilterChange(e.target.value)}
         />

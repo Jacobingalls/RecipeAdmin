@@ -1,9 +1,15 @@
 import { NavLink } from 'react-router-dom';
 
+import { useTranslation } from '../../contexts/LocaleContext';
+
 export default function AdminSidebar() {
+  const { t } = useTranslation();
+
   return (
-    <nav className="flex-shrink-0 pt-4" style={{ width: '13.75rem' }} aria-label="Admin">
-      <h6 className="text-body-secondary text-uppercase fw-semibold small mb-2 px-3">Admin</h6>
+    <nav className="flex-shrink-0 pt-4" style={{ width: '13.75rem' }} aria-label={t('admin.title')}>
+      <h6 className="text-body-secondary text-uppercase fw-semibold small mb-2 px-3">
+        {t('admin.title')}
+      </h6>
       <ul className="nav flex-column">
         <li className="nav-item">
           <NavLink
@@ -13,7 +19,7 @@ export default function AdminSidebar() {
             }
           >
             <i className="bi bi-box-seam me-2" aria-hidden="true" />
-            Products
+            {t('admin.nav.products')}
           </NavLink>
         </li>
         <li className="nav-item">
@@ -24,7 +30,7 @@ export default function AdminSidebar() {
             }
           >
             <i className="bi bi-collection me-2" aria-hidden="true" />
-            Groups
+            {t('admin.nav.groups')}
           </NavLink>
         </li>
         <li className="nav-item">
@@ -35,7 +41,7 @@ export default function AdminSidebar() {
             }
           >
             <i className="bi bi-folder me-2" aria-hidden="true" />
-            Categories
+            {t('admin.nav.categories')}
           </NavLink>
         </li>
         <li className="nav-item">
@@ -46,7 +52,7 @@ export default function AdminSidebar() {
             }
           >
             <i className="bi bi-people me-2" aria-hidden="true" />
-            Users
+            {t('admin.nav.users')}
           </NavLink>
         </li>
       </ul>

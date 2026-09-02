@@ -2,6 +2,7 @@ import { useState, useMemo, useId } from 'react';
 
 import type { ProductGroupData } from '../../domain';
 import { useCategories } from '../../contexts/CategoriesContext';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath } from '../../utils';
 import {
   SectionHeader,
@@ -25,6 +26,7 @@ function CategoryPicker({
   onAdd: (id: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { allCategories, lookup } = useCategories();
   const titleId = useId();
   const [searchText, setSearchText] = useState('');
@@ -47,13 +49,13 @@ function CategoryPicker({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId} scrollable>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        Add existing category
+        {t('editor.addExistingCategory')}
       </ModalHeader>
       <ModalBody>
         <input
           type="text"
           className="form-control form-control-sm mb-3"
-          placeholder="Search categories..."
+          placeholder={t('editor.searchCategories')}
           value={searchText}
           onChange={(e) => {
             setSearchText(e.target.value);
@@ -78,14 +80,14 @@ function CategoryPicker({
             ))
           ) : (
             <p className="text-body-secondary small mb-0">
-              {searchText ? 'No matching categories' : 'No categories available'}
+              {t(searchText ? 'editor.noMatchingCategories' : 'editor.noCategoriesAvailable')}
             </p>
           )}
         </div>
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           disabled={!selectedId}
@@ -93,7 +95,7 @@ function CategoryPicker({
             if (selectedId) onAdd(selectedId);
           }}
         >
-          Add
+          {t('common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -110,6 +112,7 @@ interface GroupCategoriesSectionProps {
 }
 
 export default function GroupCategoriesSection({ group, onChange }: GroupCategoriesSectionProps) {
+  const { t } = useTranslation();
   const { lookup } = useCategories();
   const categoryIds = useMemo(() => group.categories ?? [], [group.categories]);
   const [modal, setModal] = useState<CategoryModal>(null);
@@ -140,7 +143,7 @@ export default function GroupCategoriesSection({ group, onChange }: GroupCategor
 
   return (
     <>
-      <SectionHeader title="Categories" className="mt-5">
+      <SectionHeader title={t('editor.categories')} className="mt-5">
         <div className="dropdown">
           <button
             className="btn btn-dark btn-sm dropdown-toggle px-3"
@@ -148,19 +151,19 @@ export default function GroupCategoriesSection({ group, onChange }: GroupCategor
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Add
+            {t('common.add')}
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
               <button className="dropdown-item" type="button" onClick={() => setModal('existing')}>
                 <i className="bi bi-link-45deg me-2" aria-hidden="true" />
-                Existing category
+                {t('editor.existingCategory')}
               </button>
             </li>
             <li>
               <button className="dropdown-item" type="button" onClick={() => setModal('new')}>
                 <i className="bi bi-plus-circle me-2" aria-hidden="true" />
-                New category
+                {t('editor.newCategory')}
               </button>
             </li>
           </ul>
@@ -178,14 +181,17 @@ export default function GroupCategoriesSection({ group, onChange }: GroupCategor
                 <br />
                 <small className="text-body-secondary font-monospace">{c.path}</small>
               </div>
-              <DeleteButton ariaLabel={`Remove ${c.name}`} onClick={() => handleRemove(c.id)} />
+              <DeleteButton
+                ariaLabel={t('editor.removeItem', { name: c.name })}
+                onClick={() => handleRemove(c.id)}
+              />
             </div>
           ))}
         </div>
       ) : (
         <div className="card">
           <div className="card-body">
-            <p className="text-body-secondary small mb-0">No categories</p>
+            <p className="text-body-secondary small mb-0">{t('editor.noCategories')}</p>
           </div>
         </div>
       )}

@@ -1,118 +1,288 @@
 import type { NutritionInformationData } from '../domain/NutritionInformation';
+import type { MessageKey } from '../i18n';
 
 export interface NutrientDef {
   key: keyof NutritionInformationData;
-  label: string;
+  /** Message key for the nutrient's display name. */
+  labelKey: MessageKey;
   indent?: 1 | 2;
-  group: string;
+  /** Message key for the heading this nutrient sits under. */
+  groupKey: MessageKey;
   defaultUnit: string;
 }
 
 const NUTRIENT_ORDER: NutrientDef[] = [
   // Energy
-  { key: 'calories', label: 'Calories', group: 'Energy', defaultUnit: 'kcal' },
-  { key: 'caloriesFromFat', label: 'Calories from fat', group: 'Energy', defaultUnit: 'kcal' },
+  {
+    key: 'calories',
+    labelKey: 'nutrient.calories',
+    groupKey: 'nutrientGroup.energy',
+    defaultUnit: 'kcal',
+  },
+  {
+    key: 'caloriesFromFat',
+    labelKey: 'nutrient.caloriesFromFat',
+    groupKey: 'nutrientGroup.energy',
+    defaultUnit: 'kcal',
+  },
   // Fats
-  { key: 'totalFat', label: 'Total fat', group: 'Fats', defaultUnit: 'g' },
-  { key: 'saturatedFat', label: 'Saturated fat', indent: 1, group: 'Fats', defaultUnit: 'g' },
-  { key: 'transFat', label: 'Trans fat', indent: 1, group: 'Fats', defaultUnit: 'g' },
+  {
+    key: 'totalFat',
+    labelKey: 'nutrient.totalFat',
+    groupKey: 'nutrientGroup.fats',
+    defaultUnit: 'g',
+  },
+  {
+    key: 'saturatedFat',
+    labelKey: 'nutrient.saturatedFat',
+    indent: 1,
+    groupKey: 'nutrientGroup.fats',
+    defaultUnit: 'g',
+  },
+  {
+    key: 'transFat',
+    labelKey: 'nutrient.transFat',
+    indent: 1,
+    groupKey: 'nutrientGroup.fats',
+    defaultUnit: 'g',
+  },
   {
     key: 'polyunsaturatedFat',
-    label: 'Polyunsaturated fat',
+    labelKey: 'nutrient.polyunsaturatedFat',
     indent: 1,
-    group: 'Fats',
+    groupKey: 'nutrientGroup.fats',
     defaultUnit: 'g',
   },
   {
     key: 'monounsaturatedFat',
-    label: 'Monounsaturated fat',
+    labelKey: 'nutrient.monounsaturatedFat',
     indent: 1,
-    group: 'Fats',
+    groupKey: 'nutrientGroup.fats',
     defaultUnit: 'g',
   },
   // Cholesterol & Sodium
-  { key: 'cholesterol', label: 'Cholesterol', group: 'Other', defaultUnit: 'mg' },
-  { key: 'sodium', label: 'Sodium', group: 'Other', defaultUnit: 'mg' },
+  {
+    key: 'cholesterol',
+    labelKey: 'nutrient.cholesterol',
+    groupKey: 'nutrientGroup.otherNutrients',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'sodium',
+    labelKey: 'nutrient.sodium',
+    groupKey: 'nutrientGroup.otherNutrients',
+    defaultUnit: 'mg',
+  },
   // Carbohydrates
   {
     key: 'totalCarbohydrate',
-    label: 'Total carbohydrate',
-    group: 'Carbohydrates',
+    labelKey: 'nutrient.totalCarbohydrate',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   {
     key: 'dietaryFiber',
-    label: 'Dietary fiber',
+    labelKey: 'nutrient.dietaryFiber',
     indent: 1,
-    group: 'Carbohydrates',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   {
     key: 'solubleFiber',
-    label: 'Soluble fiber',
+    labelKey: 'nutrient.solubleFiber',
     indent: 2,
-    group: 'Carbohydrates',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   {
     key: 'insolubleFiber',
-    label: 'Insoluble fiber',
+    labelKey: 'nutrient.insolubleFiber',
     indent: 2,
-    group: 'Carbohydrates',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   {
     key: 'totalSugars',
-    label: 'Total sugars',
+    labelKey: 'nutrient.totalSugars',
     indent: 1,
-    group: 'Carbohydrates',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   {
     key: 'addedSugars',
-    label: 'Added sugars',
+    labelKey: 'nutrient.addedSugars',
     indent: 2,
-    group: 'Carbohydrates',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   {
     key: 'sugarAlcohol',
-    label: 'Sugar alcohol',
+    labelKey: 'nutrient.sugarAlcohol',
     indent: 1,
-    group: 'Carbohydrates',
+    groupKey: 'nutrientGroup.carbohydrates',
     defaultUnit: 'g',
   },
   // Protein
-  { key: 'protein', label: 'Protein', group: 'Protein', defaultUnit: 'g' },
+  {
+    key: 'protein',
+    labelKey: 'nutrient.protein',
+    groupKey: 'nutrientGroup.protein',
+    defaultUnit: 'g',
+  },
   // Vitamins
-  { key: 'vitaminA', label: 'Vitamin A', group: 'Vitamins', defaultUnit: 'μg' },
-  { key: 'vitaminC', label: 'Vitamin C', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'vitaminD', label: 'Vitamin D', group: 'Vitamins', defaultUnit: 'μg' },
-  { key: 'vitaminE', label: 'Vitamin E', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'vitaminK', label: 'Vitamin K', group: 'Vitamins', defaultUnit: 'μg' },
-  { key: 'thiamin', label: 'Thiamin (B1)', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'riboflavin', label: 'Riboflavin (B2)', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'niacin', label: 'Niacin (B3)', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'vitaminB6', label: 'Vitamin B6', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'folate', label: 'Folate', group: 'Vitamins', defaultUnit: 'μg' },
-  { key: 'vitaminB12', label: 'Vitamin B12', group: 'Vitamins', defaultUnit: 'μg' },
-  { key: 'biotin', label: 'Biotin', group: 'Vitamins', defaultUnit: 'μg' },
-  { key: 'pantothenicAcid', label: 'Pantothenic acid', group: 'Vitamins', defaultUnit: 'mg' },
-  { key: 'choline', label: 'Choline', group: 'Vitamins', defaultUnit: 'mg' },
+  {
+    key: 'vitaminA',
+    labelKey: 'nutrient.vitaminA',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'vitaminC',
+    labelKey: 'nutrient.vitaminC',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'vitaminD',
+    labelKey: 'nutrient.vitaminD',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'vitaminE',
+    labelKey: 'nutrient.vitaminE',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'vitaminK',
+    labelKey: 'nutrient.vitaminK',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'thiamin',
+    labelKey: 'nutrient.thiamin',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'riboflavin',
+    labelKey: 'nutrient.riboflavin',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'niacin',
+    labelKey: 'nutrient.niacin',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'vitaminB6',
+    labelKey: 'nutrient.vitaminB6',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'folate',
+    labelKey: 'nutrient.folate',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'vitaminB12',
+    labelKey: 'nutrient.vitaminB12',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'biotin',
+    labelKey: 'nutrient.biotin',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'pantothenicAcid',
+    labelKey: 'nutrient.pantothenicAcid',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'choline',
+    labelKey: 'nutrient.choline',
+    groupKey: 'nutrientGroup.vitamins',
+    defaultUnit: 'mg',
+  },
   // Minerals
-  { key: 'calcium', label: 'Calcium', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'iron', label: 'Iron', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'phosphorus', label: 'Phosphorus', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'iodine', label: 'Iodine', group: 'Minerals', defaultUnit: 'μg' },
-  { key: 'magnesium', label: 'Magnesium', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'zinc', label: 'Zinc', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'selenium', label: 'Selenium', group: 'Minerals', defaultUnit: 'μg' },
-  { key: 'copper', label: 'Copper', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'manganese', label: 'Manganese', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'chromium', label: 'Chromium', group: 'Minerals', defaultUnit: 'μg' },
-  { key: 'molybdenum', label: 'Molybdenum', group: 'Minerals', defaultUnit: 'μg' },
-  { key: 'chloride', label: 'Chloride', group: 'Minerals', defaultUnit: 'mg' },
-  { key: 'potassium', label: 'Potassium', group: 'Minerals', defaultUnit: 'mg' },
+  {
+    key: 'calcium',
+    labelKey: 'nutrient.calcium',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
+  { key: 'iron', labelKey: 'nutrient.iron', groupKey: 'nutrientGroup.minerals', defaultUnit: 'mg' },
+  {
+    key: 'phosphorus',
+    labelKey: 'nutrient.phosphorus',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'iodine',
+    labelKey: 'nutrient.iodine',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'magnesium',
+    labelKey: 'nutrient.magnesium',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
+  { key: 'zinc', labelKey: 'nutrient.zinc', groupKey: 'nutrientGroup.minerals', defaultUnit: 'mg' },
+  {
+    key: 'selenium',
+    labelKey: 'nutrient.selenium',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'copper',
+    labelKey: 'nutrient.copper',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'manganese',
+    labelKey: 'nutrient.manganese',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'chromium',
+    labelKey: 'nutrient.chromium',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'molybdenum',
+    labelKey: 'nutrient.molybdenum',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'μg',
+  },
+  {
+    key: 'chloride',
+    labelKey: 'nutrient.chloride',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
+  {
+    key: 'potassium',
+    labelKey: 'nutrient.potassium',
+    groupKey: 'nutrientGroup.minerals',
+    defaultUnit: 'mg',
+  },
 ];
 
 export default NUTRIENT_ORDER;

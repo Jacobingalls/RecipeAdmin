@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiFavorite, ApiProduct } from '../api';
+import { useTranslation } from '../contexts/LocaleContext';
 import type { ProductGroupData } from '../domain';
 import {
   favoriteName,
@@ -30,6 +31,7 @@ export default function FavoriteRow({
   onRemove,
   removeLoading,
 }: FavoriteRowProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const name = favoriteName(favorite, products, groups);
   const brand = favoriteBrand(favorite, products, groups);
@@ -51,13 +53,13 @@ export default function FavoriteRow({
       name={name}
       subtitle={subtitle}
       calories={calories}
-      ariaLabel={`View ${name}`}
+      ariaLabel={t('entry.view', { name })}
       onClick={() => navigate(detailPath)}
     >
       <CircularButtonGroup>
         <CircularButton
-          aria-label={`Log ${name}`}
-          title="Add to log"
+          aria-label={t('entry.log', { name })}
+          title={t('entry.addToLog')}
           onClick={(e) => {
             e.stopPropagation();
             onLog(favorite);
@@ -67,7 +69,7 @@ export default function FavoriteRow({
           <i className="bi bi-plus-lg" aria-hidden="true" />
         </CircularButton>
         <div className="dropdown">
-          <MoreButton ariaLabel={`${name} actions`} />
+          <MoreButton ariaLabel={t('favorite.actions', { name })} />
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
               <button
@@ -79,7 +81,7 @@ export default function FavoriteRow({
                   onRemove(favorite);
                 }}
               >
-                Remove
+                {t('entry.remove')}
               </button>
             </li>
           </ul>

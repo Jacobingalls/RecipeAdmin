@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useTranslation } from '../../contexts/LocaleContext';
 import type { Note } from '../NotesDisplay';
 import {
   SectionHeader,
@@ -39,16 +40,18 @@ function NoteRow({
   onEdit: () => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="list-group-item d-flex align-items-center gap-2">
       <div className="flex-grow-1 small">
         <NoteContent note={note} />
       </div>
       <CircularButtonGroup>
-        <CircularButton aria-label={`Edit note ${index + 1}`} onClick={onEdit}>
+        <CircularButton aria-label={t('note.editLabel', { number: index + 1 })} onClick={onEdit}>
           <i className="bi bi-pencil" aria-hidden="true" />
         </CircularButton>
-        <DeleteButton ariaLabel={`Remove note ${index + 1}`} onClick={onRemove} />
+        <DeleteButton ariaLabel={t('note.removeLabel', { number: index + 1 })} onClick={onRemove} />
       </CircularButtonGroup>
     </div>
   );
@@ -60,6 +63,7 @@ export default function NotesSection({
   className,
   variant = 'section',
 }: NotesSectionProps) {
+  const { t } = useTranslation();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
@@ -107,16 +111,16 @@ export default function NotesSection({
       <div className={className}>
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <strong>Notes</strong>
+            <strong>{t('note.title')}</strong>
             <Button size="sm" variant="dark" onClick={() => setShowAddModal(true)}>
-              Add
+              {t('common.add')}
             </Button>
           </div>
           {notes.length > 0 ? (
             <div className="list-group list-group-flush">{noteRows}</div>
           ) : (
             <div className="card-body">
-              <p className="text-body-secondary small mb-0">No notes</p>
+              <p className="text-body-secondary small mb-0">{t('note.empty')}</p>
             </div>
           )}
         </div>
@@ -127,9 +131,9 @@ export default function NotesSection({
 
   return (
     <div className={className}>
-      <SectionHeader title="Notes">
+      <SectionHeader title={t('note.title')}>
         <Button size="sm" variant="dark" onClick={() => setShowAddModal(true)}>
-          Add
+          {t('common.add')}
         </Button>
       </SectionHeader>
       {notes.length > 0 ? (
@@ -137,7 +141,7 @@ export default function NotesSection({
       ) : (
         <div className="card">
           <div className="card-body">
-            <p className="text-body-secondary small mb-0">No notes</p>
+            <p className="text-body-secondary small mb-0">{t('note.empty')}</p>
           </div>
         </div>
       )}

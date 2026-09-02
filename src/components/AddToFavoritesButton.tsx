@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 
 import type { ServingSize } from '../domain';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useTranslation } from '../contexts/LocaleContext';
 
 import { CircularButton } from './common';
 
@@ -18,6 +19,7 @@ export default function AddToFavoritesButton({
   preparationId,
   servingSize,
 }: AddToFavoritesButtonProps) {
+  const { t } = useTranslation();
   const { findFavorite, addFavorite, removeFavorite } = useFavorites();
   const [saving, setSaving] = useState(false);
 
@@ -67,7 +69,7 @@ export default function AddToFavoritesButton({
   ]);
 
   const icon = isFavorited ? 'bi-star-fill' : 'bi-star';
-  const label = isFavorited ? 'Remove from favorites' : 'Add to favorites';
+  const label = t(isFavorited ? 'favorite.remove' : 'favorite.add');
 
   return (
     <CircularButton
@@ -83,7 +85,7 @@ export default function AddToFavoritesButton({
       {saving ? (
         <span role="status">
           <span className="spinner-border spinner-border-sm" aria-hidden="true" />
-          <span className="visually-hidden">Loading</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </span>
       ) : (
         <i className={`bi ${icon}${isFavorited ? ' text-warning' : ''}`} aria-hidden="true" />

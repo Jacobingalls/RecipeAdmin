@@ -4,6 +4,7 @@ import type { ApiFavorite, ApiProduct } from '../api';
 import { deleteFavorite as deleteFavoriteApi, getProduct, getGroup } from '../api';
 import type { ProductGroupData } from '../domain';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useTranslation } from '../contexts/LocaleContext';
 import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils';
 import { LoadingState, ContentUnavailableView, ListFilter } from '../components/common';
 import type { LogTarget } from '../components/LogModal';
@@ -11,6 +12,7 @@ import LogModal from '../components/LogModal';
 import FavoriteRow from '../components/FavoriteRow';
 
 export default function FavoritesPage() {
+  const { t } = useTranslation();
   const { favorites, loading, error, refetch } = useFavorites();
 
   const [nameFilter, setNameFilter] = useState('');
@@ -114,32 +116,30 @@ export default function FavoritesPage() {
 
   return (
     <>
-      <h1 className="mb-4">Favorites</h1>
+      <h1 className="mb-4">{t('favorites.title')}</h1>
       <ListFilter
         nameFilter={nameFilter}
         onNameFilterChange={setNameFilter}
         dropdownFilter={brandFilter}
         onDropdownFilterChange={setBrandFilter}
-        dropdownLabel="All brands"
+        dropdownLabel={t('filter.allBrands')}
         dropdownOptions={brands}
       />
       {loading && <LoadingState />}
       {error && !loading && (
         <ContentUnavailableView
           icon="bi-star"
-          title="Couldn't load favorites"
-          description="Try again later."
+          title={t('favorites.error.title')}
+          description={t('favorites.error.description')}
         />
       )}
       {!loading && !error && filteredFavorites.length === 0 && (
         <ContentUnavailableView
           icon="bi-star"
-          title="No favorites"
-          description={
-            nameFilter || brandFilter
-              ? 'Try adjusting your search or filters.'
-              : 'Add favorites from product or group pages.'
-          }
+          title={t('favorites.empty.title')}
+          description={t(
+            nameFilter || brandFilter ? 'list.adjustFilters' : 'favorites.empty.description',
+          )}
         />
       )}
       {!loading && !error && filteredFavorites.length > 0 && (

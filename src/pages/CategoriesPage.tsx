@@ -8,8 +8,10 @@ import {
   ContentUnavailableView,
 } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
+import { useTranslation } from '../contexts/LocaleContext';
 
 export default function CategoriesPage() {
+  const { t } = useTranslation();
   const { allCategories: categories, lookup, loading, error } = useCategories();
 
   const topLevel = useMemo(
@@ -22,11 +24,11 @@ export default function CategoriesPage() {
 
   return (
     <>
-      <h1 className="mb-4">Categories</h1>
+      <h1 className="mb-4">{t('category.title')}</h1>
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && topLevel.length === 0 && (
-        <ContentUnavailableView icon="bi-folder" title="No categories" />
+        <ContentUnavailableView icon="bi-folder" title={t('category.empty.title')} />
       )}
       {!loading &&
         !error &&
@@ -44,7 +46,7 @@ export default function CategoriesPage() {
               {children.length > 0 ? (
                 <CategoryGrid categories={children} parentPath={root.slug} />
               ) : (
-                <p className="text-body-secondary small mb-0">No subcategories</p>
+                <p className="text-body-secondary small mb-0">{t('category.noSubcategories')}</p>
               )}
             </section>
           );

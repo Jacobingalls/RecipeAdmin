@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 
 import { getGroup } from '../api';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery, useServingSizeParams } from '../hooks';
 import type { ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
@@ -20,13 +21,14 @@ import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
 export default function GroupDetailPage() {
+  const { t, tPlural } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const {
     data: groupData,
     loading,
     error,
   } = useApiQuery<ProductGroupData>(() => getGroup(id!), [id], {
-    errorMessage: "Couldn't load this group. Try again later.",
+    errorMessage: t('group.error'),
   });
   const [urlServingSize, setServingSize] = useServingSizeParams();
 
@@ -54,7 +56,7 @@ export default function GroupDetailPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !groupData && (
-        <ContentUnavailableView icon="bi-collection" title="Group not found" />
+        <ContentUnavailableView icon="bi-collection" title={t('group.notFound')} />
       )}
       {!loading && !error && groupData && (
         <>
@@ -63,7 +65,7 @@ export default function GroupDetailPage() {
           <CategoryPaths categoryIds={groupData.categories ?? []} />
 
           <section className="mt-4">
-            <SubsectionTitle>Nutrition Estimate</SubsectionTitle>
+            <SubsectionTitle>{t('group.nutritionEstimate')}</SubsectionTitle>
             <div className="card mb-3">
               <div className="card-body">
                 <div className="d-flex align-items-end mb-3">
@@ -99,9 +101,9 @@ export default function GroupDetailPage() {
           )}
 
           <section className="mt-4">
-            <SubsectionTitle>Item{items.length !== 1 ? 's' : ''}</SubsectionTitle>
+            <SubsectionTitle>{tPlural('group.items', items.length)}</SubsectionTitle>
             {items.length === 0 ? (
-              <p className="text-secondary">No items in this group</p>
+              <p className="text-secondary">{t('group.empty')}</p>
             ) : (
               <div className="list-group mb-3">
                 {items.map((item) => (

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import type { ApiCategory } from '../../api';
 import { adminUpsertCategories } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath } from '../../utils';
 import { SectionHeader, DeleteButton } from '../common';
 
@@ -28,13 +29,15 @@ export default function CategoryRelationSection({
   onCreateNew,
   onSaved,
 }: CategoryRelationSectionProps) {
+  const { t } = useTranslation();
   const { lookup, addCategories } = useCategories();
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const title = relationType === 'parents' ? 'Parents' : 'Children';
-  const reciprocal: RelationType = relationType === 'parents' ? 'children' : 'parents';
-  const emptyText = relationType === 'parents' ? 'No parents' : 'No children';
+  const isParents = relationType === 'parents';
+  const title = t(isParents ? 'categoryEditor.parents' : 'categoryEditor.children');
+  const reciprocal: RelationType = isParents ? 'children' : 'parents';
+  const emptyText = t(isParents ? 'categoryEditor.noParents' : 'categoryEditor.noChildren');
 
   async function handleRemove(relatedId: string) {
     setError(null);
@@ -58,9 +61,7 @@ export default function CategoryRelationSection({
       addCategories(result);
       onSaved();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Couldn't remove this relationship. Try again.",
-      );
+      setError(err instanceof Error ? err.message : t('categoryEditor.removeRelationError'));
     } finally {
       setRemovingId(null);
     }
@@ -76,19 +77,19 @@ export default function CategoryRelationSection({
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Add
+            {t('common.add')}
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
               <button className="dropdown-item" type="button" onClick={onAdd}>
                 <i className="bi bi-link-45deg me-2" aria-hidden="true" />
-                Existing category
+                {t('editor.existingCategory')}
               </button>
             </li>
             <li>
               <button className="dropdown-item" type="button" onClick={onCreateNew}>
                 <i className="bi bi-plus-circle me-2" aria-hidden="true" />
-                New category
+                {t('editor.newCategory')}
               </button>
             </li>
           </ul>
@@ -114,12 +115,12 @@ export default function CategoryRelationSection({
                 </small>
               </Link>
               <DeleteButton
-                ariaLabel={`Remove ${c.displayName}`}
+                ariaLabel={t('editor.removeItem', { name: c.displayName })}
                 onClick={() => handleRemove(c.id)}
               />
               {removingId === c.id && (
                 <span className="visually-hidden" role="status">
-                  Removing
+                  {t('categoryEditor.removing')}
                 </span>
               )}
             </div>

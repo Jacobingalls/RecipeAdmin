@@ -12,16 +12,18 @@ import {
   LinkListItem,
   ListFilter,
 } from '../components/common';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 
 export default function ProductsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     data: products,
     loading,
     error,
   } = useApiQuery<ApiProduct[]>(adminListProducts, [], {
-    errorMessage: "Couldn't load products. Try again later.",
+    errorMessage: t('adminProducts.error'),
   });
   const [nameFilter, setNameFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
@@ -47,9 +49,9 @@ export default function ProductsPage() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="mb-0">Products</h1>
+        <h1 className="mb-0">{t('adminProducts.title')}</h1>
         <Button variant="success" onClick={() => setShowCreateModal(true)}>
-          New
+          {t('list.new')}
         </Button>
       </div>
 
@@ -64,7 +66,7 @@ export default function ProductsPage() {
         onNameFilterChange={setNameFilter}
         dropdownFilter={brandFilter}
         onDropdownFilterChange={setBrandFilter}
-        dropdownLabel="All brands"
+        dropdownLabel={t('filter.allBrands')}
         dropdownOptions={brands}
       />
       {loading && <LoadingState />}
@@ -72,8 +74,8 @@ export default function ProductsPage() {
       {!loading && !error && filteredProducts.length === 0 && (
         <ContentUnavailableView
           icon="bi-box-seam"
-          title="No products"
-          description="Try adjusting your search or filters."
+          title={t('adminProducts.empty.title')}
+          description={t('list.adjustFilters')}
         />
       )}
       {!loading && !error && filteredProducts.length > 0 && (

@@ -19,6 +19,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Calories"
+        testId="calories"
         unit="kcal"
         currentAmount={1843}
         dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -39,6 +40,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Calories"
+        testId="calories"
         unit="kcal"
         currentAmount={1843}
         dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -56,6 +58,7 @@ describe('SparklineCard', () => {
     const { container } = render(
       <SparklineCard
         label="Protein"
+        testId="protein"
         unit="g"
         currentAmount={45}
         dailyValue={{ amount: 50, unit: 'g' }}
@@ -74,6 +77,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Protein"
+        testId="protein"
         unit="g"
         currentAmount={45}
         dailyValue={{ amount: 50, unit: 'g' }}
@@ -92,6 +96,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Protein"
+        testId="protein"
         unit="g"
         currentAmount={45}
         dailyValue={{ amount: 50, unit: 'g' }}
@@ -110,6 +115,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Protein"
+        testId="protein"
         unit="g"
         currentAmount={45}
         dailyValue={{ amount: 50, unit: 'g' }}
@@ -129,6 +135,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Calories"
+          testId="calories"
           unit="kcal"
           currentAmount={800}
           dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -145,6 +152,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Calories"
+          testId="calories"
           unit="kcal"
           currentAmount={1200}
           dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -161,6 +169,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Calories"
+          testId="calories"
           unit="kcal"
           currentAmount={1900}
           dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -177,6 +186,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Calories"
+          testId="calories"
           unit="kcal"
           currentAmount={2500}
           dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -193,6 +203,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Calories"
+          testId="calories"
           unit="kcal"
           currentAmount={3200}
           dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -211,6 +222,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Protein"
+          testId="protein"
           unit="g"
           currentAmount={20}
           dailyValue={{ amount: 50, unit: 'g' }}
@@ -227,6 +239,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Protein"
+          testId="protein"
           unit="g"
           currentAmount={30}
           dailyValue={{ amount: 50, unit: 'g' }}
@@ -243,6 +256,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Protein"
+          testId="protein"
           unit="g"
           currentAmount={45}
           dailyValue={{ amount: 50, unit: 'g' }}
@@ -259,6 +273,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Fiber"
+          testId="fiber"
           unit="g"
           currentAmount={50}
           dailyValue={{ amount: 28, unit: 'g' }}
@@ -277,6 +292,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Sodium"
+          testId="sodium"
           unit="mg"
           currentAmount={1800}
           dailyValue={{ amount: 2300, unit: 'mg' }}
@@ -293,6 +309,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Sodium"
+          testId="sodium"
           unit="mg"
           currentAmount={2500}
           dailyValue={{ amount: 2300, unit: 'mg' }}
@@ -309,6 +326,7 @@ describe('SparklineCard', () => {
       render(
         <SparklineCard
           label="Sodium"
+          testId="sodium"
           unit="mg"
           currentAmount={3000}
           dailyValue={{ amount: 2300, unit: 'mg' }}
@@ -326,6 +344,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Custom"
+        testId="custom"
         unit="g"
         currentAmount={10}
         dailyValue={null}
@@ -342,6 +361,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Custom"
+        testId="custom"
         unit="g"
         currentAmount={10}
         dailyValue={null}
@@ -358,6 +378,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Calories"
+        testId="calories"
         unit="kcal"
         currentAmount={1000}
         dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -375,6 +396,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Calories"
+        testId="calories"
         unit="kcal"
         currentAmount={1000}
         dailyValue={{ amount: 2000, unit: 'kcal' }}
@@ -392,6 +414,7 @@ describe('SparklineCard', () => {
     render(
       <SparklineCard
         label="Calories"
+        testId="calories"
         unit="kcal"
         currentAmount={1000}
         dailyValue={{ amount: 2000, unit: 'kcal' }}

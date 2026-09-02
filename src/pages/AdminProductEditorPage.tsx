@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import type { ApiProduct } from '../api';
 import { adminGetProduct, adminUpsertProducts } from '../api';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import {
   LoadingState,
@@ -22,12 +23,13 @@ import {
 } from '../components/admin-product-editor';
 
 export default function AdminProductEditorPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const { data, loading, error, refetch } = useApiQuery<ApiProduct>(
     () => adminGetProduct(id!),
     [id],
     {
-      errorMessage: "Couldn't load this product. Try again later.",
+      errorMessage: t('productEditor.error'),
     },
   );
 
@@ -77,7 +79,7 @@ export default function AdminProductEditorPage() {
       await adminUpsertProducts(draftProduct);
       refetch();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Couldn't save changes. Try again.");
+      setSaveError(err instanceof Error ? err.message : t('editor.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -100,7 +102,7 @@ export default function AdminProductEditorPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !product && (
-        <ContentUnavailableView icon="bi-box-seam" title="Product not found" />
+        <ContentUnavailableView icon="bi-box-seam" title={t('productEditor.notFound')} />
       )}
       {!loading && !error && product && (
         <>
@@ -112,10 +114,10 @@ export default function AdminProductEditorPage() {
             {isDirty && (
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
                 <Button variant="outline-secondary" onClick={handleDiscard} disabled={isSaving}>
-                  Discard
+                  {t('editor.discard')}
                 </Button>
                 <Button onClick={handleSave} loading={isSaving}>
-                  Save
+                  {t('common.save')}
                 </Button>
               </div>
             )}
@@ -130,9 +132,9 @@ export default function AdminProductEditorPage() {
 
           <ProductProfileForm product={product} onChange={handleDraftChange} />
 
-          <SectionHeader title="Preparations" className="mt-5">
+          <SectionHeader title={t('productEditor.preparations')} className="mt-5">
             <Button size="sm" variant="dark" onClick={() => setShowAddPrep(true)}>
-              Add
+              {t('common.add')}
             </Button>
           </SectionHeader>
 
@@ -148,7 +150,7 @@ export default function AdminProductEditorPage() {
                           className={`nav-link${activePrepId === prep.id ? ' active' : ''}`}
                           onClick={() => setActivePrep(prep.id ?? null)}
                         >
-                          {prep.name || 'Default'}
+                          {prep.name || t('editor.default')}
                         </button>
                       </li>
                     ))}
@@ -167,7 +169,7 @@ export default function AdminProductEditorPage() {
               )}
             </div>
           ) : (
-            <p className="text-body-secondary small">No preparations</p>
+            <p className="text-body-secondary small">{t('productEditor.noPreparations')}</p>
           )}
 
           <BarcodesSection product={product} onChange={handleDraftChange} />

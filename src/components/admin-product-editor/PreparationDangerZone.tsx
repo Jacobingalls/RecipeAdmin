@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import type { ApiProduct } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { TypeToConfirmModal, Button } from '../common';
 
 interface PreparationDangerZoneProps {
@@ -16,12 +17,13 @@ export default function PreparationDangerZone({
   onChange,
   onPrepDeleted,
 }: PreparationDangerZoneProps) {
+  const { t, raw } = useTranslation();
   const prep = product.preparations.find((p) => p.id === preparationId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   if (!prep) return null;
 
-  const prepName = prep.name || 'Default';
+  const prepName = prep.name || t('editor.default');
   const isOnlyPrep = product.preparations.length <= 1;
 
   function handleDelete() {
@@ -39,20 +41,21 @@ export default function PreparationDangerZone({
     setShowDeleteModal(false);
   }
 
+  // The preparation name is emphasized inside the sentence, so render around the placeholder.
+  const [beforeName, afterName] = raw('prepEditor.delete.message').split('{name}');
+
   return (
     <div className="px-3 pt-3 pb-3">
       <div className="card">
         <div className="card-header">
-          <strong>Preparation actions</strong>
+          <strong>{t('prepEditor.actions')}</strong>
         </div>
         <div className="list-group list-group-flush">
           <div className="list-group-item d-flex align-items-center justify-content-between py-3">
             <div className="me-3">
-              <strong>Delete this preparation</strong>
+              <strong>{t('prepEditor.delete.title')}</strong>
               <p className="text-body-secondary small mb-0">
-                {isOnlyPrep
-                  ? "Can't delete the only preparation. Add another one first."
-                  : 'This will permanently delete this preparation and its nutrition data.'}
+                {t(isOnlyPrep ? 'prepEditor.delete.onlyPrep' : 'prepEditor.delete.description')}
               </p>
             </div>
             <Button
@@ -63,7 +66,7 @@ export default function PreparationDangerZone({
               disabled={isOnlyPrep}
               onClick={() => setShowDeleteModal(true)}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </div>
         </div>
@@ -71,15 +74,16 @@ export default function PreparationDangerZone({
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}
-        title="Delete preparation"
+        title={t('prepEditor.delete.modalTitle')}
         message={
           <>
-            This will permanently delete <strong>{prepName}</strong> and its nutrition data. This
-            can&apos;t be undone.
+            {beforeName}
+            <strong>{prepName}</strong>
+            {afterName}
           </>
         }
         itemName={prepName}
-        confirmButtonText="Delete preparation"
+        confirmButtonText={t('prepEditor.delete.confirm')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteModal(false)}
       />

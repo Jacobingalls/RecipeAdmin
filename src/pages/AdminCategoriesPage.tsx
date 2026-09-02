@@ -11,6 +11,7 @@ import {
   Button,
 } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { buildAllSlugPaths } from '../utils';
 
@@ -21,6 +22,7 @@ interface CategoryEntry {
 }
 
 export default function AdminCategoriesPage() {
+  const { t } = useTranslation();
   const { addCategories } = useCategories();
 
   const {
@@ -29,7 +31,7 @@ export default function AdminCategoriesPage() {
     error,
     refetch,
   } = useApiQuery<ApiCategory[]>(adminListCategories, [], {
-    errorMessage: "Couldn't load categories. Try again later.",
+    errorMessage: t('adminCategories.error'),
   });
   const [nameFilter, setNameFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -65,20 +67,20 @@ export default function AdminCategoriesPage() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="mb-0">Categories</h1>
+        <h1 className="mb-0">{t('adminCategories.title')}</h1>
         <Button variant="success" onClick={() => setShowCreateModal(true)}>
-          New
+          {t('list.new')}
         </Button>
       </div>
       <div className="mb-4">
         <label htmlFor={nameId} className="visually-hidden">
-          Filter by name
+          {t('filter.byName')}
         </label>
         <input
           type="text"
           className="form-control"
           id={nameId}
-          placeholder="Search by name..."
+          placeholder={t('filter.searchByName')}
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
         />
@@ -93,8 +95,8 @@ export default function AdminCategoriesPage() {
       {!loading && !error && filteredEntries.length === 0 && (
         <ContentUnavailableView
           icon="bi-folder"
-          title="No categories"
-          description="Try adjusting your search."
+          title={t('adminCategories.empty.title')}
+          description={t('list.adjustSearch')}
         />
       )}
       {!loading && !error && filteredEntries.length > 0 && (

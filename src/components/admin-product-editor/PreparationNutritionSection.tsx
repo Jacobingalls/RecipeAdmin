@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
 import type { ApiProduct } from '../../api';
-import type { NutritionUnit, ServingSizeType } from '../../domain';
+import type { NutritionUnit } from '../../domain';
 import { ServingSize } from '../../domain';
 import type { NutritionInformationData } from '../../domain/NutritionInformation';
-import { nutritionMassUnits, nutritionEnergyUnits } from '../../config/unitConfig';
-import type { OptionGroup } from '../../config/unitConfig';
+import { nutritionMassUnits, nutritionEnergyUnits, unitGroup } from '../../config/unitConfig';
 import type { NutrientDef } from '../../config/nutrientConfig';
 import NUTRIENT_ORDER from '../../config/nutrientConfig';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { DeleteButton } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';
 
@@ -22,30 +22,6 @@ interface NutrientValue {
   unit: string;
 }
 
-const ENERGY_GROUPS: OptionGroup[] = [
-  {
-    label: 'Energy',
-    options: nutritionEnergyUnits.map((u) => ({
-      type: 'energy' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-];
-
-const MASS_GROUPS: OptionGroup[] = [
-  {
-    label: 'Mass',
-    options: nutritionMassUnits.map((u) => ({
-      type: 'mass' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-];
-
 function isEnergyNutrient(def: NutrientDef): boolean {
   return def.defaultUnit === 'kcal' || def.defaultUnit === 'kJ';
 }
@@ -55,6 +31,10 @@ export default function PreparationNutritionSection({
   preparationId,
   onChange,
 }: PreparationNutritionSectionProps) {
+  const { t } = useTranslation();
+  const energyGroups = [unitGroup('unit.group.energy', nutritionEnergyUnits, 'energy')];
+  const massGroups = [unitGroup('unit.group.mass', nutritionMassUnits, 'mass')];
+
   const prep = product.preparations.find((p) => p.id === preparationId);
   const nutrition = prep?.nutritionalInformation;
 
@@ -119,7 +99,7 @@ export default function PreparationNutritionSection({
     <div className="px-3 pt-3 pb-2">
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <strong>Nutrition (per serving)</strong>
+          <strong>{t('productEditor.nutrition')}</strong>
           {missingNutrients.length > 0 && (
             <div className="dropdown">
               <button
@@ -128,7 +108,7 @@ export default function PreparationNutritionSection({
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Add
+                {t('common.add')}
               </button>
               <ul
                 className="dropdown-menu dropdown-menu-end"
@@ -142,7 +122,7 @@ export default function PreparationNutritionSection({
                       onClick={() => handleAdd(def.key, def.defaultUnit)}
                     >
                       {def.indent ? '\u00A0'.repeat(def.indent * 3) : ''}
-                      {def.label}
+                      {t(def.labelKey)}
                     </button>
                   </li>
                 ))}
@@ -167,20 +147,20 @@ export default function PreparationNutritionSection({
                     className={def.indent ? 'text-body-secondary' : ''}
                     style={def.indent ? { paddingLeft: `${def.indent * 1}rem` } : undefined}
                   >
-                    {def.label}
+                    {t(def.labelKey)}
                   </span>
                   <div className="d-flex align-items-center gap-2">
                     <ServingSizeSelector
                       size="sm"
-                      groups={isEnergy ? ENERGY_GROUPS : MASS_GROUPS}
+                      groups={isEnergy ? energyGroups : massGroups}
                       value={servingSize}
                       onChange={(ss) => handleNutrientChange(def.key, ss)}
-                      amountAriaLabel={`${def.label} amount`}
-                      unitAriaLabel={`${def.label} unit`}
+                      amountAriaLabel={t('editor.amountLabel', { name: t(def.labelKey) })}
+                      unitAriaLabel={t('editor.unitLabel', { name: t(def.labelKey) })}
                     />
                     {def.key !== 'calories' && (
                       <DeleteButton
-                        ariaLabel={`Remove ${def.label}`}
+                        ariaLabel={t('editor.removeItem', { name: t(def.labelKey) })}
                         onClick={() => handleRemove(def.key)}
                       />
                     )}
@@ -191,7 +171,7 @@ export default function PreparationNutritionSection({
           </div>
         ) : (
           <div className="card-body">
-            <p className="text-body-secondary small mb-0">No nutrition data</p>
+            <p className="text-body-secondary small mb-0">{t('productEditor.noNutrition')}</p>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import type { ApiSearchResult } from '../api';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useSearch } from '../hooks';
 import { buildSearchResultLogTarget } from '../utils';
 import { ContentUnavailableView } from '../components/common';
@@ -9,6 +10,7 @@ import { SearchResults } from '../components/search';
 import LogModal from '../components/LogModal';
 
 export default function SearchPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
   const { results, loading, error } = useSearch(query);
@@ -23,8 +25,8 @@ export default function SearchPage() {
     return (
       <ContentUnavailableView
         icon="bi-search"
-        title="Search products and groups"
-        description="Use the search box above to get started."
+        title={t('search.start.title')}
+        description={t('search.start.description')}
       />
     );
   }

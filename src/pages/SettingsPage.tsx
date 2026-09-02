@@ -17,11 +17,18 @@ import {
   ModalBody,
   ModalFooter,
 } from '../components/common';
-import { ProfileSection, CredentialsSection, SessionsSection } from '../components/settings';
+import {
+  ProfileSection,
+  CredentialsSection,
+  LanguageSection,
+  SessionsSection,
+} from '../components/settings';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -31,7 +38,7 @@ export default function SettingsPage() {
     error: passkeysError,
     refetch: refetchPasskeys,
   } = useApiQuery(settingsListPasskeys, [], {
-    errorMessage: "Couldn't load passkeys.",
+    errorMessage: t('settings.error.passkeys'),
   });
   const {
     data: apiKeys,
@@ -39,7 +46,7 @@ export default function SettingsPage() {
     error: apiKeysError,
     refetch: refetchApiKeys,
   } = useApiQuery(settingsListAPIKeys, [], {
-    errorMessage: "Couldn't load API keys.",
+    errorMessage: t('settings.error.apiKeys'),
   });
   const {
     data: sessions,
@@ -47,7 +54,7 @@ export default function SettingsPage() {
     error: sessionsError,
     refetch: refetchSessions,
   } = useApiQuery(settingsListSessions, [], {
-    errorMessage: "Couldn't load sessions.",
+    errorMessage: t('settings.error.sessions'),
   });
 
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
@@ -83,7 +90,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="mb-4">Settings</h1>
+      <h1 className="mb-4">{t('settings.title')}</h1>
 
       <ProfileSection />
 
@@ -93,6 +100,8 @@ export default function SettingsPage() {
         refetchPasskeys={refetchPasskeys}
         refetchApiKeys={refetchApiKeys}
       />
+
+      <LanguageSection />
 
       <SessionsSection
         sessions={sessions}
@@ -108,15 +117,15 @@ export default function SettingsPage() {
           ariaLabelledBy="revoke-sessions-title"
         >
           <ModalHeader onClose={() => setShowRevokeConfirm(false)} titleId="revoke-sessions-title">
-            Revoke all sessions
+            {t('sessions.revokeAll.title')}
           </ModalHeader>
-          <ModalBody>This will sign you out of all devices, including this one.</ModalBody>
+          <ModalBody>{t('sessions.revokeAll.message')}</ModalBody>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setShowRevokeConfirm(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="danger" onClick={handleRevokeSessions}>
-              Revoke sessions
+              {t('sessions.revokeAll.confirm')}
             </Button>
           </ModalFooter>
         </ModalBase>

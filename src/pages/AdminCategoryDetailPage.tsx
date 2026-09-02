@@ -12,6 +12,7 @@ import {
 } from '../components/admin-category-detail';
 import { ContentUnavailableView, ErrorState, LoadingState } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
+import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { buildAllSlugPaths, buildSlugPath, resolvePathSegments } from '../utils';
 
@@ -22,6 +23,7 @@ type ModalState =
   | null;
 
 export default function AdminCategoryDetailPage() {
+  const { t } = useTranslation();
   const { path } = useParams<{ path: string }>();
   const { allCategories, lookup, addCategories } = useCategories();
   const [modal, setModal] = useState<ModalState>(null);
@@ -42,7 +44,7 @@ export default function AdminCategoryDetailPage() {
     error: categoryError,
   } = useApiQuery<ApiCategory>(() => adminGetCategory(path!), [path], {
     enabled: !cachedCategory,
-    errorMessage: "Couldn't load this category. Try again later.",
+    errorMessage: t('categoryEditor.error'),
   });
 
   // Merge fetched category into cache
@@ -89,7 +91,7 @@ export default function AdminCategoryDetailPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !category && (
-        <ContentUnavailableView icon="bi-folder" title="Category not found" />
+        <ContentUnavailableView icon="bi-folder" title={t('categoryEditor.notFound')} />
       )}
       {!loading && !error && category && (
         <>

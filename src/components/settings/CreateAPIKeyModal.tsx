@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 
 import type { CreateAPIKeyResponse } from '../../api';
 import { settingsCreateAPIKey } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 import { formatRelativeTime, generateName } from '../../utils';
 
@@ -13,6 +14,7 @@ interface CreateAPIKeyModalProps {
 }
 
 export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: CreateAPIKeyModalProps) {
+  const { t } = useTranslation();
   const [newKeyName, setNewKeyName] = useState('');
   // eslint-disable-next-line react-hooks/exhaustive-deps -- regenerate each time modal opens
   const defaultKeyName = useMemo(() => generateName(), [isOpen]);
@@ -46,7 +48,7 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
       setCreatedKey(result);
     } catch (err) {
       console.error("Couldn't create the API key", err);
-      setError("Couldn't create the API key. Try again.");
+      setError(t('apiKey.create.error'));
     } finally {
       setIsCreating(false);
     }
@@ -57,18 +59,15 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
   return (
     <ModalBase onClose={handleClose} ariaLabelledBy="create-api-key-title">
       <ModalHeader onClose={handleClose} titleId="create-api-key-title">
-        Create API Key
+        {t('apiKey.create.title')}
       </ModalHeader>
       <ModalBody>
         {createdKey ? (
           <>
-            <p className="small text-body-secondary">
-              Make sure to save this key somewhere safe. It acts as your password and can&rsquo;t be
-              retrieved once you close this dialog.
-            </p>
+            <p className="small text-body-secondary">{t('apiKey.create.warning')}</p>
             <div className="mb-3">
               <label htmlFor="created-key" className="form-label">
-                API Key
+                {t('apiKey.create.keyLabel')}
               </label>
               <input
                 type="text"
@@ -81,7 +80,7 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
             <CopyButton text={createdKey.key} />
             {createdKey.expiresAt && (
               <p className="small text-body-secondary mt-2 mb-0">
-                Expires {formatRelativeTime(createdKey.expiresAt)}
+                {t('apiKey.create.expires', { time: formatRelativeTime(createdKey.expiresAt) })}
               </p>
             )}
           </>
@@ -94,7 +93,7 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
             )}
             <div className="mb-3">
               <label htmlFor="key-name" className="form-label">
-                Key Name
+                {t('apiKey.create.nameLabel')}
               </label>
               <input
                 type="text"
@@ -114,13 +113,13 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
                 onChange={(e) => setHasExpiry(e.target.checked)}
               />
               <label className="form-check-label" htmlFor="has-expiry">
-                Set expiration
+                {t('apiKey.create.setExpiration')}
               </label>
             </div>
             {hasExpiry && (
               <div className="mb-3">
                 <label htmlFor="key-expires-at" className="form-label">
-                  Expires at
+                  {t('apiKey.create.expiresAt')}
                 </label>
                 <input
                   type="datetime-local"
@@ -137,14 +136,14 @@ export default function CreateAPIKeyModal({ isOpen, onClose, onCreated }: Create
       </ModalBody>
       <ModalFooter>
         {createdKey ? (
-          <Button onClick={handleClose}>Done</Button>
+          <Button onClick={handleClose}>{t('common.done')}</Button>
         ) : (
           <>
             <Button variant="outline-secondary" onClick={handleClose}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" form="create-api-key-form" loading={isCreating}>
-              Create
+              {t('apiKey.create.submit')}
             </Button>
           </>
         )}

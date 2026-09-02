@@ -6,6 +6,7 @@ import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
 import { buildLogTarget } from '../utils';
+import { useTranslation } from '../contexts/LocaleContext';
 
 import { useApiQuery } from './useApiQuery';
 
@@ -73,6 +74,7 @@ export function useHistoryData(options?: {
   limit?: number;
   limitDays?: number;
 }): UseHistoryDataResult {
+  const { t } = useTranslation();
   const limit = options?.limit;
   const limitDays = options?.limitDays;
   const {
@@ -81,7 +83,7 @@ export function useHistoryData(options?: {
     error: logsError,
     refetch: refetchLogs,
   } = useApiQuery(() => getLogs({ limit, limitDays }), [limit, limitDays], {
-    errorMessage: "Couldn't load history. Try again later.",
+    errorMessage: t('history.error'),
   });
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logAgainLoadingId, setLogAgainLoadingId] = useState<string | null>(null);

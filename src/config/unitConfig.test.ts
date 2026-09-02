@@ -1,5 +1,6 @@
 import { Preparation, ProductGroup } from '../domain';
 import type { PreparationData, ProductGroupData } from '../domain';
+import { en } from '../i18n/messages/en';
 
 import { massUnits, volumeUnits, energyUnits, buildOptionGroups, filterGroups } from './unitConfig';
 import type { OptionGroup } from './unitConfig';
@@ -9,7 +10,7 @@ describe('unit arrays', () => {
     expect(massUnits.length).toBeGreaterThan(0);
     for (const u of massUnits) {
       expect(u).toHaveProperty('value');
-      expect(u).toHaveProperty('label');
+      expect(u).toHaveProperty('labelKey');
       expect(u).toHaveProperty('aliases');
       expect(u.aliases.length).toBeGreaterThan(0);
     }
@@ -19,7 +20,7 @@ describe('unit arrays', () => {
     expect(volumeUnits.length).toBeGreaterThan(0);
     for (const u of volumeUnits) {
       expect(u).toHaveProperty('value');
-      expect(u).toHaveProperty('label');
+      expect(u).toHaveProperty('labelKey');
       expect(u).toHaveProperty('aliases');
       expect(u.aliases.length).toBeGreaterThan(0);
     }
@@ -29,9 +30,15 @@ describe('unit arrays', () => {
     expect(energyUnits.length).toBeGreaterThan(0);
     for (const u of energyUnits) {
       expect(u).toHaveProperty('value');
-      expect(u).toHaveProperty('label');
+      expect(u).toHaveProperty('labelKey');
       expect(u).toHaveProperty('aliases');
       expect(u.aliases.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('names every unit with a key that has a translation', () => {
+    for (const u of [...massUnits, ...volumeUnits, ...energyUnits]) {
+      expect(en, u.value).toHaveProperty(u.labelKey);
     }
   });
 

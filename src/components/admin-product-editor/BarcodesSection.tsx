@@ -3,6 +3,8 @@ import { useState } from 'react';
 import type { ApiProduct } from '../../api';
 import type { BarcodeData } from '../../domain';
 import { ServingSize } from '../../domain';
+import { useTranslation } from '../../contexts/LocaleContext';
+import { getTranslator } from '../../i18n';
 import { formatSignificant } from '../../utils';
 import type { Note } from '../NotesDisplay';
 import {
@@ -18,7 +20,9 @@ import BarcodeModal, { resolvePrep } from './AddBarcodeModal';
 
 function formatServingSizeLabel(ss: ServingSize): string {
   if (ss.type === 'servings') {
-    return `${formatSignificant(ss.amount)} serving${ss.amount !== 1 ? 's' : ''}`;
+    return getTranslator().tPlural('format.servings', ss.amount, {
+      count: formatSignificant(ss.amount),
+    });
   }
   if (ss.type === 'customSize') {
     const v = ss.value as { name: string; amount: number };
@@ -39,6 +43,7 @@ function BarcodeRow({
   onEdit: () => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const servingSize = ServingSize.fromObject(barcode.servingSize) ?? ServingSize.servings(1);
   const notes = (barcode.notes ?? []) as Note[];
   const hasExplicitPrep = !!barcode.preparationID;
@@ -53,10 +58,16 @@ function BarcodeRow({
         {prepName && <span className="text-body-secondary small">{prepName},</span>}
         <span className="text-body-secondary small">{formatServingSizeLabel(servingSize)}</span>
         <CircularButtonGroup>
-          <CircularButton aria-label={`Edit barcode ${barcode.code}`} onClick={onEdit}>
+          <CircularButton
+            aria-label={t('editor.editBarcodeLabel', { code: barcode.code })}
+            onClick={onEdit}
+          >
             <i className="bi bi-pencil" aria-hidden="true" />
           </CircularButton>
-          <DeleteButton ariaLabel={`Remove barcode ${barcode.code}`} onClick={onRemove} />
+          <DeleteButton
+            ariaLabel={t('editor.removeBarcodeLabel', { code: barcode.code })}
+            onClick={onRemove}
+          />
         </CircularButtonGroup>
       </div>
       {notes.length > 0 && (
@@ -80,6 +91,7 @@ interface BarcodesSectionProps {
 }
 
 export default function BarcodesSection({ product, onChange }: BarcodesSectionProps) {
+  const { t } = useTranslation();
   const barcodes = product.barcodes ?? [];
   const [showAddModal, setShowAddModal] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -101,9 +113,9 @@ export default function BarcodesSection({ product, onChange }: BarcodesSectionPr
 
   return (
     <>
-      <SectionHeader title="Barcodes" className="mt-5">
+      <SectionHeader title={t('editor.barcodes')} className="mt-5">
         <Button size="sm" variant="dark" onClick={() => setShowAddModal(true)}>
-          Add
+          {t('common.add')}
         </Button>
       </SectionHeader>
       {barcodes.length > 0 ? (
@@ -119,7 +131,7 @@ export default function BarcodesSection({ product, onChange }: BarcodesSectionPr
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No barcodes</p>
+        <p className="text-body-secondary small">{t('editor.noBarcodes')}</p>
       )}
 
       {showAddModal && (

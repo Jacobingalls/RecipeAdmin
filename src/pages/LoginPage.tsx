@@ -5,8 +5,10 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '../components/common';
 import VersionBadge from '../components/VersionBadge';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/LocaleContext';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading, login, loginWithPasskey } = useAuth();
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ export default function LoginPage() {
     return (
       <div className="min-vh-100 bg-body-tertiary d-flex align-items-center justify-content-center">
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loadingEllipsis')}</span>
         </div>
       </div>
     );
@@ -35,7 +37,7 @@ export default function LoginPage() {
       await loginWithPasskey();
     } catch (err) {
       console.error("Couldn't sign in with passkey", err);
-      setError("Couldn't sign in with passkey. Try again.");
+      setError(t('login.error.passkey'));
     } finally {
       setIsSubmitting(false);
     }
@@ -49,7 +51,7 @@ export default function LoginPage() {
       await login(usernameOrEmail, password);
     } catch (err) {
       console.error("Couldn't sign in", err);
-      setError("Couldn't sign in. Check your credentials and try again.");
+      setError(t('login.error.credentials'));
     } finally {
       setIsSubmitting(false);
     }
@@ -80,14 +82,14 @@ export default function LoginPage() {
               disabled={isSubmitting}
             >
               <i className="bi bi-fingerprint me-2" />
-              Sign in with passkey
+              {t('login.signInWithPasskey')}
             </Button>
             <button
               type="button"
               className="btn btn-link text-body-secondary text-decoration-none"
               onClick={() => setShowApiKeyForm(true)}
             >
-              Sign in with API key
+              {t('login.signInWithApiKey')}
             </button>
           </>
         ) : (
@@ -95,7 +97,7 @@ export default function LoginPage() {
             <form className="text-start mb-3" onSubmit={handleAPIKeyLogin}>
               <div className="mb-3">
                 <label htmlFor="username" className="form-label">
-                  Username or email
+                  {t('login.usernameOrEmail')}
                 </label>
                 <input
                   type="text"
@@ -109,7 +111,7 @@ export default function LoginPage() {
               </div>
               <div className="mb-3">
                 <label htmlFor="password" className="form-label">
-                  API key
+                  {t('login.apiKey')}
                 </label>
                 <input
                   type="password"
@@ -128,7 +130,7 @@ export default function LoginPage() {
                 loading={isSubmitting}
                 disabled={isSubmitting}
               >
-                Sign in
+                {t('login.submit')}
               </Button>
             </form>
             <button
@@ -140,7 +142,7 @@ export default function LoginPage() {
               }}
             >
               <i className="bi bi-fingerprint me-2" />
-              Sign in with passkey
+              {t('login.signInWithPasskey')}
             </button>
           </>
         )}

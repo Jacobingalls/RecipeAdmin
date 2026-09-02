@@ -1,4 +1,5 @@
 import type { SessionInfo } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { ListRow, DeleteButton, SectionHeader } from '../common';
 import { formatRelativeTime } from '../../utils';
 
@@ -17,12 +18,14 @@ export default function SessionsSection({
   onRevokeSessions,
   onRevokeSession,
 }: SessionsSectionProps) {
+  const { t } = useTranslation();
+
   return (
     <>
-      <SectionHeader title="Sessions" className="mt-4">
+      <SectionHeader title={t('sessions.title')} className="mt-4">
         <div className="btn-group">
           <button type="button" className="btn btn-dark btn-sm" onClick={onLogout}>
-            Sign out
+            {t('sessions.signOut')}
           </button>
           <button
             type="button"
@@ -30,7 +33,7 @@ export default function SessionsSection({
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <span className="visually-hidden">More sign out options</span>
+            <span className="visually-hidden">{t('sessions.moreOptions')}</span>
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
@@ -40,7 +43,7 @@ export default function SessionsSection({
                 onClick={onRevokeSessions}
                 disabled={isRevokingSessions}
               >
-                Sign out everywhere
+                {t('sessions.signOutEverywhere')}
               </button>
             </li>
           </ul>
@@ -57,24 +60,34 @@ export default function SessionsSection({
                   <strong>{session.deviceName}</strong>
                   <br />
                   <small className="text-body-secondary">
-                    Created {formatRelativeTime(session.sessionCreatedAt)}
+                    {t('sessions.created', { time: formatRelativeTime(session.sessionCreatedAt) })}
                     {session.lastRefreshedAt && (
-                      <> &middot; Last active {formatRelativeTime(session.lastRefreshedAt)}</>
+                      <>
+                        {' '}
+                        &middot;{' '}
+                        {t('sessions.lastActive', {
+                          time: formatRelativeTime(session.lastRefreshedAt),
+                        })}
+                      </>
                     )}
-                    <> &middot; Expires {formatRelativeTime(session.expiresAt)}</>
+                    <>
+                      {' '}
+                      &middot;{' '}
+                      {t('sessions.expires', { time: formatRelativeTime(session.expiresAt) })}
+                    </>
                   </small>
                 </>
               }
             >
               <DeleteButton
-                ariaLabel={`Revoke session ${session.deviceName}`}
+                ariaLabel={t('sessions.revoke', { name: session.deviceName })}
                 onClick={() => onRevokeSession(session.familyID)}
               />
             </ListRow>
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No active sessions</p>
+        <p className="text-body-secondary small">{t('sessions.empty')}</p>
       )}
     </>
   );

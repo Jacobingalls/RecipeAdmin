@@ -2,6 +2,7 @@ import type { FormEvent, ReactNode } from 'react';
 import { useState, useEffect } from 'react';
 
 import { adminUpdateUser } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, Button } from '../common';
 
 interface AdminUserProfileFormProps {
@@ -40,6 +41,7 @@ export default function AdminUserProfileForm({
   initialUser,
   onSaved,
 }: AdminUserProfileFormProps) {
+  const { t } = useTranslation();
   const [editUsername, setEditUsername] = useState(initialUser.username);
   const [editDisplayName, setEditDisplayName] = useState(initialUser.displayName);
   const [editEmail, setEditEmail] = useState(initialUser.email);
@@ -67,7 +69,7 @@ export default function AdminUserProfileForm({
       });
       onSaved();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : "Couldn't update this user. Try again.");
+      setEditError(err instanceof Error ? err.message : t('adminUser.updateError'));
     } finally {
       setIsEditing(false);
     }
@@ -75,9 +77,9 @@ export default function AdminUserProfileForm({
 
   return (
     <>
-      <SectionHeader title="Profile" className="mt-5">
+      <SectionHeader title={t('adminUser.profile')} className="mt-5">
         <Button type="submit" form="edit-user-form" size="sm" loading={isEditing}>
-          Save
+          {t('common.save')}
         </Button>
       </SectionHeader>
       {editError && (
@@ -87,7 +89,7 @@ export default function AdminUserProfileForm({
       )}
       <form id="edit-user-form" onSubmit={handleUpdate}>
         <div className="list-group">
-          <InlineFormField htmlFor="edit-username" label="Username">
+          <InlineFormField htmlFor="edit-username" label={t('adminUser.username')}>
             <input
               type="text"
               className="form-control form-control-sm"
@@ -98,7 +100,7 @@ export default function AdminUserProfileForm({
               required
             />
           </InlineFormField>
-          <InlineFormField htmlFor="edit-display-name" label="Display Name">
+          <InlineFormField htmlFor="edit-display-name" label={t('adminUser.displayName')}>
             <input
               type="text"
               className="form-control form-control-sm"
@@ -109,7 +111,7 @@ export default function AdminUserProfileForm({
               required
             />
           </InlineFormField>
-          <InlineFormField htmlFor="edit-email" label="Email">
+          <InlineFormField htmlFor="edit-email" label={t('adminUser.email')}>
             <input
               type="email"
               className="form-control form-control-sm"
@@ -120,7 +122,7 @@ export default function AdminUserProfileForm({
               required
             />
           </InlineFormField>
-          <InlineFormField htmlFor="edit-is-admin" label="Administrator">
+          <InlineFormField htmlFor="edit-is-admin" label={t('adminUser.administrator')}>
             <div className="form-check form-switch mb-0">
               <input
                 type="checkbox"

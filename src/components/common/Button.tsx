@@ -1,5 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
+import { useTranslation } from '../../contexts/LocaleContext';
+
 type ButtonVariant =
   | 'primary'
   | 'secondary'
@@ -42,6 +44,8 @@ export default function Button({
   children,
   ...rest
 }: ButtonProps) {
+  const { t } = useTranslation();
+
   const classes = [`btn`, `btn-${variant}`, size && `btn-${size}`, className]
     .filter(Boolean)
     .join(' ');
@@ -75,7 +79,7 @@ export default function Button({
             }}
           >
             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-            <span className="visually-hidden">Loading</span>
+            <span className="visually-hidden">{t('common.loading')}</span>
           </span>
         )}
       </span>

@@ -1,3 +1,5 @@
+import { useTranslation } from '../../contexts/LocaleContext';
+
 import CircularButton from './CircularButton';
 
 interface MoreButtonProps {
@@ -18,11 +20,13 @@ interface MoreButtonProps {
  * ```
  */
 export default function MoreButton({ ariaLabel }: MoreButtonProps) {
+  const { t } = useTranslation();
+
   return (
     <CircularButton
       data-bs-toggle="dropdown"
       aria-label={ariaLabel}
-      title="More actions"
+      title={t('common.moreActions')}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >

@@ -1,5 +1,9 @@
+import { getActiveLocale, getTranslator } from '../../i18n';
+import type { MessageKey } from '../../i18n';
+
 export interface Block {
-  name: string;
+  /** Message key for the block's display name. */
+  nameKey: MessageKey;
   icon: string;
   iconColor: string;
   coreStart: number;
@@ -7,13 +11,61 @@ export interface Block {
 }
 
 export const BLOCKS: Block[] = [
-  { name: 'Late night', icon: 'bi-moon-stars', iconColor: '#6366f1', coreStart: 0, coreEnd: 300 },
-  { name: 'Morning', icon: 'bi-sunrise', iconColor: '#f59e0b', coreStart: 300, coreEnd: 600 },
-  { name: 'Midday', icon: 'bi-sun', iconColor: '#eab308', coreStart: 600, coreEnd: 840 },
-  { name: 'Afternoon', icon: 'bi-cloud-sun', iconColor: '#f97316', coreStart: 840, coreEnd: 1020 },
-  { name: 'Evening', icon: 'bi-sunset', iconColor: '#ef4444', coreStart: 1020, coreEnd: 1260 },
-  { name: 'Night', icon: 'bi-moon', iconColor: '#8b5cf6', coreStart: 1260, coreEnd: 1440 },
+  {
+    nameKey: 'timePicker.block.lateNight',
+    icon: 'bi-moon-stars',
+    iconColor: '#6366f1',
+    coreStart: 0,
+    coreEnd: 300,
+  },
+  {
+    nameKey: 'timePicker.block.morning',
+    icon: 'bi-sunrise',
+    iconColor: '#f59e0b',
+    coreStart: 300,
+    coreEnd: 600,
+  },
+  {
+    nameKey: 'timePicker.block.midday',
+    icon: 'bi-sun',
+    iconColor: '#eab308',
+    coreStart: 600,
+    coreEnd: 840,
+  },
+  {
+    nameKey: 'timePicker.block.afternoon',
+    icon: 'bi-cloud-sun',
+    iconColor: '#f97316',
+    coreStart: 840,
+    coreEnd: 1020,
+  },
+  {
+    nameKey: 'timePicker.block.evening',
+    icon: 'bi-sunset',
+    iconColor: '#ef4444',
+    coreStart: 1020,
+    coreEnd: 1260,
+  },
+  {
+    nameKey: 'timePicker.block.night',
+    icon: 'bi-moon',
+    iconColor: '#8b5cf6',
+    coreStart: 1260,
+    coreEnd: 1440,
+  },
 ];
+
+/**
+ * Whether the active language writes clock times as 1–12 with AM/PM.
+ *
+ * Languages on a 24-hour clock get no period marker, so callers must handle an empty `period`.
+ */
+export function uses12HourClock(): boolean {
+  const { hour12, hourCycle } = new Intl.DateTimeFormat(getActiveLocale(), {
+    hour: 'numeric',
+  }).resolvedOptions();
+  return hour12 ?? (hourCycle === 'h11' || hourCycle === 'h12');
+}
 
 export const BUFFER = 30;
 
@@ -34,10 +86,17 @@ export function formatTime(totalMinutes: number): {
   const normalized = ((totalMinutes % 1440) + 1440) % 1440;
   const h24 = Math.floor(normalized / 60);
   const m = normalized % 60;
+  const minutes = m.toString().padStart(2, '0');
+
+  if (!uses12HourClock()) {
+    const display = `${h24.toString().padStart(2, '0')}:${minutes}`;
+    return { display, period: '', full: display };
+  }
+
   const period = h24 >= 12 ? 'PM' : 'AM';
   let h12 = h24 % 12;
   if (h12 === 0) h12 = 12;
-  const display = `${h12}:${m.toString().padStart(2, '0')}`;
+  const display = `${h12}:${minutes}`;
   return { display, period, full: `${display} ${period}` };
 }
 
@@ -94,10 +153,15 @@ export function tickPadding(idx: number): { left: number; right: number } {
 
 export function buildCoreTicks(block: Block): Tick[] {
   const ticks: Tick[] = [];
+  const twelveHour = uses12HourClock();
   const startHour = Math.ceil(block.coreStart / 60);
   const endHour = Math.floor(block.coreEnd / 60);
   for (let h = startHour; h <= endHour; h++) {
     const h24 = h % 24;
+    if (!twelveHour) {
+      ticks.push({ label: `${h24}:00`, minutes: h * 60 });
+      continue;
+    }
     const period = h24 >= 12 ? 'PM' : 'AM';
     let h12 = h24 % 12;
     if (h12 === 0) h12 = 12;
@@ -107,6 +171,10 @@ export function buildCoreTicks(block: Block): Tick[] {
 }
 
 export function formatBlockRange(block: Block): string {
+  if (!uses12HourClock()) {
+    return `${block.coreStart / 60} \u2013 ${block.coreEnd / 60}`;
+  }
+
   const start = formatTime(block.coreStart);
   const end = formatTime(block.coreEnd);
   const startH = start.display.split(':')[0];
@@ -120,20 +188,24 @@ export function formatBlockRange(block: Block): string {
 export function formatDayHint(dayOffset: number): string {
   const now = new Date();
   const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
-  return target.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return target.toLocaleDateString(getActiveLocale(), { month: 'short', day: 'numeric' });
 }
 
 export function formatTriggerLabel(epoch: number): string {
+  const { t } = getTranslator();
   const now = Math.floor(Date.now() / 1000);
-  if (Math.abs(now - epoch) < 60) return 'Now';
+  if (Math.abs(now - epoch) < 60) return t('timePicker.now');
 
   const { dayOffset, minutes } = epochToDayMinutes(epoch);
   const time = formatTime(minutes);
-  if (dayOffset === 0) return `Today, ${time.full}`;
-  if (dayOffset === -1) return `Yesterday, ${time.full}`;
+  if (dayOffset === 0) return t('timePicker.todayAt', { time: time.full });
+  if (dayOffset === -1) return t('timePicker.yesterdayAt', { time: time.full });
 
-  const date = new Date(epoch * 1000);
-  return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time.full}`;
+  const date = new Date(epoch * 1000).toLocaleDateString(getActiveLocale(), {
+    month: 'short',
+    day: 'numeric',
+  });
+  return t('timePicker.dateAt', { date, time: time.full });
 }
 
 export function epochToDatetimeLocal(epoch: number): string {

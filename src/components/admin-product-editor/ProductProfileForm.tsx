@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { ApiProduct } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader } from '../common';
 
 interface ProductProfileFormProps {
@@ -29,13 +30,14 @@ function InlineFormField({
 }
 
 export default function ProductProfileForm({ product, onChange }: ProductProfileFormProps) {
+  const { t } = useTranslation();
   const defaultPrepId = product.defaultPreparationID ?? product.preparations[0]?.id ?? '';
 
   return (
     <>
-      <SectionHeader title="Profile" className="mt-4" />
+      <SectionHeader title={t('editor.profile')} className="mt-4" />
       <div className="list-group">
-        <InlineFormField htmlFor="edit-product-name" label="Name">
+        <InlineFormField htmlFor="edit-product-name" label={t('common.name')}>
           <input
             type="text"
             className="form-control form-control-sm"
@@ -46,7 +48,7 @@ export default function ProductProfileForm({ product, onChange }: ProductProfile
             required
           />
         </InlineFormField>
-        <InlineFormField htmlFor="edit-product-brand" label="Brand">
+        <InlineFormField htmlFor="edit-product-brand" label={t('common.brand')}>
           <input
             type="text"
             className="form-control form-control-sm"
@@ -54,11 +56,14 @@ export default function ProductProfileForm({ product, onChange }: ProductProfile
             id="edit-product-brand"
             value={product.brand}
             onChange={(e) => onChange({ ...product, brand: e.target.value })}
-            placeholder="Optional"
+            placeholder={t('common.optional')}
           />
         </InlineFormField>
         {product.preparations.length > 0 && (
-          <InlineFormField htmlFor="edit-default-prep" label="Default preparation">
+          <InlineFormField
+            htmlFor="edit-default-prep"
+            label={t('productEditor.defaultPreparation')}
+          >
             <select
               className="form-select form-select-sm"
               style={{ maxWidth: '14rem' }}
@@ -70,7 +75,7 @@ export default function ProductProfileForm({ product, onChange }: ProductProfile
             >
               {product.preparations.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name || 'Default'}
+                  {p.name || t('editor.default')}
                 </option>
               ))}
             </select>

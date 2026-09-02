@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ApiProduct } from '../../api';
 import { adminDeleteProduct } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, TypeToConfirmModal, Button } from '../common';
 
 interface ProductDangerZoneProps {
@@ -10,6 +11,7 @@ interface ProductDangerZoneProps {
 }
 
 export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
+  const { t, raw } = useTranslation();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -22,16 +24,19 @@ export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
       await adminDeleteProduct(product.id);
       navigate('/admin/products');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete this product. Try again.");
+      setError(err instanceof Error ? err.message : t('productEditor.delete.error'));
       setShowDeleteModal(false);
     } finally {
       setIsDeleting(false);
     }
   }
 
+  // The product name is emphasized inside the sentence, so render around the placeholder.
+  const [beforeName, afterName] = raw('productEditor.delete.message').split('{name}');
+
   return (
     <>
-      <SectionHeader title="Product actions" className="mt-5" />
+      <SectionHeader title={t('productEditor.actions')} className="mt-5" />
       {error && (
         <div className="alert alert-danger py-2 small" role="alert">
           {error}
@@ -40,9 +45,9 @@ export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
       <div className="list-group border-danger">
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
-            <strong>Delete this product</strong>
+            <strong>{t('productEditor.delete.title')}</strong>
             <p className="text-body-secondary small mb-0">
-              This will permanently delete this product and all its data. This can&apos;t be undone.
+              {t('productEditor.delete.description')}
             </p>
           </div>
           <Button
@@ -52,22 +57,23 @@ export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
             style={{ minWidth: '9rem' }}
             onClick={() => setShowDeleteModal(true)}
           >
-            Delete product
+            {t('productEditor.delete.action')}
           </Button>
         </div>
       </div>
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}
-        title="Delete product"
+        title={t('productEditor.delete.modalTitle')}
         message={
           <>
-            This will permanently delete <strong>{product.name}</strong> and all its data. This
-            action can&apos;t be undone.
+            {beforeName}
+            <strong>{product.name}</strong>
+            {afterName}
           </>
         }
         itemName={product.name}
-        confirmButtonText="Delete this product"
+        confirmButtonText={t('productEditor.delete.confirm')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteModal(false)}
         isLoading={isDeleting}

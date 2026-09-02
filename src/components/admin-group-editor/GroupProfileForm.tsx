@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { ProductGroupData } from '../../domain';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader } from '../common';
 
 interface GroupProfileFormProps {
@@ -29,11 +30,13 @@ function InlineFormField({
 }
 
 export default function GroupProfileForm({ group, onChange }: GroupProfileFormProps) {
+  const { t } = useTranslation();
+
   return (
     <>
-      <SectionHeader title="Profile" className="mt-4" />
+      <SectionHeader title={t('editor.profile')} className="mt-4" />
       <div className="list-group">
-        <InlineFormField htmlFor="edit-group-name" label="Name">
+        <InlineFormField htmlFor="edit-group-name" label={t('common.name')}>
           <input
             type="text"
             className="form-control form-control-sm"
@@ -44,7 +47,7 @@ export default function GroupProfileForm({ group, onChange }: GroupProfileFormPr
             required
           />
         </InlineFormField>
-        <InlineFormField htmlFor="edit-group-brand" label="Brand">
+        <InlineFormField htmlFor="edit-group-brand" label={t('common.brand')}>
           <input
             type="text"
             className="form-control form-control-sm"
@@ -52,7 +55,7 @@ export default function GroupProfileForm({ group, onChange }: GroupProfileFormPr
             id="edit-group-brand"
             value={group.brand ?? ''}
             onChange={(e) => onChange({ ...group, brand: e.target.value })}
-            placeholder="Optional"
+            placeholder={t('common.optional')}
           />
         </InlineFormField>
       </div>

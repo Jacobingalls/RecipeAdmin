@@ -1,3 +1,5 @@
+import { useTranslation } from '../../contexts/LocaleContext';
+
 import { BLOCKS, formatBlockRange, getNowMinutes } from './timeBlocks';
 
 interface TimePickerDayProps {
@@ -7,8 +9,9 @@ interface TimePickerDayProps {
 }
 
 export default function TimePickerDay({ dayOffset, onBack, onSelectBlock }: TimePickerDayProps) {
+  const { t } = useTranslation();
   const nowMinutes = dayOffset === 0 ? getNowMinutes() : null;
-  const dayLabel = dayOffset === 0 ? 'Today' : 'Yesterday';
+  const dayLabel = t(dayOffset === 0 ? 'timePicker.today' : 'timePicker.yesterday');
 
   return (
     <>
@@ -23,7 +26,7 @@ export default function TimePickerDay({ dayOffset, onBack, onSelectBlock }: Time
           style={{ gap: '0.125rem' }}
         >
           <i className="bi bi-chevron-left" aria-hidden="true" style={{ fontSize: '0.7rem' }} />
-          <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>When</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t('timePicker.when')}</span>
         </button>
         <span
           className="position-absolute start-50 translate-middle-x fw-semibold"
@@ -38,7 +41,7 @@ export default function TimePickerDay({ dayOffset, onBack, onSelectBlock }: Time
           const isFuture = nowMinutes !== null && block.coreStart > nowMinutes;
           return (
             <button
-              key={block.name}
+              key={block.nameKey}
               type="button"
               className="d-flex align-items-center w-100 rounded-2 gap-2 text-start tp-drill-row"
               disabled={isFuture}
@@ -63,7 +66,7 @@ export default function TimePickerDay({ dayOffset, onBack, onSelectBlock }: Time
                   style={{ color: block.iconColor }}
                 />
               </span>
-              <span className="flex-grow-1">{block.name}</span>
+              <span className="flex-grow-1">{t(block.nameKey)}</span>
               <span
                 className="me-1"
                 style={{

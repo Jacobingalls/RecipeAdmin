@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { ProductGroupData } from '../../domain';
 import { adminDeleteGroup } from '../../api';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, TypeToConfirmModal, Button } from '../common';
 
 interface GroupDangerZoneProps {
@@ -10,6 +11,7 @@ interface GroupDangerZoneProps {
 }
 
 export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
+  const { t, raw } = useTranslation();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -23,18 +25,20 @@ export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
       await adminDeleteGroup(group.id);
       navigate('/admin/groups');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete this group. Try again.");
+      setError(err instanceof Error ? err.message : t('groupEditor.delete.error'));
       setShowDeleteModal(false);
     } finally {
       setIsDeleting(false);
     }
   }
 
-  const groupName = group.name ?? 'this group';
+  const groupName = group.name ?? t('groupEditor.thisGroup');
+  // The group name is emphasized inside the sentence, so render around the placeholder.
+  const [beforeName, afterName] = raw('groupEditor.delete.message').split('{name}');
 
   return (
     <>
-      <SectionHeader title="Group actions" className="mt-5" />
+      <SectionHeader title={t('groupEditor.actions')} className="mt-5" />
       {error && (
         <div className="alert alert-danger py-2 small" role="alert">
           {error}
@@ -43,10 +47,8 @@ export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
       <div className="list-group border-danger">
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
-            <strong>Delete this group</strong>
-            <p className="text-body-secondary small mb-0">
-              This will permanently delete this group and all its data. This can&apos;t be undone.
-            </p>
+            <strong>{t('groupEditor.delete.title')}</strong>
+            <p className="text-body-secondary small mb-0">{t('groupEditor.delete.description')}</p>
           </div>
           <Button
             variant="danger"
@@ -55,22 +57,23 @@ export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
             style={{ minWidth: '9rem' }}
             onClick={() => setShowDeleteModal(true)}
           >
-            Delete group
+            {t('groupEditor.delete.action')}
           </Button>
         </div>
       </div>
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}
-        title="Delete group"
+        title={t('groupEditor.delete.modalTitle')}
         message={
           <>
-            This will permanently delete <strong>{groupName}</strong> and all its data. This action
-            can&apos;t be undone.
+            {beforeName}
+            <strong>{groupName}</strong>
+            {afterName}
           </>
         }
         itemName={groupName}
-        confirmButtonText="Delete this group"
+        confirmButtonText={t('groupEditor.delete.confirm')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteModal(false)}
         isLoading={isDeleting}

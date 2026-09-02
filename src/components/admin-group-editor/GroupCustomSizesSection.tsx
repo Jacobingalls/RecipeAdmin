@@ -1,10 +1,17 @@
 import { useState, useMemo } from 'react';
 
-import type { ProductGroupData, ServingSizeType } from '../../domain';
+import type { ProductGroupData } from '../../domain';
 import { ServingSize } from '../../domain';
 import type { CustomSizeData } from '../../domain/CustomSize';
-import { massUnits, volumeUnits, energyUnits } from '../../config/unitConfig';
+import {
+  massUnits,
+  volumeUnits,
+  energyUnits,
+  servingsGroup,
+  unitGroup,
+} from '../../config/unitConfig';
 import type { OptionGroup } from '../../config/unitConfig';
+import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, DeleteButton } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';
 
@@ -17,48 +24,15 @@ interface GroupCustomSizesSectionProps {
   onChange: (group: ProductGroupData) => void;
 }
 
-const optionGroups: OptionGroup[] = [
-  {
-    label: 'Servings',
-    options: [
-      {
-        type: 'servings' as ServingSizeType,
-        value: 'servings',
-        label: 'Servings',
-        aliases: ['serving', 'servings'],
-      },
-    ],
-  },
-  {
-    label: 'Mass',
-    options: massUnits.map((u) => ({
-      type: 'mass' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-  {
-    label: 'Volume',
-    options: volumeUnits.map((u) => ({
-      type: 'volume' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-  {
-    label: 'Energy',
-    options: energyUnits.map((u) => ({
-      type: 'energy' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-];
-
 export default function GroupCustomSizesSection({ group, onChange }: GroupCustomSizesSectionProps) {
+  const { t } = useTranslation();
+  const optionGroups: OptionGroup[] = [
+    servingsGroup(),
+    unitGroup('unit.group.mass', massUnits, 'mass'),
+    unitGroup('unit.group.volume', volumeUnits, 'volume'),
+    unitGroup('unit.group.energy', energyUnits, 'energy'),
+  ];
+
   const customSizes = useMemo(() => group.customSizes ?? [], [group.customSizes]);
   const [modal, setModal] = useState<CustomSizeModal>(null);
   const existingNames = useMemo(
@@ -88,7 +62,7 @@ export default function GroupCustomSizesSection({ group, onChange }: GroupCustom
 
   return (
     <>
-      <SectionHeader title="Custom sizes" className="mt-5">
+      <SectionHeader title={t('editor.customSizes')} className="mt-5">
         <div className="dropdown">
           <button
             className="btn btn-dark btn-sm dropdown-toggle px-3"
@@ -96,19 +70,19 @@ export default function GroupCustomSizesSection({ group, onChange }: GroupCustom
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Add
+            {t('common.add')}
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
               <button className="dropdown-item" type="button" onClick={() => setModal('preset')}>
                 <i className="bi bi-list-ul me-2" aria-hidden="true" />
-                Preset size
+                {t('editor.presetSize')}
               </button>
             </li>
             <li>
               <button className="dropdown-item" type="button" onClick={() => setModal('custom')}>
                 <i className="bi bi-plus-circle me-2" aria-hidden="true" />
-                Custom size
+                {t('editor.customSize')}
               </button>
             </li>
           </ul>
@@ -137,10 +111,13 @@ export default function GroupCustomSizesSection({ group, onChange }: GroupCustom
                     groups={optionGroups}
                     value={servingSize}
                     onChange={(ss) => handleServingSizeChange(i, ss)}
-                    amountAriaLabel={`${cs.name} amount`}
-                    unitAriaLabel={`${cs.name} unit`}
+                    amountAriaLabel={t('editor.amountLabel', { name: cs.name ?? '' })}
+                    unitAriaLabel={t('editor.unitLabel', { name: cs.name ?? '' })}
                   />
-                  <DeleteButton ariaLabel={`Remove ${cs.name}`} onClick={() => handleRemove(i)} />
+                  <DeleteButton
+                    ariaLabel={t('editor.removeItem', { name: cs.name ?? '' })}
+                    onClick={() => handleRemove(i)}
+                  />
                 </div>
               </div>
             );
@@ -149,7 +126,7 @@ export default function GroupCustomSizesSection({ group, onChange }: GroupCustom
       ) : (
         <div className="card">
           <div className="card-body">
-            <p className="text-body-secondary small mb-0">No custom sizes</p>
+            <p className="text-body-secondary small mb-0">{t('editor.noCustomSizes')}</p>
           </div>
         </div>
       )}

@@ -1,3 +1,5 @@
+import { useTranslation } from '../../contexts/LocaleContext';
+
 import { epochToDatetimeLocal, datetimeLocalToEpoch } from './timeBlocks';
 
 interface TimePickerCustomProps {
@@ -7,6 +9,8 @@ interface TimePickerCustomProps {
 }
 
 export default function TimePickerCustom({ value, onChange, onBack }: TimePickerCustomProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <div
@@ -20,13 +24,13 @@ export default function TimePickerCustom({ value, onChange, onBack }: TimePicker
           style={{ gap: '0.125rem' }}
         >
           <i className="bi bi-chevron-left" aria-hidden="true" style={{ fontSize: '0.7rem' }} />
-          <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>When</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t('timePicker.when')}</span>
         </button>
         <span
           className="position-absolute start-50 translate-middle-x fw-semibold"
           style={{ fontSize: '0.85rem' }}
         >
-          Custom
+          {t('timePicker.customTitle')}
         </span>
       </div>
       <div style={{ padding: '0.75rem' }}>
@@ -39,7 +43,7 @@ export default function TimePickerCustom({ value, onChange, onBack }: TimePicker
               onChange(datetimeLocalToEpoch(e.target.value));
             }
           }}
-          aria-label="Pick a specific date and time"
+          aria-label={t('timePicker.customLabel')}
         />
       </div>
     </>

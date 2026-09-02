@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { useState, useId } from 'react';
 
+import { useTranslation } from '../../contexts/LocaleContext';
+
 import ModalBase, { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
 import Button from './Button';
 
@@ -9,6 +11,7 @@ interface TypeToConfirmModalProps {
   title: string;
   message: ReactNode;
   itemName: string;
+  /** Overrides the default "Confirm" label on the destructive button. */
   confirmButtonText?: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -41,9 +44,13 @@ function TypeToConfirmModalContent({
   onCancel,
   isLoading,
 }: Omit<TypeToConfirmModalProps, 'isOpen'>) {
+  const { t, raw } = useTranslation();
   const [confirmText, setConfirmText] = useState('');
   const titleId = useId();
   const inputId = useId();
+
+  // The name is emphasized inside the sentence, so render around the placeholder.
+  const [beforeName, afterName] = raw('confirm.typeToConfirm').split('{name}');
 
   return (
     <ModalBase onClose={onCancel} ariaLabelledBy={titleId}>
@@ -53,7 +60,9 @@ function TypeToConfirmModalContent({
       <ModalBody>
         <p>{message}</p>
         <label htmlFor={inputId} className="form-label">
-          Type <strong>{itemName}</strong> to confirm
+          {beforeName}
+          <strong>{itemName}</strong>
+          {afterName}
         </label>
         <input
           type="text"
@@ -66,7 +75,7 @@ function TypeToConfirmModalContent({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           variant="danger"
@@ -74,7 +83,7 @@ function TypeToConfirmModalContent({
           loading={isLoading}
           onClick={onConfirm}
         >
-          {confirmButtonText}
+          {confirmButtonText ?? t('confirm.confirm')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -86,7 +95,7 @@ export default function TypeToConfirmModal({
   title,
   message,
   itemName,
-  confirmButtonText = 'Confirm',
+  confirmButtonText,
   onConfirm,
   onCancel,
   isLoading = false,
