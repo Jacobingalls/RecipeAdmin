@@ -124,6 +124,11 @@ export default [
   },
   {
     files: ['src/**/*.test.{ts,tsx}'],
+    rules: {
+      // Test files grow with the number of cases they cover; splitting them by
+      // line count separates a subject from its own tests.
+      'max-lines': 'off',
+    },
     languageOptions: {
       globals: {
         describe: 'readonly',
