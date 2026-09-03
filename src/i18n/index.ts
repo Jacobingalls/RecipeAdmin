@@ -35,16 +35,16 @@ i18n
     interpolation: {
       // React escapes interpolated values already.
       escapeValue: false,
-      // A placeholder with no value renders as literal "{{amount}}" text, which is easy to
-      // ship unnoticed. Fail loudly while developing and in tests; keep rendering in
-      // production rather than taking the page down over a formatting slip.
-      missingInterpolationHandler: (text: string, match: unknown) => {
-        const placeholder = Array.isArray(match) ? String(match[0]) : String(match);
-        if (import.meta.env.DEV) {
-          throw new Error(`No value supplied for ${placeholder} in message: ${text}`);
-        }
-        return placeholder;
-      },
+    },
+    // A placeholder with no value renders as literal "{{amount}}" text, which is easy to
+    // ship unnoticed. Fail loudly while developing and in tests; keep rendering in
+    // production rather than taking the page down over a formatting slip.
+    missingInterpolationHandler: (text: string, match: unknown) => {
+      const placeholder = Array.isArray(match) ? String(match[0]) : String(match);
+      if (import.meta.env.DEV) {
+        throw new Error(`No value supplied for ${placeholder} in message: ${text}`);
+      }
+      return placeholder;
     },
   });
 
