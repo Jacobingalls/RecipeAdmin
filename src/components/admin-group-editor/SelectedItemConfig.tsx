@@ -31,7 +31,7 @@ export default function SelectedItemConfig({
     : (group?.name ?? t('groupItem.group'));
   const brand = product ? product.brand : group?.brand;
   const icon = product ? 'bi-box-seam' : 'bi-collection';
-  const preps = product?.preparations ?? [];
+  const preps = useMemo(() => product?.preparations ?? [], [product]);
 
   const selectorGroups = useMemo(() => {
     if (product) {
