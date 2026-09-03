@@ -44,7 +44,7 @@ const sharedRules = {
   'prefer-destructuring': ['error', { object: true, array: false }],
   'prefer-arrow-callback': 'error',
   'no-param-reassign': ['error', { props: false }],
-  'no-console': 'warn',
+  'no-console': ['warn', { allow: ['warn', 'error'] }],
   'no-nested-ternary': 'error',
   eqeqeq: ['error', 'always', { null: 'ignore' }],
   curly: ['error', 'multi-line'],
