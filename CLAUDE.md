@@ -17,6 +17,30 @@ npm run format:check # Check formatting without writing
 
 **Do not commit unless explicitly asked.** When asked to commit, use the `commit-writer` agent.
 
+## Deployment
+
+`.github/workflows/`:
+
+- `checks.yml` — lint, format, type-check, test, build. Runs on every pull
+  request, and is called by `release.yml` so the deploy path runs the same gate.
+- `build-image.yml` — reusable (`workflow_call`) multi-arch build and push to
+  GHCR. Separate from `release.yml` so the other RecipeKit repos can call it.
+- `release.yml` — runs on every merge to `main`. Derives the next version from
+  the bare `X.Y.Z` tag list (patch by default; `workflow_dispatch` takes a
+  `bump` input for minor and major), builds and pushes the image, rewrites the
+  image in `k8s/base/admin/deployment.yaml`, then commits `Deploy X.Y.Z`, tags,
+  and pushes. ArgoCD syncs `k8s/overlays/production` from `main`.
+
+The deploy commit is pushed with the default `GITHUB_TOKEN`, and pushes made
+with that token do not trigger workflows — that is what keeps a release from
+re-triggering itself.
+
+The Dockerfile's build stage is pinned to `$BUILDPLATFORM` because it emits
+architecture-independent static files: `npm ci` and `vite build` run once
+rather than once per target architecture.
+
+`deploy.sh` is the local break-glass equivalent and is kept in sync by hand.
+
 ## Code Standards
 
 ### Writing style

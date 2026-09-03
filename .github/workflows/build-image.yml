@@ -1,0 +1,76 @@
+# Reusable multi-arch image build. Kept separate from release.yml so other
+# repositories in the RecipeKit set can call it with their own image name.
+name: Build image
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Fully qualified image name, without a tag.
+        required: true
+        type: string
+      version:
+        description: Version to tag the image with, e.g. 0.0.42.
+        required: true
+        type: string
+      platforms:
+        description: Comma-separated buildx platform list.
+        type: string
+        default: linux/amd64,linux/arm64
+      tag-latest:
+        description: Also move the :latest tag to this build.
+        type: boolean
+        default: true
+      push:
+        description: Push to the registry. Set false to build only.
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: commit
+        run: echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Needed for the arm64 leg: the runtime stage runs a RUN instruction.
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ inputs.image }}
+          tags: |
+            type=raw,value=${{ inputs.version }}
+            type=raw,value=latest,enable=${{ inputs.tag-latest }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ inputs.platforms }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          build-args: |
+            VERSION=${{ inputs.version }}
+            GIT_COMMIT=${{ steps.commit.outputs.short }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Off to keep the manifest shape identical to deploy.sh's output.
+          # Set to mode=max to start publishing build attestations.
+          provenance: false
