@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { adminGetGroup, adminUpsertGroups, resolveIndirectGroup } from '../api';
 import type { IndirectGroup } from '../api';
 import type { ProductGroupData } from '../domain';
-import type { Note } from '../components/NotesDisplay';
 import { useApiQuery } from '../hooks';
 import { LoadingState, ErrorState, ContentUnavailableView, Button } from '../components/common';
 import { NotesSection } from '../components/admin-product-editor';
@@ -105,7 +104,7 @@ export default function AdminGroupEditorPage() {
     }
   }
 
-  const notes = (group?.notes ?? []) as Note[];
+  const notes = group?.notes ?? [];
 
   return (
     <>

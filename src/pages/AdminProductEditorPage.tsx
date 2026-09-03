@@ -12,7 +12,6 @@ import {
   SectionHeader,
   Button,
 } from '../components/common';
-import type { Note } from '../components/NotesDisplay';
 import {
   ProductProfileForm,
   ProductDangerZone,
@@ -94,7 +93,7 @@ export default function AdminProductEditorPage() {
   }
 
   const preparations = product?.preparations ?? [];
-  const notes = (product?.notes ?? []) as Note[];
+  const notes = product?.notes ?? [];
   const defaultPrepId = product?.defaultPreparationID ?? preparations[0]?.id;
   const activePrepId = activePrep ?? defaultPrepId;
 

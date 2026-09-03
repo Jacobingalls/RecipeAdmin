@@ -6,7 +6,6 @@ import type { BarcodeData } from '../../domain';
 import { ServingSize } from '../../domain';
 import i18n from '../../i18n';
 import { formatSignificant } from '../../utils';
-import type { Note } from '../NotesDisplay';
 import {
   SectionHeader,
   Button,
@@ -46,7 +45,7 @@ function BarcodeRow({
 }) {
   const { t } = useTranslation();
   const servingSize = ServingSize.fromObject(barcode.servingSize) ?? ServingSize.servings(1);
-  const notes = (barcode.notes ?? []) as Note[];
+  const notes = barcode.notes ?? [];
   const hasExplicitPrep = !!barcode.preparationID;
   const resolvedPrepData = resolvePrep(barcode, product);
   const prepName = hasExplicitPrep ? resolvedPrepData?.name : undefined;

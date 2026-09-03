@@ -1,3 +1,4 @@
+import type { Note } from './Note';
 import type { NutritionInformationData } from './NutritionInformation';
 import { NutritionInformation } from './NutritionInformation';
 import type { NutritionUnitData } from './NutritionUnit';
@@ -17,7 +18,7 @@ export interface PreparationData {
   servingSizeDescription?: string | null;
   defaultServingSize?: ServingSizeData;
   categories?: string[];
-  notes?: string[];
+  notes?: Note[];
 }
 
 /**
@@ -36,7 +37,7 @@ export class Preparation {
   customSizes: CustomSize[];
   servingSizeDescription: string | null;
   categories: string[];
-  notes: string[];
+  notes: Note[];
 
   constructor(data: PreparationData = {}) {
     this.id = data.id;

@@ -1,5 +1,6 @@
 import { formatSignificant } from '../utils';
 
+import type { Note } from './Note';
 import type { ServingSizeData } from './ServingSize';
 import { ServingSize } from './ServingSize';
 import type { NutritionUnit } from './NutritionUnit';
@@ -9,7 +10,7 @@ export interface CustomSizeData {
   name?: string;
   singularName?: string;
   pluralName?: string;
-  notes?: string[];
+  notes?: Note[];
   servingSize?: ServingSizeData;
   servings?: number;
 }
@@ -22,7 +23,7 @@ export class CustomSize {
   name: string;
   singularName: string;
   pluralName: string;
-  notes: string[];
+  notes: Note[];
   servingSize: ServingSize;
 
   constructor(data: CustomSizeData = {}) {

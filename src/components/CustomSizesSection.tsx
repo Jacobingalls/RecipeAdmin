@@ -4,7 +4,6 @@ import type { CustomSize } from '../domain';
 import { ServingSize } from '../domain';
 
 import { SubsectionTitle } from './common';
-import type { Note } from './NotesDisplay';
 import NotesDisplay from './NotesDisplay';
 
 interface CustomSizesSectionProps {
@@ -54,7 +53,7 @@ function CustomSizeItem({ customSize, onSelect }: CustomSizeItemProps) {
         </div>
         {hasNotes && (
           <div className="mt-1">
-            <NotesDisplay notes={notes as Note[]} />
+            <NotesDisplay notes={notes} />
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import type {
   BarcodeData,
   CustomSizeData,
   GroupItem,
+  Note,
   NutritionUnitData,
   PreparationData,
   ProductGroupData,
@@ -21,7 +22,7 @@ export interface ApiProduct {
   defaultPreparationID?: string;
   // Absent on responses that carry none; every consumer normalises with `?? []`.
   barcodes?: BarcodeData[];
-  notes?: unknown[];
+  notes?: Note[];
 }
 
 export interface ApiLookupItem {
@@ -917,7 +918,7 @@ export interface IndirectGroup {
   defaultServingSize?: ServingSizeData | null;
   barcodes?: BarcodeData[];
   categories?: string[];
-  notes?: unknown[];
+  notes?: Note[];
 }
 
 function groupItemToIndirect(item: GroupItem): IndirectGroupItem {

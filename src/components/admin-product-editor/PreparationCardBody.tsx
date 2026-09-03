@@ -1,6 +1,5 @@
 import type { ApiProduct } from '../../api';
 import type { PreparationData } from '../../domain';
-import type { Note } from '../NotesDisplay';
 
 import NotesSection from './NotesSection';
 import PreparationServingSection from './PreparationServingSection';
@@ -26,7 +25,7 @@ export default function PreparationCardBody({
   const prep = preparations.find((p) => p.id === preparationId);
   if (!prep) return null;
 
-  const notes = (prep.notes ?? []) as Note[];
+  const notes = prep.notes ?? [];
 
   return (
     <>

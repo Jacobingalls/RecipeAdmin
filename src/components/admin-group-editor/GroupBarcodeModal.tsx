@@ -30,7 +30,7 @@ export default function GroupBarcodeModal({
     (barcode?.servingSize ? ServingSize.fromObject(barcode.servingSize) : null) ??
       ServingSize.servings(1),
   );
-  const [notesState, setNotesState] = useState<Note[]>((barcode?.notes ?? []) as Note[]);
+  const [notesState, setNotesState] = useState<Note[]>(barcode?.notes ?? []);
 
   const pg = new ProductGroup(group);
   const selectorGroups = buildOptionGroups(pg) ?? buildFallbackOptionGroups();

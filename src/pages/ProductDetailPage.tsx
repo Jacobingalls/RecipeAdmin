@@ -16,7 +16,6 @@ import {
 import { PreparationDetails } from '../components/product';
 import BarcodeSection from '../components/BarcodeSection';
 import NotesDisplay from '../components/NotesDisplay';
-import type { Note } from '../components/NotesDisplay';
 import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
@@ -81,9 +80,9 @@ export default function ProductDetailPage() {
           <h1 className="mb-1">{product.name}</h1>
           <CategoryPaths categoryIds={currentPrep?.categories ?? []} />
 
-          {(product.notes as Note[] | undefined)?.length ? (
+          {product.notes?.length ? (
             <div className="mb-3">
-              <NotesDisplay notes={product.notes as Note[]} />
+              <NotesDisplay notes={product.notes} />
             </div>
           ) : null}
 

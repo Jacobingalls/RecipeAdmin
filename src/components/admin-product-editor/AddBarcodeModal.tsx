@@ -39,7 +39,7 @@ export default function BarcodeModal({ product, barcode, onSave, onClose }: Barc
     (barcode?.servingSize ? ServingSize.fromObject(barcode.servingSize) : null) ??
       ServingSize.servings(1),
   );
-  const [notesState, setNotesState] = useState<Note[]>((barcode?.notes ?? []) as Note[]);
+  const [notesState, setNotesState] = useState<Note[]>(barcode?.notes ?? []);
 
   const preps = product.preparations ?? [];
   const draftBarcode: BarcodeData = { code, preparationID: prepId };
