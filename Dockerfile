@@ -1,5 +1,8 @@
 # Stage 1: Build the React application
-FROM node:20-alpine AS builder
+# The build stage emits architecture-independent static files, so pin it to the
+# native platform: npm ci and vite build then run once instead of once per
+# target architecture.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
 LABEL org.opencontainers.image.source=https://github.com/Jacobingalls/RecipeAdmin
 
 WORKDIR /app

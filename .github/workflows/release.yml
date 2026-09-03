@@ -1,0 +1,111 @@
+# Replaces deploy.sh: build and push the image, then point the k8s manifest at
+# it and tag the commit. ArgoCD watches main and syncs from there.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which version part to increment.
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+# One release at a time, and never cancel one part-way through: a cancelled run
+# can leave an image pushed with no matching tag or manifest bump.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+      image: ${{ steps.next.outputs.image }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the next version is derived from the tag list
+
+      - id: next
+        env:
+          # github.event.inputs is null on push and populated on dispatch, so
+          # this defaults to patch on a merge without needing the inputs context.
+          BUMP: ${{ github.event.inputs.bump || 'patch' }}
+        run: |
+          image=ghcr.io/jacobingalls/recipe-admin
+          latest=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+          if [ -z "$latest" ]; then
+            version=0.0.1
+          else
+            IFS='.' read -r major minor patch <<< "$latest"
+            case "$BUMP" in
+              major) version="$((major + 1)).0.0" ;;
+              minor) version="$major.$((minor + 1)).0" ;;
+              patch) version="$major.$minor.$((patch + 1))" ;;
+              *) echo "::error::Unknown bump '$BUMP'"; exit 1 ;;
+            esac
+          fi
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "::error::Tag $version already exists"
+            exit 1
+          fi
+          echo "${latest:-none} -> $version ($BUMP)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+  checks:
+    uses: ./.github/workflows/checks.yml
+
+  build:
+    needs: [plan, checks]
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: ${{ needs.plan.outputs.image }}
+      version: ${{ needs.plan.outputs.version }}
+
+  deploy:
+    needs: [plan, build]
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE: ${{ needs.plan.outputs.image }}
+      VERSION: ${{ needs.plan.outputs.version }}
+      MANIFEST: k8s/base/admin/deployment.yaml
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Point the deployment at the new image
+        run: |
+          sed -i "s|image: $IMAGE:.*|image: $IMAGE:$VERSION|" "$MANIFEST"
+          if git diff --quiet -- "$MANIFEST"; then
+            echo "::error::No image line in $MANIFEST matched $IMAGE"
+            exit 1
+          fi
+          git diff -- "$MANIFEST"
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$MANIFEST"
+          git commit -m "Deploy $VERSION"
+          git tag "$VERSION"
+          git push origin "HEAD:${{ github.ref_name }}"
+          git push origin "$VERSION"
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployed \`$VERSION\`"
+            echo
+            echo "- Image: \`$IMAGE:$VERSION\` (also tagged \`latest\`)"
+            echo "- Platforms: \`linux/amd64\`, \`linux/arm64\`"
+            echo "- ArgoCD syncs this from \`${{ github.ref_name }}\`."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -23,12 +23,16 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## Deploying
 
-Build and push Docker image:
+Merging to `main` deploys. The Release workflow builds the image for
+`linux/amd64` and `linux/arm64`, pushes it to
+`ghcr.io/jacobingalls/recipe-admin` as both the new version and `latest`,
+points `k8s/base/admin/deployment.yaml` at it, and pushes the version tag.
+ArgoCD picks it up from there.
 
-```bash
-docker build -t ghcr.io/jacobingalls/recipe-admin:0.0.1 .
-docker push ghcr.io/jacobingalls/recipe-admin:0.0.1
-```
+Versions increment the patch number. To cut a minor or major release, run the
+Release workflow from the Actions tab and choose the part to increment.
+
+`deploy.sh` does the same thing from a laptop, for when the workflow can't.
 
 ## ArgoCD
 

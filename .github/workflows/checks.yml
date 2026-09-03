@@ -1,0 +1,38 @@
+name: Checks
+
+on:
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # --legacy-peer-deps matches the Dockerfile: @types/react 19 against react 18.
+      - run: npm ci --legacy-peer-deps
+
+      - run: npm run lint
+
+      - run: npm run format:check
+
+      - run: npm run type-check
+
+      - run: npm test
+
+      # The image build runs this too; failing here surfaces it on the PR
+      # instead of part-way through a release.
+      - run: npm run build
