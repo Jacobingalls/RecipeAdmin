@@ -3,7 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import type { ApiLogEntry, ApiProduct } from '../../api';
-import type { NutritionInformation, ProductGroupData } from '../../domain';
+import type { ProductGroupData } from '../../domain';
+import { NutritionInformation } from '../../domain';
 
 import HistoryDayGroup from './HistoryDayGroup';
 
@@ -83,9 +84,9 @@ const defaultGroupDetails: Record<string, ProductGroupData> = {};
 
 const defaultNutritionById = new Map<string, NutritionInformation>();
 
-const defaultDayNutrition: NutritionInformation = {
+const defaultDayNutrition = new NutritionInformation({
   calories: { amount: 450, unit: 'kcal' },
-};
+});
 
 describe('HistoryDayGroup', () => {
   const entries = [makeEntry('e1'), makeEntry('e2')];

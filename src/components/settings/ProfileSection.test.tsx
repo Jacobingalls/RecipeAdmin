@@ -38,6 +38,9 @@ function setupAuth(user = defaultUser) {
     logout: vi.fn(),
     updateUser: mockUpdateUser,
     refreshSession: mockRefreshSession,
+    apiVersion: null,
+    apiGitCommit: null,
+    apiEnvironment: null,
   });
 }
 

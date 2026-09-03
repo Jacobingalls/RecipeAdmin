@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
+import type { AdminUserListItem } from '../../api';
 import * as api from '../../api';
 
 import AdminUserProfileForm from './AdminUserProfileForm';
@@ -15,6 +16,18 @@ const defaultInitialUser = {
   displayName: 'Alice',
   email: 'alice@example.com',
   isAdmin: true,
+};
+
+const updatedUser: AdminUserListItem = {
+  id: 'u1',
+  username: 'bob',
+  displayName: 'Bob',
+  email: 'bob@test.com',
+  isAdmin: true,
+  createdAt: null,
+  lastLoginAt: null,
+  passkeyCount: 0,
+  apiKeyCount: 0,
 };
 
 const onSaved = vi.fn();
@@ -77,7 +90,7 @@ describe('AdminUserProfileForm', () => {
   });
 
   it('submits updated values and calls onSaved', async () => {
-    mockUpdateUser.mockResolvedValue(undefined);
+    mockUpdateUser.mockResolvedValue(updatedUser);
     renderForm();
 
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'bob' } });
@@ -129,7 +142,7 @@ describe('AdminUserProfileForm', () => {
     });
     expect(screen.getByRole('alert')).toBeInTheDocument();
 
-    mockUpdateUser.mockResolvedValueOnce(undefined);
+    mockUpdateUser.mockResolvedValueOnce(updatedUser);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     });

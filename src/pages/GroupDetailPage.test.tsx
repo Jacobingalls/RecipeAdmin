@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
@@ -73,7 +74,7 @@ vi.mock('../components/AddToLogButton', () => ({
 const mockUseApiQuery = vi.mocked(useApiQuery);
 const mockUseServingSizeParams = vi.mocked(useServingSizeParams);
 
-let mockSetServingSize: ReturnType<typeof vi.fn>;
+let mockSetServingSize: Mock<(ss: ServingSize) => void>;
 
 function renderWithRoute(route: string) {
   return render(

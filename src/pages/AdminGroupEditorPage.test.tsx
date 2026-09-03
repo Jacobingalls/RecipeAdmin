@@ -194,7 +194,7 @@ describe('AdminGroupEditorPage', () => {
 
   it('hides brand spacer when no brand is present', async () => {
     mockResolveIndirectGroup.mockResolvedValue({ ...sampleGroup, brand: undefined });
-    mockQuery({ data: { ...sampleIndirectGroup, brand: undefined } });
+    mockQuery({ data: { ...sampleIndirectGroup, brand: '' } });
     renderWithRoute('/admin/groups/g1');
     await waitFor(() => {
       expect(screen.getByTestId('group-profile-form')).toBeInTheDocument();

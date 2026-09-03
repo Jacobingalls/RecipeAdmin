@@ -38,7 +38,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('renders fallback message when error has no message', () => {
-    function ThrowNull() {
+    function ThrowNull(): never {
       throw Object.assign(new Error(), { message: '' });
     }
 

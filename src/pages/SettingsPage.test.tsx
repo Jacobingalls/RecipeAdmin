@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { PasskeyInfo, APIKeyInfo, SessionInfo } from '../api';
@@ -169,6 +170,9 @@ describe('SettingsPage', () => {
       logout: mockLogout,
       updateUser: mockUpdateUser,
       refreshSession: mockRefreshSession,
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
     });
   });
 
@@ -319,7 +323,10 @@ describe('SettingsPage', () => {
   });
 
   it('adds passkey and refetches', async () => {
-    mockBegin.mockResolvedValue({ options: { challenge: 'abc' }, sessionID: 'sess-1' });
+    mockBegin.mockResolvedValue({
+      options: { challenge: 'abc' } as PublicKeyCredentialCreationOptionsJSON,
+      sessionID: 'sess-1',
+    });
     mockFinish.mockResolvedValue({
       id: 'pk2',
       name: 'New Passkey',

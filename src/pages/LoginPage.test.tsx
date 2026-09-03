@@ -42,6 +42,10 @@ describe('LoginPage', () => {
       loginWithPasskey: mockLoginWithPasskey,
       logout: vi.fn(),
       updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
   });
 
@@ -100,6 +104,10 @@ describe('LoginPage', () => {
       loginWithPasskey: mockLoginWithPasskey,
       logout: vi.fn(),
       updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
     expect(screen.getByRole('status')).toBeInTheDocument();
@@ -122,6 +130,10 @@ describe('LoginPage', () => {
       loginWithPasskey: mockLoginWithPasskey,
       logout: vi.fn(),
       updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
     expect(screen.queryByRole('heading', { name: 'Recipe Admin' })).not.toBeInTheDocument();

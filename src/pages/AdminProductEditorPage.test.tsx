@@ -103,7 +103,7 @@ vi.mock('../components/admin-product-editor', () => ({
       <button
         data-testid="add-barcode-btn"
         onClick={() =>
-          onChange({ ...product, barcodes: [...product.barcodes, { code: 'NEW-BC' }] })
+          onChange({ ...product, barcodes: [...(product.barcodes ?? []), { code: 'NEW-BC' }] })
         }
       >
         Add barcode

@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { ApiGroupSummary } from '../api';
+import type { ProductGroupData } from '../domain';
 import { useApiQuery } from '../hooks';
 
 import GroupsPage from './GroupsPage';
@@ -36,19 +36,23 @@ function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
 
-function mockQuery(overrides: Partial<UseApiQueryResult<ApiGroupSummary[]>>) {
+function mockQuery(overrides: Partial<UseApiQueryResult<ProductGroupData[]>>) {
   mockUseApiQuery.mockReturnValue({
     data: null,
     loading: false,
     error: null,
     refetch: vi.fn(),
     ...overrides,
-  } as UseApiQueryResult<ApiGroupSummary[]>);
+  } as UseApiQueryResult<ProductGroupData[]>);
 }
 
-const sampleGroups: ApiGroupSummary[] = [
-  { id: 'g1', name: 'Breakfast', items: [{ id: 'i1' }, { id: 'i2' }] },
-  { id: 'g2', name: 'Lunch', items: [{ id: 'i3' }] },
+const sampleGroups: ProductGroupData[] = [
+  {
+    id: 'g1',
+    name: 'Breakfast',
+    items: [{ product: { id: 'i1' } }, { product: { id: 'i2' } }],
+  },
+  { id: 'g2', name: 'Lunch', items: [{ product: { id: 'i3' } }] },
   { id: 'g3', name: 'Dinner', items: [] },
 ];
 

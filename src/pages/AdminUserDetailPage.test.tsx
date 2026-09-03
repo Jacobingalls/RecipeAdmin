@@ -42,6 +42,7 @@ const mockCreateAPIKey = vi.mocked(api.adminCreateUserAPIKey);
 const mockRevokeSessions = vi.mocked(api.adminRevokeUserSessions);
 
 const sampleUser: AdminUserDetail = {
+  sessions: [],
   id: 'u1',
   username: 'alice',
   displayName: 'Alice',

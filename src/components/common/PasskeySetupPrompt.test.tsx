@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser';
 
 import * as api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -56,6 +57,10 @@ describe('PasskeySetupPrompt', () => {
       loginWithPasskey: vi.fn(),
       logout: vi.fn(),
       updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
   });
 
@@ -82,6 +87,10 @@ describe('PasskeySetupPrompt', () => {
       loginWithPasskey: vi.fn(),
       logout: vi.fn(),
       updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
     const { container } = render(<PasskeySetupPrompt />);
     expect(container.innerHTML).toBe('');
@@ -96,6 +105,10 @@ describe('PasskeySetupPrompt', () => {
       loginWithPasskey: vi.fn(),
       logout: vi.fn(),
       updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
     const { container } = render(<PasskeySetupPrompt />);
     expect(container.innerHTML).toBe('');
@@ -117,7 +130,10 @@ describe('PasskeySetupPrompt', () => {
   });
 
   it('setup button triggers registration flow', async () => {
-    mockBegin.mockResolvedValue({ options: { challenge: 'abc' }, sessionID: 'sess-1' });
+    mockBegin.mockResolvedValue({
+      options: { challenge: 'abc' } as PublicKeyCredentialCreationOptionsJSON,
+      sessionID: 'sess-1',
+    });
     mockFinish.mockResolvedValue({
       id: 'pk-1',
       name: 'Passkey',

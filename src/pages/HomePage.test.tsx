@@ -63,6 +63,10 @@ describe('HomePage', () => {
       loginWithPasskey: vi.fn(),
       updateUser: vi.fn(),
       logout: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      refreshSession: vi.fn(),
     });
     renderWithRouter(<HomePage />);
     const heading = screen.getByRole('heading', { level: 1 });

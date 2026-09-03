@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { UseHistoryDataResult } from '../../hooks/useHistoryData';
-import type { ApiLogEntry } from '../../api';
+import type { ApiLogEntry, ApiProduct } from '../../api';
 import { NutritionInformation } from '../../domain';
 
 import TodayTile from './TodayTile';
@@ -86,9 +86,9 @@ vi.mock('../LogModal', () => ({
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 const { useHistoryData } = vi.mocked(await import('../../hooks'));
 
-const sampleProductDetails: Record<string, { id: string; name: string; brand?: string }> = {
-  p1: { id: 'p1', name: 'Oats' },
-  p2: { id: 'p2', name: 'Milk' },
+const sampleProductDetails: Record<string, ApiProduct> = {
+  p1: { id: 'p1', name: 'Oats', preparations: [] },
+  p2: { id: 'p2', name: 'Milk', preparations: [] },
 };
 
 const sampleGroupDetails: Record<string, { id: string; name: string }> = {
@@ -306,7 +306,7 @@ describe('TodayTile', () => {
       logs: [sampleLogs[0]],
       productDetails: sampleProductDetails,
       groupDetails: sampleGroupDetails,
-      logTarget: mockTarget as UseHistoryDataResult['logTarget'],
+      logTarget: mockTarget as unknown as UseHistoryDataResult['logTarget'],
     });
     renderTile();
     expect(screen.getByTestId('log-modal')).toBeInTheDocument();
