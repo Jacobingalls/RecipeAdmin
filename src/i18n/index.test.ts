@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { messages } from './messages';
+
 import i18n, {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -13,8 +15,9 @@ import i18n, {
 
 describe('isLocale', () => {
   it('accepts shipped languages', () => {
-    expect(isLocale('en')).toBe(true);
-    expect(isLocale('nl')).toBe(true);
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(isLocale(locale), locale).toBe(true);
+    }
   });
 
   it('rejects anything else', () => {
@@ -37,10 +40,15 @@ describe('translations', () => {
     await i18n.changeLanguage(DEFAULT_LOCALE);
   });
 
-  it('reads messages in the active language', async () => {
+  it.each([
+    ['nl', 'Opslaan'],
+    ['sv', 'Spara'],
+    ['da', 'Gem'],
+    ['es', 'Guardar'],
+  ] as const)('reads messages in the active language (%s)', async (locale, save) => {
     expect(i18n.t('common.save')).toBe('Save');
-    await i18n.changeLanguage('nl');
-    expect(i18n.t('common.save')).toBe('Opslaan');
+    await i18n.changeLanguage(locale);
+    expect(i18n.t('common.save')).toBe(save);
   });
 
   it('treats dots in keys as part of the key, not a path', () => {
@@ -62,6 +70,16 @@ describe('translations', () => {
     expect(i18n.t('format.servings', { count: 2.5, amount: 2.5 })).toBe('2.5 servings');
     await i18n.changeLanguage('nl');
     expect(i18n.t('format.servings', { count: 3, amount: 3 })).toBe('3 porties');
+  });
+
+  it.each([
+    ['sv', '1 portion', '3 portioner'],
+    ['da', '1 portion', '3 portioner'],
+    ['es', '1 ración', '3 raciones'],
+  ] as const)('picks singular and plural forms in %s', async (locale, one, other) => {
+    await i18n.changeLanguage(locale);
+    expect(i18n.t('format.servings', { count: 1, amount: 1 })).toBe(one);
+    expect(i18n.t('format.servings', { count: 3, amount: 3 })).toBe(other);
   });
 
   it('shows the caller-formatted number while still selecting on the real count', () => {
@@ -88,6 +106,8 @@ describe('getActiveLocale', () => {
   it('resolves a regional language to the catalog it uses', async () => {
     await i18n.changeLanguage('nl-BE');
     expect(getActiveLocale()).toBe('nl');
+    await i18n.changeLanguage('es-MX');
+    expect(getActiveLocale()).toBe('es');
   });
 
   it('falls back to the default for a language the app does not ship', async () => {
@@ -128,10 +148,15 @@ describe('language preference', () => {
     expect(getActiveLocale()).toBe('en');
   });
 
-  it('follows a Dutch browser when no language is pinned', async () => {
-    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['nl-NL', 'en']);
+  it.each([
+    [['nl-NL', 'en'], 'nl'],
+    [['sv-SE', 'en'], 'sv'],
+    [['da-DK', 'en'], 'da'],
+    [['es-ES', 'en'], 'es'],
+  ] as const)('follows the browser languages %s when none is pinned', async (languages, locale) => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue([...languages]);
     await setLocalePreference('system');
-    expect(getActiveLocale()).toBe('nl');
+    expect(getActiveLocale()).toBe(locale);
   });
 
   it('falls back to the default when the browser asks for a language we do not ship', async () => {
@@ -163,6 +188,10 @@ describe('language preference', () => {
 
 describe('SUPPORTED_LOCALES', () => {
   it('lists English first so it reads as the source language', () => {
-    expect(SUPPORTED_LOCALES).toEqual(['en', 'nl']);
+    expect(SUPPORTED_LOCALES[0]).toBe('en');
+  });
+
+  it('offers every language the app has a catalog for', () => {
+    expect([...SUPPORTED_LOCALES].sort()).toEqual(Object.keys(messages).sort());
   });
 });

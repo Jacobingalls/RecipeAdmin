@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enTimePicker } from '../en/timePicker';
 
-export const nlTimePicker: Record<keyof typeof enTimePicker, string> = {
+export const nlTimePicker: Translations<typeof enTimePicker> = {
   'timePicker.block.lateNight': 'Late nacht',
   'timePicker.block.morning': 'Ochtend',
   'timePicker.block.midday': 'Middag',

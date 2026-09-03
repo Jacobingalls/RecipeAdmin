@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enFormats } from '../en/formats';
 
-export const nlFormats: Record<keyof typeof enFormats, string> = {
+export const nlFormats: Translations<typeof enFormats> = {
   'format.servings_one': '{{amount}} portie',
   'format.servings_other': '{{amount}} porties',
   // A custom size name comes from the data, so it can't be pluralized reliably.

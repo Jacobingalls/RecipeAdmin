@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enSettings } from '../en/settings';
 
-export const nlSettings: Record<keyof typeof enSettings, string> = {
+export const nlSettings: Translations<typeof enSettings> = {
   'settings.title': 'Instellingen',
   'settings.error.passkeys': 'We konden je passkeys niet laden.',
   'settings.error.apiKeys': 'We konden je API-sleutels niet laden.',
@@ -20,5 +21,8 @@ export const nlSettings: Record<keyof typeof enSettings, string> = {
   'language.selectLabel': 'Taal',
   'language.system': 'Browsertaal volgen',
   'language.name.en': 'English',
+  'language.name.da': 'Dansk',
+  'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
+  'language.name.sv': 'Svenska',
 };

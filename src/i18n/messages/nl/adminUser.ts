@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enAdminUser } from '../en/adminUser';
 
-export const nlAdminUser: Record<keyof typeof enAdminUser, string> = {
+export const nlAdminUser: Translations<typeof enAdminUser> = {
   'adminUser.error': 'We konden deze gebruiker niet laden. Probeer het later opnieuw.',
   'adminUser.notFound': 'Gebruiker niet gevonden',
   'adminUser.created': 'Aangemaakt op {{date}}',

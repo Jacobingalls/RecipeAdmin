@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enAuth } from '../en/auth';
 
-export const nlAuth: Record<keyof typeof enAuth, string> = {
+export const nlAuth: Translations<typeof enAuth> = {
   'login.signInWithPasskey': 'Inloggen met passkey',
   'login.signInWithApiKey': 'Inloggen met API-sleutel',
   'login.usernameOrEmail': 'Gebruikersnaam of e-mailadres',

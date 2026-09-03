@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enHome } from '../en/home';
 
-export const nlHome: Record<keyof typeof enHome, string> = {
+export const nlHome: Translations<typeof enHome> = {
   'home.greeting.morning': 'Goedemorgen',
   'home.greeting.afternoon': 'Goedemiddag',
   'home.greeting.evening': 'Goedenavond',

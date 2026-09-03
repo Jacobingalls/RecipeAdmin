@@ -2,15 +2,11 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-import { en } from './messages/en';
-import { nl } from './messages/nl';
-import type { Locale, LocalePreference } from './types';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales';
+import type { Locale, LocalePreference } from './locales';
+import { messages } from './messages';
 
-/** Languages offered in the language picker, in display order. */
-export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'nl'];
-
-/** Used when no preference is stored and the browser asks for a language we don't ship. */
-export const DEFAULT_LOCALE: Locale = 'en';
+export { DEFAULT_LOCALE, SUPPORTED_LOCALES };
 
 export const LOCALE_STORAGE_KEY = 'recipeadmin.locale';
 
@@ -18,10 +14,9 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: en },
-      nl: { translation: nl },
-    },
+    resources: Object.fromEntries(
+      Object.entries(messages).map(([locale, catalog]) => [locale, { translation: catalog }]),
+    ),
     fallbackLng: DEFAULT_LOCALE,
     supportedLngs: SUPPORTED_LOCALES,
     // Message keys are flat and contain dots ("settings.title"), so dots must not be
@@ -111,5 +106,6 @@ function browserLocale(): Locale {
   return DEFAULT_LOCALE;
 }
 
-export type { Locale, LocalePreference, TranslationValues } from './types';
+export type { Locale, LocalePreference } from './locales';
+export type { TranslationValues } from './types';
 export type { MessageKey } from './messages/en';

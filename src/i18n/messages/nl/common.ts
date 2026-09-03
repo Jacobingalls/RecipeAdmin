@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enCommon } from '../en/common';
 
-export const nlCommon: Record<keyof typeof enCommon, string> = {
+export const nlCommon: Translations<typeof enCommon> = {
   'common.loading': 'Laden',
   'common.loadingEllipsis': 'Laden...',
   'common.save': 'Opslaan',

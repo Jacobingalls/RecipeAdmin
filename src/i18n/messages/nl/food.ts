@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enFood } from '../en/food';
 
-export const nlFood: Record<keyof typeof enFood, string> = {
+export const nlFood: Translations<typeof enFood> = {
   'product.error': 'We konden dit product niet laden. Probeer het later opnieuw.',
   'product.notFound': 'Product niet gevonden',
   'product.preparations_one': 'Bereiding',

@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enEditor } from '../en/editor';
 
-export const nlEditor: Record<keyof typeof enEditor, string> = {
+export const nlEditor: Translations<typeof enEditor> = {
   'editor.discard': 'Verwerpen',
   'editor.saveError': 'Je wijzigingen opslaan is niet gelukt. Probeer het opnieuw.',
   'editor.create': 'Aanmaken',

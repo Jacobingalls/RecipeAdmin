@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enNav } from '../en/nav';
 
-export const nlNav: Record<keyof typeof enNav, string> = {
+export const nlNav: Translations<typeof enNav> = {
   'nav.brandHome': 'Recipe Admin startpagina',
   'nav.toggle': 'Navigatie in- of uitklappen',
   'nav.home': 'Home',

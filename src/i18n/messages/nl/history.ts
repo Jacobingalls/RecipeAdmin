@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enHistory } from '../en/history';
 
-export const nlHistory: Record<keyof typeof enHistory, string> = {
+export const nlHistory: Translations<typeof enHistory> = {
   'history.title': 'Geschiedenis',
   'history.today': 'Vandaag',
   'history.yesterday': 'Gisteren',
