@@ -1,4 +1,5 @@
 import type { ApiProduct } from '../../api';
+import type { PreparationData } from '../../domain';
 import type { Note } from '../NotesDisplay';
 
 import NotesSection from './NotesSection';
@@ -53,7 +54,7 @@ export default function PreparationCardBody({
         notes={notes}
         onChange={(updated) => {
           const updatedPreps = product.preparations.map((p) =>
-            p.id === preparationId ? { ...p, notes: updated } : p,
+            p.id === preparationId ? ({ ...p, notes: updated } as PreparationData) : p,
           );
           onChange({ ...product, preparations: updatedPreps });
         }}

@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { ApiFavorite, CreateFavoriteRequest, ServingSizeData } from '../api';
+import type { ApiFavorite, CreateFavoriteRequest } from '../api';
 import { listFavorites, createFavorite, deleteFavorite } from '../api';
+import type { ServingSizeData } from '../domain';
 import { ServingSize } from '../domain';
 
 interface FindFavoriteOptions {

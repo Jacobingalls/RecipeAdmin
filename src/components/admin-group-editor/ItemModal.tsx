@@ -35,7 +35,7 @@ export default function ItemModal({ item, onSave, onClose }: ItemModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ApiSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const inputRef: RefCallback<HTMLInputElement> = useCallback((el) => el?.focus(), []);
 
   // Selection state

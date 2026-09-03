@@ -40,7 +40,8 @@ export default function GroupsPage() {
   const filteredGroups = useMemo(() => {
     if (!groups) return [];
     return groups.filter((g) => {
-      const matchesName = !nameFilter || g.name.toLowerCase().includes(nameFilter.toLowerCase());
+      const matchesName =
+        !nameFilter || (g.name ?? '').toLowerCase().includes(nameFilter.toLowerCase());
       const matchesBrand = !brandFilter || g.brand === brandFilter;
       return matchesName && matchesBrand;
     });

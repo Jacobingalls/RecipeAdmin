@@ -222,7 +222,10 @@ export default function PreparationCustomSizesSection({
 
   const [modal, setModal] = useState<CustomSizeModal>(null);
 
-  const existingNames = useMemo(() => new Set(customSizes.map((cs) => cs.name)), [customSizes]);
+  const existingNames = useMemo(
+    () => new Set(customSizes.flatMap((cs) => (cs.name === undefined ? [] : [cs.name]))),
+    [customSizes],
+  );
 
   // Build unit option groups: always include servings + mass + volume,
   // plus energy if the prep has calories defined.
