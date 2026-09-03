@@ -1,4 +1,4 @@
-import type { ApiProduct, ApiSearchResult } from '../api';
+import type { ApiSearchResult } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 
 import { buildSearchResultLogTarget } from './searchResultLogTarget';
@@ -82,13 +82,12 @@ describe('buildSearchResultLogTarget', () => {
   });
 
   it('returns null when product has undefined preparations', () => {
-    // The API can omit preparations entirely, which ApiProduct does not model.
     const result: ApiSearchResult = {
       item: {
         product: {
           id: 'p1',
           name: 'Oats',
-        } as ApiProduct,
+        },
       },
       servingSize: { kind: 'servings', amount: 1 },
       relevance: 1,

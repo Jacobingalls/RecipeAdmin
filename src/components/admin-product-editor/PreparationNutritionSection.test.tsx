@@ -4,6 +4,9 @@ import type { ApiProduct } from '../../api';
 
 import PreparationNutritionSection from './PreparationNutritionSection';
 
+/** These sections always write the full preparation list back, so assertions can rely on it. */
+type EditedProduct = ApiProduct & { preparations: NonNullable<ApiProduct['preparations']> };
+
 // jsdom does not implement scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
@@ -94,7 +97,7 @@ describe('PreparationNutritionSection', () => {
     fireEvent.click(screen.getByLabelText('Calories unit'));
     fireEvent.click(screen.getByText('Kilojoules (kJ)'));
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const nutrition = passedProduct.preparations[0].nutritionalInformation;
     expect(nutrition?.calories).toEqual({ amount: 100, unit: 'kJ' });
   });
@@ -114,7 +117,7 @@ describe('PreparationNutritionSection', () => {
     renderSection();
     fireEvent.change(screen.getByLabelText('Calories amount'), { target: { value: '200' } });
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const nutrition = passedProduct.preparations[0].nutritionalInformation;
     expect(nutrition?.calories).toEqual({ amount: 200, unit: 'kcal' });
   });
@@ -123,7 +126,7 @@ describe('PreparationNutritionSection', () => {
     renderSection();
     fireEvent.click(screen.getByLabelText('Remove Total fat'));
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const nutrition = passedProduct.preparations[0].nutritionalInformation;
     expect(nutrition?.totalFat).toBeUndefined();
     expect(nutrition?.calories).toEqual({ amount: 100, unit: 'kcal' });

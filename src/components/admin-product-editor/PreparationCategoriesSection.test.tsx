@@ -4,6 +4,9 @@ import type { ApiProduct, ApiCategory } from '../../api';
 
 import PreparationCategoriesSection from './PreparationCategoriesSection';
 
+/** These sections always write the full preparation list back, so assertions can rely on it. */
+type EditedProduct = ApiProduct & { preparations: NonNullable<ApiProduct['preparations']> };
+
 const testCategories: ApiCategory[] = [
   {
     id: 'cat-1',
@@ -113,7 +116,7 @@ describe('PreparationCategoriesSection', () => {
     renderSection();
     fireEvent.click(screen.getByLabelText('Remove Dairy'));
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.preparations[0].categories).toEqual(['cat-2']);
   });
 

@@ -18,16 +18,17 @@ export default function PreparationDangerZone({
   onPrepDeleted,
 }: PreparationDangerZoneProps) {
   const { t } = useTranslation();
-  const prep = product.preparations.find((p) => p.id === preparationId);
+  const preparations = product.preparations ?? [];
+  const prep = preparations.find((p) => p.id === preparationId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   if (!prep) return null;
 
   const prepName = prep.name || t('editor.default');
-  const isOnlyPrep = product.preparations.length <= 1;
+  const isOnlyPrep = preparations.length <= 1;
 
   function handleDelete() {
-    const remaining = product.preparations.filter((p) => p.id !== preparationId);
+    const remaining = preparations.filter((p) => p.id !== preparationId);
     const updatedProduct: ApiProduct = {
       ...product,
       preparations: remaining,

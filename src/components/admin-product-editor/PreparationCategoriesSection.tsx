@@ -112,7 +112,8 @@ export default function PreparationCategoriesSection({
 }: PreparationCategoriesSectionProps) {
   const { t } = useTranslation();
   const { lookup } = useCategories();
-  const prep = product.preparations.find((p) => p.id === preparationId);
+  const preparations = product.preparations ?? [];
+  const prep = preparations.find((p) => p.id === preparationId);
   const categoryIds = useMemo(() => prep?.categories ?? [], [prep?.categories]);
 
   const [modal, setModal] = useState<CategoryModal>(null);
@@ -138,7 +139,7 @@ export default function PreparationCategoriesSection({
   function updateCategories(newCategoryIds: string[]) {
     const updatedProduct: ApiProduct = {
       ...product,
-      preparations: product.preparations.map((p) =>
+      preparations: preparations.map((p) =>
         p.id === preparationId ? { ...p, categories: newCategoryIds } : p,
       ),
     };

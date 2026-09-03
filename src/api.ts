@@ -17,7 +17,7 @@ export interface ApiProduct {
   id: string;
   name: string;
   brand?: string;
-  preparations: PreparationData[];
+  preparations?: PreparationData[];
   defaultPreparationID?: string;
   // Absent on responses that carry none; every consumer normalises with `?? []`.
   barcodes?: BarcodeData[];

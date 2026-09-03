@@ -117,7 +117,7 @@ describe('PreparationServingSection', () => {
   it('shows "None" when mass is not set', () => {
     const noMassProduct: ApiProduct = {
       ...sampleProduct,
-      preparations: [{ ...sampleProduct.preparations[0], mass: undefined }],
+      preparations: [{ ...(sampleProduct.preparations ?? [])[0], mass: undefined }],
     };
     renderSection(noMassProduct);
     expect(screen.getByLabelText('Mass unit')).toHaveTextContent('None');

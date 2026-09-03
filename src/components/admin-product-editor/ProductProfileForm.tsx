@@ -31,7 +31,8 @@ function InlineFormField({
 
 export default function ProductProfileForm({ product, onChange }: ProductProfileFormProps) {
   const { t } = useTranslation();
-  const defaultPrepId = product.defaultPreparationID ?? product.preparations[0]?.id ?? '';
+  const preparations = product.preparations ?? [];
+  const defaultPrepId = product.defaultPreparationID ?? preparations[0]?.id ?? '';
 
   return (
     <>
@@ -59,7 +60,7 @@ export default function ProductProfileForm({ product, onChange }: ProductProfile
             placeholder={t('common.optional')}
           />
         </InlineFormField>
-        {product.preparations.length > 0 && (
+        {preparations.length > 0 && (
           <InlineFormField
             htmlFor="edit-default-prep"
             label={t('productEditor.defaultPreparation')}
@@ -73,7 +74,7 @@ export default function ProductProfileForm({ product, onChange }: ProductProfile
                 onChange({ ...product, defaultPreparationID: e.target.value || undefined })
               }
             >
-              {product.preparations.map((p) => (
+              {preparations.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name || t('editor.default')}
                 </option>

@@ -224,12 +224,11 @@ describe('ProductDetailPage', () => {
   });
 
   it('handles product with undefined preparations', () => {
-    // The API can omit preparations entirely, which ApiProduct does not model.
-    const noPreps = {
+    const noPreps: ApiProduct = {
       id: 'p-noprep',
       name: 'No Preps Product',
       brand: 'Test',
-    } as ApiProduct;
+    };
     mockQuery({ data: noPreps });
     renderWithRoute('/products/p-noprep');
     expect(screen.getByText('No Preps Product')).toBeInTheDocument();
