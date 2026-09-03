@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enAdmin } from '../en/admin';
 
-export const nlAdmin: Record<keyof typeof enAdmin, string> = {
+export const nlAdmin: Translations<typeof enAdmin> = {
   'admin.title': 'Beheer',
   'admin.nav.products': 'Producten',
   'admin.nav.groups': 'Groepen',

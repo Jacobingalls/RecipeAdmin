@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enUnits } from '../en/units';
 
-export const nlUnits: Record<keyof typeof enUnits, string> = {
+export const nlUnits: Translations<typeof enUnits> = {
   'unit.group.servings': 'Porties',
   'unit.group.customSizes': 'Eigen porties',
   'unit.group.mass': 'Massa',

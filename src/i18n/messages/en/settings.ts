@@ -19,5 +19,8 @@ export const enSettings = {
   'language.selectLabel': 'Language',
   'language.system': 'Follow your browser',
   'language.name.en': 'English',
+  'language.name.da': 'Dansk',
+  'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
+  'language.name.sv': 'Svenska',
 };

@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enNutrients } from '../en/nutrients';
 
-export const nlNutrients: Record<keyof typeof enNutrients, string> = {
+export const nlNutrients: Translations<typeof enNutrients> = {
   'nutrientGroup.energy': 'Energie',
   'nutrientGroup.fats': 'Vetten',
   'nutrientGroup.otherNutrients': 'Overig',

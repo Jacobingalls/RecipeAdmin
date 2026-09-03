@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enEntityEditors } from '../en/entityEditors';
 
-export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
+export const nlEntityEditors: Translations<typeof enEntityEditors> = {
   'productEditor.error': 'We konden dit product niet laden. Probeer het later opnieuw.',
   'productEditor.notFound': 'Product niet gevonden',
   'productEditor.preparations': 'Bereidingen',

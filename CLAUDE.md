@@ -23,7 +23,7 @@ npm run format:check # Check formatting without writing
 
 All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/writing-style` skill when adding or changing user-facing text.** Never skip this step.
 
-User-facing text lives in the message catalogs, not in components — see [Localization](#localization). The style guide applies to every language: the Dutch catalog follows the same voice, sentence case and error phrasing as the English one.
+User-facing text lives in the message catalogs, not in components — see [Localization](#localization). The style guide applies to every language: each translated catalog follows the same voice, sentence case and error phrasing as the English one.
 
 ### Engineering Philosophy
 
@@ -207,11 +207,16 @@ src/
 ├── i18n/                  # i18next setup and translations
 │   ├── index.ts           # Configured i18next instance + language preference helpers
 │   ├── i18next.d.ts       # Types t() against the English catalog
-│   ├── types.ts           # Locale, LocalePreference
+│   ├── locales.ts         # SUPPORTED_LOCALES and the types derived from it
+│   ├── types.ts           # TranslationValues, Translations<Section>
 │   └── messages/
-│       ├── en.ts, nl.ts   # Merged catalogs (en defines the key set)
+│       ├── index.ts       # messages: Record<Locale, Messages>
+│       ├── en.ts, da.ts,  # Merged catalogs, one per language
+│       │   es.ts, nl.ts,  #   (en defines the key set)
+│       │   sv.ts
 │       ├── en/            # English messages, split by area
-│       └── nl/            # Dutch messages, typed against their English section
+│       └── da/, es/,      # Translations, each section typed against its
+│           nl/, sv/       #   English original
 ├── hooks/
 │   ├── index.ts           # Barrel exports
 │   ├── useApiQuery.ts     # Data fetching with cancellation
@@ -302,10 +307,18 @@ When authenticated: shows nav links, barcode search, and a user dropdown (userna
 
 ## Localization
 
-The app ships English and Dutch, built on [i18next](https://www.i18next.com/) and
+The app ships English, Danish, Spanish, Dutch and Swedish, built on
+[i18next](https://www.i18next.com/) and
 [react-i18next](https://react.i18next.com/). Every user-facing string lives in a message
 catalog under `src/i18n/messages/`; components look messages up by key rather than embedding
 text.
+
+Catalogs are split by language and then by area (`messages/sv/history.ts`) rather than holding
+every language for a key in one place. It keeps each file small enough to read, lets a whole
+language be handed to one translator, and keeps a single-language change out of the other
+languages' diffs. Completeness doesn't depend on that layout: each section is typed against its
+English original, so a missing or misspelled key is a compile error, not a message that quietly
+falls back to English.
 
 `src/i18n/index.ts` configures and exports the i18next instance. Importing it (done once from
 `App.tsx`) initialises i18next — there is no provider to mount.
@@ -347,14 +360,24 @@ use `<Trans>`, so translators can move the value *and* its emphasis:
 
 1. Add the key to the matching section file in `src/i18n/messages/en/` — group by area, not by
    component, and keep each file under 200 lines.
-2. Add the Dutch translation to the same key in `src/i18n/messages/nl/`. The Dutch section is
-   typed as `Record<keyof typeof enSection, string>`, so a missing or misspelled key fails to
-   compile.
+2. Add the same key to that section in every other language directory. Each section is typed as
+   `Translations<typeof enSection>`, so a missing or misspelled key fails to compile.
 3. Use it via `t('your.key')`. `src/i18n/i18next.d.ts` types `t()` against the English catalog,
    so an unknown key is also a compile error.
 
 Message keys are dot-separated and lowercase-camel: `area.thing.variant`. Because keys contain
 dots, i18next runs with `keySeparator: false` — keys are flat, not paths into nested objects.
+
+### Adding a language
+
+1. Add the code to `SUPPORTED_LOCALES` in `src/i18n/locales.ts`, in the order the picker should
+   offer it. `Locale` derives from that list.
+2. Add a `src/i18n/messages/<code>/` directory with one file per English section, and a
+   `messages/<code>.ts` merging them into a `Messages`.
+3. Register the catalog in `src/i18n/messages/index.ts`. The `Record<Locale, Messages>` type
+   makes step 1 fail to compile until this is done, and i18next's resources are built from it.
+4. Add the language's endonym under `language.name.<code>` in every settings section, so
+   speakers recognise it in the picker.
 
 ### Plurals
 
@@ -383,14 +406,15 @@ browser's. The preference is stored in `localStorage` under `recipeadmin.locale`
 value means "follow the browser", so detection is configured with `caches: []` and
 `setLocalePreference` writes the key itself. Users change it in **Settings → Language**.
 
-`load: 'languageOnly'` maps regional languages (`nl-NL`, `nl-BE`) onto the `nl` catalog, and
+`load: 'languageOnly'` maps regional languages (`nl-BE`, `es-MX`) onto their base catalog, and
 `fallbackLng` covers anything unsupported.
 
 ### Formatting
 
 Numbers, dates and times follow the active language — pass `getActiveLocale()` to
 `toLocaleString` and friends rather than relying on the browser default. The time picker reads
-the language's hour cycle, so Dutch shows a 24-hour clock and English shows AM/PM.
+the language's hour cycle, so the European languages show a 24-hour clock and English shows
+AM/PM.
 
 
 ## Key Patterns

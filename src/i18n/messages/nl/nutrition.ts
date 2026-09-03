@@ -1,6 +1,7 @@
+import type { Translations } from '../../types';
 import type { enNutritionLabel } from '../en/nutrition';
 
-export const nlNutritionLabel: Record<keyof typeof enNutritionLabel, string> = {
+export const nlNutritionLabel: Translations<typeof enNutritionLabel> = {
   'nutritionLabel.title': 'Voedingswaarde',
   'nutritionLabel.servingSize': 'Portiegrootte',
   'nutritionLabel.calories': 'Calorieën',
