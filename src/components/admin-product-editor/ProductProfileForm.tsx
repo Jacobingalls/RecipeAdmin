@@ -54,7 +54,7 @@ export default function ProductProfileForm({ product, onChange }: ProductProfile
             className="form-control form-control-sm"
             style={{ maxWidth: '20rem' }}
             id="edit-product-brand"
-            value={product.brand}
+            value={product.brand ?? ''}
             onChange={(e) => onChange({ ...product, brand: e.target.value })}
             placeholder={t('common.optional')}
           />
