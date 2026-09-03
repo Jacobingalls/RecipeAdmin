@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiFavorite, ApiProduct } from '../../api';
 import { deleteFavorite as deleteFavoriteApi, getProduct, getGroup } from '../../api';
 import type { ProductGroupData } from '../../domain';
 import { useFavorites } from '../../contexts/FavoritesContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { buildFavoriteLogTarget } from '../../utils';
 import { LoadingState, ContentUnavailableView } from '../common';
 import type { LogTarget } from '../LogModal';

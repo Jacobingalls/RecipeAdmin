@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { adminDeleteUser, adminRevokeUserSessions } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import {
   SectionHeader,
   TypeToConfirmModal,
@@ -19,7 +19,7 @@ interface DangerZoneSectionProps {
 }
 
 export default function DangerZoneSection({ userId, username, onDeleted }: DangerZoneSectionProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
@@ -55,12 +55,6 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       setIsDeleting(false);
     }
   }
-
-  // The username is emphasized inside both sentences, so render around the placeholder.
-  const [beforeRevokeName, afterRevokeName] = raw('adminUser.revokeSessions.confirm').split(
-    '{name}',
-  );
-  const [beforeDeleteName, afterDeleteName] = raw('adminUser.delete.message').split('{name}');
 
   return (
     <>
@@ -128,9 +122,11 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
             {t('adminUser.revokeSessions.title')}
           </ModalHeader>
           <ModalBody>
-            {beforeRevokeName}
-            <strong>{username}</strong>
-            {afterRevokeName}
+            <Trans
+              i18nKey="adminUser.revokeSessions.confirm"
+              values={{ name: username }}
+              components={{ strong: <strong /> }}
+            />
           </ModalBody>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setShowRevokeConfirm(false)}>
@@ -148,9 +144,11 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
         title={t('adminUser.delete.modalTitle')}
         message={
           <>
-            {beforeDeleteName}
-            <strong>{username}</strong>
-            {afterDeleteName}
+            <Trans
+              i18nKey="adminUser.delete.message"
+              values={{ name: username }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={username}

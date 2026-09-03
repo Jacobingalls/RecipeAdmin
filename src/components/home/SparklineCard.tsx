@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next';
+
 import type { DailyValue } from '../../config/constants';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { NutritionUnit } from '../../domain';
 import { formatSignificant } from '../../utils';
 

@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiSearchResult } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 import { servingSizeSearchParams } from '../utils';
 

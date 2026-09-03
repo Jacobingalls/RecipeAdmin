@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next';
+
 import type { SessionInfo } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { ListRow, DeleteButton, SectionHeader } from '../common';
 import { formatRelativeTime } from '../../utils';
 

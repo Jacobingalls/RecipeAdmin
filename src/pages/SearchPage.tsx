@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiSearchResult } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useSearch } from '../hooks';
 import { buildSearchResultLogTarget } from '../utils';
 import { ContentUnavailableView } from '../components/common';

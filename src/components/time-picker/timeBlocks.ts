@@ -1,4 +1,4 @@
-import { getActiveLocale, getTranslator } from '../../i18n';
+import i18n, { getActiveLocale } from '../../i18n';
 import type { MessageKey } from '../../i18n';
 
 export interface Block {
@@ -192,7 +192,7 @@ export function formatDayHint(dayOffset: number): string {
 }
 
 export function formatTriggerLabel(epoch: number): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - epoch) < 60) return t('timePicker.now');
 

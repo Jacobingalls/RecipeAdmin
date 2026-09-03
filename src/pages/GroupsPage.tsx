@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ProductGroupData } from '../domain';
 import { adminListGroups } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import {
   LoadingState,
@@ -16,7 +16,7 @@ import {
 import { CreateGroupModal } from '../components/admin';
 
 export default function GroupsPage() {
-  const { t, tPlural } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     data: groups,
@@ -85,7 +85,7 @@ export default function GroupsPage() {
               key={g.id}
               to={`/admin/groups/${g.id}`}
               title={g.name}
-              subtitle={g.brand ?? tPlural('adminGroups.itemCount', g.items?.length ?? 0)}
+              subtitle={g.brand ?? t('adminGroups.itemCount', { count: g.items?.length ?? 0 })}
             />
           ))}
         </div>

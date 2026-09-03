@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiFavorite, ApiProduct } from '../api';
 import { deleteFavorite as deleteFavoriteApi, getProduct, getGroup } from '../api';
 import type { ProductGroupData } from '../domain';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useTranslation } from '../contexts/LocaleContext';
 import { buildFavoriteLogTarget, favoriteName, favoriteBrand } from '../utils';
 import { LoadingState, ContentUnavailableView, ListFilter } from '../components/common';
 import type { LogTarget } from '../components/LogModal';

@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react';
 import { useState, useRef, useEffect, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type {
   CustomSizeValue,
@@ -11,7 +12,6 @@ import type {
 import { ServingSize } from '../domain';
 import type { SelectOption, OptionGroup } from '../config/unitConfig';
 import { buildOptionGroups, filterGroups } from '../config/unitConfig';
-import { useTranslation } from '../contexts/LocaleContext';
 
 function optionElId(prefix: string, option: SelectOption): string {
   return `${prefix}-option-${option.type}-${option.value.replace(/\s+/g, '-')}`;

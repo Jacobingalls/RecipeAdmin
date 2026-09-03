@@ -13,7 +13,7 @@ export const enNav = {
   'nav.admin': 'Admin',
   'nav.signOut': 'Sign out',
 
-  'footer.api': 'API: {url}',
+  'footer.api': 'API: {{url}}',
 
   'environment.unknown': 'Unknown',
   'environment.development': 'Development',

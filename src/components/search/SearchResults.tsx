@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ApiSearchResult } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../common';
 import SearchResultRow from '../SearchResultRow';
 

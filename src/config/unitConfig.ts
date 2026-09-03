@@ -4,7 +4,7 @@
  */
 
 import type { Preparation, ProductGroup, ServingSizeType } from '../domain';
-import { getTranslator } from '../i18n';
+import i18n from '../i18n';
 import type { MessageKey } from '../i18n';
 
 export interface UnitDefinition {
@@ -101,7 +101,7 @@ export function unitGroup(
   units: UnitDefinition[],
   type: ServingSizeType,
 ): OptionGroup {
-  const { t } = getTranslator();
+  const { t } = i18n;
   return {
     label: t(labelKey),
     options: units.map((u) => ({
@@ -115,7 +115,7 @@ export function unitGroup(
 
 /** The "Servings" group, which every serving size selector offers. */
 export function servingsGroup(): OptionGroup {
-  const { t } = getTranslator();
+  const { t } = i18n;
   return {
     label: t('unit.group.servings'),
     options: [
@@ -162,7 +162,7 @@ export function buildOptionGroups(prepOrGroup: PrepOrGroup): OptionGroup[] {
   // Custom Sizes - only if has custom sizes
   if (prepOrGroup.customSizes && prepOrGroup.customSizes.length > 0) {
     groups.push({
-      label: getTranslator().t('unit.group.customSizes'),
+      label: i18n.t('unit.group.customSizes'),
       options: prepOrGroup.customSizes.map((cs) => ({
         type: 'customSize' as ServingSizeType,
         value: cs.name,

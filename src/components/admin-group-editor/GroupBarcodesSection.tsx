@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { BarcodeData, ProductGroupData } from '../../domain';
 import { ServingSize } from '../../domain';
-import { useTranslation } from '../../contexts/LocaleContext';
-import { getTranslator } from '../../i18n';
+import i18n from '../../i18n';
 import { formatSignificant } from '../../utils';
 import type { Note } from '../NotesDisplay';
 import {
@@ -19,8 +19,9 @@ import GroupBarcodeModal from './GroupBarcodeModal';
 
 function formatServingSizeLabel(ss: ServingSize): string {
   if (ss.type === 'servings') {
-    return getTranslator().tPlural('format.servings', ss.amount, {
-      count: formatSignificant(ss.amount),
+    return i18n.t('format.servings', {
+      count: ss.amount,
+      amount: formatSignificant(ss.amount),
     });
   }
   if (ss.type === 'customSize') {

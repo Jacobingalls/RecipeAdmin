@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiSearchResult } from '../api';
 import { searchItems } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 
 import type { UseApiQueryResult } from './useApiQuery';
 import { useApiQuery } from './useApiQuery';

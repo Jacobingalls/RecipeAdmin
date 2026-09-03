@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { PasskeyInfo, APIKeyInfo } from '../../api';
 import {
@@ -8,7 +9,6 @@ import {
   settingsDeletePasskey,
   settingsRevokeAPIKey,
 } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, CredentialRow, TypeToConfirmModal } from '../common';
 
 import CreateAPIKeyModal from './CreateAPIKeyModal';
@@ -26,7 +26,7 @@ export default function CredentialsSection({
   refetchPasskeys,
   refetchApiKeys,
 }: CredentialsSectionProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const [now] = useState(Date.now);
   const [isAddingPasskey, setIsAddingPasskey] = useState(false);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
@@ -65,11 +65,6 @@ export default function CredentialsSection({
   }
 
   const isPasskey = deleteCredential?.type === 'passkey';
-  // The credential name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw(
-    isPasskey ? 'credentials.deleteMessage' : 'credentials.revokeMessage',
-  ).split('{name}');
-
   return (
     <>
       <SectionHeader title={t('credentials.title')} className="mt-4">
@@ -172,9 +167,11 @@ export default function CredentialsSection({
         title={t(isPasskey ? 'credentials.deletePasskeyTitle' : 'credentials.revokeApiKeyTitle')}
         message={
           <>
-            {beforeName}
-            <strong>{deleteCredential?.name}</strong>
-            {afterName}
+            <Trans
+              i18nKey={isPasskey ? 'credentials.deleteMessage' : 'credentials.revokeMessage'}
+              values={{ name: deleteCredential?.name }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={deleteCredential?.name ?? ''}

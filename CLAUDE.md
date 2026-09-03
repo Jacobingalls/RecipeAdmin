@@ -195,8 +195,7 @@ src/
 │   ├── constants.ts       # FDA daily values
 │   └── unitConfig.ts      # Unit definitions for serving selector
 ├── contexts/
-│   ├── AuthContext.tsx     # Auth state, login/logout/passkey methods
-│   └── LocaleContext.tsx   # Active language + the useTranslation hook
+│   └── AuthContext.tsx     # Auth state, login/logout/passkey methods
 ├── domain/                # Business logic classes
 │   ├── index.ts           # Barrel exports
 │   ├── CustomSize.ts      # Custom serving size (e.g., "1 cookie")
@@ -205,11 +204,10 @@ src/
 │   ├── Preparation.ts     # Product preparation with nutrition calc
 │   ├── ProductGroup.ts    # Product group with aggregate nutrition
 │   └── ServingSize.ts     # Serving size types (mass, volume, etc.)
-├── i18n/                  # Translations and the translator
-│   ├── index.ts           # translatorFor / getTranslator + barrel exports
-│   ├── locale.ts          # Language detection, preference storage, active locale
-│   ├── translator.ts      # Message lookup, interpolation, plurals
-│   ├── types.ts           # Locale, LocalePreference, TranslationValues
+├── i18n/                  # i18next setup and translations
+│   ├── index.ts           # Configured i18next instance + language preference helpers
+│   ├── i18next.d.ts       # Types t() against the English catalog
+│   ├── types.ts           # Locale, LocalePreference
 │   └── messages/
 │       ├── en.ts, nl.ts   # Merged catalogs (en defines the key set)
 │       ├── en/            # English messages, split by area
@@ -304,38 +302,45 @@ When authenticated: shows nav links, barcode search, and a user dropdown (userna
 
 ## Localization
 
-The app ships English and Dutch. Every user-facing string lives in a message catalog under
-`src/i18n/messages/`; components look messages up by key rather than embedding text.
+The app ships English and Dutch, built on [i18next](https://www.i18next.com/) and
+[react-i18next](https://react.i18next.com/). Every user-facing string lives in a message
+catalog under `src/i18n/messages/`; components look messages up by key rather than embedding
+text.
+
+`src/i18n/index.ts` configures and exports the i18next instance. Importing it (done once from
+`App.tsx`) initialises i18next — there is no provider to mount.
 
 ### Using translations
 
 ```tsx
-import { useTranslation } from '../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
 
-const { t, tPlural, raw, locale } = useTranslation();
+const { t } = useTranslation();
 
 t('settings.title');                                  // "Settings"
-t('credential.created', { time: '3d ago' });          // fills in {time}
-tPlural('format.servings', count);                    // singular/plural by count
+t('credential.created', { time: '3d ago' });          // fills in {{time}}
+t('format.servings', { count, amount: formatted });   // singular/plural by count
 ```
 
-Outside the React tree — formatting helpers, domain classes, `ErrorBoundary` — use
-`getTranslator()` from `src/i18n`, which returns a translator for the language currently
-being rendered:
+Outside the React tree — formatting helpers, domain classes, `ErrorBoundary` — import the
+instance directly:
 
 ```ts
-import { getActiveLocale, getTranslator } from '../i18n';
+import i18n, { getActiveLocale } from '../i18n';
 
-const { t } = getTranslator();
+i18n.t('entry.unknownItem');
 value.toLocaleString(getActiveLocale());
 ```
 
-When a value has to render as an element inside a sentence (bold, a link), split the raw
-message on its placeholder rather than breaking the sentence into fragments:
+When a value has to render as an element inside a sentence, put the markup in the message and
+use `<Trans>`, so translators can move the value *and* its emphasis:
+
+```ts
+'confirm.typeToConfirm': 'Type <strong>{{name}}</strong> to confirm',
+```
 
 ```tsx
-const [before, after] = raw('confirm.typeToConfirm').split('{name}');
-// {before}<strong>{name}</strong>{after}
+<Trans i18nKey="confirm.typeToConfirm" values={{ name }} components={{ strong: <strong /> }} />
 ```
 
 ### Adding a string
@@ -345,11 +350,25 @@ const [before, after] = raw('confirm.typeToConfirm').split('{name}');
 2. Add the Dutch translation to the same key in `src/i18n/messages/nl/`. The Dutch section is
    typed as `Record<keyof typeof enSection, string>`, so a missing or misspelled key fails to
    compile.
-3. Use it via `t('your.key')`.
+3. Use it via `t('your.key')`. `src/i18n/i18next.d.ts` types `t()` against the English catalog,
+   so an unknown key is also a compile error.
 
-Message keys are dot-separated and lowercase-camel: `area.thing.variant`. Plural messages use
-`.one` / `.other` suffixes and are read with `tPlural`, which selects the form via
-`Intl.PluralRules` for the active language.
+Message keys are dot-separated and lowercase-camel: `area.thing.variant`. Because keys contain
+dots, i18next runs with `keySeparator: false` — keys are flat, not paths into nested objects.
+
+### Plurals
+
+Plural messages use i18next's `_one` / `_other` suffixes and are selected by passing `count`:
+
+```ts
+'format.servings_one': '{{amount}} serving',
+'format.servings_other': '{{amount}} servings',
+```
+
+`count` selects the form; a separate `amount` carries the number to display, because callers
+usually format it first (`formatSignificant`). Only plural messages may interpolate `count` —
+a catalog test enforces this, since passing `count` to a non-plural key makes i18next look for
+plural forms that don't exist.
 
 ### What stays in English
 
@@ -359,13 +378,13 @@ identifiers, and unit symbols (`g`, `kcal`).
 
 ### Choosing a language
 
-`LocaleProvider` (in `App.tsx`) resolves the language from the saved preference, falling back to
-the browser's language and then to English. The preference is stored in `localStorage` under
-`recipeadmin.locale`, and the provider keeps `<html lang>` in sync. Users change it in
-**Settings → Language**.
+`i18next-browser-languagedetector` resolves the language: saved preference first, then the
+browser's. The preference is stored in `localStorage` under `recipeadmin.locale`; an absent
+value means "follow the browser", so detection is configured with `caches: []` and
+`setLocalePreference` writes the key itself. Users change it in **Settings → Language**.
 
-`useTranslation` works without a provider and falls back to English, so components stay
-renderable in isolation and in tests.
+`load: 'languageOnly'` maps regional languages (`nl-NL`, `nl-BE`) onto the `nl` catalog, and
+`fallbackLng` covers anything unsupported.
 
 ### Formatting
 
@@ -407,7 +426,7 @@ import {
   ListRow, DeleteButton, CopyButton, TypeToConfirmModal,
   Button, ModalBase, ModalHeader, ModalBody, ModalFooter,
 } from '../components/common'
-import { useTranslation } from '../contexts/LocaleContext'
+import { useTranslation } from 'react-i18next'
 
 // Status displays
 if (loading) return <LoadingState />

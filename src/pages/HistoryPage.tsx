@@ -1,17 +1,17 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiLogEntry } from '../api';
 import { NutritionInformation } from '../domain';
 import { ErrorState, ContentUnavailableView, SubsectionTitle } from '../components/common';
 import { HistoryDayGroup } from '../components/history';
-import { useTranslation } from '../contexts/LocaleContext';
-import { getActiveLocale, getTranslator } from '../i18n';
+import i18n, { getActiveLocale } from '../i18n';
 import { useInfiniteHistoryData } from '../hooks';
 import LogModal from '../components/LogModal';
 import DayNutritionModal from '../components/DayNutritionModal';
 
 function formatDayHeading(dateStr: string): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   const locale = getActiveLocale();
   const today = new Date();
   const todayDate = today.toLocaleDateString(locale);
@@ -41,7 +41,7 @@ function groupByDay(entries: ApiLogEntry[]): Map<string, ApiLogEntry[]> {
 function formatDayLabelForModal(day: string): string {
   const dayHeading = formatDayHeading(day);
   if (dayHeading === day) return day;
-  return getTranslator().t('history.dayLabel', { heading: dayHeading, date: day });
+  return i18n.t('history.dayLabel', { heading: dayHeading, date: day });
 }
 
 export default function HistoryPage() {

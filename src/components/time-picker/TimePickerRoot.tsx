@@ -1,4 +1,5 @@
-import { useTranslation } from '../../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
+
 import type { MessageKey } from '../../i18n';
 
 import { formatDayHint } from './timeBlocks';
@@ -30,8 +31,8 @@ export default function TimePickerRoot({
 
   function presetLabel(minutesAgo: number): string {
     if (minutesAgo === 0) return t('timePicker.now');
-    if (minutesAgo < 60) return t('timePicker.preset.minutesAgo', { count: minutesAgo });
-    return t('timePicker.preset.hoursAgo', { count: minutesAgo / 60 });
+    if (minutesAgo < 60) return t('timePicker.preset.minutesAgo', { amount: minutesAgo });
+    return t('timePicker.preset.hoursAgo', { amount: minutesAgo / 60 });
   }
 
   return (

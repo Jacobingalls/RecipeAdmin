@@ -1,9 +1,9 @@
 import { useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { BarcodeData, ProductGroupData } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
 import { buildOptionGroups, buildFallbackOptionGroups } from '../../config/unitConfig';
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { Note } from '../NotesDisplay';
 import ServingSizeSelector from '../ServingSizeSelector';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';

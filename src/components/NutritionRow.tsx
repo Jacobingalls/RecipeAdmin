@@ -1,4 +1,5 @@
-import { useTranslation } from '../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
+
 import type { NutritionInformationData } from '../domain';
 
 export type NutrientKey = keyof NutritionInformationData;

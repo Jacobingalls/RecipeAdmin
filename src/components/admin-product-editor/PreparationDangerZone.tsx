@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { TypeToConfirmModal, Button } from '../common';
 
 interface PreparationDangerZoneProps {
@@ -17,7 +17,7 @@ export default function PreparationDangerZone({
   onChange,
   onPrepDeleted,
 }: PreparationDangerZoneProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const prep = product.preparations.find((p) => p.id === preparationId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -40,9 +40,6 @@ export default function PreparationDangerZone({
     onPrepDeleted();
     setShowDeleteModal(false);
   }
-
-  // The preparation name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw('prepEditor.delete.message').split('{name}');
 
   return (
     <div className="px-3 pt-3 pb-3">
@@ -77,9 +74,11 @@ export default function PreparationDangerZone({
         title={t('prepEditor.delete.modalTitle')}
         message={
           <>
-            {beforeName}
-            <strong>{prepName}</strong>
-            {afterName}
+            <Trans
+              i18nKey="prepEditor.delete.message"
+              values={{ name: prepName }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={prepName}

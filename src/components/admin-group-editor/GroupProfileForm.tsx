@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ProductGroupData } from '../../domain';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader } from '../common';
 
 interface GroupProfileFormProps {

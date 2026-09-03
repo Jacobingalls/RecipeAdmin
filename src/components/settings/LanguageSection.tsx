@@ -1,16 +1,25 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../../contexts/LocaleContext';
-import { SUPPORTED_LOCALES, isLocalePreference } from '../../i18n';
+import type { LocalePreference } from '../../i18n';
+import {
+  SUPPORTED_LOCALES,
+  getLocalePreference,
+  isLocalePreference,
+  setLocalePreference,
+} from '../../i18n';
 import { SectionHeader } from '../common';
 
 /** Lets the user pick the app's language, or keep following the browser's. */
 export default function LanguageSection() {
-  const { t, preference, setPreference } = useTranslation();
+  const { t } = useTranslation();
+  const [preference, setPreference] = useState<LocalePreference>(getLocalePreference);
   const selectId = useId();
 
   function handleChange(value: string) {
-    if (isLocalePreference(value)) setPreference(value);
+    if (!isLocalePreference(value)) return;
+    setPreference(value);
+    setLocalePreference(value);
   }
 
   return (

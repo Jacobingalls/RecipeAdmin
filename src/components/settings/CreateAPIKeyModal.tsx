@@ -1,9 +1,9 @@
 import type { FormEvent } from 'react';
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { CreateAPIKeyResponse } from '../../api';
 import { settingsCreateAPIKey } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 import { formatRelativeTime, generateName } from '../../utils';
 

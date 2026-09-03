@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiFavorite, ApiProduct } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import type { ProductGroupData } from '../domain';
 import {
   favoriteName,

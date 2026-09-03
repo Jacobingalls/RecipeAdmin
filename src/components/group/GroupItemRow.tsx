@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { GroupItem } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
 import { servingSizeSearchParams } from '../../utils';

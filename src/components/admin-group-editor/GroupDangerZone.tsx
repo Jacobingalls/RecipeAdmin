@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { ProductGroupData } from '../../domain';
 import { adminDeleteGroup } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, TypeToConfirmModal, Button } from '../common';
 
 interface GroupDangerZoneProps {
@@ -11,7 +11,7 @@ interface GroupDangerZoneProps {
 }
 
 export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -33,8 +33,6 @@ export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
   }
 
   const groupName = group.name ?? t('groupEditor.thisGroup');
-  // The group name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw('groupEditor.delete.message').split('{name}');
 
   return (
     <>
@@ -67,9 +65,11 @@ export default function GroupDangerZone({ group }: GroupDangerZoneProps) {
         title={t('groupEditor.delete.modalTitle')}
         message={
           <>
-            {beforeName}
-            <strong>{groupName}</strong>
-            {afterName}
+            <Trans
+              i18nKey="groupEditor.delete.message"
+              values={{ name: groupName }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={groupName}

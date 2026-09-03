@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { adminListUsers } from '../api';
 import {
@@ -10,7 +11,6 @@ import {
   ListFilter,
 } from '../components/common';
 import { CreateUserModal } from '../components/admin';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { formatLastLogin } from '../utils';
 

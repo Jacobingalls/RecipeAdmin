@@ -1,10 +1,10 @@
 import { useState, useId, useCallback, useRef, useEffect, type RefCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct, ApiSearchResult } from '../../api';
 import { searchItems } from '../../api';
 import type { GroupItem, ProductGroupData } from '../../domain';
 import { ServingSize } from '../../domain';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 
 import SelectedItemConfig from './SelectedItemConfig';

@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ServingSize } from '../domain';
 import { logEntry } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 
 interface AddToLogButtonProps {
   productId?: string;

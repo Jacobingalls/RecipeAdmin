@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { Note } from '../NotesDisplay';
 import {
   SectionHeader,

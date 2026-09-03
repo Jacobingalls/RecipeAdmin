@@ -14,8 +14,8 @@ export const nlAdmin: Record<keyof typeof enAdmin, string> = {
   'adminGroups.title': 'Groepen',
   'adminGroups.error': 'We konden de groepen niet laden. Probeer het later opnieuw.',
   'adminGroups.empty.title': 'Geen groepen',
-  'adminGroups.itemCount.one': '{count} item',
-  'adminGroups.itemCount.other': '{count} items',
+  'adminGroups.itemCount_one': '{{count}} item',
+  'adminGroups.itemCount_other': '{{count}} items',
 
   'adminCategories.title': 'Categorieën',
   'adminCategories.error': 'We konden de categorieën niet laden. Probeer het later opnieuw.',
@@ -39,7 +39,7 @@ export const nlAdmin: Record<keyof typeof enAdmin, string> = {
   'createUser.title': 'Gebruiker toevoegen',
   'createUser.created': 'Gebruiker aangemaakt',
   'createUser.tempKeyNotice':
-    'Tijdelijke API-sleutel voor {name}. Bewaar hem nu — hij verloopt over 24 uur en is later niet meer op te vragen.',
+    'Tijdelijke API-sleutel voor <strong>{{name}}</strong>. Bewaar hem nu — hij verloopt over 24 uur en is later niet meer op te vragen.',
   'createUser.username': 'Gebruikersnaam',
   'createUser.displayName': 'Weergavenaam',
   'createUser.email': 'E-mailadres',

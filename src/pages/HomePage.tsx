@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { PasskeySetupPrompt } from '../components/common';
 import { TodayTile, FavoritesTile } from '../components/home';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from '../contexts/LocaleContext';
 import type { MessageKey } from '../i18n';
 
 function getTimeOfDayGreetingKey(): MessageKey {

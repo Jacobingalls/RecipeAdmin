@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   createContext,
   useContext,
@@ -11,8 +12,6 @@ import {
 
 import type { ApiCategory } from '../api';
 import { listCategoriesWithMeta } from '../api';
-
-import { useTranslation } from './LocaleContext';
 
 const DEFAULT_MAX_AGE = 300; // 5 minutes fallback when server omits Cache-Control
 

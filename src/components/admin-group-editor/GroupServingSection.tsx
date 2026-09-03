@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ProductGroupData } from '../../domain';
 import { massUnits, unitGroup, volumeUnits } from '../../config/unitConfig';
-import { useTranslation } from '../../contexts/LocaleContext';
 import ServingSizeSelector from '../ServingSizeSelector';
 import { SectionHeader } from '../common';
 import { ServingSize } from '../../domain';

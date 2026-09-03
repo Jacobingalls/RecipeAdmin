@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import { ServingSize } from '../domain';
 import { useApiQuery, useServingSizeParams } from '../hooks';
 import {
@@ -21,7 +21,7 @@ import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
 export default function ProductDetailPage() {
-  const { t, tPlural } = useTranslation();
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const {
     data: product,
@@ -89,7 +89,7 @@ export default function ProductDetailPage() {
 
           <section className="mt-4">
             <SubsectionTitle>
-              {tPlural('product.preparations', preparations.length)}
+              {t('product.preparations', { count: preparations.length })}
             </SubsectionTitle>
             {preparations.length > 0 && (
               <div className="card mb-3">

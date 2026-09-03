@@ -23,7 +23,7 @@ export const enCommon = {
   'error.unexpected.description': 'An unexpected error occurred',
 
   'confirm.confirm': 'Confirm',
-  'confirm.typeToConfirm': 'Type {name} to confirm',
+  'confirm.typeToConfirm': 'Type <strong>{{name}}</strong> to confirm',
 
   'filter.byName': 'Filter by name',
   'filter.searchByName': 'Search by name...',
@@ -33,9 +33,9 @@ export const enCommon = {
   'list.adjustFilters': 'Try adjusting your search or filters.',
   'list.adjustSearch': 'Try adjusting your search.',
 
-  'credential.created': 'Created {time}',
-  'credential.expires': 'Expires {time}',
-  'credential.expired': 'Expired {time}',
-  'credential.deletePasskey': 'Delete passkey {name}',
-  'credential.revokeApiKey': 'Revoke API key {name}',
+  'credential.created': 'Created {{time}}',
+  'credential.expires': 'Expires {{time}}',
+  'credential.expired': 'Expired {{time}}',
+  'credential.deletePasskey': 'Delete passkey {{name}}',
+  'credential.revokeApiKey': 'Revoke API key {{name}}',
 };

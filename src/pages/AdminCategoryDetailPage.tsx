@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../api';
 import { adminGetCategory } from '../api';
@@ -12,7 +13,6 @@ import {
 } from '../components/admin-category-detail';
 import { ContentUnavailableView, ErrorState, LoadingState } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { buildAllSlugPaths, buildSlugPath, resolvePathSegments } from '../utils';
 

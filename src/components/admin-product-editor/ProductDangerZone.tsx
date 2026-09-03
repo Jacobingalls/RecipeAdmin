@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
 import { adminDeleteProduct } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, TypeToConfirmModal, Button } from '../common';
 
 interface ProductDangerZoneProps {
@@ -11,7 +11,7 @@ interface ProductDangerZoneProps {
 }
 
 export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -30,9 +30,6 @@ export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
       setIsDeleting(false);
     }
   }
-
-  // The product name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw('productEditor.delete.message').split('{name}');
 
   return (
     <>
@@ -67,9 +64,11 @@ export default function ProductDangerZone({ product }: ProductDangerZoneProps) {
         title={t('productEditor.delete.modalTitle')}
         message={
           <>
-            {beforeName}
-            <strong>{product.name}</strong>
-            {afterName}
+            <Trans
+              i18nKey="productEditor.delete.message"
+              values={{ name: product.name }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={product.name}

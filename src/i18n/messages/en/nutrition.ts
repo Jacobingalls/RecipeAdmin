@@ -3,10 +3,10 @@ export const enNutritionLabel = {
   'nutritionLabel.title': 'Nutrition Facts',
   'nutritionLabel.servingSize': 'Serving size',
   'nutritionLabel.calories': 'Calories',
-  'nutritionLabel.caloriesFromFat': 'Calories from Fat {amount}',
+  'nutritionLabel.caloriesFromFat': 'Calories from Fat {{amount}}',
   'nutritionLabel.amount': 'Amount',
   'nutritionLabel.percentDV': '% DV*',
-  'nutritionLabel.percentOfDaily': '{percent}% of {amount}',
+  'nutritionLabel.percentOfDaily': '{{percent}}% of {{amount}}',
   'nutritionLabel.footnote':
     '* The % Daily Value (DV) tells you how much a nutrient in a serving of food contributes to a daily diet.',
 

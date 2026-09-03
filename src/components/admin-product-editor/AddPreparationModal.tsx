@@ -1,7 +1,7 @@
 import { useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 
 interface AddPreparationModalProps {

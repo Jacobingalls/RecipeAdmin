@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ApiProduct } from '../../api';
 import { ServingSize } from '../../domain';
 import { massUnits, unitGroup, volumeUnits } from '../../config/unitConfig';
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { PreparationData } from '../../domain/Preparation';
 import ServingSizeSelector from '../ServingSizeSelector';
 

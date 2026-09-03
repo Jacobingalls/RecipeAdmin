@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ApiLogEntry, ApiProduct } from '../../api';
 import type { NutritionInformation, ProductGroupData } from '../../domain';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SubsectionTitle } from '../common';
 import HistoryEntryRow from '../HistoryEntryRow';
 import { formatSignificant, resolveEntryName, resolveEntryBrand } from '../../utils';

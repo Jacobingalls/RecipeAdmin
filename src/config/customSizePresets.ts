@@ -7,7 +7,7 @@
 
 import type { CustomSizeData, ServingSizeData } from '../domain';
 import { ServingSize } from '../domain';
-import { getTranslator } from '../i18n';
+import i18n from '../i18n';
 import type { MessageKey } from '../i18n';
 
 export interface PresetCustomSize {
@@ -178,9 +178,9 @@ export const PRESET_CUSTOM_SIZES: PresetCustomSize[] = [
 ];
 
 export function formatPresetServing(s: ServingSizeData): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   if (s.kind === 'servings' && typeof s.amount === 'number') {
-    return t('customSizePreset.servings', { count: s.amount });
+    return t('customSizePreset.servings', { amount: s.amount });
   }
   if (s.kind === 'mass' && typeof s.amount === 'object' && s.amount) {
     return `${s.amount.amount} ${s.amount.unit}`;
@@ -189,10 +189,10 @@ export function formatPresetServing(s: ServingSizeData): string {
     return `${s.amount.amount} ${s.amount.unit}`;
   }
   // Fallback for tagged union format (backwards compatibility)
-  if (s.servings != null) return t('customSizePreset.servings', { count: s.servings });
+  if (s.servings != null) return t('customSizePreset.servings', { amount: s.servings });
   if (s.mass) return `${s.mass.amount} ${s.mass.unit}`;
   if (s.volume) return `${s.volume.amount} ${s.volume.unit}`;
-  return t('customSizePreset.servings', { count: 1 });
+  return t('customSizePreset.servings', { amount: 1 });
 }
 
 export function presetToCustomSizeData(preset: PresetCustomSize): CustomSizeData {

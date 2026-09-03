@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   API_DISPLAY_URL,
@@ -8,7 +9,6 @@ import {
   getAdminVersion,
 } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { useGravatarUrl } from '../../hooks/useGravatarUrl';
 import { formatEnvironmentName } from '../../utils';
 

@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
+import { getActiveLocale } from '../i18n';
 import { adminGetUser } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
-import { useTranslation } from '../contexts/LocaleContext';
 import {
   AdminUserProfileForm,
   AdminCredentialsSection,
@@ -11,7 +12,7 @@ import {
 import { useApiQuery } from '../hooks';
 
 export default function AdminUserDetailPage() {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -39,7 +40,7 @@ export default function AdminUserDetailPage() {
           <>
             <span className="mx-1">&middot;</span>
             {t('adminUser.created', {
-              date: new Date(user.createdAt * 1000).toLocaleDateString(locale),
+              date: new Date(user.createdAt * 1000).toLocaleDateString(getActiveLocale()),
             })}
           </>
         )}

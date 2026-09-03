@@ -1,10 +1,10 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { settingsUpdateProfile } from '../../api';
 import { Button } from '../../components/common';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 
 export default function ProfileSection() {
   const { t } = useTranslation();

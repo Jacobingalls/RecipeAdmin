@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { AdminTempAPIKeyResponse, PasskeyInfo, AdminAPIKeyInfo } from '../../api';
 import { adminDeleteUserPasskey, adminDeleteUserAPIKey, adminCreateUserAPIKey } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, CredentialRow, TypeToConfirmModal, Button } from '../common';
 
 import TempAPIKeyModal from './TempAPIKeyModal';
@@ -26,7 +26,7 @@ export default function AdminCredentialsSection({
   apiKeys,
   onChanged,
 }: AdminCredentialsSectionProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const [now] = useState(Date.now);
   const [tempKeyModal, setTempKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
@@ -60,11 +60,6 @@ export default function AdminCredentialsSection({
   }
 
   const isPasskey = deleteCredential?.type === 'passkey';
-  // The credential name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw(
-    isPasskey ? 'credentials.deleteMessage' : 'credentials.revokeMessage',
-  ).split('{name}');
-
   return (
     <>
       <SectionHeader title={t('adminUser.credentials')} className="mt-5">
@@ -118,9 +113,11 @@ export default function AdminCredentialsSection({
         title={t(isPasskey ? 'credentials.deletePasskeyTitle' : 'credentials.revokeApiKeyTitle')}
         message={
           <>
-            {beforeName}
-            <strong>{deleteCredential?.name}</strong>
-            {afterName}
+            <Trans
+              i18nKey={isPasskey ? 'credentials.deleteMessage' : 'credentials.revokeMessage'}
+              values={{ name: deleteCredential?.name }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={deleteCredential?.name ?? ''}

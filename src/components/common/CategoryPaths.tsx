@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath, resolvePathSegments } from '../../utils';
 
 type CategoryPathsProps =

@@ -13,8 +13,8 @@ export const enAdmin = {
   'adminGroups.title': 'Groups',
   'adminGroups.error': "Couldn't load groups. Try again later.",
   'adminGroups.empty.title': 'No groups',
-  'adminGroups.itemCount.one': '{count} item(s)',
-  'adminGroups.itemCount.other': '{count} item(s)',
+  'adminGroups.itemCount_one': '{{count}} item(s)',
+  'adminGroups.itemCount_other': '{{count}} item(s)',
 
   'adminCategories.title': 'Categories',
   'adminCategories.error': "Couldn't load categories. Try again later.",
@@ -38,7 +38,7 @@ export const enAdmin = {
   'createUser.title': 'Add User',
   'createUser.created': 'User created',
   'createUser.tempKeyNotice':
-    'Temporary API key for {name}. Save it now — it expires in 24 hours and can’t be retrieved later.',
+    'Temporary API key for <strong>{{name}}</strong>. Save it now — it expires in 24 hours and can’t be retrieved later.',
   'createUser.username': 'Username',
   'createUser.displayName': 'Display Name',
   'createUser.email': 'Email',

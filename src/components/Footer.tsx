@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next';
+
 import { API_DISPLAY_URL } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 
 export default function Footer() {
   const { t } = useTranslation();

@@ -1,4 +1,5 @@
 import { useState, useMemo, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { CustomSizeData } from '../../domain/CustomSize';
 import {
@@ -6,7 +7,6 @@ import {
   formatPresetServing,
   presetToCustomSizeData,
 } from '../../config/customSizePresets';
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { MessageKey } from '../../i18n';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiLogEntry, ApiProduct } from '../api';
 import { getLogs, getProduct, getGroup, deleteLog } from '../api';
@@ -6,7 +7,6 @@ import { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ProductGroupData, NutritionInformation } from '../domain';
 import type { LogTarget } from '../components/LogModal';
 import { buildLogTarget } from '../utils';
-import { useTranslation } from '../contexts/LocaleContext';
 
 const DAYS_PER_PAGE = 7;
 

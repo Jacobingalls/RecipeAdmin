@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-
-import { useTranslation } from '../../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
 
 import {
   BLOCKS,

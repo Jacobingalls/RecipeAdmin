@@ -6,7 +6,7 @@ export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
   'productEditor.preparations': 'Bereidingen',
   'productEditor.noPreparations': 'Geen bereidingen',
   'productEditor.defaultPreparation': 'Standaardbereiding',
-  'productEditor.defaultPreparationOption': 'Standaard ({name})',
+  'productEditor.defaultPreparationOption': 'Standaard ({{name}})',
   'productEditor.preparation': 'Bereiding',
   'productEditor.newPreparation': 'Nieuwe bereiding',
   'productEditor.preparationNamePlaceholder': 'bijv. Gekookt',
@@ -21,7 +21,7 @@ export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
   'productEditor.delete.action': 'Product verwijderen',
   'productEditor.delete.modalTitle': 'Product verwijderen',
   'productEditor.delete.message':
-    'Hiermee verwijder je {name} en alle bijbehorende gegevens definitief. Dit kun je niet ongedaan maken.',
+    'Hiermee verwijder je <strong>{{name}}</strong> en alle bijbehorende gegevens definitief. Dit kun je niet ongedaan maken.',
   'productEditor.delete.confirm': 'Dit product verwijderen',
   'productEditor.delete.error': 'Dit product verwijderen is niet gelukt. Probeer het opnieuw.',
 
@@ -33,7 +33,7 @@ export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
     'Hiermee verwijder je deze bereiding en de voedingsgegevens definitief.',
   'prepEditor.delete.modalTitle': 'Bereiding verwijderen',
   'prepEditor.delete.message':
-    'Hiermee verwijder je {name} en de voedingsgegevens definitief. Dit kun je niet ongedaan maken.',
+    'Hiermee verwijder je <strong>{{name}}</strong> en de voedingsgegevens definitief. Dit kun je niet ongedaan maken.',
   'prepEditor.delete.confirm': 'Bereiding verwijderen',
 
   'groupEditor.error': 'We konden deze groep niet laden. Probeer het later opnieuw.',
@@ -50,7 +50,7 @@ export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
   'groupEditor.itemServingAmount': 'Hoeveelheid voor itemportie',
   'groupEditor.itemServingUnit': 'Eenheid voor itemportie',
   'groupEditor.oneServing': '1 portie',
-  'groupEditor.calories': '{amount} cal',
+  'groupEditor.calories': '{{amount}} cal',
   'groupEditor.thisGroup': 'deze groep',
   'groupEditor.actions': 'Groepsacties',
   'groupEditor.delete.title': 'Deze groep verwijderen',
@@ -59,7 +59,7 @@ export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
   'groupEditor.delete.action': 'Groep verwijderen',
   'groupEditor.delete.modalTitle': 'Groep verwijderen',
   'groupEditor.delete.message':
-    'Hiermee verwijder je {name} en alle bijbehorende gegevens definitief. Dit kun je niet ongedaan maken.',
+    'Hiermee verwijder je <strong>{{name}}</strong> en alle bijbehorende gegevens definitief. Dit kun je niet ongedaan maken.',
   'groupEditor.delete.confirm': 'Deze groep verwijderen',
   'groupEditor.delete.error': 'Deze groep verwijderen is niet gelukt. Probeer het opnieuw.',
 
@@ -97,7 +97,7 @@ export const nlEntityEditors: Record<keyof typeof enEntityEditors, string> = {
   'categoryEditor.delete.action': 'Categorie verwijderen',
   'categoryEditor.delete.modalTitle': 'Categorie verwijderen',
   'categoryEditor.delete.message':
-    'Hiermee verwijder je {name} definitief. Dit kun je niet ongedaan maken.',
+    'Hiermee verwijder je <strong>{{name}}</strong> definitief. Dit kun je niet ongedaan maken.',
   'categoryEditor.delete.confirm': 'Deze categorie verwijderen',
   'categoryEditor.delete.error': 'Deze categorie verwijderen is niet gelukt. Probeer het opnieuw.',
 };

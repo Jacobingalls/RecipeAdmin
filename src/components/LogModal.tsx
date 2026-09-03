@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Preparation, ProductGroup, ServingSize } from '../domain';
 import type { ApiLogItem } from '../api';
 import { logEntry, updateLogEntry } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import type { MessageKey } from '../i18n';
 
 import { ModalBase, ModalHeader, ModalBody } from './common';

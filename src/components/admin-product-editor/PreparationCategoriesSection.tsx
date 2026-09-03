@@ -1,8 +1,8 @@
 import { useState, useMemo, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath } from '../../utils';
 import { DeleteButton, Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 import { CreateCategoryModal } from '../admin-category-detail';

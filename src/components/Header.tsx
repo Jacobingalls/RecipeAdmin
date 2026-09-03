@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from '../contexts/LocaleContext';
 
 import { HeaderSearchBar, UserDropdownMenu } from './header/index';
 

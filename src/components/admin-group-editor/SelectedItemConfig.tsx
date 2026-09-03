@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { PreparationData, ProductGroupData, ServingSize } from '../../domain';
 import { Preparation, ProductGroup } from '../../domain';
 import { buildOptionGroups, buildFallbackOptionGroups } from '../../config/unitConfig';
-import { useTranslation } from '../../contexts/LocaleContext';
 import ServingSizeSelector from '../ServingSizeSelector';
 
 interface SelectedItemConfigProps {

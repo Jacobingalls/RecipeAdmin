@@ -1,9 +1,9 @@
 import { useState, useMemo, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../../api';
 import { adminUpsertCategories } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath, isValidSlug, toSlug } from '../../utils';
 import { ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 

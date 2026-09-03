@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
+
 import type { AdminTempAPIKeyResponse } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
+import { getActiveLocale } from '../../i18n';
 
 interface TempAPIKeyModalProps {
   isOpen: boolean;
@@ -9,7 +11,7 @@ interface TempAPIKeyModalProps {
 }
 
 export default function TempAPIKeyModal({ isOpen, tempKey, onClose }: TempAPIKeyModalProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -36,7 +38,7 @@ export default function TempAPIKeyModal({ isOpen, tempKey, onClose }: TempAPIKey
             </div>
             <p className="text-body-secondary small mb-0">
               {t('adminUser.tempKey.expires', {
-                date: new Date(tempKey.expiresAt * 1000).toLocaleString(locale),
+                date: new Date(tempKey.expiresAt * 1000).toLocaleString(getActiveLocale()),
               })}
             </p>
           </>

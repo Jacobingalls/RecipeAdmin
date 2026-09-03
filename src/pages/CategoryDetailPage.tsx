@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory, ApiLookupItem } from '../api';
 import { getCategory, getCategoryChildren, getCategoryItems } from '../api';
@@ -13,7 +14,6 @@ import {
 } from '../components/common';
 import { GroupItemRow } from '../components/group';
 import { useCategories } from '../contexts/CategoriesContext';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { resolvePathSegments } from '../utils';
 

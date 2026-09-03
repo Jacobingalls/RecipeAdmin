@@ -4,10 +4,10 @@ export const nlNutritionLabel: Record<keyof typeof enNutritionLabel, string> = {
   'nutritionLabel.title': 'Voedingswaarde',
   'nutritionLabel.servingSize': 'Portiegrootte',
   'nutritionLabel.calories': 'Calorieën',
-  'nutritionLabel.caloriesFromFat': 'Calorieën uit vet {amount}',
+  'nutritionLabel.caloriesFromFat': 'Calorieën uit vet {{amount}}',
   'nutritionLabel.amount': 'Hoeveelheid',
   'nutritionLabel.percentDV': '% DW*',
-  'nutritionLabel.percentOfDaily': '{percent}% van {amount}',
+  'nutritionLabel.percentOfDaily': '{{percent}}% van {{amount}}',
   'nutritionLabel.footnote':
     '* De dagelijkse waarde (DW) geeft aan hoeveel een voedingsstof in een portie bijdraagt aan je dagelijkse voeding.',
 

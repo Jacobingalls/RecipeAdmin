@@ -1,4 +1,5 @@
 import { useState, useMemo, useId, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../api';
 import { adminListCategories } from '../api';
@@ -11,7 +12,6 @@ import {
   Button,
 } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { buildAllSlugPaths } from '../utils';
 

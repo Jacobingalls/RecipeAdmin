@@ -1,4 +1,4 @@
-import { useTranslation } from '../../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
 
 import CircularButton from './CircularButton';
 

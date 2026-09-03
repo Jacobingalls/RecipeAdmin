@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   settingsListPasskeys,
@@ -24,7 +25,6 @@ import {
   SessionsSection,
 } from '../components/settings';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 
 export default function SettingsPage() {

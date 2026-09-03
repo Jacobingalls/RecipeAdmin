@@ -1,8 +1,7 @@
 import type { FormEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-
-import { useTranslation } from '../../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
 
 export default function HeaderSearchBar() {
   const { t } = useTranslation();

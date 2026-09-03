@@ -1,8 +1,8 @@
 import { useMemo, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../../contexts/LocaleContext';
 import { useHistoryData } from '../../hooks';
 import { NutritionInformation } from '../../domain';
 import { DAILY_VALUES } from '../../config/constants';

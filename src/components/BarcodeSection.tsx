@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../contexts/LocaleContext';
 import type { BarcodeData } from '../domain';
 import { ServingSize } from '../domain';
 

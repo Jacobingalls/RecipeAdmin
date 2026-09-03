@@ -1,8 +1,8 @@
 import { useState, useMemo, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ProductGroupData } from '../../domain';
 import { useCategories } from '../../contexts/CategoriesContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { buildSlugPath } from '../../utils';
 import {
   SectionHeader,

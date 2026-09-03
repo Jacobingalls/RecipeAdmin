@@ -5,10 +5,10 @@ export const enEditor = {
   'editor.create': 'Create',
   'editor.profile': 'Profile',
   'editor.default': 'Default',
-  'editor.editItem': 'Edit {name}',
-  'editor.removeItem': 'Remove {name}',
-  'editor.amountLabel': '{name} amount',
-  'editor.unitLabel': '{name} unit',
+  'editor.editItem': 'Edit {{name}}',
+  'editor.removeItem': 'Remove {{name}}',
+  'editor.amountLabel': '{{name}} amount',
+  'editor.unitLabel': '{{name}} unit',
 
   'editor.categories': 'Categories',
   'editor.noCategories': 'No categories',
@@ -25,8 +25,8 @@ export const enEditor = {
   'editor.barcodePlaceholder': 'e.g. 012345678905',
   'editor.addBarcode': 'Add barcode',
   'editor.editBarcode': 'Edit barcode',
-  'editor.editBarcodeLabel': 'Edit barcode {code}',
-  'editor.removeBarcodeLabel': 'Remove barcode {code}',
+  'editor.editBarcodeLabel': 'Edit barcode {{code}}',
+  'editor.removeBarcodeLabel': 'Remove barcode {{code}}',
   'editor.barcodeServingAmount': 'Barcode serving amount',
   'editor.barcodeServingUnit': 'Barcode serving unit',
 
@@ -56,7 +56,7 @@ export const enEditor = {
   'customSizeGroup.units': 'Units',
   'customSizeGroup.sodaSizes': 'Soda sizes',
   'customSizeGroup.eggs': 'Eggs',
-  'customSizePreset.servings': '{count} serving(s)',
+  'customSizePreset.servings': '{{amount}} serving(s)',
 
   'note.title': 'Notes',
   'note.empty': 'No notes',
@@ -72,6 +72,6 @@ export const enEditor = {
   'note.url': 'URL',
   'note.urlPlaceholder': 'e.g. https://fdc.nal.usda.gov/...',
   'note.content': 'Content',
-  'note.editLabel': 'Edit note {number}',
-  'note.removeLabel': 'Remove note {number}',
+  'note.editLabel': 'Edit note {{number}}',
+  'note.removeLabel': 'Remove note {{number}}',
 };

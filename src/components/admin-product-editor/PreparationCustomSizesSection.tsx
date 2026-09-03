@@ -1,4 +1,5 @@
 import { useState, useMemo, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
 import { ServingSize } from '../../domain';
@@ -17,7 +18,6 @@ import {
   presetToCustomSizeData,
 } from '../../config/customSizePresets';
 import type { PresetCustomSize } from '../../config/customSizePresets';
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { MessageKey } from '../../i18n';
 import { DeleteButton, Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';

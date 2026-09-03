@@ -24,7 +24,7 @@ export const nlCommon: Record<keyof typeof enCommon, string> = {
   'error.unexpected.description': 'Er is een onverwachte fout opgetreden',
 
   'confirm.confirm': 'Bevestigen',
-  'confirm.typeToConfirm': 'Typ {name} om te bevestigen',
+  'confirm.typeToConfirm': 'Typ <strong>{{name}}</strong> om te bevestigen',
 
   'filter.byName': 'Filter op naam',
   'filter.searchByName': 'Zoek op naam...',
@@ -34,9 +34,9 @@ export const nlCommon: Record<keyof typeof enCommon, string> = {
   'list.adjustFilters': 'Pas je zoekopdracht of filters aan.',
   'list.adjustSearch': 'Pas je zoekopdracht aan.',
 
-  'credential.created': 'Aangemaakt {time}',
-  'credential.expires': 'Verloopt {time}',
-  'credential.expired': 'Verlopen {time}',
-  'credential.deletePasskey': 'Passkey {name} verwijderen',
-  'credential.revokeApiKey': 'API-sleutel {name} intrekken',
+  'credential.created': 'Aangemaakt {{time}}',
+  'credential.expires': 'Verloopt {{time}}',
+  'credential.expired': 'Verlopen {{time}}',
+  'credential.deletePasskey': 'Passkey {{name}} verwijderen',
+  'credential.revokeApiKey': 'API-sleutel {{name}} intrekken',
 };

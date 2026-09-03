@@ -1,11 +1,10 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiFavorite, CreateFavoriteRequest, ServingSizeData } from '../api';
 import { listFavorites, createFavorite, deleteFavorite } from '../api';
 import { ServingSize } from '../domain';
-
-import { useTranslation } from './LocaleContext';
 
 interface FindFavoriteOptions {
   productId?: string;

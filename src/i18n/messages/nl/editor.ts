@@ -6,10 +6,10 @@ export const nlEditor: Record<keyof typeof enEditor, string> = {
   'editor.create': 'Aanmaken',
   'editor.profile': 'Profiel',
   'editor.default': 'Standaard',
-  'editor.editItem': '{name} bewerken',
-  'editor.removeItem': '{name} verwijderen',
-  'editor.amountLabel': 'Hoeveelheid voor {name}',
-  'editor.unitLabel': 'Eenheid voor {name}',
+  'editor.editItem': '{{name}} bewerken',
+  'editor.removeItem': '{{name}} verwijderen',
+  'editor.amountLabel': 'Hoeveelheid voor {{name}}',
+  'editor.unitLabel': 'Eenheid voor {{name}}',
 
   'editor.categories': 'Categorieën',
   'editor.noCategories': 'Geen categorieën',
@@ -26,8 +26,8 @@ export const nlEditor: Record<keyof typeof enEditor, string> = {
   'editor.barcodePlaceholder': 'bijv. 012345678905',
   'editor.addBarcode': 'Barcode toevoegen',
   'editor.editBarcode': 'Barcode bewerken',
-  'editor.editBarcodeLabel': 'Barcode {code} bewerken',
-  'editor.removeBarcodeLabel': 'Barcode {code} verwijderen',
+  'editor.editBarcodeLabel': 'Barcode {{code}} bewerken',
+  'editor.removeBarcodeLabel': 'Barcode {{code}} verwijderen',
   'editor.barcodeServingAmount': 'Hoeveelheid voor barcodeportie',
   'editor.barcodeServingUnit': 'Eenheid voor barcodeportie',
 
@@ -57,7 +57,7 @@ export const nlEditor: Record<keyof typeof enEditor, string> = {
   'customSizeGroup.units': 'Eenheden',
   'customSizeGroup.sodaSizes': 'Frisdrankformaten',
   'customSizeGroup.eggs': 'Eieren',
-  'customSizePreset.servings': '{count} portie(s)',
+  'customSizePreset.servings': '{{amount}} portie(s)',
 
   'note.title': 'Notities',
   'note.empty': 'Geen notities',
@@ -73,6 +73,6 @@ export const nlEditor: Record<keyof typeof enEditor, string> = {
   'note.url': 'URL',
   'note.urlPlaceholder': 'bijv. https://fdc.nal.usda.gov/...',
   'note.content': 'Inhoud',
-  'note.editLabel': 'Notitie {number} bewerken',
-  'note.removeLabel': 'Notitie {number} verwijderen',
+  'note.editLabel': 'Notitie {{number}} bewerken',
+  'note.removeLabel': 'Notitie {{number}} verwijderen',
 };

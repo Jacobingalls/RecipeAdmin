@@ -44,8 +44,3 @@ export type MessageKey = keyof typeof en;
 
 /** A complete set of translations. */
 export type Messages = Record<MessageKey, string>;
-
-type PluralBase<K> = K extends `${infer Base}.other` ? Base : never;
-
-/** Keys that have plural forms — pass one of these to `tPlural`. */
-export type PluralBaseKey = PluralBase<MessageKey>;

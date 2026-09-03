@@ -2,29 +2,29 @@
 export const enFood = {
   'product.error': "Couldn't load this product. Try again later.",
   'product.notFound': 'Product not found',
-  'product.preparations.one': 'Preparation',
-  'product.preparations.other': 'Preparations',
+  'product.preparations_one': 'Preparation',
+  'product.preparations_other': 'Preparations',
 
   'notes.title': 'Notes',
 
   'barcodes.title': 'Barcodes',
   'barcode.lookup': 'Lookup',
-  'barcode.lookupTitle': 'Look up barcode {code}',
+  'barcode.lookupTitle': 'Look up barcode {{code}}',
   'barcode.use': 'Use',
-  'barcode.useTitle': 'Set serving to {size}',
+  'barcode.useTitle': 'Set serving to {{size}}',
 
   'customSizes.title': 'Custom Sizes',
-  'customSizes.useTitle': 'Set serving to 1 {name}',
+  'customSizes.useTitle': 'Set serving to 1 {{name}}',
 
   'group.error': "Couldn't load this group. Try again later.",
   'group.notFound': 'Group not found',
   'group.nutritionEstimate': 'Nutrition Estimate',
-  'group.items.one': 'Item',
-  'group.items.other': 'Items',
+  'group.items_one': 'Item',
+  'group.items_other': 'Items',
   'group.empty': 'No items in this group',
   'groupItem.product': 'Product',
   'groupItem.group': 'Group',
-  'groupItem.view': 'View {name}',
+  'groupItem.view': 'View {{name}}',
 
   'lookup.title': 'Lookup',
   'lookup.error': "Couldn't look up this barcode. Try again later.",

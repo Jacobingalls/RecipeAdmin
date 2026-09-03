@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { PreparationData, ServingSize } from '../../domain';
 import { Preparation } from '../../domain';
 import { SubsectionTitle } from '../common';

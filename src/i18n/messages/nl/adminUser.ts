@@ -3,7 +3,7 @@ import type { enAdminUser } from '../en/adminUser';
 export const nlAdminUser: Record<keyof typeof enAdminUser, string> = {
   'adminUser.error': 'We konden deze gebruiker niet laden. Probeer het later opnieuw.',
   'adminUser.notFound': 'Gebruiker niet gevonden',
-  'adminUser.created': 'Aangemaakt op {date}',
+  'adminUser.created': 'Aangemaakt op {{date}}',
 
   'adminUser.profile': 'Profiel',
   'adminUser.username': 'Gebruikersnaam',
@@ -18,7 +18,7 @@ export const nlAdminUser: Record<keyof typeof enAdminUser, string> = {
   'adminUser.tempKey.title': 'Tijdelijke API-sleutel',
   'adminUser.tempKey.ariaLabel': 'Tijdelijke API-sleutel',
   'adminUser.tempKey.keyLabel': 'API-sleutel',
-  'adminUser.tempKey.expires': 'Verloopt op {date}',
+  'adminUser.tempKey.expires': 'Verloopt op {{date}}',
   'adminUser.tempKey.generating': 'Genereren...',
 
   'adminUser.accountActions': 'Accountacties',
@@ -30,7 +30,7 @@ export const nlAdminUser: Record<keyof typeof enAdminUser, string> = {
   'adminUser.revokeSessions.description': 'Log deze gebruiker direct uit op alle apparaten.',
   'adminUser.revokeSessions.action': 'Sessies intrekken',
   'adminUser.revokeSessions.confirm':
-    'Alle sessies voor {name} intrekken? Deze gebruiker wordt op alle apparaten uitgelogd.',
+    'Alle sessies voor <strong>{{name}}</strong> intrekken? Deze gebruiker wordt op alle apparaten uitgelogd.',
   'adminUser.revokeSessions.error': 'De sessies intrekken is niet gelukt. Probeer het opnieuw.',
   'adminUser.delete.title': 'Deze gebruiker verwijderen',
   'adminUser.delete.description':
@@ -38,7 +38,7 @@ export const nlAdminUser: Record<keyof typeof enAdminUser, string> = {
   'adminUser.delete.action': 'Gebruiker verwijderen',
   'adminUser.delete.modalTitle': 'Gebruiker verwijderen',
   'adminUser.delete.message':
-    'Hiermee verwijder je {name} definitief. Dit kun je niet ongedaan maken.',
+    'Hiermee verwijder je <strong>{{name}}</strong> definitief. Dit kun je niet ongedaan maken.',
   'adminUser.delete.confirm': 'Deze gebruiker verwijderen',
   'adminUser.delete.error': 'Deze gebruiker verwijderen is niet gelukt. Probeer het opnieuw.',
 };

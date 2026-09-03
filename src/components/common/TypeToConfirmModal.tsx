@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { useState, useId } from 'react';
-
-import { useTranslation } from '../../contexts/LocaleContext';
+import { Trans, useTranslation } from 'react-i18next';
 
 import ModalBase, { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
 import Button from './Button';
@@ -44,13 +43,10 @@ function TypeToConfirmModalContent({
   onCancel,
   isLoading,
 }: Omit<TypeToConfirmModalProps, 'isOpen'>) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const [confirmText, setConfirmText] = useState('');
   const titleId = useId();
   const inputId = useId();
-
-  // The name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw('confirm.typeToConfirm').split('{name}');
 
   return (
     <ModalBase onClose={onCancel} ariaLabelledBy={titleId}>
@@ -60,9 +56,11 @@ function TypeToConfirmModalContent({
       <ModalBody>
         <p>{message}</p>
         <label htmlFor={inputId} className="form-label">
-          {beforeName}
-          <strong>{itemName}</strong>
-          {afterName}
+          <Trans
+            i18nKey="confirm.typeToConfirm"
+            values={{ name: itemName }}
+            components={{ strong: <strong /> }}
+          />
         </label>
         <input
           type="text"

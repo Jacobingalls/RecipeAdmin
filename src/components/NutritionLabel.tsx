@@ -1,5 +1,6 @@
 import convert from 'convert';
 import type { Unit } from 'convert';
+import { useTranslation } from 'react-i18next';
 
 import type {
   NutritionInformation,
@@ -9,7 +10,6 @@ import type {
   ServingSize,
 } from '../domain';
 import { DAILY_VALUES } from '../config/constants';
-import { useTranslation } from '../contexts/LocaleContext';
 import { formatSignificant, formatServingSize } from '../utils';
 
 import NutritionRow from './NutritionRow';

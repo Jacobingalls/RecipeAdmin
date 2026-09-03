@@ -10,12 +10,12 @@ export const enTimePicker = {
   'timePicker.now': 'Now',
   'timePicker.today': 'Today',
   'timePicker.yesterday': 'Yesterday',
-  'timePicker.todayAt': 'Today, {time}',
-  'timePicker.yesterdayAt': 'Yesterday, {time}',
-  'timePicker.dateAt': '{date}, {time}',
+  'timePicker.todayAt': 'Today, {{time}}',
+  'timePicker.yesterdayAt': 'Yesterday, {{time}}',
+  'timePicker.dateAt': '{{date}}, {{time}}',
 
-  'timePicker.preset.minutesAgo': '{count}m ago',
-  'timePicker.preset.hoursAgo': '{count}hr ago',
+  'timePicker.preset.minutesAgo': '{{amount}}m ago',
+  'timePicker.preset.hoursAgo': '{{amount}}hr ago',
 
   'timePicker.when': 'When',
   'timePicker.custom': 'Pick a specific date & time…',
@@ -25,8 +25,8 @@ export const enTimePicker = {
 
   'timePicker.noPreviousBlock': 'No previous block',
   'timePicker.noNextBlock': 'No next block',
-  'timePicker.previousBlock': 'Previous: {label}',
-  'timePicker.nextBlock': 'Next: {label}',
+  'timePicker.previousBlock': 'Previous: {{label}}',
+  'timePicker.nextBlock': 'Next: {{label}}',
   'timePicker.yesterdayNight': 'Yesterday, Night',
   'timePicker.todayLateNight': 'Today, Late night',
 };

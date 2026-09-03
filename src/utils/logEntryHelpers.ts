@@ -1,7 +1,7 @@
 import type { ApiLogEntry, ApiProduct } from '../api';
 import type { LogTarget } from '../components/LogModal';
 import type { ProductGroupData } from '../domain';
-import { getActiveLocale, getTranslator } from '../i18n';
+import i18n, { getActiveLocale } from '../i18n';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
 
 import { servingSizeSearchParams } from './servingSizeParams';
@@ -16,7 +16,7 @@ export function formatTime(timestamp: number): string {
 
 /** Formats a Unix epoch timestamp (seconds) as a relative time string. */
 export function formatRelativeTime(timestamp: number): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   const now = Date.now();
   const thenMs = timestamp * 1000;
   const diffMs = now - thenMs;
@@ -28,9 +28,9 @@ export function formatRelativeTime(timestamp: number): string {
     const futureDays = Math.floor(futurMs / 86_400_000);
 
     if (futureMinutes < 1) return t('format.relative.justNow');
-    if (futureMinutes < 60) return t('format.relative.inMinutes', { count: futureMinutes });
-    if (futureHours < 24) return t('format.relative.inHours', { count: futureHours });
-    if (futureDays < 7) return t('format.relative.inDays', { count: futureDays });
+    if (futureMinutes < 60) return t('format.relative.inMinutes', { amount: futureMinutes });
+    if (futureHours < 24) return t('format.relative.inHours', { amount: futureHours });
+    if (futureDays < 7) return t('format.relative.inDays', { amount: futureDays });
     return new Date(thenMs).toLocaleDateString(getActiveLocale());
   }
 
@@ -39,9 +39,9 @@ export function formatRelativeTime(timestamp: number): string {
   const diffDays = Math.floor(diffMs / 86_400_000);
 
   if (diffMinutes < 1) return t('format.relative.justNow');
-  if (diffMinutes < 60) return t('format.relative.minutesAgo', { count: diffMinutes });
-  if (diffHours < 24) return t('format.relative.hoursAgo', { count: diffHours });
-  if (diffDays < 7) return t('format.relative.daysAgo', { count: diffDays });
+  if (diffMinutes < 60) return t('format.relative.minutesAgo', { amount: diffMinutes });
+  if (diffHours < 24) return t('format.relative.hoursAgo', { amount: diffHours });
+  if (diffDays < 7) return t('format.relative.daysAgo', { amount: diffDays });
   return new Date(thenMs).toLocaleDateString(getActiveLocale());
 }
 
@@ -51,7 +51,7 @@ export function resolveEntryName(
   productDetails: Record<string, { name: string }>,
   groupDetails: Record<string, { name?: string }>,
 ): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   if (entry.item.groupID) {
     const group = groupDetails[entry.item.groupID];
     return group?.name ?? t('entry.unknownGroup');
@@ -135,7 +135,7 @@ export function buildLogTarget(
 
   if (entry.item.groupID && groupData) {
     return {
-      name: groupData.name ?? getTranslator().t('entry.group'),
+      name: groupData.name ?? i18n.t('entry.group'),
       brand: groupData.brand,
       prepOrGroup: new ProductGroup(groupData),
       initialServingSize,

@@ -1,24 +1,25 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LocaleProvider } from '../../contexts/LocaleContext';
-import { LOCALE_STORAGE_KEY } from '../../i18n';
+import i18n, { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '../../i18n';
 
 import LanguageSection from './LanguageSection';
 
 function renderSection() {
-  return render(
-    <LocaleProvider>
-      <LanguageSection />
-    </LocaleProvider>,
-  );
+  return render(<LanguageSection />);
 }
 
 describe('LanguageSection', () => {
   beforeEach(() => {
     window.localStorage.clear();
     vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-US']);
+  });
+
+  afterEach(async () => {
+    window.localStorage.clear();
+    vi.restoreAllMocks();
+    await i18n.changeLanguage(DEFAULT_LOCALE);
   });
 
   it('offers every shipped language plus following the browser', () => {

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { ApiCategory, ApiLookupItem } from '../../api';
 import { adminDeleteCategory, getCategoryItems } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, TypeToConfirmModal, Button } from '../common';
 
 interface CategoryDangerZoneProps {
@@ -12,7 +12,7 @@ interface CategoryDangerZoneProps {
 }
 
 export default function CategoryDangerZone({ category }: CategoryDangerZoneProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { refresh } = useCategories();
   const [items, setItems] = useState<ApiLookupItem[] | null>(null);
@@ -60,9 +60,6 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
     }
   }
 
-  // The category name is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw('categoryEditor.delete.message').split('{name}');
-
   return (
     <>
       <SectionHeader title={t('categoryEditor.actions')} className="mt-5" />
@@ -97,9 +94,11 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
         title={t('categoryEditor.delete.modalTitle')}
         message={
           <>
-            {beforeName}
-            <strong>{category.displayName}</strong>
-            {afterName}
+            <Trans
+              i18nKey="categoryEditor.delete.message"
+              values={{ name: category.displayName }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={category.displayName}

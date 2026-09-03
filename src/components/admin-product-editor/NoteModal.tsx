@@ -1,6 +1,6 @@
 import { useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from '../../contexts/LocaleContext';
 import type { Note } from '../NotesDisplay';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 

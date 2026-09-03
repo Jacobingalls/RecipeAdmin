@@ -1,4 +1,4 @@
-import { getTranslator } from '../i18n';
+import i18n from '../i18n';
 
 import type { NutritionUnitData } from './NutritionUnit';
 import { NutritionUnit } from './NutritionUnit';
@@ -205,7 +205,7 @@ export class ServingSize {
     switch (this.type) {
       case 'servings': {
         const count = this.value as number;
-        return getTranslator().tPlural('format.servings', count);
+        return i18n.t('format.servings', { count, amount: count });
       }
       case 'mass':
       case 'volume':
@@ -213,7 +213,7 @@ export class ServingSize {
         return (this.value as NutritionUnit).toString();
       case 'customSize': {
         const { name, amount } = this.value as CustomSizeValue;
-        return getTranslator().tPlural('format.customSize', amount, { count: amount, name });
+        return i18n.t('format.customSize', { count: amount, amount, name });
       }
       default:
         return '';

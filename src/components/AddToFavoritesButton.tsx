@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ServingSize } from '../domain';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useTranslation } from '../contexts/LocaleContext';
 
 import { CircularButton } from './common';
 

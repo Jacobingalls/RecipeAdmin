@@ -3,29 +3,29 @@ import type { enFood } from '../en/food';
 export const nlFood: Record<keyof typeof enFood, string> = {
   'product.error': 'We konden dit product niet laden. Probeer het later opnieuw.',
   'product.notFound': 'Product niet gevonden',
-  'product.preparations.one': 'Bereiding',
-  'product.preparations.other': 'Bereidingen',
+  'product.preparations_one': 'Bereiding',
+  'product.preparations_other': 'Bereidingen',
 
   'notes.title': 'Notities',
 
   'barcodes.title': 'Barcodes',
   'barcode.lookup': 'Opzoeken',
-  'barcode.lookupTitle': 'Barcode {code} opzoeken',
+  'barcode.lookupTitle': 'Barcode {{code}} opzoeken',
   'barcode.use': 'Gebruiken',
-  'barcode.useTitle': 'Portie instellen op {size}',
+  'barcode.useTitle': 'Portie instellen op {{size}}',
 
   'customSizes.title': 'Eigen porties',
-  'customSizes.useTitle': 'Portie instellen op 1 {name}',
+  'customSizes.useTitle': 'Portie instellen op 1 {{name}}',
 
   'group.error': 'We konden deze groep niet laden. Probeer het later opnieuw.',
   'group.notFound': 'Groep niet gevonden',
   'group.nutritionEstimate': 'Geschatte voedingswaarde',
-  'group.items.one': 'Item',
-  'group.items.other': 'Items',
+  'group.items_one': 'Item',
+  'group.items_other': 'Items',
   'group.empty': 'Geen items in deze groep',
   'groupItem.product': 'Product',
   'groupItem.group': 'Groep',
-  'groupItem.view': '{name} bekijken',
+  'groupItem.view': '{{name}} bekijken',
 
   'lookup.title': 'Opzoeken',
   'lookup.error': 'We konden deze barcode niet opzoeken. Probeer het later opnieuw.',

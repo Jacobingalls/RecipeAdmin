@@ -1,4 +1,5 @@
-import { useTranslation } from '../../contexts/LocaleContext';
+import { useTranslation } from 'react-i18next';
+
 import { formatRelativeTime } from '../../utils';
 
 import DeleteButton from './DeleteButton';

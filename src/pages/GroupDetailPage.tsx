@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { getGroup } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery, useServingSizeParams } from '../hooks';
 import type { ProductGroupData } from '../domain';
 import { ServingSize, ProductGroup } from '../domain';
@@ -21,7 +21,7 @@ import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
 export default function GroupDetailPage() {
-  const { t, tPlural } = useTranslation();
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const {
     data: groupData,
@@ -101,7 +101,7 @@ export default function GroupDetailPage() {
           )}
 
           <section className="mt-4">
-            <SubsectionTitle>{tPlural('group.items', items.length)}</SubsectionTitle>
+            <SubsectionTitle>{t('group.items', { count: items.length })}</SubsectionTitle>
             {items.length === 0 ? (
               <p className="text-secondary">{t('group.empty')}</p>
             ) : (

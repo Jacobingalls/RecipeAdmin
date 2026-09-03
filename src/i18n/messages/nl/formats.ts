@@ -1,25 +1,25 @@
 import type { enFormats } from '../en/formats';
 
 export const nlFormats: Record<keyof typeof enFormats, string> = {
-  'format.servings.one': '{count} portie',
-  'format.servings.other': '{count} porties',
+  'format.servings_one': '{{amount}} portie',
+  'format.servings_other': '{{amount}} porties',
   // A custom size name comes from the data, so it can't be pluralized reliably.
-  'format.customSize.one': '{count} {name}',
-  'format.customSize.other': '{count} {name}',
+  'format.customSize_one': '{{amount}} {{name}}',
+  'format.customSize_other': '{{amount}} {{name}}',
 
   'format.relative.justNow': 'zojuist',
-  'format.relative.minutesAgo': '{count} min geleden',
-  'format.relative.hoursAgo': '{count} u geleden',
-  'format.relative.daysAgo': '{count} d geleden',
-  'format.relative.inMinutes': 'over {count} min',
-  'format.relative.inHours': 'over {count} u',
-  'format.relative.inDays': 'over {count} d',
+  'format.relative.minutesAgo': '{{amount}} min geleden',
+  'format.relative.hoursAgo': '{{amount}} u geleden',
+  'format.relative.daysAgo': '{{amount}} d geleden',
+  'format.relative.inMinutes': 'over {{amount}} min',
+  'format.relative.inHours': 'over {{amount}} u',
+  'format.relative.inDays': 'over {{amount}} d',
 
   'format.lastLogin.never': 'Nooit ingelogd',
   'format.lastLogin.justNow': 'Zojuist',
-  'format.lastLogin.minutesAgo': '{count} min geleden',
-  'format.lastLogin.hoursAgo': '{count} u geleden',
-  'format.lastLogin.daysAgo': '{count} d geleden',
+  'format.lastLogin.minutesAgo': '{{amount}} min geleden',
+  'format.lastLogin.hoursAgo': '{{amount}} u geleden',
+  'format.lastLogin.daysAgo': '{{amount}} d geleden',
 
   'entry.unknownGroup': 'Onbekende groep',
   'entry.unknownProduct': 'Onbekend product',

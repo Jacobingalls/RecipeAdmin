@@ -24,7 +24,7 @@ export const enHome = {
   'sparkline.onTarget': 'on target',
   'sparkline.nearTarget': 'near target',
   'sparkline.offTarget': 'off target',
-  'sparkline.percentOfDaily': '{percent}% of {amount} {unit}',
+  'sparkline.percentOfDaily': '{{percent}}% of {{amount}} {{unit}}',
 
   'favorites.title': 'Favorites',
   'favorites.loadError': "Couldn't load favorites. Try again later.",

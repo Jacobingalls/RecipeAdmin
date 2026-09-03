@@ -5,7 +5,7 @@ export const enEntityEditors = {
   'productEditor.preparations': 'Preparations',
   'productEditor.noPreparations': 'No preparations',
   'productEditor.defaultPreparation': 'Default preparation',
-  'productEditor.defaultPreparationOption': 'Default ({name})',
+  'productEditor.defaultPreparationOption': 'Default ({{name}})',
   'productEditor.preparation': 'Preparation',
   'productEditor.newPreparation': 'New preparation',
   'productEditor.preparationNamePlaceholder': 'e.g. Cooked',
@@ -20,7 +20,7 @@ export const enEntityEditors = {
   'productEditor.delete.action': 'Delete product',
   'productEditor.delete.modalTitle': 'Delete product',
   'productEditor.delete.message':
-    "This will permanently delete {name} and all its data. This action can't be undone.",
+    "This will permanently delete {{name}} and all its data. This action can't be undone.",
   'productEditor.delete.confirm': 'Delete this product',
   'productEditor.delete.error': "Couldn't delete this product. Try again.",
 
@@ -31,7 +31,7 @@ export const enEntityEditors = {
     'This will permanently delete this preparation and its nutrition data.',
   'prepEditor.delete.modalTitle': 'Delete preparation',
   'prepEditor.delete.message':
-    "This will permanently delete {name} and its nutrition data. This can't be undone.",
+    "This will permanently delete {{name}} and its nutrition data. This can't be undone.",
   'prepEditor.delete.confirm': 'Delete preparation',
 
   'groupEditor.error': "Couldn't load this group. Try again later.",
@@ -48,7 +48,7 @@ export const enEntityEditors = {
   'groupEditor.itemServingAmount': 'Item serving amount',
   'groupEditor.itemServingUnit': 'Item serving unit',
   'groupEditor.oneServing': '1 serving',
-  'groupEditor.calories': '{amount} cal',
+  'groupEditor.calories': '{{amount}} cal',
   'groupEditor.thisGroup': 'this group',
   'groupEditor.actions': 'Group actions',
   'groupEditor.delete.title': 'Delete this group',
@@ -57,7 +57,7 @@ export const enEntityEditors = {
   'groupEditor.delete.action': 'Delete group',
   'groupEditor.delete.modalTitle': 'Delete group',
   'groupEditor.delete.message':
-    "This will permanently delete {name} and all its data. This action can't be undone.",
+    "This will permanently delete {{name}} and all its data. This action can't be undone.",
   'groupEditor.delete.confirm': 'Delete this group',
   'groupEditor.delete.error': "Couldn't delete this group. Try again.",
 
@@ -92,7 +92,7 @@ export const enEntityEditors = {
   'categoryEditor.delete.action': 'Delete category',
   'categoryEditor.delete.modalTitle': 'Delete category',
   'categoryEditor.delete.message':
-    "This will permanently delete {name}. This action can't be undone.",
+    "This will permanently delete {{name}}. This action can't be undone.",
   'categoryEditor.delete.confirm': 'Delete this category',
   'categoryEditor.delete.error': "Couldn't delete this category. Try again.",
 };

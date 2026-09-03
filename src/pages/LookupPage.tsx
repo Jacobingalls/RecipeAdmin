@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiSearchResult } from '../api';
 import { lookupBarcode } from '../api';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { buildSearchResultLogTarget } from '../utils';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../components/common';

@@ -25,7 +25,7 @@ export const nlHome: Record<keyof typeof enHome, string> = {
   'sparkline.onTarget': 'op schema',
   'sparkline.nearTarget': 'bijna op schema',
   'sparkline.offTarget': 'niet op schema',
-  'sparkline.percentOfDaily': '{percent}% van {amount} {unit}',
+  'sparkline.percentOfDaily': '{{percent}}% van {{amount}} {{unit}}',
 
   'favorites.title': 'Favorieten',
   'favorites.loadError': 'We konden je favorieten niet laden. Probeer het later opnieuw.',

@@ -1,7 +1,7 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
 
-import { getTranslator } from '../../i18n';
+import i18n from '../../i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -37,7 +37,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   render() {
     if (this.state.hasError) {
       // A class component can't use hooks, so read the active language directly.
-      const { t } = getTranslator();
+      const { t } = i18n;
 
       return (
         <div className="container py-4" style={{ maxWidth: 600 }}>

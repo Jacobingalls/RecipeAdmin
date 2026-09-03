@@ -14,7 +14,7 @@ export const nlNav: Record<keyof typeof enNav, string> = {
   'nav.admin': 'Beheer',
   'nav.signOut': 'Uitloggen',
 
-  'footer.api': 'API: {url}',
+  'footer.api': 'API: {{url}}',
 
   'environment.unknown': 'Onbekend',
   'environment.development': 'Ontwikkeling',

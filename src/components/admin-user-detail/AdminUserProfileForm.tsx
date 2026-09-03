@@ -1,8 +1,8 @@
 import type { FormEvent, ReactNode } from 'react';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { adminUpdateUser } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, Button } from '../common';
 
 interface AdminUserProfileFormProps {

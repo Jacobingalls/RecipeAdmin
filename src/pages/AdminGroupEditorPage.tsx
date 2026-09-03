@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { adminGetGroup, adminUpsertGroups, resolveIndirectGroup } from '../api';
 import type { IndirectGroup } from '../api';
 import type { ProductGroupData } from '../domain';
 import type { Note } from '../components/NotesDisplay';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 import { LoadingState, ErrorState, ContentUnavailableView, Button } from '../components/common';
 import { NotesSection } from '../components/admin-product-editor';

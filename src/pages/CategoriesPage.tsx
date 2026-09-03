@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../api';
 import {
@@ -8,7 +9,6 @@ import {
   ContentUnavailableView,
 } from '../components/common';
 import { useCategories } from '../contexts/CategoriesContext';
-import { useTranslation } from '../contexts/LocaleContext';
 
 export default function CategoriesPage() {
   const { t } = useTranslation();

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../api';
 import { adminListProducts } from '../api';
@@ -12,7 +13,6 @@ import {
   LinkListItem,
   ListFilter,
 } from '../components/common';
-import { useTranslation } from '../contexts/LocaleContext';
 import { useApiQuery } from '../hooks';
 
 export default function ProductsPage() {

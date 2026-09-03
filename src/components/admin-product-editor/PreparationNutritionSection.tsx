@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
 import type { NutritionUnit } from '../../domain';
@@ -7,7 +8,6 @@ import type { NutritionInformationData } from '../../domain/NutritionInformation
 import { nutritionMassUnits, nutritionEnergyUnits, unitGroup } from '../../config/unitConfig';
 import type { NutrientDef } from '../../config/nutrientConfig';
 import NUTRIENT_ORDER from '../../config/nutrientConfig';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { DeleteButton } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';
 

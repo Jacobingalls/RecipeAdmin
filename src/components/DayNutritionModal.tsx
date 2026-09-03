@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type NutritionInformationData,
@@ -6,7 +7,6 @@ import {
   Preparation,
   ServingSize,
 } from '../domain';
-import { useTranslation } from '../contexts/LocaleContext';
 
 import { ModalBase, ModalHeader, ModalBody } from './common';
 import NutritionLabel from './NutritionLabel';

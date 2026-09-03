@@ -5,7 +5,7 @@ import { nl } from './nl';
 
 import { messages } from './index';
 
-const PLACEHOLDER_PATTERN = /\{(\w+)\}/g;
+const PLACEHOLDER_PATTERN = /\{\{(\w+)\}\}/g;
 
 function placeholders(message: string): string[] {
   return [...message.matchAll(PLACEHOLDER_PATTERN)].map((m) => m[1]).sort();
@@ -37,10 +37,17 @@ describe('message catalogs', () => {
   it('gives every plural key both a one and an other form', () => {
     for (const [locale, catalog] of Object.entries(messages)) {
       for (const key of Object.keys(catalog)) {
-        if (!key.endsWith('.other')) continue;
-        const base = key.slice(0, -'.other'.length);
-        expect(catalog, `${locale}: ${base}`).toHaveProperty(`${base}.one`);
+        if (!key.endsWith('_other')) continue;
+        const base = key.slice(0, -'_other'.length);
+        expect(catalog, `${locale}: ${base}`).toHaveProperty(`${base}_one`);
       }
+    }
+  });
+
+  it('only uses count in messages i18next will resolve as a plural', () => {
+    for (const [key, value] of Object.entries(en)) {
+      if (!placeholders(value).includes('count')) continue;
+      expect(key, `${key} interpolates count but is not a plural form`).toMatch(/_(one|other)$/);
     }
   });
 

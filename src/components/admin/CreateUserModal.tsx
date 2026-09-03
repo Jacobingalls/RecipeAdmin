@@ -1,9 +1,9 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { AdminCreateUserResponse } from '../../api';
 import { adminCreateUser } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 
 interface CreateUserModalProps {
@@ -13,7 +13,7 @@ interface CreateUserModalProps {
 }
 
 export default function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserModalProps) {
-  const { t, raw } = useTranslation();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,9 +51,6 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
 
   if (!isOpen) return null;
 
-  // The username is emphasized inside the sentence, so render around the placeholder.
-  const [beforeName, afterName] = raw('createUser.tempKeyNotice').split('{name}');
-
   return (
     <ModalBase onClose={handleClose} ariaLabelledBy="create-user-modal-title">
       {createdResult ? (
@@ -64,9 +61,11 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
           <ModalBody>
             <div className="alert alert-success mb-0" role="status">
               <p className="mb-2 small">
-                {beforeName}
-                <strong>{createdResult.user.username}</strong>
-                {afterName}
+                <Trans
+                  i18nKey="createUser.tempKeyNotice"
+                  values={{ name: createdResult.user.username }}
+                  components={{ strong: <strong /> }}
+                />
               </p>
               <div className="d-flex gap-2 align-items-center">
                 <code className="flex-grow-1 text-break">{createdResult.temporaryAPIKey}</code>

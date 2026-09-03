@@ -1,9 +1,9 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
 import { adminUpsertProducts } from '../../api';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
 
 interface CreateProductModalProps {

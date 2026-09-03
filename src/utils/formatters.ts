@@ -1,4 +1,4 @@
-import { getActiveLocale, getTranslator } from '../i18n';
+import i18n, { getActiveLocale } from '../i18n';
 import type {
   Preparation,
   ProductGroup,
@@ -61,8 +61,6 @@ export function formatServingSize(
 ): FormattedServingSize {
   if (!servingSize || !prepOrGroup) return { primary: null, resolved: null };
 
-  const { tPlural } = getTranslator();
-
   let scalar: number;
   try {
     scalar = prepOrGroup.scalar(servingSize);
@@ -79,7 +77,7 @@ export function formatServingSize(
   let primary: string | null = null;
   if (servingSize.type === 'servings') {
     const count = servingSize.value as number;
-    primary = tPlural('format.servings', count, { count: formatSignificant(count) });
+    primary = i18n.t('format.servings', { count, amount: formatSignificant(count) });
   } else if (servingSize.type === 'customSize') {
     const { name, amount } = servingSize.value as CustomSizeValue;
     primary = `${formatSignificant(amount)} ${name}`;
@@ -97,7 +95,7 @@ export function formatServingSize(
   // Build resolved breakdown, omitting whichever is the primary selection
   const resolved: string[] = [];
   if (servingSize.type !== 'servings') {
-    resolved.push(tPlural('format.servings', scalar, { count: formatSignificant(scalar) }));
+    resolved.push(i18n.t('format.servings', { count: scalar, amount: formatSignificant(scalar) }));
   }
   if (mass && servingSize.type !== 'mass') {
     const massAmount = mass.amount * scalar;
@@ -118,7 +116,7 @@ export function formatServingSize(
  * they're capitalized rather than translated.
  */
 export function formatEnvironmentName(environment: string | null | undefined): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   if (!environment) return t('environment.unknown');
   if (environment.toLowerCase() === 'debug') return t('environment.development');
   return environment.charAt(0).toUpperCase() + environment.slice(1);
@@ -134,7 +132,7 @@ const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
  * - Older than 2 weeks → date only ("1/15/2025")
  */
 export function formatLastLogin(timestamp: number | null | undefined): string {
-  const { t } = getTranslator();
+  const { t } = i18n;
   if (timestamp == null) return t('format.lastLogin.never');
 
   const nowMs = Date.now();
@@ -147,9 +145,9 @@ export function formatLastLogin(timestamp: number | null | undefined): string {
     const diffDays = Math.floor(diffMs / 86_400_000);
 
     if (diffMinutes < 1) return t('format.lastLogin.justNow');
-    if (diffMinutes < 60) return t('format.lastLogin.minutesAgo', { count: diffMinutes });
-    if (diffHours < 24) return t('format.lastLogin.hoursAgo', { count: diffHours });
-    return t('format.lastLogin.daysAgo', { count: diffDays });
+    if (diffMinutes < 60) return t('format.lastLogin.minutesAgo', { amount: diffMinutes });
+    if (diffHours < 24) return t('format.lastLogin.hoursAgo', { amount: diffHours });
+    return t('format.lastLogin.daysAgo', { amount: diffDays });
   }
 
   return new Date(thenMs).toLocaleDateString(getActiveLocale());

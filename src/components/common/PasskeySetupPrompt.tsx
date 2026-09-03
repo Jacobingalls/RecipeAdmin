@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { settingsAddPasskeyBegin, settingsAddPasskeyFinish } from '../../api';
 
 import Button from './Button';

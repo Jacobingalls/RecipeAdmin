@@ -1,11 +1,11 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '../components/common';
 import VersionBadge from '../components/VersionBadge';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from '../contexts/LocaleContext';
 
 export default function LoginPage() {
   const { t } = useTranslation();

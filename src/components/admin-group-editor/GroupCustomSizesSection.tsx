@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ProductGroupData } from '../../domain';
 import { ServingSize } from '../../domain';
@@ -11,7 +12,6 @@ import {
   unitGroup,
 } from '../../config/unitConfig';
 import type { OptionGroup } from '../../config/unitConfig';
-import { useTranslation } from '../../contexts/LocaleContext';
 import { SectionHeader, DeleteButton } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';
 
