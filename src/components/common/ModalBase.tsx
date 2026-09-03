@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"]):not(:disabled)';
@@ -132,12 +133,19 @@ interface ModalHeaderProps {
 
 /** Standard modal header with an `<h5>` title and a close button. */
 export function ModalHeader({ children, onClose, titleId }: ModalHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="modal-header">
       <h5 className="modal-title" id={titleId}>
         {children}
       </h5>
-      <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+      <button
+        type="button"
+        className="btn-close"
+        aria-label={t('common.close')}
+        onClick={onClose}
+      />
     </div>
   );
 }

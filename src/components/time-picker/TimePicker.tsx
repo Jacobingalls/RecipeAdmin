@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   BLOCKS,
@@ -79,6 +80,7 @@ interface TimePickerProps {
 }
 
 export default function TimePicker({ value, onChange }: TimePickerProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [level, setLevel] = useState<Level>('root');
   const [dayOffset, setDayOffset] = useState(0);
@@ -280,7 +282,7 @@ export default function TimePicker({ value, onChange }: TimePickerProps) {
             {/* Popover */}
             <div
               role="dialog"
-              aria-label="Select time"
+              aria-label={t('timePicker.selectTime')}
               style={{
                 position: 'fixed',
                 top: popoverPos.top,

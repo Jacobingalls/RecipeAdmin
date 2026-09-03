@@ -1,10 +1,16 @@
 import { useState, useMemo, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
-import type { ServingSizeType } from '../../domain';
 import { ServingSize } from '../../domain';
 import type { CustomSizeData } from '../../domain/CustomSize';
-import { massUnits, volumeUnits, energyUnits } from '../../config/unitConfig';
+import {
+  massUnits,
+  volumeUnits,
+  energyUnits,
+  servingsGroup,
+  unitGroup,
+} from '../../config/unitConfig';
 import type { OptionGroup } from '../../config/unitConfig';
 import {
   PRESET_CUSTOM_SIZES,
@@ -12,6 +18,7 @@ import {
   presetToCustomSizeData,
 } from '../../config/customSizePresets';
 import type { PresetCustomSize } from '../../config/customSizePresets';
+import type { MessageKey } from '../../i18n';
 import { DeleteButton, Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
 import ServingSizeSelector from '../ServingSizeSelector';
 
@@ -28,6 +35,7 @@ function AddCustomSizeModal({
   onAdd: (data: CustomSizeData) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const titleId = useId();
   const [selectedName, setSelectedName] = useState<string | null>(null);
 
@@ -37,11 +45,11 @@ function AddCustomSizeModal({
   );
 
   const groups = useMemo(() => {
-    const map = new Map<string, PresetCustomSize[]>();
+    const map = new Map<MessageKey, PresetCustomSize[]>();
     for (const p of available) {
-      const list = map.get(p.group) ?? [];
+      const list = map.get(p.groupKey) ?? [];
       list.push(p);
-      map.set(p.group, list);
+      map.set(p.groupKey, list);
     }
     return map;
   }, [available]);
@@ -54,17 +62,17 @@ function AddCustomSizeModal({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId} scrollable>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        Add custom size
+        {t('editor.addCustomSize')}
       </ModalHeader>
       <ModalBody>
         {available.length === 0 ? (
-          <p className="text-body-secondary small mb-0">All preset sizes have been added</p>
+          <p className="text-body-secondary small mb-0">{t('editor.allPresetsAdded')}</p>
         ) : (
           <div className="list-group" style={{ maxHeight: '20rem', overflowY: 'auto' }}>
             {[...groups.entries()].map(([group, items]) => (
               <div key={group}>
                 <div className="list-group-item bg-body-tertiary py-1 px-3">
-                  <small className="fw-bold text-body-secondary">{group}</small>
+                  <small className="fw-bold text-body-secondary">{t(group)}</small>
                 </div>
                 {items.map((p) => (
                   <button
@@ -92,10 +100,10 @@ function AddCustomSizeModal({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button disabled={!selectedName} onClick={handleConfirm}>
-          Add
+          {t('common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -113,6 +121,7 @@ function CreateCustomSizeModal({
   onAdd: (data: CustomSizeData) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const titleId = useId();
   const [name, setName] = useState('');
   const [singularName, setSingularName] = useState('');
@@ -135,44 +144,44 @@ function CreateCustomSizeModal({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId}>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        New custom size
+        {t('editor.newCustomSize')}
       </ModalHeader>
       <ModalBody>
         <div className="mb-3">
           <label htmlFor="cs-name" className="form-label">
-            Name
+            {t('common.name')}
           </label>
           <input
             type="text"
             className="form-control form-control-sm"
             id="cs-name"
-            placeholder="e.g. Cookie"
+            placeholder={t('editor.customSizeNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="mb-3">
           <label htmlFor="cs-singular" className="form-label">
-            Singular name
+            {t('editor.singularName')}
           </label>
           <input
             type="text"
             className="form-control form-control-sm"
             id="cs-singular"
-            placeholder="e.g. cookie"
+            placeholder={t('editor.customSizeSingularPlaceholder')}
             value={singularName}
             onChange={(e) => setSingularName(e.target.value)}
           />
         </div>
         <div>
           <label htmlFor="cs-plural" className="form-label">
-            Plural name
+            {t('editor.pluralName')}
           </label>
           <input
             type="text"
             className="form-control form-control-sm"
             id="cs-plural"
-            placeholder="e.g. cookies"
+            placeholder={t('editor.customSizePluralPlaceholder')}
             value={pluralName}
             onChange={(e) => setPluralName(e.target.value)}
           />
@@ -180,10 +189,10 @@ function CreateCustomSizeModal({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button disabled={!canCreate} onClick={handleCreate}>
-          Create
+          {t('editor.create')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -207,6 +216,7 @@ export default function PreparationCustomSizesSection({
   preparationId,
   onChange,
 }: PreparationCustomSizesSectionProps) {
+  const { t } = useTranslation();
   const prep = product.preparations.find((p) => p.id === preparationId);
   const customSizes = useMemo(() => prep?.customSizes ?? [], [prep?.customSizes]);
 
@@ -216,53 +226,14 @@ export default function PreparationCustomSizesSection({
 
   // Build unit option groups: always include servings + mass + volume,
   // plus energy if the prep has calories defined.
-  const customSizeOptionGroups: OptionGroup[] = useMemo(() => {
-    const result: OptionGroup[] = [
-      {
-        label: 'Servings',
-        options: [
-          {
-            type: 'servings' as ServingSizeType,
-            value: 'servings',
-            label: 'Servings',
-            aliases: ['serving', 'servings'],
-          },
-        ],
-      },
-      {
-        label: 'Mass',
-        options: massUnits.map((u) => ({
-          type: 'mass' as ServingSizeType,
-          value: u.value,
-          label: u.label,
-          aliases: u.aliases,
-        })),
-      },
-      {
-        label: 'Volume',
-        options: volumeUnits.map((u) => ({
-          type: 'volume' as ServingSizeType,
-          value: u.value,
-          label: u.label,
-          aliases: u.aliases,
-        })),
-      },
-    ];
-
-    if (prep?.nutritionalInformation?.calories) {
-      result.push({
-        label: 'Energy',
-        options: energyUnits.map((u) => ({
-          type: 'energy' as ServingSizeType,
-          value: u.value,
-          label: u.label,
-          aliases: u.aliases,
-        })),
-      });
-    }
-
-    return result;
-  }, [prep?.nutritionalInformation?.calories]);
+  const customSizeOptionGroups: OptionGroup[] = [
+    servingsGroup(),
+    unitGroup('unit.group.mass', massUnits, 'mass'),
+    unitGroup('unit.group.volume', volumeUnits, 'volume'),
+  ];
+  if (prep?.nutritionalInformation?.calories) {
+    customSizeOptionGroups.push(unitGroup('unit.group.energy', energyUnits, 'energy'));
+  }
 
   if (!prep) return null;
 
@@ -296,7 +267,7 @@ export default function PreparationCustomSizesSection({
     <div className="px-3 pt-3 pb-2">
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <strong>Custom sizes</strong>
+          <strong>{t('editor.customSizes')}</strong>
           <div className="dropdown">
             <button
               className="btn btn-dark btn-sm dropdown-toggle px-3"
@@ -304,19 +275,19 @@ export default function PreparationCustomSizesSection({
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Add
+              {t('common.add')}
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
               <li>
                 <button className="dropdown-item" type="button" onClick={() => setModal('preset')}>
                   <i className="bi bi-list-ul me-2" aria-hidden="true" />
-                  Preset size
+                  {t('editor.presetSize')}
                 </button>
               </li>
               <li>
                 <button className="dropdown-item" type="button" onClick={() => setModal('custom')}>
                   <i className="bi bi-plus-circle me-2" aria-hidden="true" />
-                  Custom size
+                  {t('editor.customSize')}
                 </button>
               </li>
             </ul>
@@ -345,10 +316,13 @@ export default function PreparationCustomSizesSection({
                       groups={customSizeOptionGroups}
                       value={servingSize}
                       onChange={(ss) => handleServingSizeChange(i, ss)}
-                      amountAriaLabel={`${cs.name} amount`}
-                      unitAriaLabel={`${cs.name} unit`}
+                      amountAriaLabel={t('editor.amountLabel', { name: cs.name ?? '' })}
+                      unitAriaLabel={t('editor.unitLabel', { name: cs.name ?? '' })}
                     />
-                    <DeleteButton ariaLabel={`Remove ${cs.name}`} onClick={() => handleRemove(i)} />
+                    <DeleteButton
+                      ariaLabel={t('editor.removeItem', { name: cs.name ?? '' })}
+                      onClick={() => handleRemove(i)}
+                    />
                   </div>
                 </div>
               );
@@ -356,7 +330,7 @@ export default function PreparationCustomSizesSection({
           </div>
         ) : (
           <div className="card-body">
-            <p className="text-body-secondary small mb-0">No custom sizes</p>
+            <p className="text-body-secondary small mb-0">{t('editor.noCustomSizes')}</p>
           </div>
         )}
       </div>

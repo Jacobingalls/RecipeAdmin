@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { getAdminVersion } from '../api';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { HeaderSearchBar, UserDropdownMenu } from './header/index';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const adminVersion = getAdminVersion();
 
@@ -20,7 +22,7 @@ export default function Header() {
         <NavLink
           className="navbar-brand mb-0 user-select-none d-flex align-items-center position-relative"
           to="/"
-          aria-label="Recipe Admin home"
+          aria-label={t('nav.brandHome')}
         >
           <i
             className="bi bi-egg-fried text-warning"
@@ -41,7 +43,7 @@ export default function Header() {
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
-          aria-label="Toggle navigation"
+          aria-label={t('nav.toggle')}
         >
           <span className="navbar-toggler-icon" />
         </button>
@@ -50,9 +52,9 @@ export default function Header() {
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/" end>
                 <span className="d-inline-flex flex-column align-items-center">
-                  Home
+                  {t('nav.home')}
                   <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
-                    Home
+                    {t('nav.home')}
                   </span>
                 </span>
               </NavLink>
@@ -60,9 +62,9 @@ export default function Header() {
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/favorites">
                 <span className="d-inline-flex flex-column align-items-center">
-                  Favorites
+                  {t('nav.favorites')}
                   <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
-                    Favorites
+                    {t('nav.favorites')}
                   </span>
                 </span>
               </NavLink>
@@ -70,9 +72,9 @@ export default function Header() {
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/history">
                 <span className="d-inline-flex flex-column align-items-center">
-                  History
+                  {t('nav.history')}
                   <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
-                    History
+                    {t('nav.history')}
                   </span>
                 </span>
               </NavLink>
@@ -80,9 +82,9 @@ export default function Header() {
             <li className="nav-item">
               <NavLink className={navLinkClass} to="/categories">
                 <span className="d-inline-flex flex-column align-items-center">
-                  Categories
+                  {t('nav.categories')}
                   <span className="fw-semibold invisible" style={{ height: 0 }} aria-hidden="true">
-                    Categories
+                    {t('nav.categories')}
                   </span>
                 </span>
               </NavLink>

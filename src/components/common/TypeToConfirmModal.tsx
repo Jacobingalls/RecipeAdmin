@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useState, useId } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import ModalBase, { ModalHeader, ModalBody, ModalFooter } from './ModalBase';
 import Button from './Button';
@@ -9,6 +10,7 @@ interface TypeToConfirmModalProps {
   title: string;
   message: ReactNode;
   itemName: string;
+  /** Overrides the default "Confirm" label on the destructive button. */
   confirmButtonText?: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -41,6 +43,7 @@ function TypeToConfirmModalContent({
   onCancel,
   isLoading,
 }: Omit<TypeToConfirmModalProps, 'isOpen'>) {
+  const { t } = useTranslation();
   const [confirmText, setConfirmText] = useState('');
   const titleId = useId();
   const inputId = useId();
@@ -53,7 +56,11 @@ function TypeToConfirmModalContent({
       <ModalBody>
         <p>{message}</p>
         <label htmlFor={inputId} className="form-label">
-          Type <strong>{itemName}</strong> to confirm
+          <Trans
+            i18nKey="confirm.typeToConfirm"
+            values={{ name: itemName }}
+            components={{ strong: <strong /> }}
+          />
         </label>
         <input
           type="text"
@@ -66,7 +73,7 @@ function TypeToConfirmModalContent({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           variant="danger"
@@ -74,7 +81,7 @@ function TypeToConfirmModalContent({
           loading={isLoading}
           onClick={onConfirm}
         >
-          {confirmButtonText}
+          {confirmButtonText ?? t('confirm.confirm')}
         </Button>
       </ModalFooter>
     </ModalBase>
@@ -86,7 +93,7 @@ export default function TypeToConfirmModal({
   title,
   message,
   itemName,
-  confirmButtonText = 'Confirm',
+  confirmButtonText,
   onConfirm,
   onCancel,
   isLoading = false,

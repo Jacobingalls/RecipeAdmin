@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { BarcodeData } from '../domain';
 import { ServingSize } from '../domain';
@@ -13,11 +14,13 @@ interface BarcodeSectionProps {
 }
 
 export default function BarcodeSection({ barcodes, onSelectSize }: BarcodeSectionProps) {
+  const { t } = useTranslation();
+
   if (!barcodes || barcodes.length === 0) return null;
 
   return (
     <section className="mt-3">
-      <SubsectionTitle>Barcodes</SubsectionTitle>
+      <SubsectionTitle>{t('barcodes.title')}</SubsectionTitle>
       <div className="list-group">
         {barcodes.map((bc, index) => (
           <BarcodeItem key={bc.code || index} barcode={bc} onSelectSize={onSelectSize} />
@@ -33,6 +36,7 @@ interface BarcodeItemProps {
 }
 
 function BarcodeItem({ barcode, onSelectSize }: BarcodeItemProps) {
+  const { t } = useTranslation();
   const { code, notes, servingSize: servingSizeData } = barcode;
   const servingSize = ServingSize.fromObject(servingSizeData ?? null) || ServingSize.servings(1);
 
@@ -57,17 +61,17 @@ function BarcodeItem({ barcode, onSelectSize }: BarcodeItemProps) {
           <Link
             to={`/lookup/${encodeURIComponent(code)}`}
             className="btn btn-outline-secondary btn-sm"
-            title={`Look up barcode ${code}`}
+            title={t('barcode.lookupTitle', { code })}
           >
-            Lookup
+            {t('barcode.lookup')}
           </Link>
           {servingSize && onSelectSize && (
             <button
               className="btn btn-outline-primary btn-sm ms-2"
               onClick={handleUse}
-              title={`Set serving to ${servingSize.toString()}`}
+              title={t('barcode.useTitle', { size: servingSize.toString() })}
             >
-              Use
+              {t('barcode.use')}
             </button>
           )}
         </div>

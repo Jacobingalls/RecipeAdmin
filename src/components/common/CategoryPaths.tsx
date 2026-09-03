@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../../api';
 import { useCategories } from '../../contexts/CategoriesContext';
@@ -22,6 +23,7 @@ function buildBreadcrumbs(
 }
 
 export default function CategoryPaths(props: CategoryPathsProps) {
+  const { t } = useTranslation();
   const { allCategories, lookup } = useCategories();
 
   if (allCategories.length === 0) return null;
@@ -48,11 +50,11 @@ export default function CategoryPaths(props: CategoryPathsProps) {
   return (
     <div className="mb-2">
       {trails.map(({ key, crumbs }) => (
-        <nav aria-label="Category" key={key}>
+        <nav aria-label={t('category.breadcrumbLabel')} key={key}>
           <ol className="breadcrumb mb-0 small">
             <li className="breadcrumb-item">
               <Link to="/categories" className="text-decoration-none">
-                Categories
+                {t('category.title')}
               </Link>
             </li>
             {crumbs.map((crumb, i) => (

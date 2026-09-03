@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ServingSize } from '../domain';
 import { logEntry } from '../api';
@@ -18,6 +19,7 @@ export default function AddToLogButton({
   preparationId,
   servingSize,
 }: AddToLogButtonProps) {
+  const { t } = useTranslation();
   const [logState, setLogState] = useState<LogState>('idle');
   const [logError, setLogError] = useState<string | null>(null);
 
@@ -45,13 +47,13 @@ export default function AddToLogButton({
   let buttonText: string;
   let buttonClass: string;
   if (logState === 'logging') {
-    buttonText = 'Logging...';
+    buttonText = t('log.button.logging');
     buttonClass = 'btn btn-outline-primary btn-sm';
   } else if (logState === 'success') {
-    buttonText = 'Logged!';
+    buttonText = t('log.button.logged');
     buttonClass = 'btn btn-success btn-sm';
   } else {
-    buttonText = 'Add to Log';
+    buttonText = t('log.button.add');
     buttonClass = 'btn btn-outline-primary btn-sm';
   }
 

@@ -1,4 +1,5 @@
 import { useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Note } from '../NotesDisplay';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
@@ -38,6 +39,7 @@ function extractSourceUrl(note: Note): string {
 }
 
 export default function NoteModal({ note, onSave, onClose }: NoteModalProps) {
+  const { t } = useTranslation();
   const titleId = useId();
   const editing = !!note;
   const [type, setType] = useState<NoteType>(note ? detectNoteType(note) : 'information');
@@ -65,12 +67,12 @@ export default function NoteModal({ note, onSave, onClose }: NoteModalProps) {
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId}>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        {editing ? 'Edit note' : 'Add note'}
+        {t(editing ? 'note.edit' : 'note.add')}
       </ModalHeader>
       <ModalBody>
         <div className="mb-3">
           <label htmlFor="note-type" className="form-label">
-            Type
+            {t('note.type')}
           </label>
           <select
             className="form-select form-select-sm"
@@ -78,17 +80,17 @@ export default function NoteModal({ note, onSave, onClose }: NoteModalProps) {
             value={type}
             onChange={(e) => setType(e.target.value as NoteType)}
           >
-            <option value="information">Information</option>
-            <option value="warning">Warning</option>
-            <option value="severe">Severe</option>
-            <option value="source">Source</option>
+            <option value="information">{t('note.type.information')}</option>
+            <option value="warning">{t('note.type.warning')}</option>
+            <option value="severe">{t('note.type.severe')}</option>
+            <option value="source">{t('note.type.source')}</option>
           </select>
         </div>
         {isSource ? (
           <>
             <div className="mb-3">
               <label htmlFor="note-source-title" className="form-label">
-                Title
+                {t('note.sourceTitle')}
               </label>
               <input
                 type="text"
@@ -96,12 +98,12 @@ export default function NoteModal({ note, onSave, onClose }: NoteModalProps) {
                 id="note-source-title"
                 value={sourceTitle}
                 onChange={(e) => setSourceTitle(e.target.value)}
-                placeholder="e.g. USDA FoodData Central"
+                placeholder={t('note.sourceTitlePlaceholder')}
               />
             </div>
             <div>
               <label htmlFor="note-source-url" className="form-label">
-                URL
+                {t('note.url')}
               </label>
               <input
                 type="url"
@@ -109,14 +111,14 @@ export default function NoteModal({ note, onSave, onClose }: NoteModalProps) {
                 id="note-source-url"
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
-                placeholder="e.g. https://fdc.nal.usda.gov/..."
+                placeholder={t('note.urlPlaceholder')}
               />
             </div>
           </>
         ) : (
           <div>
             <label htmlFor="note-content" className="form-label">
-              Content
+              {t('note.content')}
             </label>
             <textarea
               className="form-control form-control-sm"
@@ -130,10 +132,10 @@ export default function NoteModal({ note, onSave, onClose }: NoteModalProps) {
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button disabled={!canSave} onClick={handleSave}>
-          {editing ? 'Save' : 'Add'}
+          {t(editing ? 'common.save' : 'common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>

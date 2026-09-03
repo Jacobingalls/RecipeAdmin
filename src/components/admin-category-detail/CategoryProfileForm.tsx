@@ -1,5 +1,6 @@
 import type { FormEvent, ReactNode } from 'react';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory } from '../../api';
 import { adminUpsertCategories } from '../../api';
@@ -33,6 +34,7 @@ function InlineFormField({
 }
 
 export default function CategoryProfileForm({ category, onSaved }: CategoryProfileFormProps) {
+  const { t } = useTranslation();
   const { addCategories } = useCategories();
   const [editDisplayName, setEditDisplayName] = useState(category.displayName);
   const [editSlug, setEditSlug] = useState(category.slug);
@@ -64,7 +66,7 @@ export default function CategoryProfileForm({ category, onSaved }: CategoryProfi
       addCategories(result);
       onSaved();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't save this category. Try again.");
+      setError(err instanceof Error ? err.message : t('categoryEditor.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -72,9 +74,9 @@ export default function CategoryProfileForm({ category, onSaved }: CategoryProfi
 
   return (
     <>
-      <SectionHeader title="Profile" className="mt-5">
+      <SectionHeader title={t('editor.profile')} className="mt-5">
         <Button type="submit" form="edit-category-form" size="sm" loading={isSaving}>
-          Save
+          {t('common.save')}
         </Button>
       </SectionHeader>
       {error && (
@@ -84,7 +86,7 @@ export default function CategoryProfileForm({ category, onSaved }: CategoryProfi
       )}
       <form id="edit-category-form" onSubmit={handleSubmit}>
         <div className="list-group">
-          <InlineFormField htmlFor="edit-display-name" label="Display name">
+          <InlineFormField htmlFor="edit-display-name" label={t('categoryEditor.displayName')}>
             <input
               type="text"
               className="form-control form-control-sm"
@@ -95,7 +97,7 @@ export default function CategoryProfileForm({ category, onSaved }: CategoryProfi
               required
             />
           </InlineFormField>
-          <InlineFormField htmlFor="edit-slug" label="Slug">
+          <InlineFormField htmlFor="edit-slug" label={t('categoryEditor.slug')}>
             <div style={{ maxWidth: '20rem', width: '100%' }}>
               <input
                 type="text"
@@ -106,13 +108,11 @@ export default function CategoryProfileForm({ category, onSaved }: CategoryProfi
                 required
               />
               {!slugValid && (
-                <div className="invalid-feedback">
-                  Lowercase letters, numbers, and hyphens only.
-                </div>
+                <div className="invalid-feedback">{t('categoryEditor.slugInvalid')}</div>
               )}
             </div>
           </InlineFormField>
-          <InlineFormField htmlFor="edit-description" label="Description">
+          <InlineFormField htmlFor="edit-description" label={t('categoryEditor.description')}>
             <input
               type="text"
               className="form-control form-control-sm"
@@ -120,7 +120,7 @@ export default function CategoryProfileForm({ category, onSaved }: CategoryProfi
               id="edit-description"
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Optional"
+              placeholder={t('common.optional')}
             />
           </InlineFormField>
         </div>

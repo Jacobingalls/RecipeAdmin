@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ApiLogEntry, ApiProduct } from '../../api';
 import type { NutritionInformation, ProductGroupData } from '../../domain';
 import { SubsectionTitle } from '../common';
@@ -35,6 +37,8 @@ export default function HistoryDayGroup({
   onDelete,
   deleteLoadingId,
 }: HistoryDayGroupProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="mb-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -44,7 +48,10 @@ export default function HistoryDayGroup({
 
         <div className="d-flex align-items-center">
           <span className="text-body-secondary small fw-medium mb-0">
-            {formatSignificant(dayNutrition?.calories?.amount ?? 0)} kcal total,&nbsp;
+            {t('history.caloriesTotal', {
+              calories: formatSignificant(dayNutrition?.calories?.amount ?? 0),
+            })}
+            &nbsp;
           </span>
 
           <button
@@ -52,7 +59,7 @@ export default function HistoryDayGroup({
             className="btn btn-link text-decoration-none small p-0"
             onClick={onViewFullNutrition}
           >
-            View full nutrition &rarr;
+            {t('history.viewFullNutrition')} &rarr;
           </button>
         </div>
       </div>

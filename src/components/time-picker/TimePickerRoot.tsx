@@ -1,22 +1,19 @@
+import { useTranslation } from 'react-i18next';
+
+import type { MessageKey } from '../../i18n';
+
 import { formatDayHint } from './timeBlocks';
 
-const PRESETS = [
-  { label: 'Now', minutesAgo: 0 },
-  { label: '15m ago', minutesAgo: 15 },
-  { label: '30m ago', minutesAgo: 30 },
-  { label: '1hr ago', minutesAgo: 60 },
-  { label: '2hr ago', minutesAgo: 120 },
-  { label: '3hr ago', minutesAgo: 180 },
-];
+const PRESET_MINUTES_AGO = [0, 15, 30, 60, 120, 180];
 
 const DAY_ROWS: Array<{
   dayOffset: number;
-  label: string;
+  labelKey: MessageKey;
   icon: string;
   iconColor?: string;
 }> = [
-  { dayOffset: 0, label: 'Today', icon: 'bi-sun', iconColor: '#eab308' },
-  { dayOffset: -1, label: 'Yesterday', icon: 'bi-clock-history' },
+  { dayOffset: 0, labelKey: 'timePicker.today', icon: 'bi-sun', iconColor: '#eab308' },
+  { dayOffset: -1, labelKey: 'timePicker.yesterday', icon: 'bi-clock-history' },
 ];
 
 interface TimePickerRootProps {
@@ -30,18 +27,26 @@ export default function TimePickerRoot({
   onSelectDay,
   onCustom,
 }: TimePickerRootProps) {
+  const { t } = useTranslation();
+
+  function presetLabel(minutesAgo: number): string {
+    if (minutesAgo === 0) return t('timePicker.now');
+    if (minutesAgo < 60) return t('timePicker.preset.minutesAgo', { amount: minutesAgo });
+    return t('timePicker.preset.hoursAgo', { amount: minutesAgo / 60 });
+  }
+
   return (
     <>
       <div style={{ padding: '0.75rem 0.5rem' }}>
         <div className="d-flex flex-wrap gap-1 px-1">
-          {PRESETS.map((p) => (
+          {PRESET_MINUTES_AGO.map((minutesAgo) => (
             <button
-              key={p.label}
+              key={minutesAgo}
               type="button"
               className="tp-chip"
-              onClick={() => onSelectPreset(p.minutesAgo)}
+              onClick={() => onSelectPreset(minutesAgo)}
             >
-              {p.label}
+              {presetLabel(minutesAgo)}
             </button>
           ))}
         </div>
@@ -69,7 +74,7 @@ export default function TimePickerRoot({
             >
               <i className={`bi ${row.icon}`} aria-hidden="true" style={{ color: row.iconColor }} />
             </span>
-            <span className="flex-grow-1">{row.label}</span>
+            <span className="flex-grow-1">{t(row.labelKey)}</span>
             <span
               className="me-1"
               style={{
@@ -116,7 +121,7 @@ export default function TimePickerRoot({
           >
             <i className="bi bi-calendar3" aria-hidden="true" />
           </span>
-          <span>Pick a specific date & time&hellip;</span>
+          <span>{t('timePicker.custom')}</span>
         </button>
       </div>
     </>

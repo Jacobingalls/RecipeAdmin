@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useHistoryData } from '../../hooks';
 import { NutritionInformation } from '../../domain';
@@ -15,13 +16,13 @@ import SparklineCard from './SparklineCard';
 import type { SparklinePoint } from './SparklineCard';
 
 const NUTRIENTS = [
-  { key: 'calories', label: 'Calories', unit: 'kcal', goal: 'target', size: 'large' },
-  { key: 'protein', label: 'Protein', unit: 'g', goal: 'more', size: 'default' },
-  { key: 'totalFat', label: 'Fat', unit: 'g', goal: 'less', size: 'default' },
-  { key: 'totalCarbohydrate', label: 'Carbs', unit: 'g', goal: 'less', size: 'default' },
-  { key: 'dietaryFiber', label: 'Fiber', unit: 'g', goal: 'more', size: 'default' },
-  { key: 'totalSugars', label: 'Sugar', unit: 'g', goal: 'less', size: 'default' },
-  { key: 'sodium', label: 'Sodium', unit: 'mg', goal: 'less', size: 'default' },
+  { key: 'calories', slug: 'calories', unit: 'kcal', goal: 'target', size: 'large' },
+  { key: 'protein', slug: 'protein', unit: 'g', goal: 'more', size: 'default' },
+  { key: 'totalFat', slug: 'fat', unit: 'g', goal: 'less', size: 'default' },
+  { key: 'totalCarbohydrate', slug: 'carbs', unit: 'g', goal: 'less', size: 'default' },
+  { key: 'dietaryFiber', slug: 'fiber', unit: 'g', goal: 'more', size: 'default' },
+  { key: 'totalSugars', slug: 'sugar', unit: 'g', goal: 'less', size: 'default' },
+  { key: 'sodium', slug: 'sodium', unit: 'mg', goal: 'less', size: 'default' },
 ] as const;
 
 interface TodayTileProps {
@@ -29,6 +30,7 @@ interface TodayTileProps {
 }
 
 export default function TodayTile({ refreshSignal }: TodayTileProps) {
+  const { t } = useTranslation();
   const {
     logs,
     productDetails,
@@ -121,13 +123,13 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
 
   const historyLink = (
     <Link to="/history" className="text-decoration-none small">
-      History &rarr;
+      {t('home.today.historyLink')} &rarr;
     </Link>
   );
 
   if (loading) {
     return (
-      <Tile title="Today" titleRight={historyLink} minHeight="12rem">
+      <Tile title={t('home.today.title')} titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(<LoadingState />)}
       </Tile>
     );
@@ -135,11 +137,11 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
 
   if (error) {
     return (
-      <Tile title="Today" titleRight={historyLink} minHeight="12rem">
+      <Tile title={t('home.today.title')} titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(
           <ContentUnavailableView
             icon="bi-journal-x"
-            title="Couldn't load today's nutrition"
+            title={t('home.today.error.title')}
             description={error}
           />,
         )}
@@ -149,12 +151,12 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
 
   if (!todayLogs || todayLogs.length === 0) {
     return (
-      <Tile title="Today" titleRight={historyLink} minHeight="12rem">
+      <Tile title={t('home.today.title')} titleRight={historyLink} minHeight="12rem">
         {centeredWrapper(
           <ContentUnavailableView
             icon="bi-journal-x"
-            title="Nothing logged today"
-            description="Log something to see your daily nutrition here."
+            title={t('home.today.empty.title')}
+            description={t('home.today.empty.description')}
           />,
         )}
       </Tile>
@@ -162,10 +164,10 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
   }
 
   return (
-    <Tile title="Today" titleRight={historyLink}>
+    <Tile title={t('home.today.title')} titleRight={historyLink}>
       <div className="card-body">
         <div className="row g-3">
-          {NUTRIENTS.map(({ key, label, unit, goal, size }) => {
+          {NUTRIENTS.map(({ key, slug, unit, goal, size }) => {
             const nutrient = totalNutrition[key as keyof NutritionInformation];
             const nutrientUnit =
               nutrient && typeof nutrient === 'object' && 'unit' in nutrient ? nutrient.unit : unit;
@@ -177,7 +179,8 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
             return (
               <div key={key} className={size === 'large' ? 'col-12' : 'col-6'}>
                 <SparklineCard
-                  label={label}
+                  label={t(`nutrientShort.${slug}`)}
+                  testId={slug}
                   unit={nutrientUnit}
                   currentAmount={nutrientAmount}
                   dailyValue={DAILY_VALUES[key] ?? null}

@@ -1,8 +1,11 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CopyButtonProps {
   text: string;
+  /** Overrides the default "Copy" label. */
   label?: string;
+  /** Overrides the default "Copied!" confirmation. */
   copiedLabel?: string;
   className?: string;
 }
@@ -17,10 +20,11 @@ interface CopyButtonProps {
  */
 export default function CopyButton({
   text,
-  label = 'Copy',
-  copiedLabel = 'Copied!',
+  label,
+  copiedLabel,
   className = 'btn btn-outline-secondary btn-sm',
 }: CopyButtonProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -31,7 +35,7 @@ export default function CopyButton({
 
   return (
     <button type="button" className={className} onClick={handleCopy} aria-live="polite">
-      {copied ? copiedLabel : label}
+      {copied ? (copiedLabel ?? t('common.copied')) : (label ?? t('common.copy'))}
     </button>
   );
 }

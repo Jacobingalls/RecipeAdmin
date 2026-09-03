@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   createContext,
   useContext,
@@ -28,6 +29,7 @@ interface CategoriesContextValue {
 const CategoriesContext = createContext<CategoriesContextValue | null>(null);
 
 export function CategoriesProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Map<string, ApiCategory>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,14 +55,14 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         if (cancelled) return;
         setCategories(new Map());
-        setError("Couldn't load categories. Try again later.");
+        setError(t('adminCategories.error'));
         setLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [fetchKey]);
+  }, [fetchKey, t]);
 
   const refresh = useCallback(() => {
     setLoading(true);

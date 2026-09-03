@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { DailyValue } from '../../config/constants';
 import { NutritionUnit } from '../../domain';
 import { formatSignificant } from '../../utils';
@@ -11,6 +13,8 @@ type NutrientGoal = 'target' | 'more' | 'less';
 
 interface SparklineCardProps {
   label: string;
+  /** Stable identifier for the nutrient, used as the card's test id. */
+  testId: string;
   unit: string;
   currentAmount: number;
   dailyValue: DailyValue | null;
@@ -41,14 +45,17 @@ function getColor(ratio: number, goal: NutrientGoal): string {
   }
 }
 
-function getStatusLabel(color: string): string {
-  if (color === GREEN) return 'on target';
-  if (color === YELLOW) return 'near target';
-  return 'off target';
+function statusKey(
+  color: string,
+): 'sparkline.onTarget' | 'sparkline.nearTarget' | 'sparkline.offTarget' {
+  if (color === GREEN) return 'sparkline.onTarget';
+  if (color === YELLOW) return 'sparkline.nearTarget';
+  return 'sparkline.offTarget';
 }
 
 export default function SparklineCard({
   label,
+  testId,
   unit,
   currentAmount,
   dailyValue,
@@ -57,6 +64,8 @@ export default function SparklineCard({
   goal,
   size = 'default',
 }: SparklineCardProps) {
+  const { t } = useTranslation();
+
   let dvAmount: number | null = null;
   let ratio = 0;
 
@@ -68,7 +77,11 @@ export default function SparklineCard({
 
   const color = dailyValue ? getColor(ratio, goal) : GREEN;
   const percentDisplay = dailyValue
-    ? `${Math.round(ratio * 1000) / 10}% of ${formatSignificant(dvAmount!)} ${unit}`
+    ? t('sparkline.percentOfDaily', {
+        percent: formatSignificant(Math.round(ratio * 1000) / 10),
+        amount: formatSignificant(dvAmount!),
+        unit,
+      })
     : null;
 
   // SVG coordinate system: DV centered at y=0.5 when present
@@ -100,7 +113,7 @@ export default function SparklineCard({
   return (
     <div
       className="sparkline-card position-relative rounded-3 overflow-hidden"
-      data-testid={`sparkline-card-${label.toLowerCase()}`}
+      data-testid={`sparkline-card-${testId}`}
     >
       <svg
         viewBox="0 0 24 1"
@@ -168,7 +181,7 @@ export default function SparklineCard({
           </span>
           {dailyValue && (
             <span className="visually-hidden" data-testid="sparkline-status">
-              ({getStatusLabel(color)})
+              ({t(statusKey(color))})
             </span>
           )}{' '}
           <span

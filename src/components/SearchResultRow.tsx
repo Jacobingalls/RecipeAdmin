@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiSearchResult } from '../api';
 import { Preparation, ProductGroup, ServingSize } from '../domain';
@@ -15,10 +16,13 @@ interface SearchResultRowProps {
 }
 
 export default function SearchResultRow({ result, onLog, logLoading }: SearchResultRowProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const isProduct = !!result.item.product;
-  const name = isProduct ? result.item.product!.name : (result.item.group!.name ?? 'Group');
+  const name = isProduct
+    ? result.item.product!.name
+    : (result.item.group!.name ?? t('entry.group'));
   const brand = isProduct ? result.item.product!.brand : result.item.group?.brand;
 
   const servingSize = useMemo(
@@ -82,14 +86,14 @@ export default function SearchResultRow({ result, onLog, logLoading }: SearchRes
       name={name}
       subtitle={subtitle}
       calories={calories}
-      ariaLabel={`View ${name}`}
+      ariaLabel={t('entry.view', { name })}
       onClick={() => navigate(detailPath)}
     >
       {onLog && (
         <CircularButtonGroup>
           <CircularButton
-            aria-label={`Log ${name}`}
-            title="Add to log"
+            aria-label={t('entry.log', { name })}
+            title={t('entry.addToLog')}
             disabled={logLoading}
             onClick={(e) => {
               e.stopPropagation();
@@ -100,7 +104,7 @@ export default function SearchResultRow({ result, onLog, logLoading }: SearchRes
             {logLoading ? (
               <span role="status">
                 <span className="spinner-border spinner-border-sm" aria-hidden="true" />
-                <span className="visually-hidden">Loading</span>
+                <span className="visually-hidden">{t('common.loading')}</span>
               </span>
             ) : (
               <i className="bi bi-plus-lg" aria-hidden="true" />

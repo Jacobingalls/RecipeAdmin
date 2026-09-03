@@ -4,10 +4,13 @@
  */
 
 import type { Preparation, ProductGroup, ServingSizeType } from '../domain';
+import i18n from '../i18n';
+import type { MessageKey } from '../i18n';
 
 export interface UnitDefinition {
   value: string;
-  label: string;
+  /** Message key for the unit's display name. */
+  labelKey: MessageKey;
   aliases: string[];
 }
 
@@ -28,91 +31,112 @@ type PrepOrGroup = Preparation | ProductGroup;
 // Mass units with display labels and search aliases
 // Uses RecipeKit unit names as values
 export const massUnits: UnitDefinition[] = [
-  { value: 'g', label: 'Grams (g)', aliases: ['gram', 'grams', 'g'] },
-  { value: 'mg', label: 'Milligrams (mg)', aliases: ['milligram', 'milligrams', 'mg'] },
+  { value: 'g', labelKey: 'unit.mass.g', aliases: ['gram', 'grams', 'g'] },
+  { value: 'mg', labelKey: 'unit.mass.mg', aliases: ['milligram', 'milligrams', 'mg'] },
   {
     value: 'μg',
-    label: 'Micrograms (μg)',
+    labelKey: 'unit.mass.ug',
     aliases: ['microgram', 'micrograms', 'mcg', 'μg', 'ug'],
   },
-  { value: 'kg', label: 'Kilograms (kg)', aliases: ['kilogram', 'kilograms', 'kg'] },
-  { value: 'oz', label: 'Ounces (oz)', aliases: ['ounce', 'ounces', 'oz'] },
-  { value: 'lb', label: 'Pounds (lb)', aliases: ['pound', 'pounds', 'lb', 'lbs'] },
+  { value: 'kg', labelKey: 'unit.mass.kg', aliases: ['kilogram', 'kilograms', 'kg'] },
+  { value: 'oz', labelKey: 'unit.mass.oz', aliases: ['ounce', 'ounces', 'oz'] },
+  { value: 'lb', labelKey: 'unit.mass.lb', aliases: ['pound', 'pounds', 'lb', 'lbs'] },
 ];
 
 // Volume units with display labels and search aliases
 // Uses RecipeKit unit names as values (e.g., 'fl oz (US)' not 'fl oz')
 export const volumeUnits: UnitDefinition[] = [
-  { value: 'mL', label: 'Milliliters (mL)', aliases: ['milliliter', 'milliliters', 'ml', 'mL'] },
-  { value: 'L', label: 'Liters (L)', aliases: ['liter', 'liters', 'l', 'L'] },
-  { value: 'cup (US)', label: 'Cups', aliases: ['cup', 'cups'] },
+  { value: 'mL', labelKey: 'unit.volume.ml', aliases: ['milliliter', 'milliliters', 'ml', 'mL'] },
+  { value: 'L', labelKey: 'unit.volume.l', aliases: ['liter', 'liters', 'l', 'L'] },
+  { value: 'cup (US)', labelKey: 'unit.volume.cup', aliases: ['cup', 'cups'] },
   {
     value: 'tbsp (US)',
-    label: 'Tablespoons (tbsp)',
+    labelKey: 'unit.volume.tbsp',
     aliases: ['tablespoon', 'tablespoons', 'tbsp', 'tbs'],
   },
-  { value: 'tsp (US)', label: 'Teaspoons (tsp)', aliases: ['teaspoon', 'teaspoons', 'tsp'] },
+  { value: 'tsp (US)', labelKey: 'unit.volume.tsp', aliases: ['teaspoon', 'teaspoons', 'tsp'] },
   {
     value: 'fl oz (US)',
-    label: 'Fluid ounces (fl oz)',
+    labelKey: 'unit.volume.flOz',
     aliases: ['fluid ounce', 'fluid ounces', 'fl oz', 'floz'],
   },
-  { value: 'pt (US)', label: 'Pints (pt)', aliases: ['pint', 'pints', 'pt'] },
-  { value: 'qt (US)', label: 'Quarts (qt)', aliases: ['quart', 'quarts', 'qt'] },
-  { value: 'gal (US)', label: 'Gallons (gal)', aliases: ['gallon', 'gallons', 'gal'] },
+  { value: 'pt (US)', labelKey: 'unit.volume.pt', aliases: ['pint', 'pints', 'pt'] },
+  { value: 'qt (US)', labelKey: 'unit.volume.qt', aliases: ['quart', 'quarts', 'qt'] },
+  { value: 'gal (US)', labelKey: 'unit.volume.gal', aliases: ['gallon', 'gallons', 'gal'] },
 ];
 
 // Energy units with display labels and search aliases
 export const energyUnits: UnitDefinition[] = [
-  { value: 'kcal', label: 'Calories (kcal)', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
-  { value: 'kJ', label: 'Kilojoules (kJ)', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
-  { value: 'J', label: 'Joules (J)', aliases: ['joule', 'joules', 'j', 'J'] },
-  { value: 'Wh', label: 'Watt-hours (Wh)', aliases: ['watt-hour', 'watt-hours', 'wh', 'Wh'] },
+  { value: 'kcal', labelKey: 'unit.energy.kcal', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
+  { value: 'kJ', labelKey: 'unit.energy.kj', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
+  { value: 'J', labelKey: 'unit.energy.j', aliases: ['joule', 'joules', 'j', 'J'] },
+  { value: 'Wh', labelKey: 'unit.energy.wh', aliases: ['watt-hour', 'watt-hours', 'wh', 'Wh'] },
 ];
 
 // Nutrition-label units: separate mass and energy subsets for nutrition facts
 export const nutritionMassUnits: UnitDefinition[] = [
-  { value: 'g', label: 'Grams (g)', aliases: ['gram', 'grams', 'g'] },
-  { value: 'mg', label: 'Milligrams (mg)', aliases: ['milligram', 'milligrams', 'mg'] },
+  { value: 'g', labelKey: 'unit.mass.g', aliases: ['gram', 'grams', 'g'] },
+  { value: 'mg', labelKey: 'unit.mass.mg', aliases: ['milligram', 'milligrams', 'mg'] },
   {
     value: 'μg',
-    label: 'Micrograms (μg)',
+    labelKey: 'unit.mass.ug',
     aliases: ['microgram', 'micrograms', 'mcg', 'μg', 'ug'],
   },
 ];
 
 export const nutritionEnergyUnits: UnitDefinition[] = [
-  { value: 'kcal', label: 'Calories (kcal)', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
-  { value: 'kJ', label: 'Kilojoules (kJ)', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
+  { value: 'kcal', labelKey: 'unit.energy.kcal', aliases: ['calorie', 'calories', 'kcal', 'cal'] },
+  { value: 'kJ', labelKey: 'unit.energy.kj', aliases: ['kilojoule', 'kilojoules', 'kj', 'kJ'] },
 ];
 
-/** Static option groups with servings, mass, and volume (no prep-specific data). */
-export const fallbackOptionGroups: OptionGroup[] = [
-  {
-    label: 'Servings',
+/**
+ * Build one option group from a list of units, translating the group and unit names.
+ *
+ * ```ts
+ * unitGroup('unit.group.mass', massUnits, 'mass')
+ * ```
+ */
+export function unitGroup(
+  labelKey: MessageKey,
+  units: UnitDefinition[],
+  type: ServingSizeType,
+): OptionGroup {
+  const { t } = i18n;
+  return {
+    label: t(labelKey),
+    options: units.map((u) => ({
+      type,
+      value: u.value,
+      label: t(u.labelKey),
+      aliases: u.aliases,
+    })),
+  };
+}
+
+/** The "Servings" group, which every serving size selector offers. */
+export function servingsGroup(): OptionGroup {
+  const { t } = i18n;
+  return {
+    label: t('unit.group.servings'),
     options: [
-      { type: 'servings', value: 'servings', label: 'Servings', aliases: ['serving', 'servings'] },
+      {
+        type: 'servings',
+        value: 'servings',
+        label: t('unit.servings'),
+        aliases: ['serving', 'servings'],
+      },
     ],
-  },
-  {
-    label: 'Mass',
-    options: massUnits.map((u) => ({
-      type: 'mass' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-  {
-    label: 'Volume',
-    options: volumeUnits.map((u) => ({
-      type: 'volume' as ServingSizeType,
-      value: u.value,
-      label: u.label,
-      aliases: u.aliases,
-    })),
-  },
-];
+  };
+}
+
+/** Option groups with servings, mass, and volume, for when there's no prep-specific data. */
+export function buildFallbackOptionGroups(): OptionGroup[] {
+  return [
+    servingsGroup(),
+    unitGroup('unit.group.mass', massUnits, 'mass'),
+    unitGroup('unit.group.volume', volumeUnits, 'volume'),
+  ];
+}
 
 /**
  * Build option groups for the serving size selector based on preparation/group capabilities.
@@ -133,17 +157,12 @@ export function buildOptionGroups(prepOrGroup: PrepOrGroup): OptionGroup[] {
       : oneServing?.nutrition?.calories;
 
   // Servings - always available
-  groups.push({
-    label: 'Servings',
-    options: [
-      { type: 'servings', value: 'servings', label: 'Servings', aliases: ['serving', 'servings'] },
-    ],
-  });
+  groups.push(servingsGroup());
 
   // Custom Sizes - only if has custom sizes
   if (prepOrGroup.customSizes && prepOrGroup.customSizes.length > 0) {
     groups.push({
-      label: 'Custom Sizes',
+      label: i18n.t('unit.group.customSizes'),
       options: prepOrGroup.customSizes.map((cs) => ({
         type: 'customSize' as ServingSizeType,
         value: cs.name,
@@ -155,41 +174,17 @@ export function buildOptionGroups(prepOrGroup: PrepOrGroup): OptionGroup[] {
 
   // Mass - only if has mass defined
   if (mass) {
-    groups.push({
-      label: 'Mass',
-      options: massUnits.map((u) => ({
-        type: 'mass' as ServingSizeType,
-        value: u.value,
-        label: u.label,
-        aliases: u.aliases,
-      })),
-    });
+    groups.push(unitGroup('unit.group.mass', massUnits, 'mass'));
   }
 
   // Volume - only if has volume defined
   if (volume) {
-    groups.push({
-      label: 'Volume',
-      options: volumeUnits.map((u) => ({
-        type: 'volume' as ServingSizeType,
-        value: u.value,
-        label: u.label,
-        aliases: u.aliases,
-      })),
-    });
+    groups.push(unitGroup('unit.group.volume', volumeUnits, 'volume'));
   }
 
   // Energy - only if has calories defined
   if (calories) {
-    groups.push({
-      label: 'Energy',
-      options: energyUnits.map((u) => ({
-        type: 'energy' as ServingSizeType,
-        value: u.value,
-        label: u.label,
-        aliases: u.aliases,
-      })),
-    });
+    groups.push(unitGroup('unit.group.energy', energyUnits, 'energy'));
   }
 
   return groups;

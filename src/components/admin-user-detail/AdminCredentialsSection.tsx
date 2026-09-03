@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { AdminTempAPIKeyResponse, PasskeyInfo, AdminAPIKeyInfo } from '../../api';
 import { adminDeleteUserPasskey, adminDeleteUserAPIKey, adminCreateUserAPIKey } from '../../api';
@@ -25,6 +26,7 @@ export default function AdminCredentialsSection({
   apiKeys,
   onChanged,
 }: AdminCredentialsSectionProps) {
+  const { t } = useTranslation();
   const [now] = useState(Date.now);
   const [tempKeyModal, setTempKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState<AdminTempAPIKeyResponse | null>(null);
@@ -57,11 +59,12 @@ export default function AdminCredentialsSection({
     onChanged();
   }
 
+  const isPasskey = deleteCredential?.type === 'passkey';
   return (
     <>
-      <SectionHeader title="Credentials" className="mt-5">
+      <SectionHeader title={t('adminUser.credentials')} className="mt-5">
         <Button variant="dark" size="sm" onClick={generateTempKey}>
-          Generate Temporary API Key
+          {t('adminUser.generateTempKey')}
         </Button>
       </SectionHeader>
 
@@ -102,20 +105,25 @@ export default function AdminCredentialsSection({
           })}
         </div>
       ) : (
-        <p className="text-body-secondary small">No credentials.</p>
+        <p className="text-body-secondary small">{t('adminUser.noCredentials')}</p>
       )}
 
       <TypeToConfirmModal
         isOpen={!!deleteCredential}
-        title={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke API key'}
+        title={t(isPasskey ? 'credentials.deletePasskeyTitle' : 'credentials.revokeApiKeyTitle')}
         message={
           <>
-            This will permanently {deleteCredential?.type === 'passkey' ? 'delete' : 'revoke'}{' '}
-            <strong>{deleteCredential?.name}</strong>. This action cannot be undone.
+            <Trans
+              i18nKey={isPasskey ? 'credentials.deleteMessage' : 'credentials.revokeMessage'}
+              values={{ name: deleteCredential?.name }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={deleteCredential?.name ?? ''}
-        confirmButtonText={deleteCredential?.type === 'passkey' ? 'Delete passkey' : 'Revoke key'}
+        confirmButtonText={t(
+          isPasskey ? 'credentials.deletePasskeyTitle' : 'credentials.revokeKeyConfirm',
+        )}
         onConfirm={handleConfirmDeleteCredential}
         onCancel={() => setDeleteCredential(null)}
       />

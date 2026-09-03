@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiLogEntry } from '../api';
 import { ServingSize } from '../domain';
@@ -40,6 +41,7 @@ export default function HistoryEntryRow({
   onDelete,
   deleteLoadingId,
 }: HistoryEntryRowProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const detailPath = entryDetailPath(entry);
 
@@ -61,13 +63,13 @@ export default function HistoryEntryRow({
       name={name}
       subtitle={subtitle}
       calories={calories}
-      ariaLabel={`View ${name}`}
+      ariaLabel={t('entry.view', { name })}
       onClick={() => navigate(detailPath)}
     >
       <CircularButtonGroup>
         <CircularButton
-          aria-label={`Log ${name}`}
-          title="Add to log"
+          aria-label={t('entry.log', { name })}
+          title={t('entry.addToLog')}
           disabled={logAgainLoadingId === entry.id}
           onClick={(e) => {
             e.stopPropagation();
@@ -78,7 +80,7 @@ export default function HistoryEntryRow({
           {logAgainLoadingId === entry.id ? (
             <span role="status">
               <span className="spinner-border spinner-border-sm" aria-hidden="true" />
-              <span className="visually-hidden">Loading</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </span>
           ) : (
             <i className="bi bi-plus-lg" aria-hidden="true" />
@@ -93,7 +95,7 @@ export default function HistoryEntryRow({
           />
         )}
         <div className="dropdown">
-          <MoreButton ariaLabel="Entry actions" />
+          <MoreButton ariaLabel={t('entry.actions')} />
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
               <button
@@ -105,7 +107,7 @@ export default function HistoryEntryRow({
                   onEdit(entry);
                 }}
               >
-                Edit
+                {t('entry.edit')}
               </button>
             </li>
             <li>
@@ -118,7 +120,7 @@ export default function HistoryEntryRow({
                   onDelete(entry);
                 }}
               >
-                Remove
+                {t('entry.remove')}
               </button>
             </li>
           </ul>

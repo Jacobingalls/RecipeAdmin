@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
@@ -20,13 +21,14 @@ import AddToFavoritesButton from '../components/AddToFavoritesButton';
 import AddToLogButton from '../components/AddToLogButton';
 
 export default function ProductDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const {
     data: product,
     loading,
     error,
   } = useApiQuery<ApiProduct>(() => getProduct(id!), [id], {
-    errorMessage: "Couldn't load this product. Try again later.",
+    errorMessage: t('product.error'),
   });
   const [searchParams, setSearchParams] = useSearchParams();
   const [urlServingSize, setServingSize] = useServingSizeParams();
@@ -71,7 +73,7 @@ export default function ProductDetailPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !product && (
-        <ContentUnavailableView icon="bi-box-seam" title="Product not found" />
+        <ContentUnavailableView icon="bi-box-seam" title={t('product.notFound')} />
       )}
       {!loading && !error && product && (
         <>
@@ -86,7 +88,9 @@ export default function ProductDetailPage() {
           ) : null}
 
           <section className="mt-4">
-            <SubsectionTitle>Preparation{preparations.length > 1 ? 's' : ''}</SubsectionTitle>
+            <SubsectionTitle>
+              {t('product.preparations', { count: preparations.length })}
+            </SubsectionTitle>
             {preparations.length > 0 && (
               <div className="card mb-3">
                 {preparations.length > 1 && (

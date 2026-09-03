@@ -1,5 +1,8 @@
+import { useTranslation } from 'react-i18next';
+
 import type { AdminTempAPIKeyResponse } from '../../api';
 import { CopyButton, ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
+import { getActiveLocale } from '../../i18n';
 
 interface TempAPIKeyModalProps {
   isOpen: boolean;
@@ -8,17 +11,19 @@ interface TempAPIKeyModalProps {
 }
 
 export default function TempAPIKeyModal({ isOpen, tempKey, onClose }: TempAPIKeyModalProps) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
-    <ModalBase onClose={onClose} ariaLabel="Temporary API key">
-      <ModalHeader onClose={onClose}>Temporary API Key</ModalHeader>
+    <ModalBase onClose={onClose} ariaLabel={t('adminUser.tempKey.ariaLabel')}>
+      <ModalHeader onClose={onClose}>{t('adminUser.tempKey.title')}</ModalHeader>
       <ModalBody>
         {tempKey ? (
           <>
             <div className="mb-3">
               <label htmlFor="temp-key-value" className="form-label">
-                API Key
+                {t('adminUser.tempKey.keyLabel')}
               </label>
               <div className="input-group">
                 <input
@@ -32,20 +37,22 @@ export default function TempAPIKeyModal({ isOpen, tempKey, onClose }: TempAPIKey
               </div>
             </div>
             <p className="text-body-secondary small mb-0">
-              Expires {new Date(tempKey.expiresAt * 1000).toLocaleString()}
+              {t('adminUser.tempKey.expires', {
+                date: new Date(tempKey.expiresAt * 1000).toLocaleString(getActiveLocale()),
+              })}
             </p>
           </>
         ) : (
           <div className="text-center py-2">
             <div className="spinner-border spinner-border-sm" role="status">
-              <span className="visually-hidden">Generating...</span>
+              <span className="visually-hidden">{t('adminUser.tempKey.generating')}</span>
             </div>
           </div>
         )}
       </ModalBody>
       <ModalFooter>
         <Button variant="outline-secondary" onClick={onClose}>
-          Done
+          {t('common.done')}
         </Button>
       </ModalFooter>
     </ModalBase>

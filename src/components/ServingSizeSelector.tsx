@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react';
 import { useState, useRef, useEffect, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type {
   CustomSizeValue,
@@ -37,6 +38,7 @@ export default function ServingSizeSelector({
   amountAriaLabel,
   unitAriaLabel,
 }: ServingSizeSelectorProps) {
+  const { t } = useTranslation();
   const instanceId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,9 +58,9 @@ export default function ServingSizeSelector({
   const flatOptions = filteredGroups.flatMap((group) => group.options);
 
   const getCurrentLabel = (): string => {
-    if (!value) return 'None';
+    if (!value) return t('unit.none');
     if (value.type === 'servings') {
-      return 'Servings';
+      return t('unit.servings');
     }
     if (value.type === 'customSize') {
       return (value.value as CustomSizeValue).name;
@@ -69,7 +71,7 @@ export default function ServingSizeSelector({
       const option = group.options.find((o) => o.type === value.type && o.value === unitValue);
       if (option) return option.label;
     }
-    return unitValue || 'unknown';
+    return unitValue || t('common.unknown');
   };
 
   const getUnitValue = (): string => {
@@ -236,7 +238,7 @@ export default function ServingSizeSelector({
       onClick={handleNoneSelect}
       onMouseEnter={() => setHighlightedIndex(-1)}
     >
-      None
+      {t('unit.none')}
     </button>
   );
 
@@ -262,8 +264,8 @@ export default function ServingSizeSelector({
           ref={searchInputRef}
           type="text"
           className="form-control form-control-sm"
-          placeholder="Search units..."
-          aria-label="Search units"
+          placeholder={t('unit.searchPlaceholder')}
+          aria-label={t('unit.searchLabel')}
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -276,7 +278,7 @@ export default function ServingSizeSelector({
       {noneItem}
       {onClear && filteredGroups.length > 0 && <div className="dropdown-divider" />}
       {filteredGroups.length === 0 ? (
-        <div className="dropdown-item-text text-muted small">No matching units</div>
+        <div className="dropdown-item-text text-muted small">{t('unit.noMatches')}</div>
       ) : (
         filteredGroups.map((group, groupIndex) => (
           <div key={group.label}>
@@ -316,7 +318,7 @@ export default function ServingSizeSelector({
             step="any"
             value={value.amount}
             onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0)}
-            aria-label={amountAriaLabel ?? 'Amount'}
+            aria-label={amountAriaLabel ?? t('unit.amount')}
           />
         )}
         <div ref={dropdownRef} className="dropdown flex-shrink-1" style={{ minWidth: '5rem' }}>
@@ -325,7 +327,7 @@ export default function ServingSizeSelector({
             type="button"
             onClick={toggleDropdown}
             style={{ minWidth: '5rem' }}
-            aria-label={unitAriaLabel ?? 'Unit'}
+            aria-label={unitAriaLabel ?? t('unit.unit')}
           >
             {getCurrentLabel()}
           </button>
@@ -340,7 +342,7 @@ export default function ServingSizeSelector({
       {value && (
         <div className="col-auto">
           <label htmlFor={amountInputId} className="form-label small mb-1">
-            Amount
+            {t('unit.amount')}
           </label>
           <input
             id={amountInputId}
@@ -356,7 +358,7 @@ export default function ServingSizeSelector({
       )}
       <div className="col-auto" ref={dropdownRef}>
         <label htmlFor={unitButtonId} className="form-label small mb-1">
-          Unit
+          {t('unit.unit')}
         </label>
         <div className="dropdown">
           <button

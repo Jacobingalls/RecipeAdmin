@@ -1,29 +1,33 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiLogEntry } from '../api';
 import { NutritionInformation } from '../domain';
 import { ErrorState, ContentUnavailableView, SubsectionTitle } from '../components/common';
 import { HistoryDayGroup } from '../components/history';
+import i18n, { getActiveLocale } from '../i18n';
 import { useInfiniteHistoryData } from '../hooks';
 import LogModal from '../components/LogModal';
 import DayNutritionModal from '../components/DayNutritionModal';
 
 function formatDayHeading(dateStr: string): string {
+  const { t } = i18n;
+  const locale = getActiveLocale();
   const today = new Date();
-  const todayDate = today.toLocaleDateString();
+  const todayDate = today.toLocaleDateString(locale);
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayDate = yesterday.toLocaleDateString();
+  const yesterdayDate = yesterday.toLocaleDateString(locale);
 
-  if (dateStr === todayDate) return 'Today';
-  if (dateStr === yesterdayDate) return 'Yesterday';
+  if (dateStr === todayDate) return t('history.today');
+  if (dateStr === yesterdayDate) return t('history.yesterday');
   return dateStr;
 }
 
 function groupByDay(entries: ApiLogEntry[]): Map<string, ApiLogEntry[]> {
   const groups = new Map<string, ApiLogEntry[]>();
   for (const entry of entries) {
-    const dayKey = new Date(entry.timestamp * 1000).toLocaleDateString();
+    const dayKey = new Date(entry.timestamp * 1000).toLocaleDateString(getActiveLocale());
     const existing = groups.get(dayKey);
     if (existing) {
       existing.push(entry);
@@ -37,10 +41,11 @@ function groupByDay(entries: ApiLogEntry[]): Map<string, ApiLogEntry[]> {
 function formatDayLabelForModal(day: string): string {
   const dayHeading = formatDayHeading(day);
   if (dayHeading === day) return day;
-  return `${dayHeading} (${day})`;
+  return i18n.t('history.dayLabel', { heading: dayHeading, date: day });
 }
 
 export default function HistoryPage() {
+  const { t } = useTranslation();
   const {
     logs,
     productDetails,
@@ -111,7 +116,7 @@ export default function HistoryPage() {
 
   return (
     <>
-      <h1 className="mb-4">History</h1>
+      <h1 className="mb-4">{t('history.title')}</h1>
       {loading && (
         <div data-testid="history-placeholder">
           <div className="mb-4">
@@ -139,8 +144,8 @@ export default function HistoryPage() {
       {!loading && !error && dayGroups.size === 0 && (
         <ContentUnavailableView
           icon="bi-clock-history"
-          title="No history"
-          description="Log something to see it here."
+          title={t('history.empty.title')}
+          description={t('history.empty.description')}
         />
       )}
       {!loading &&
@@ -169,13 +174,13 @@ export default function HistoryPage() {
       {loadingMore && (
         <div className="text-center py-3" data-testid="loading-more">
           <div className="spinner-border spinner-border-sm text-secondary" role="status">
-            <span className="visually-hidden">Loading more entries</span>
+            <span className="visually-hidden">{t('history.loadingMore')}</span>
           </div>
         </div>
       )}
       {!loading && !loadingMore && !hasMore && logs.length > 0 && (
         <p className="text-center text-body-secondary py-3" data-testid="end-of-list">
-          You&rsquo;re all caught up.
+          {t('history.endOfList')}
         </p>
       )}
 

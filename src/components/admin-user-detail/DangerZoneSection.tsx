@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { adminDeleteUser, adminRevokeUserSessions } from '../../api';
 import {
@@ -18,6 +19,7 @@ interface DangerZoneSectionProps {
 }
 
 export default function DangerZoneSection({ userId, username, onDeleted }: DangerZoneSectionProps) {
+  const { t } = useTranslation();
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
   const [revokeSessionsSuccess, setRevokeSessionsSuccess] = useState(false);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
@@ -34,7 +36,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       setRevokeSessionsSuccess(true);
     } catch (err) {
       console.error("Couldn't revoke sessions", err);
-      setError("Couldn't revoke sessions. Try again.");
+      setError(t('adminUser.revokeSessions.error'));
     } finally {
       setIsRevokingSessions(false);
     }
@@ -47,7 +49,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       onDeleted();
     } catch (err) {
       console.error("Couldn't delete user", err);
-      setError("Couldn't delete this user. Try again.");
+      setError(t('adminUser.delete.error'));
       setShowDeleteModal(false);
     } finally {
       setIsDeleting(false);
@@ -56,18 +58,16 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
 
   return (
     <>
-      <SectionHeader title="Account actions" className="mt-5" />
+      <SectionHeader title={t('adminUser.accountActions')} className="mt-5" />
       {revokeSessionsSuccess && (
         <div className="alert alert-success alert-dismissible small" role="status">
-          <strong style={{ opacity: 0.8 }}>All sessions revoked</strong>
-          <p className="mb-0 mt-1">
-            Active sessions may remain valid briefly until their current access token expires.
-          </p>
+          <strong style={{ opacity: 0.8 }}>{t('adminUser.sessionsRevoked.title')}</strong>
+          <p className="mb-0 mt-1">{t('adminUser.sessionsRevoked.description')}</p>
           <button
             type="button"
             className="btn-close btn-close-white"
             style={{ opacity: 0.8 }}
-            aria-label="Dismiss"
+            aria-label={t('adminUser.sessionsRevoked.dismiss')}
             onClick={() => setRevokeSessionsSuccess(false)}
           />
         </div>
@@ -80,9 +80,9 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
       <div className="list-group border-danger">
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
-            <strong>Revoke all sessions</strong>
+            <strong>{t('adminUser.revokeSessions.title')}</strong>
             <p className="text-body-secondary small mb-0">
-              Log this user out of all devices immediately.
+              {t('adminUser.revokeSessions.description')}
             </p>
           </div>
           <Button
@@ -93,15 +93,13 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
             onClick={() => setShowRevokeConfirm(true)}
             loading={isRevokingSessions}
           >
-            Revoke sessions
+            {t('adminUser.revokeSessions.action')}
           </Button>
         </div>
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
-            <strong>Delete this user</strong>
-            <p className="text-body-secondary small mb-0">
-              This will permanently delete this user and all their data. This can&apos;t be undone.
-            </p>
+            <strong>{t('adminUser.delete.title')}</strong>
+            <p className="text-body-secondary small mb-0">{t('adminUser.delete.description')}</p>
           </div>
           <Button
             variant="danger"
@@ -110,7 +108,7 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
             style={{ minWidth: '9rem' }}
             onClick={() => setShowDeleteModal(true)}
           >
-            Delete user
+            {t('adminUser.delete.action')}
           </Button>
         </div>
       </div>
@@ -121,18 +119,21 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
           ariaLabelledBy="revoke-sessions-title"
         >
           <ModalHeader onClose={() => setShowRevokeConfirm(false)} titleId="revoke-sessions-title">
-            Revoke all sessions
+            {t('adminUser.revokeSessions.title')}
           </ModalHeader>
           <ModalBody>
-            Revoke all sessions for <strong>{username}</strong>? They will be logged out of all
-            devices.
+            <Trans
+              i18nKey="adminUser.revokeSessions.confirm"
+              values={{ name: username }}
+              components={{ strong: <strong /> }}
+            />
           </ModalBody>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setShowRevokeConfirm(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="danger" onClick={handleRevokeSessions}>
-              Revoke sessions
+              {t('adminUser.revokeSessions.action')}
             </Button>
           </ModalFooter>
         </ModalBase>
@@ -140,14 +141,18 @@ export default function DangerZoneSection({ userId, username, onDeleted }: Dange
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}
-        title="Delete user"
+        title={t('adminUser.delete.modalTitle')}
         message={
           <>
-            This will permanently delete <strong>{username}</strong>. This action cannot be undone.
+            <Trans
+              i18nKey="adminUser.delete.message"
+              values={{ name: username }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={username}
-        confirmButtonText="Delete this user"
+        confirmButtonText={t('adminUser.delete.confirm')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteModal(false)}
         isLoading={isDeleting}

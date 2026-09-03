@@ -1,8 +1,10 @@
 import type { FormEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function HeaderSearchBar() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const urlQuery = searchParams.get('q') ?? '';
@@ -46,7 +48,7 @@ export default function HeaderSearchBar() {
   return (
     <form className="d-flex me-3" role="search" onSubmit={handleSearch}>
       <label htmlFor="header-search" className="visually-hidden">
-        Search
+        {t('nav.search')}
       </label>
       <div
         className="input-group rounded-pill overflow-hidden"
@@ -59,7 +61,7 @@ export default function HeaderSearchBar() {
           type="search"
           className="form-control border-0 bg-body-secondary shadow-none ps-2"
           id="header-search"
-          placeholder="Search..."
+          placeholder={t('nav.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={(e) => {

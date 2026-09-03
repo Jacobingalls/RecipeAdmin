@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
+import { getActiveLocale } from '../i18n';
 import { adminGetUser } from '../api';
 import { LoadingState, ErrorState } from '../components/common';
 import {
@@ -10,6 +12,7 @@ import {
 import { useApiQuery } from '../hooks';
 
 export default function AdminUserDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -19,12 +22,12 @@ export default function AdminUserDetailPage() {
     error,
     refetch,
   } = useApiQuery(() => adminGetUser(id!), [id], {
-    errorMessage: "Couldn't load this user. Try again later.",
+    errorMessage: t('adminUser.error'),
   });
 
   if (loading && !user) return <LoadingState />;
   if (error && !user) return <ErrorState message={error} />;
-  if (!user) return <ErrorState message="User not found" />;
+  if (!user) return <ErrorState message={t('adminUser.notFound')} />;
 
   return (
     <div>
@@ -36,7 +39,9 @@ export default function AdminUserDetailPage() {
         {user.createdAt && (
           <>
             <span className="mx-1">&middot;</span>
-            Created {new Date(user.createdAt * 1000).toLocaleDateString()}
+            {t('adminUser.created', {
+              date: new Date(user.createdAt * 1000).toLocaleDateString(getActiveLocale()),
+            })}
           </>
         )}
       </p>

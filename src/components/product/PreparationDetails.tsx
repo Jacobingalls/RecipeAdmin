@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { PreparationData, ServingSize } from '../../domain';
 import { Preparation } from '../../domain';
@@ -25,6 +26,7 @@ export default function PreparationDetails({
   onServingSizeChange,
   actionSlot,
 }: PreparationDetailsProps) {
+  const { t } = useTranslation();
   const prep = new Preparation(prepData);
 
   let nutritionInfo = null;
@@ -62,7 +64,7 @@ export default function PreparationDetails({
         <>
           <br />
           <div className="mt-3">
-            <SubsectionTitle>Notes</SubsectionTitle>
+            <SubsectionTitle>{t('notes.title')}</SubsectionTitle>
             <NotesDisplay notes={prep.notes} />
           </div>
         </>

@@ -4,6 +4,8 @@ import { AdminLayout } from './components/admin';
 import Header from './components/Header';
 import { ErrorBoundary, RequireAuth, RequireAdmin } from './components/common';
 import { AuthProvider } from './contexts/AuthContext';
+// Importing the i18n module configures i18next before anything renders.
+import './i18n';
 import { useTheme } from './hooks';
 import {
   AdminCategoriesPage,

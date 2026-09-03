@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { AdminCreateUserResponse } from '../../api';
 import { adminCreateUser } from '../../api';
@@ -12,6 +13,7 @@ interface CreateUserModalProps {
 }
 
 export default function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserModalProps) {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,7 +43,7 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
       setCreatedResult(result);
     } catch (err) {
       console.error("Couldn't create user", err);
-      setError("Couldn't create the user. Try again.");
+      setError(t('createUser.error'));
     } finally {
       setIsCreating(false);
     }
@@ -54,13 +56,16 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
       {createdResult ? (
         <>
           <ModalHeader onClose={handleClose} titleId="create-user-modal-title">
-            User created
+            {t('createUser.created')}
           </ModalHeader>
           <ModalBody>
             <div className="alert alert-success mb-0" role="status">
               <p className="mb-2 small">
-                Temporary API key for <strong>{createdResult.user.username}</strong>. Save it now —
-                it expires in 24 hours and can&apos;t be retrieved later.
+                <Trans
+                  i18nKey="createUser.tempKeyNotice"
+                  values={{ name: createdResult.user.username }}
+                  components={{ strong: <strong /> }}
+                />
               </p>
               <div className="d-flex gap-2 align-items-center">
                 <code className="flex-grow-1 text-break">{createdResult.temporaryAPIKey}</code>
@@ -72,13 +77,13 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={handleClose}>Done</Button>
+            <Button onClick={handleClose}>{t('common.done')}</Button>
           </ModalFooter>
         </>
       ) : (
         <>
           <ModalHeader onClose={handleClose} titleId="create-user-modal-title">
-            Add User
+            {t('createUser.title')}
           </ModalHeader>
           <form onSubmit={handleSubmit}>
             <ModalBody>
@@ -89,7 +94,7 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
               )}
               <div className="mb-3">
                 <label htmlFor="new-username" className="form-label">
-                  Username
+                  {t('createUser.username')}
                 </label>
                 <input
                   type="text"
@@ -102,7 +107,7 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
               </div>
               <div className="mb-3">
                 <label htmlFor="new-display-name" className="form-label">
-                  Display Name
+                  {t('createUser.displayName')}
                 </label>
                 <input
                   type="text"
@@ -115,7 +120,7 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
               </div>
               <div className="mb-3">
                 <label htmlFor="new-email" className="form-label">
-                  Email
+                  {t('createUser.email')}
                 </label>
                 <input
                   type="email"
@@ -135,16 +140,16 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated }: Crea
                   onChange={(e) => setIsAdmin(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="new-is-admin">
-                  Administrator
+                  {t('createUser.administrator')}
                 </label>
               </div>
             </ModalBody>
             <ModalFooter>
               <Button variant="secondary" onClick={handleClose}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" loading={isCreating}>
-                Add
+                {t('common.add')}
               </Button>
             </ModalFooter>
           </form>

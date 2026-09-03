@@ -1,5 +1,6 @@
 import convert from 'convert';
 import type { Unit } from 'convert';
+import { useTranslation } from 'react-i18next';
 
 import type {
   NutritionInformation,
@@ -21,6 +22,8 @@ interface NutritionLabelProps {
 }
 
 export default function NutritionLabel({ nutritionInfo, servingSize, prep }: NutritionLabelProps) {
+  const { t } = useTranslation();
+
   if (!nutritionInfo) return null;
 
   const { primary: servingPrimary, resolved: servingResolved } = formatServingSize(
@@ -74,12 +77,12 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
         .nutrition-label th, .nutrition-label td { padding: 0.25rem 0; }
       `}</style>
       <div className="fw-bold fs-3 border-bottom" style={{ letterSpacing: '-1px' }}>
-        Nutrition Facts
+        {t('nutritionLabel.title')}
       </div>
       <div className="border-bottom py-1" style={{ borderBottomWidth: '8px !important' }}>
         <div className="d-flex justify-content-between align-items-center">
           <span>
-            <span className="small">Serving size</span>{' '}
+            <span className="small">{t('nutritionLabel.servingSize')}</span>{' '}
             <span className="fw-bold">{servingPrimary || '—'}</span>
           </span>
           {servingResolved && <span className="small">{servingResolved}</span>}
@@ -90,14 +93,14 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
       </div>
       <div className="border-bottom border-4 py-1">
         <div className="d-flex justify-content-between align-items-end">
-          <span className="fw-bold fs-5">Calories</span>
+          <span className="fw-bold fs-5">{t('nutritionLabel.calories')}</span>
           <span className="fw-bold" style={{ fontSize: '2rem' }}>
             {calories !== null ? formatSignificant(calories) : '—'}
           </span>
         </div>
         {caloriesFromFat !== null && (
           <div className="small text-end">
-            Calories from Fat {formatSignificant(caloriesFromFat)}
+            {t('nutritionLabel.caloriesFromFat', { amount: formatSignificant(caloriesFromFat) })}
           </div>
         )}
       </div>
@@ -106,53 +109,90 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
           <tr className="small fw-bold">
             <th className="border-bottom fw-bold" />
             <th className="border-bottom fw-bold text-end" style={{ width: 100 }}>
-              Amount
+              {t('nutritionLabel.amount')}
             </th>
             <th className="border-bottom fw-bold text-end" style={{ width: 100 }}>
-              % DV*
+              {t('nutritionLabel.percentDV')}
             </th>
           </tr>
         </thead>
         <tbody>
           {/* Fats */}
-          <NutritionRow label="Total Fat" nutrient={getNutrient('totalFat')} bold />
-          <NutritionRow label="Saturated Fat" nutrient={getNutrient('saturatedFat')} indent />
-          <NutritionRow label="Trans Fat" nutrient={getNutrient('transFat')} indent />
           <NutritionRow
-            label="Polyunsaturated Fat"
+            label={t('nutritionLabel.totalFat')}
+            nutrient={getNutrient('totalFat')}
+            bold
+          />
+          <NutritionRow
+            label={t('nutritionLabel.saturatedFat')}
+            nutrient={getNutrient('saturatedFat')}
+            indent
+          />
+          <NutritionRow
+            label={t('nutritionLabel.transFat')}
+            nutrient={getNutrient('transFat')}
+            indent
+          />
+          <NutritionRow
+            label={t('nutritionLabel.polyunsaturatedFat')}
             nutrient={getNutrient('polyunsaturatedFat')}
             indent
           />
           <NutritionRow
-            label="Monounsaturated Fat"
+            label={t('nutritionLabel.monounsaturatedFat')}
             nutrient={getNutrient('monounsaturatedFat')}
             indent
           />
           {/* Cholesterol & Sodium */}
-          <NutritionRow label="Cholesterol" nutrient={getNutrient('cholesterol')} bold />
-          <NutritionRow label="Sodium" nutrient={getNutrient('sodium')} bold />
+          <NutritionRow
+            label={t('nutritionLabel.cholesterol')}
+            nutrient={getNutrient('cholesterol')}
+            bold
+          />
+          <NutritionRow label={t('nutritionLabel.sodium')} nutrient={getNutrient('sodium')} bold />
           {/* Carbohydrates */}
           <NutritionRow
-            label="Total Carbohydrate"
+            label={t('nutritionLabel.totalCarbohydrate')}
             nutrient={getNutrient('totalCarbohydrate')}
             bold
           />
-          <NutritionRow label="Dietary Fiber" nutrient={getNutrient('dietaryFiber')} indent />
-          <NutritionRow label="Soluble Fiber" nutrient={getNutrient('solubleFiber')} doubleIndent />
           <NutritionRow
-            label="Insoluble Fiber"
+            label={t('nutritionLabel.dietaryFiber')}
+            nutrient={getNutrient('dietaryFiber')}
+            indent
+          />
+          <NutritionRow
+            label={t('nutritionLabel.solubleFiber')}
+            nutrient={getNutrient('solubleFiber')}
+            doubleIndent
+          />
+          <NutritionRow
+            label={t('nutritionLabel.insolubleFiber')}
             nutrient={getNutrient('insolubleFiber')}
             doubleIndent
           />
-          <NutritionRow label="Total Sugars" nutrient={getNutrient('totalSugars')} indent />
           <NutritionRow
-            label="Includes Added Sugars"
+            label={t('nutritionLabel.totalSugars')}
+            nutrient={getNutrient('totalSugars')}
+            indent
+          />
+          <NutritionRow
+            label={t('nutritionLabel.addedSugars')}
             nutrient={getNutrient('addedSugars')}
             doubleIndent
           />
-          <NutritionRow label="Sugar Alcohol" nutrient={getNutrient('sugarAlcohol')} indent />
+          <NutritionRow
+            label={t('nutritionLabel.sugarAlcohol')}
+            nutrient={getNutrient('sugarAlcohol')}
+            indent
+          />
           {/* Protein */}
-          <NutritionRow label="Protein" nutrient={getNutrient('protein')} bold hideBottomBorder />
+          <NutritionRow
+            label={t('nutritionLabel.protein')}
+            nutrient={getNutrient('protein')}
+            bold
+            hideBottomBorder
+          />
           {/* Vitamins & Minerals separator */}
           <tr>
             <td
@@ -161,39 +201,53 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
             />
           </tr>
           {/* Vitamins */}
-          <NutritionRow label="Vitamin A" nutrient={getNutrient('vitaminA')} />
-          <NutritionRow label="Vitamin C" nutrient={getNutrient('vitaminC')} />
-          <NutritionRow label="Vitamin D" nutrient={getNutrient('vitaminD')} />
-          <NutritionRow label="Vitamin E" nutrient={getNutrient('vitaminE')} />
-          <NutritionRow label="Vitamin K" nutrient={getNutrient('vitaminK')} />
-          <NutritionRow label="Thiamin (B1)" nutrient={getNutrient('thiamin')} />
-          <NutritionRow label="Riboflavin (B2)" nutrient={getNutrient('riboflavin')} />
-          <NutritionRow label="Niacin (B3)" nutrient={getNutrient('niacin')} />
-          <NutritionRow label="Vitamin B6" nutrient={getNutrient('vitaminB6')} />
-          <NutritionRow label="Folate" nutrient={getNutrient('folate')} />
-          <NutritionRow label="Vitamin B12" nutrient={getNutrient('vitaminB12')} />
-          <NutritionRow label="Biotin" nutrient={getNutrient('biotin')} />
-          <NutritionRow label="Pantothenic Acid" nutrient={getNutrient('pantothenicAcid')} />
-          <NutritionRow label="Choline" nutrient={getNutrient('choline')} />
+          <NutritionRow label={t('nutritionLabel.vitaminA')} nutrient={getNutrient('vitaminA')} />
+          <NutritionRow label={t('nutritionLabel.vitaminC')} nutrient={getNutrient('vitaminC')} />
+          <NutritionRow label={t('nutritionLabel.vitaminD')} nutrient={getNutrient('vitaminD')} />
+          <NutritionRow label={t('nutritionLabel.vitaminE')} nutrient={getNutrient('vitaminE')} />
+          <NutritionRow label={t('nutritionLabel.vitaminK')} nutrient={getNutrient('vitaminK')} />
+          <NutritionRow label={t('nutritionLabel.thiamin')} nutrient={getNutrient('thiamin')} />
+          <NutritionRow
+            label={t('nutritionLabel.riboflavin')}
+            nutrient={getNutrient('riboflavin')}
+          />
+          <NutritionRow label={t('nutritionLabel.niacin')} nutrient={getNutrient('niacin')} />
+          <NutritionRow label={t('nutritionLabel.vitaminB6')} nutrient={getNutrient('vitaminB6')} />
+          <NutritionRow label={t('nutritionLabel.folate')} nutrient={getNutrient('folate')} />
+          <NutritionRow
+            label={t('nutritionLabel.vitaminB12')}
+            nutrient={getNutrient('vitaminB12')}
+          />
+          <NutritionRow label={t('nutritionLabel.biotin')} nutrient={getNutrient('biotin')} />
+          <NutritionRow
+            label={t('nutritionLabel.pantothenicAcid')}
+            nutrient={getNutrient('pantothenicAcid')}
+          />
+          <NutritionRow label={t('nutritionLabel.choline')} nutrient={getNutrient('choline')} />
           {/* Minerals */}
-          <NutritionRow label="Calcium" nutrient={getNutrient('calcium')} />
-          <NutritionRow label="Iron" nutrient={getNutrient('iron')} />
-          <NutritionRow label="Phosphorus" nutrient={getNutrient('phosphorus')} />
-          <NutritionRow label="Iodine" nutrient={getNutrient('iodine')} />
-          <NutritionRow label="Magnesium" nutrient={getNutrient('magnesium')} />
-          <NutritionRow label="Zinc" nutrient={getNutrient('zinc')} />
-          <NutritionRow label="Selenium" nutrient={getNutrient('selenium')} />
-          <NutritionRow label="Copper" nutrient={getNutrient('copper')} />
-          <NutritionRow label="Manganese" nutrient={getNutrient('manganese')} />
-          <NutritionRow label="Chromium" nutrient={getNutrient('chromium')} />
-          <NutritionRow label="Molybdenum" nutrient={getNutrient('molybdenum')} />
-          <NutritionRow label="Chloride" nutrient={getNutrient('chloride')} />
-          <NutritionRow label="Potassium" nutrient={getNutrient('potassium')} />
+          <NutritionRow label={t('nutritionLabel.calcium')} nutrient={getNutrient('calcium')} />
+          <NutritionRow label={t('nutritionLabel.iron')} nutrient={getNutrient('iron')} />
+          <NutritionRow
+            label={t('nutritionLabel.phosphorus')}
+            nutrient={getNutrient('phosphorus')}
+          />
+          <NutritionRow label={t('nutritionLabel.iodine')} nutrient={getNutrient('iodine')} />
+          <NutritionRow label={t('nutritionLabel.magnesium')} nutrient={getNutrient('magnesium')} />
+          <NutritionRow label={t('nutritionLabel.zinc')} nutrient={getNutrient('zinc')} />
+          <NutritionRow label={t('nutritionLabel.selenium')} nutrient={getNutrient('selenium')} />
+          <NutritionRow label={t('nutritionLabel.copper')} nutrient={getNutrient('copper')} />
+          <NutritionRow label={t('nutritionLabel.manganese')} nutrient={getNutrient('manganese')} />
+          <NutritionRow label={t('nutritionLabel.chromium')} nutrient={getNutrient('chromium')} />
+          <NutritionRow
+            label={t('nutritionLabel.molybdenum')}
+            nutrient={getNutrient('molybdenum')}
+          />
+          <NutritionRow label={t('nutritionLabel.chloride')} nutrient={getNutrient('chloride')} />
+          <NutritionRow label={t('nutritionLabel.potassium')} nutrient={getNutrient('potassium')} />
         </tbody>
       </table>
       <div className="small pt-2" style={{ fontSize: '0.7rem' }}>
-        * The % Daily Value (DV) tells you how much a nutrient in a serving of food contributes to a
-        daily diet.
+        {t('nutritionLabel.footnote')}
       </div>
     </div>
   );

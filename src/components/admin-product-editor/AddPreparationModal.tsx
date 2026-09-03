@@ -1,4 +1,5 @@
 import { useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../../api';
 import { ModalBase, ModalHeader, ModalBody, ModalFooter, Button } from '../common';
@@ -14,6 +15,7 @@ export default function AddPreparationModal({
   onChange,
   onClose,
 }: AddPreparationModalProps) {
+  const { t } = useTranslation();
   const titleId = useId();
   const [name, setName] = useState('');
 
@@ -40,11 +42,11 @@ export default function AddPreparationModal({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId}>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        New preparation
+        {t('productEditor.newPreparation')}
       </ModalHeader>
       <ModalBody>
         <label htmlFor="prep-name" className="form-label">
-          Name
+          {t('common.name')}
         </label>
         <input
           type="text"
@@ -52,15 +54,15 @@ export default function AddPreparationModal({
           id="prep-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Cooked"
+          placeholder={t('productEditor.preparationNamePlaceholder')}
         />
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button disabled={!name.trim()} onClick={handleCreate}>
-          Create
+          {t('editor.create')}
         </Button>
       </ModalFooter>
     </ModalBase>

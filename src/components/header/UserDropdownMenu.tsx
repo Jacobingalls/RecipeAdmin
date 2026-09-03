@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   API_DISPLAY_URL,
@@ -14,6 +15,7 @@ import { formatEnvironmentName } from '../../utils';
 const menuIconStyle: CSSProperties = { width: 20, marginRight: 8 };
 
 export default function UserDropdownMenu() {
+  const { t } = useTranslation();
   const { user, logout, apiVersion, apiGitCommit, apiEnvironment } = useAuth();
   const avatarUrl = useGravatarUrl(user?.email);
 
@@ -32,7 +34,7 @@ export default function UserDropdownMenu() {
         className="btn p-1 border-0 rounded-circle"
         data-bs-toggle="dropdown"
         aria-expanded="false"
-        aria-label="User menu"
+        aria-label={t('nav.userMenu')}
       >
         {avatarUrl ? (
           <img
@@ -83,7 +85,7 @@ export default function UserDropdownMenu() {
               aria-hidden="true"
               style={menuIconStyle}
             />
-            Settings
+            {t('nav.settings')}
           </Link>
         </li>
         {isAdmin && (
@@ -94,7 +96,7 @@ export default function UserDropdownMenu() {
                 aria-hidden="true"
                 style={menuIconStyle}
               />
-              Admin
+              {t('nav.admin')}
             </Link>
           </li>
         )}
@@ -112,7 +114,7 @@ export default function UserDropdownMenu() {
               aria-hidden="true"
               style={menuIconStyle}
             />
-            Sign out
+            {t('nav.signOut')}
           </button>
         </li>
         <li>

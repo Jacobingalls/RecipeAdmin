@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { NutritionInformationData } from '../domain';
 
 export type NutrientKey = keyof NutritionInformationData;
@@ -31,6 +33,8 @@ export default function NutritionRow({
   doubleIndent,
   hideBottomBorder = false,
 }: NutritionRowProps) {
+  const { t } = useTranslation();
+
   if (!nutrient || !nutrient.formatted) return null;
 
   const { formatted, percentDV, dvFormatted } = nutrient;
@@ -48,7 +52,11 @@ export default function NutritionRow({
       <td className={`${borderClass} text-end`}>{formatted}</td>
       <td
         className={`${borderClass} fw-bold text-end`}
-        title={percentDV !== null ? `${percentDV}% of ${dvFormatted}` : undefined}
+        title={
+          percentDV !== null
+            ? t('nutritionLabel.percentOfDaily', { percent: percentDV, amount: dvFormatted ?? '' })
+            : undefined
+        }
       >
         {percentDV !== null ? `${percentDV}%` : ''}
       </td>

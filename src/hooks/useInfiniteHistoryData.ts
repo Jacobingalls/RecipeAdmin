@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiLogEntry, ApiProduct } from '../api';
 import { getLogs, getProduct, getGroup, deleteLog } from '../api';
@@ -73,6 +74,7 @@ export interface UseInfiniteHistoryDataResult {
  * Unlike `useHistoryData`, which loads a fixed date range, this hook supports incremental loading via `loadMore`.
  */
 export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
+  const { t } = useTranslation();
   const [allLogs, setAllLogs] = useState<ApiLogEntry[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -115,7 +117,7 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
       })
       .catch(() => {
         if (cancelled) return;
-        setLogsError("Couldn't load history. Try again later.");
+        setLogsError(t('history.error'));
       })
       .finally(() => {
         if (cancelled) return;
@@ -126,7 +128,7 @@ export function useInfiniteHistoryData(): UseInfiniteHistoryDataResult {
     return () => {
       cancelled = true;
     };
-  }, [resetKey]);
+  }, [resetKey, t]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current || cursorRef.current === null) return;

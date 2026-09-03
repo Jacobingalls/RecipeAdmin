@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiLogEntry, ApiProduct } from '../api';
 import { getLogs, getProduct, getGroup, deleteLog } from '../api';
@@ -73,6 +74,7 @@ export function useHistoryData(options?: {
   limit?: number;
   limitDays?: number;
 }): UseHistoryDataResult {
+  const { t } = useTranslation();
   const limit = options?.limit;
   const limitDays = options?.limitDays;
   const {
@@ -81,7 +83,7 @@ export function useHistoryData(options?: {
     error: logsError,
     refetch: refetchLogs,
   } = useApiQuery(() => getLogs({ limit, limitDays }), [limit, limitDays], {
-    errorMessage: "Couldn't load history. Try again later.",
+    errorMessage: t('history.error'),
   });
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
   const [logAgainLoadingId, setLogAgainLoadingId] = useState<string | null>(null);

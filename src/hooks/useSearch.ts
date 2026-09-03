@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiSearchResult } from '../api';
 import { searchItems } from '../api';
@@ -20,6 +21,7 @@ export interface UseSearchResult {
  * once the query reaches the minimum length.
  */
 export function useSearch(query: string): UseSearchResult {
+  const { t } = useTranslation();
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function useSearch(query: string): UseSearchResult {
     [debouncedQuery],
     {
       enabled: debouncedQuery.length >= MIN_QUERY_LENGTH,
-      errorMessage: "Couldn't load search results. Try again.",
+      errorMessage: t('search.error'),
     },
   );
 

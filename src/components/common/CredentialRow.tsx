@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { formatRelativeTime } from '../../utils';
 
 import DeleteButton from './DeleteButton';
@@ -32,17 +34,21 @@ export default function CredentialRow({
   isExpired,
   onDelete,
 }: CredentialRowProps) {
+  const { t } = useTranslation();
+
   const icon = kind === 'passkey' ? 'bi-fingerprint' : 'bi-key';
 
   let secondary;
   if (isExpired && expiresAt) {
     secondary = (
-      <span className="text-danger-emphasis">Expired {formatRelativeTime(expiresAt)}</span>
+      <span className="text-danger-emphasis">
+        {t('credential.expired', { time: formatRelativeTime(expiresAt) })}
+      </span>
     );
   } else if (isTemporary && expiresAt) {
-    secondary = <>Expires {formatRelativeTime(expiresAt)}</>;
+    secondary = t('credential.expires', { time: formatRelativeTime(expiresAt) });
   } else if (createdAt) {
-    secondary = <>Created {formatRelativeTime(createdAt)}</>;
+    secondary = t('credential.created', { time: formatRelativeTime(createdAt) });
   }
 
   const content =
@@ -55,7 +61,10 @@ export default function CredentialRow({
       <strong className={isExpired ? 'text-body-tertiary' : undefined}>{name}</strong>
     );
 
-  const deleteLabel = kind === 'passkey' ? `Delete passkey ${name}` : `Revoke API key ${name}`;
+  const deleteLabel =
+    kind === 'passkey'
+      ? t('credential.deletePasskey', { name })
+      : t('credential.revokeApiKey', { name });
 
   return (
     <ListRow

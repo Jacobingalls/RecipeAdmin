@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiCategory, ApiLookupItem } from '../api';
 import { getCategory, getCategoryChildren, getCategoryItems } from '../api';
@@ -17,6 +18,7 @@ import { useApiQuery } from '../hooks';
 import { resolvePathSegments } from '../utils';
 
 export default function CategoryDetailPage() {
+  const { t } = useTranslation();
   const { path } = useParams<{ path: string }>();
   const [includeDescendants, setIncludeDescendants] = useState(true);
   const [nameFilter, setNameFilter] = useState('');
@@ -37,7 +39,7 @@ export default function CategoryDetailPage() {
     error: categoryError,
   } = useApiQuery<ApiCategory>(() => getCategory(path!), [path], {
     enabled: !cachedCategory,
-    errorMessage: "Couldn't load this category. Try again later.",
+    errorMessage: t('category.error'),
   });
 
   // Merge fetched category into cache
@@ -96,11 +98,11 @@ export default function CategoryDetailPage() {
   const loading = !cachedCategory && categoryLoading;
   const error = !cachedCategory ? categoryError : null;
 
-  let emptyDescription = "Nothing's been added to this category.";
+  let emptyDescription = t('category.noItems.description');
   if (nameFilter.trim()) {
-    emptyDescription = 'Try adjusting your search.';
+    emptyDescription = t('list.adjustSearch');
   } else if (includeDescendants) {
-    emptyDescription = "Nothing's been added to this category or its subcategories.";
+    emptyDescription = t('category.noItems.withDescendants');
   }
 
   return (
@@ -108,7 +110,7 @@ export default function CategoryDetailPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !category && (
-        <ContentUnavailableView icon="bi-folder" title="Category not found" />
+        <ContentUnavailableView icon="bi-folder" title={t('category.notFound')} />
       )}
       {!loading && !error && category && (
         <>
@@ -117,7 +119,7 @@ export default function CategoryDetailPage() {
 
           {children && children.length > 0 && (
             <section className="mt-4">
-              <SubsectionTitle>Subcategories</SubsectionTitle>
+              <SubsectionTitle>{t('category.subcategories')}</SubsectionTitle>
               <CategoryGrid
                 categories={[...children].sort((a, b) =>
                   a.displayName.localeCompare(b.displayName),
@@ -128,13 +130,13 @@ export default function CategoryDetailPage() {
           )}
 
           <section className="mt-4">
-            <SubsectionTitle>Items</SubsectionTitle>
+            <SubsectionTitle>{t('category.items')}</SubsectionTitle>
             <div className="d-flex align-items-center gap-3 mb-3">
               <input
                 type="text"
                 className="form-control form-control-sm"
-                placeholder="Filter items..."
-                aria-label="Filter items"
+                placeholder={t('category.filterPlaceholder')}
+                aria-label={t('category.filterLabel')}
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
               />
@@ -147,7 +149,7 @@ export default function CategoryDetailPage() {
                   onChange={(e) => setIncludeDescendants(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="include-descendants">
-                  Include descendants
+                  {t('category.includeDescendants')}
                 </label>
               </div>
             </div>
@@ -156,7 +158,7 @@ export default function CategoryDetailPage() {
             {!itemsLoading && filteredItems.length === 0 && (
               <ContentUnavailableView
                 icon="bi-tray"
-                title="No items"
+                title={t('category.noItems.title')}
                 description={emptyDescription}
               />
             )}

@@ -23,6 +23,8 @@ npm run format:check # Check formatting without writing
 
 All user-facing strings must follow `WRITING_STYLE.md`. **Always invoke the `/writing-style` skill when adding or changing user-facing text.** Never skip this step.
 
+User-facing text lives in the message catalogs, not in components — see [Localization](#localization). The style guide applies to every language: the Dutch catalog follows the same voice, sentence case and error phrasing as the English one.
+
 ### Engineering Philosophy
 
 - Follow the [React documentation](https://react.dev/) and [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) conventions
@@ -178,6 +180,7 @@ src/
 │   │   ├── ProfileSection # Display name viewing/editing
 │   │   ├── CredentialsSection # Passkey + API key list with add dropdown
 │   │   ├── CreateAPIKeyModal # Key creation form with expiry toggle
+│   │   ├── LanguageSection # Language picker (browser default or an explicit language)
 │   │   └── SessionsSection # Session list with sign-out controls
 │   ├── BarcodeSection     # Barcode list with serving size links
 │   ├── CustomSizesSection # Custom size buttons
@@ -201,6 +204,14 @@ src/
 │   ├── Preparation.ts     # Product preparation with nutrition calc
 │   ├── ProductGroup.ts    # Product group with aggregate nutrition
 │   └── ServingSize.ts     # Serving size types (mass, volume, etc.)
+├── i18n/                  # i18next setup and translations
+│   ├── index.ts           # Configured i18next instance + language preference helpers
+│   ├── i18next.d.ts       # Types t() against the English catalog
+│   ├── types.ts           # Locale, LocalePreference
+│   └── messages/
+│       ├── en.ts, nl.ts   # Merged catalogs (en defines the key set)
+│       ├── en/            # English messages, split by area
+│       └── nl/            # Dutch messages, typed against their English section
 ├── hooks/
 │   ├── index.ts           # Barrel exports
 │   ├── useApiQuery.ts     # Data fetching with cancellation
@@ -289,6 +300,99 @@ Admin functions: `adminListUsers`, `adminCreateUser`, `adminUpdateUser`, `adminD
 
 When authenticated: shows nav links, barcode search, and a user dropdown (username, Settings link, Sign out). Admins see an "Admin" nav link. When not authenticated: shows only the brand.
 
+## Localization
+
+The app ships English and Dutch, built on [i18next](https://www.i18next.com/) and
+[react-i18next](https://react.i18next.com/). Every user-facing string lives in a message
+catalog under `src/i18n/messages/`; components look messages up by key rather than embedding
+text.
+
+`src/i18n/index.ts` configures and exports the i18next instance. Importing it (done once from
+`App.tsx`) initialises i18next — there is no provider to mount.
+
+### Using translations
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+const { t } = useTranslation();
+
+t('settings.title');                                  // "Settings"
+t('credential.created', { time: '3d ago' });          // fills in {{time}}
+t('format.servings', { count, amount: formatted });   // singular/plural by count
+```
+
+Outside the React tree — formatting helpers, domain classes, `ErrorBoundary` — import the
+instance directly:
+
+```ts
+import i18n, { getActiveLocale } from '../i18n';
+
+i18n.t('entry.unknownItem');
+value.toLocaleString(getActiveLocale());
+```
+
+When a value has to render as an element inside a sentence, put the markup in the message and
+use `<Trans>`, so translators can move the value *and* its emphasis:
+
+```ts
+'confirm.typeToConfirm': 'Type <strong>{{name}}</strong> to confirm',
+```
+
+```tsx
+<Trans i18nKey="confirm.typeToConfirm" values={{ name }} components={{ strong: <strong /> }} />
+```
+
+### Adding a string
+
+1. Add the key to the matching section file in `src/i18n/messages/en/` — group by area, not by
+   component, and keep each file under 200 lines.
+2. Add the Dutch translation to the same key in `src/i18n/messages/nl/`. The Dutch section is
+   typed as `Record<keyof typeof enSection, string>`, so a missing or misspelled key fails to
+   compile.
+3. Use it via `t('your.key')`. `src/i18n/i18next.d.ts` types `t()` against the English catalog,
+   so an unknown key is also a compile error.
+
+Message keys are dot-separated and lowercase-camel: `area.thing.variant`. Because keys contain
+dots, i18next runs with `keySeparator: false` — keys are flat, not paths into nested objects.
+
+### Plurals
+
+Plural messages use i18next's `_one` / `_other` suffixes and are selected by passing `count`:
+
+```ts
+'format.servings_one': '{{amount}} serving',
+'format.servings_other': '{{amount}} servings',
+```
+
+`count` selects the form; a separate `amount` carries the number to display, because callers
+usually format it first (`formatSignificant`). Only plural messages may interpolate `count` —
+a catalog test enforces this, since passing `count` to a non-plural key makes i18next look for
+plural forms that don't exist.
+
+### What stays in English
+
+Values that are saved to the API or shown as identifiers are data, not interface text, and are
+not translated: preset custom size names, session device names, deployment environment
+identifiers, and unit symbols (`g`, `kcal`).
+
+### Choosing a language
+
+`i18next-browser-languagedetector` resolves the language: saved preference first, then the
+browser's. The preference is stored in `localStorage` under `recipeadmin.locale`; an absent
+value means "follow the browser", so detection is configured with `caches: []` and
+`setLocalePreference` writes the key itself. Users change it in **Settings → Language**.
+
+`load: 'languageOnly'` maps regional languages (`nl-NL`, `nl-BE`) onto the `nl` catalog, and
+`fallbackLng` covers anything unsupported.
+
+### Formatting
+
+Numbers, dates and times follow the active language — pass `getActiveLocale()` to
+`toLocaleString` and friends rather than relying on the browser default. The time picker reads
+the language's hour cycle, so Dutch shows a 24-hour clock and English shows AM/PM.
+
+
 ## Key Patterns
 
 ### Data Fetching with useApiQuery
@@ -322,6 +426,7 @@ import {
   ListRow, DeleteButton, CopyButton, TypeToConfirmModal,
   Button, ModalBase, ModalHeader, ModalBody, ModalFooter,
 } from '../components/common'
+import { useTranslation } from 'react-i18next'
 
 // Status displays
 if (loading) return <LoadingState />

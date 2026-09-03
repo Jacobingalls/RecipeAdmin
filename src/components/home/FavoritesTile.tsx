@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiFavorite, ApiProduct } from '../../api';
 import { deleteFavorite as deleteFavoriteApi, getProduct, getGroup } from '../../api';
@@ -21,6 +22,7 @@ interface FavoritesTileProps {
 }
 
 export default function FavoritesTile({ onItemLogged }: FavoritesTileProps) {
+  const { t } = useTranslation();
   const { favorites, loading, error, refetch } = useFavorites();
 
   const [logTarget, setLogTarget] = useState<LogTarget | null>(null);
@@ -109,16 +111,16 @@ export default function FavoritesTile({ onItemLogged }: FavoritesTileProps) {
     content = centeredWrapper(
       <ContentUnavailableView
         icon="bi-star"
-        title="Couldn't load favorites"
-        description="Try again later."
+        title={t('favorites.error.title')}
+        description={t('favorites.error.description')}
       />,
     );
   } else if (favorites.length === 0) {
     content = centeredWrapper(
       <ContentUnavailableView
         icon="bi-star"
-        title="No favorites"
-        description="Add favorites from product or group pages."
+        title={t('favorites.empty.title')}
+        description={t('favorites.empty.description')}
       />,
     );
   } else {
@@ -142,12 +144,12 @@ export default function FavoritesTile({ onItemLogged }: FavoritesTileProps) {
 
   const viewAllLink = (
     <Link to="/favorites" className="text-decoration-none small">
-      View all &rarr;
+      {t('home.favorites.viewAll')} &rarr;
     </Link>
   );
 
   return (
-    <Tile title="Favorites" titleRight={viewAllLink} minHeight="10rem">
+    <Tile title={t('favorites.title')} titleRight={viewAllLink} minHeight="10rem">
       {content}
       <LogModal target={logTarget} onClose={handleModalClose} onSaved={handleModalSaved} />
     </Tile>

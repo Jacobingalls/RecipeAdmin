@@ -1,4 +1,5 @@
 import { useState, useId, useCallback, useRef, useEffect, type RefCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct, ApiSearchResult } from '../../api';
 import { searchItems } from '../../api';
@@ -26,6 +27,7 @@ function selectionFromItem(item: GroupItem): Selection | null {
 }
 
 export default function ItemModal({ item, onSave, onClose }: ItemModalProps) {
+  const { t } = useTranslation();
   const titleId = useId();
   const isEditMode = !!item;
 
@@ -112,28 +114,28 @@ export default function ItemModal({ item, onSave, onClose }: ItemModalProps) {
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId} scrollable>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        {isEditMode ? 'Edit item' : 'Add item'}
+        {t(isEditMode ? 'groupEditor.editItem' : 'groupEditor.addItem')}
       </ModalHeader>
       <ModalBody>
         <input
           type="text"
           className="form-control form-control-sm mb-3"
-          placeholder="Search products and groups..."
+          placeholder={t('groupEditor.searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           ref={inputRef}
         />
-        {searching && <p className="text-body-secondary small">Searching...</p>}
+        {searching && <p className="text-body-secondary small">{t('groupEditor.searching')}</p>}
         {!searching && query.trim().length >= 2 && results.length === 0 && (
-          <p className="text-body-secondary small">No results</p>
+          <p className="text-body-secondary small">{t('groupEditor.noResults')}</p>
         )}
         {results.length > 0 && (
           <div className="list-group mb-3" style={{ maxHeight: '20rem', overflowY: 'auto' }}>
             {results.map((r) => {
               const isProduct = !!r.item.product;
               const name = isProduct
-                ? (r.item.product?.name ?? 'Product')
-                : (r.item.group?.name ?? 'Group');
+                ? (r.item.product?.name ?? t('groupItem.product'))
+                : (r.item.group?.name ?? t('groupItem.group'));
               const brand = isProduct ? r.item.product?.brand : r.item.group?.brand;
               const icon = isProduct ? 'bi-box-seam' : 'bi-collection';
               const id = isProduct ? r.item.product?.id : r.item.group?.id;
@@ -169,10 +171,10 @@ export default function ItemModal({ item, onSave, onClose }: ItemModalProps) {
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button onClick={handleSave} disabled={!selection}>
-          {isEditMode ? 'Save' : 'Add'}
+          {t(isEditMode ? 'common.save' : 'common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>

@@ -1,8 +1,9 @@
 import { useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { BarcodeData, ProductGroupData } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
-import { buildOptionGroups, fallbackOptionGroups } from '../../config/unitConfig';
+import { buildOptionGroups, buildFallbackOptionGroups } from '../../config/unitConfig';
 import type { Note } from '../NotesDisplay';
 import ServingSizeSelector from '../ServingSizeSelector';
 import { Button, ModalBase, ModalHeader, ModalBody, ModalFooter } from '../common';
@@ -21,6 +22,7 @@ export default function GroupBarcodeModal({
   onSave,
   onClose,
 }: GroupBarcodeModalProps) {
+  const { t } = useTranslation();
   const titleId = useId();
   const editing = !!barcode;
   const [code, setCode] = useState(barcode?.code ?? '');
@@ -31,7 +33,7 @@ export default function GroupBarcodeModal({
   const [notesState, setNotesState] = useState<Note[]>((barcode?.notes ?? []) as Note[]);
 
   const pg = new ProductGroup(group);
-  const selectorGroups = buildOptionGroups(pg) ?? fallbackOptionGroups;
+  const selectorGroups = buildOptionGroups(pg) ?? buildFallbackOptionGroups();
 
   function handleSubmit() {
     const result: BarcodeData = { code: code.trim() };
@@ -45,12 +47,12 @@ export default function GroupBarcodeModal({
   return (
     <ModalBase onClose={onClose} ariaLabelledBy={titleId}>
       <ModalHeader onClose={onClose} titleId={titleId}>
-        {editing ? 'Edit barcode' : 'Add barcode'}
+        {t(editing ? 'editor.editBarcode' : 'editor.addBarcode')}
       </ModalHeader>
       <ModalBody>
         <div className="mb-3">
           <label htmlFor="barcode-code" className="form-label">
-            Barcode
+            {t('editor.barcode')}
           </label>
           <input
             type="text"
@@ -58,28 +60,28 @@ export default function GroupBarcodeModal({
             id="barcode-code"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="e.g. 012345678905"
+            placeholder={t('editor.barcodePlaceholder')}
           />
         </div>
         <div className="mb-3">
-          <span className="form-label d-block">Serving size</span>
+          <span className="form-label d-block">{t('editor.servingSize')}</span>
           <ServingSizeSelector
             size="sm"
             groups={selectorGroups}
             value={servingSize}
             onChange={setServingSize}
-            amountAriaLabel="Barcode serving amount"
-            unitAriaLabel="Barcode serving unit"
+            amountAriaLabel={t('editor.barcodeServingAmount')}
+            unitAriaLabel={t('editor.barcodeServingUnit')}
           />
         </div>
         <NotesSection notes={notesState} onChange={setNotesState} />
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button disabled={!code.trim()} onClick={handleSubmit}>
-          {editing ? 'Save' : 'Add'}
+          {t(editing ? 'common.save' : 'common.add')}
         </Button>
       </ModalFooter>
     </ModalBase>

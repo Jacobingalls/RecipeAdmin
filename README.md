@@ -2,6 +2,11 @@
 
 React admin interface for viewing RecipeKit nutrition data.
 
+## Languages
+
+The interface is available in English and Dutch. It follows your browser's language by default;
+to pin one, open **Settings → Language** and pick it there.
+
 ## Local Development
 
 ```bash

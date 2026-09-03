@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { settingsAddPasskeyBegin, settingsAddPasskeyFinish } from '../../api';
@@ -7,6 +8,7 @@ import { settingsAddPasskeyBegin, settingsAddPasskeyFinish } from '../../api';
 import Button from './Button';
 
 export default function PasskeySetupPrompt() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(
     () => sessionStorage.getItem('passkey-prompt-dismissed') === 'true',
@@ -24,15 +26,11 @@ export default function PasskeySetupPrompt() {
       await settingsAddPasskeyFinish(sessionID, credential, navigator.platform || 'Passkey');
       setSuccess(true);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong registering your passkey. Try again.',
-      );
+      setError(err instanceof Error ? err.message : t('passkey.registerError'));
     } finally {
       setIsRegistering(false);
     }
-  }, []);
+  }, [t]);
 
   const handleDismiss = useCallback(() => {
     sessionStorage.setItem('passkey-prompt-dismissed', 'true');
@@ -45,10 +43,8 @@ export default function PasskeySetupPrompt() {
     <div className="alert alert-info d-flex align-items-start mb-4" role="alert">
       <i className="bi bi-shield-lock me-3 fs-4" />
       <div className="flex-grow-1">
-        <h6 className="alert-heading mb-1">Secure your account with a passkey</h6>
-        <p className="mb-2 small">
-          Sign in faster and more securely with your fingerprint or face.
-        </p>
+        <h6 className="alert-heading mb-1">{t('passkeyPrompt.title')}</h6>
+        <p className="mb-2 small">{t('passkeyPrompt.description')}</p>
         {error && (
           <p className="text-danger small mb-2" role="alert">
             {error}
@@ -56,14 +52,14 @@ export default function PasskeySetupPrompt() {
         )}
         <div className="d-flex gap-2">
           <Button size="sm" onClick={handleSetup} loading={isRegistering}>
-            Set up now
+            {t('passkeyPrompt.setUp')}
           </Button>
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm"
             onClick={handleDismiss}
           >
-            Remind me later
+            {t('passkeyPrompt.remindLater')}
           </button>
         </div>
       </div>

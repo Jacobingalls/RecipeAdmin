@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ApiSearchResult } from '../../api';
 import { LoadingState, ErrorState, ContentUnavailableView } from '../common';
 import SearchResultRow from '../SearchResultRow';
@@ -17,6 +19,8 @@ export default function SearchResults({
   query,
   onLog,
 }: SearchResultsProps) {
+  const { t } = useTranslation();
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
 
@@ -27,8 +31,8 @@ export default function SearchResults({
     return (
       <ContentUnavailableView
         icon="bi-search"
-        title="No results"
-        description="Try adjusting your search."
+        title={t('search.empty.title')}
+        description={t('list.adjustSearch')}
       />
     );
   }
@@ -36,7 +40,7 @@ export default function SearchResults({
   if (!results) return null;
 
   return (
-    <div className="list-group" role="region" aria-label="Search results">
+    <div className="list-group" role="region" aria-label={t('search.resultsLabel')}>
       {results.map((result) => (
         <SearchResultRow
           key={result.item.product?.id ?? result.item.group?.id}

@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { GroupItem, ProductGroupData } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
+import i18n from '../../i18n';
 import { formatSignificant } from '../../utils';
 import {
   SectionHeader,
@@ -14,10 +16,14 @@ import {
 import ItemModal from './ItemModal';
 
 function formatItemServing(item: GroupItem): string {
+  const { t } = i18n;
   const ss = item.servingSize ? ServingSize.fromObject(item.servingSize) : null;
-  if (!ss) return '1 serving';
+  if (!ss) return t('groupEditor.oneServing');
   if (ss.type === 'servings') {
-    return `${formatSignificant(ss.amount)} serving${ss.amount !== 1 ? 's' : ''}`;
+    return i18n.t('format.servings', {
+      count: ss.amount,
+      amount: formatSignificant(ss.amount),
+    });
   }
   if (ss.type === 'customSize') {
     const v = ss.value as { name: string; amount: number };
@@ -36,8 +42,11 @@ function ItemRow({
   onEdit: () => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const isProduct = !!item.product;
-  const name = isProduct ? (item.product?.name ?? 'Product') : (item.group?.name ?? 'Group');
+  const name = isProduct
+    ? (item.product?.name ?? t('groupItem.product'))
+    : (item.group?.name ?? t('groupItem.group'));
   const brand = isProduct ? item.product?.brand : item.group?.brand;
   const icon = isProduct ? 'bi-box-seam' : 'bi-collection';
 
@@ -54,14 +63,16 @@ function ItemRow({
         <small className="text-body-secondary">
           {brand && <>{brand} &middot; </>}
           {formatItemServing(item)}
-          {calories != null && <> &middot; {formatSignificant(calories)} cal</>}
+          {calories != null && (
+            <> &middot; {t('groupEditor.calories', { amount: formatSignificant(calories) })}</>
+          )}
         </small>
       </div>
       <CircularButtonGroup>
-        <CircularButton aria-label={`Edit ${name}`} onClick={onEdit}>
+        <CircularButton aria-label={t('editor.editItem', { name })} onClick={onEdit}>
           <i className="bi bi-pencil" aria-hidden="true" />
         </CircularButton>
-        <DeleteButton ariaLabel={`Remove ${name}`} onClick={onRemove} />
+        <DeleteButton ariaLabel={t('editor.removeItem', { name })} onClick={onRemove} />
       </CircularButtonGroup>
     </div>
   );
@@ -73,6 +84,7 @@ interface GroupItemsSectionProps {
 }
 
 export default function GroupItemsSection({ group, onChange }: GroupItemsSectionProps) {
+  const { t } = useTranslation();
   const items = group.items ?? [];
   const [modalState, setModalState] = useState<
     null | { mode: 'add' } | { mode: 'edit'; index: number }
@@ -94,9 +106,9 @@ export default function GroupItemsSection({ group, onChange }: GroupItemsSection
 
   return (
     <>
-      <SectionHeader title="Items" className="mt-5">
+      <SectionHeader title={t('groupEditor.items')} className="mt-5">
         <Button size="sm" variant="dark" onClick={() => setModalState({ mode: 'add' })}>
-          Add
+          {t('common.add')}
         </Button>
       </SectionHeader>
       {items.length > 0 ? (
@@ -112,7 +124,7 @@ export default function GroupItemsSection({ group, onChange }: GroupItemsSection
           ))}
         </div>
       ) : (
-        <p className="text-body-secondary small">No items</p>
+        <p className="text-body-secondary small">{t('groupEditor.noItems')}</p>
       )}
 
       {modalState && (

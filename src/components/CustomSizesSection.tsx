@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { CustomSize } from '../domain';
 import { ServingSize } from '../domain';
 
@@ -11,11 +13,13 @@ interface CustomSizesSectionProps {
 }
 
 export default function CustomSizesSection({ customSizes, onSelectSize }: CustomSizesSectionProps) {
+  const { t } = useTranslation();
+
   if (!customSizes || customSizes.length === 0) return null;
 
   return (
     <section className="mt-3">
-      <SubsectionTitle>Custom Sizes</SubsectionTitle>
+      <SubsectionTitle>{t('customSizes.title')}</SubsectionTitle>
       <div className="list-group">
         {customSizes.map((cs, index) => (
           <CustomSizeItem
@@ -35,6 +39,7 @@ interface CustomSizeItemProps {
 }
 
 function CustomSizeItem({ customSize, onSelect }: CustomSizeItemProps) {
+  const { t } = useTranslation();
   const { name, description, notes } = customSize;
   const hasNotes = notes && notes.length > 0;
 
@@ -56,9 +61,9 @@ function CustomSizeItem({ customSize, onSelect }: CustomSizeItemProps) {
       <button
         className="btn btn-outline-primary btn-sm ms-2"
         onClick={onSelect}
-        title={`Set serving to 1 ${name}`}
+        title={t('customSizes.useTitle', { name })}
       >
-        Use
+        {t('barcode.use')}
       </button>
     </div>
   );

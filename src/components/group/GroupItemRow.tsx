@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { GroupItem } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
@@ -11,10 +12,13 @@ interface GroupItemRowProps {
 }
 
 export default function GroupItemRow({ item }: GroupItemRowProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const isProduct = !!item.product;
-  const name = isProduct ? (item.product?.name ?? 'Product') : (item.group?.name ?? 'Group');
+  const name = isProduct
+    ? (item.product?.name ?? t('groupItem.product'))
+    : (item.group?.name ?? t('groupItem.group'));
   const brand = isProduct ? item.product?.brand : item.group?.brand;
 
   const servingSize = useMemo(
@@ -56,7 +60,7 @@ export default function GroupItemRow({ item }: GroupItemRowProps) {
       name={name}
       subtitle={subtitle}
       calories={calories}
-      ariaLabel={`View ${name}`}
+      ariaLabel={t('groupItem.view', { name })}
       onClick={() => navigate(detailPath)}
     />
   );

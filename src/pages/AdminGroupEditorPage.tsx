@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { adminGetGroup, adminUpsertGroups, resolveIndirectGroup } from '../api';
 import type { IndirectGroup } from '../api';
@@ -19,6 +20,7 @@ import {
 } from '../components/admin-group-editor';
 
 export default function AdminGroupEditorPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const {
     data: indirectData,
@@ -26,7 +28,7 @@ export default function AdminGroupEditorPage() {
     error: fetchError,
     refetch,
   } = useApiQuery<IndirectGroup>(() => adminGetGroup(id!), [id], {
-    errorMessage: "Couldn't load this group. Try again later.",
+    errorMessage: t('groupEditor.error'),
   });
 
   const [data, setData] = useState<ProductGroupData | null>(null);
@@ -47,7 +49,7 @@ export default function AdminGroupEditorPage() {
       })
       .catch((err) => {
         if (!cancelled) {
-          setResolveError(err instanceof Error ? err.message : "Couldn't resolve group items.");
+          setResolveError(err instanceof Error ? err.message : t('groupEditor.resolveError'));
         }
       })
       .finally(() => {
@@ -56,7 +58,7 @@ export default function AdminGroupEditorPage() {
     return () => {
       cancelled = true;
     };
-  }, [indirectData]);
+  }, [indirectData, t]);
 
   const loading = fetchLoading || resolving;
   const error = fetchError ?? resolveError;
@@ -90,7 +92,7 @@ export default function AdminGroupEditorPage() {
       await adminUpsertGroups(draftGroup);
       refetch();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Couldn't save changes. Try again.");
+      setSaveError(err instanceof Error ? err.message : t('editor.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -110,7 +112,7 @@ export default function AdminGroupEditorPage() {
       {loading && <LoadingState />}
       {error && <ErrorState message={error} />}
       {!loading && !error && !group && (
-        <ContentUnavailableView icon="bi-collection" title="Group not found" />
+        <ContentUnavailableView icon="bi-collection" title={t('groupEditor.notFound')} />
       )}
       {!loading && !error && group && (
         <>
@@ -122,10 +124,10 @@ export default function AdminGroupEditorPage() {
             {isDirty && (
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
                 <Button variant="outline-secondary" onClick={handleDiscard} disabled={isSaving}>
-                  Discard
+                  {t('editor.discard')}
                 </Button>
                 <Button onClick={handleSave} loading={isSaving}>
-                  Save
+                  {t('common.save')}
                 </Button>
               </div>
             )}

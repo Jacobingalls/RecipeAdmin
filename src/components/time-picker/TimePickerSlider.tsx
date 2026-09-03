@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Tick } from './timeBlocks';
 import {
@@ -134,6 +135,7 @@ export default function TimePickerSlider({
   onBack,
   onGraceEdgeChange,
 }: TimePickerSliderProps) {
+  const { t } = useTranslation();
   const [currentBlockIdx, setCurrentBlockIdx] = useState(initialBlockIdx);
   const [currentMinutes, setCurrentMinutes] = useState(initialMinutes);
   const [currentDayOffset, setCurrentDayOffset] = useState(initialDayOffset);
@@ -478,7 +480,7 @@ export default function TimePickerSlider({
 
   const block = BLOCKS[currentBlockIdx];
   const time = formatTime(currentMinutes);
-  const dayLabel = currentDayOffset === 0 ? 'Today' : 'Yesterday';
+  const dayLabel = t(currentDayOffset === 0 ? 'timePicker.today' : 'timePicker.yesterday');
 
   const currentTicks = buildCoreTicks(block);
   const currentPad = tickPadding(currentBlockIdx);
@@ -499,18 +501,18 @@ export default function TimePickerSlider({
       !(isToday && BLOCKS[currentBlockIdx + 1].coreStart > (nowMinutes ?? Infinity))) ||
     (currentBlockIdx === BLOCKS.length - 1 && currentDayOffset === -1);
 
-  let prevLabel = 'No previous block';
+  let prevLabel = t('timePicker.noPreviousBlock');
   if (currentBlockIdx > 0) {
-    prevLabel = `Previous: ${BLOCKS[currentBlockIdx - 1].name}`;
+    prevLabel = t('timePicker.previousBlock', { label: t(BLOCKS[currentBlockIdx - 1].nameKey) });
   } else if (currentDayOffset === 0) {
-    prevLabel = 'Previous: Yesterday, Night';
+    prevLabel = t('timePicker.previousBlock', { label: t('timePicker.yesterdayNight') });
   }
 
-  let nextLabel = 'No next block';
+  let nextLabel = t('timePicker.noNextBlock');
   if (currentBlockIdx < BLOCKS.length - 1) {
-    nextLabel = `Next: ${BLOCKS[currentBlockIdx + 1].name}`;
+    nextLabel = t('timePicker.nextBlock', { label: t(BLOCKS[currentBlockIdx + 1].nameKey) });
   } else if (currentDayOffset === -1) {
-    nextLabel = 'Next: Today, Late night';
+    nextLabel = t('timePicker.nextBlock', { label: t('timePicker.todayLateNight') });
   }
 
   return (
@@ -550,7 +552,7 @@ export default function TimePickerSlider({
             <i className="bi bi-chevron-left" aria-hidden="true" style={{ fontSize: '0.75rem' }} />
           </button>
           <span className="fw-semibold" style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-            {block.name}
+            {t(block.nameKey)}
           </span>
           <button
             type="button"
@@ -670,7 +672,7 @@ export default function TimePickerSlider({
             onInput={handleSliderInput}
             onMouseDown={handleDragStart}
             onTouchStart={handleDragStart}
-            aria-label="Select time"
+            aria-label={t('timePicker.selectTime')}
           />
         </div>
 

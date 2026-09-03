@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
+
 import StatusView from './StatusView';
 
 interface LoadingStateProps {
+  /** Overrides the default "Loading..." title. */
   title?: string;
   description?: string;
 }
@@ -9,7 +12,9 @@ interface LoadingStateProps {
  * Centered loading indicator with spinner, title, and optional description.
  * Mirrors the layout of ContentUnavailableView for visual consistency.
  */
-export default function LoadingState({ title = 'Loading...', description }: LoadingStateProps) {
+export default function LoadingState({ title, description }: LoadingStateProps) {
+  const { t } = useTranslation();
+
   return (
     <StatusView
       symbol={
@@ -18,10 +23,10 @@ export default function LoadingState({ title = 'Loading...', description }: Load
           role="status"
           style={{ borderWidth: '0.1em' }}
         >
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loadingEllipsis')}</span>
         </span>
       }
-      title={title}
+      title={title ?? t('common.loadingEllipsis')}
       description={description}
     />
   );

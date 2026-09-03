@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { ApiCategory, ApiLookupItem } from '../../api';
 import { adminDeleteCategory, getCategoryItems } from '../../api';
@@ -11,6 +12,7 @@ interface CategoryDangerZoneProps {
 }
 
 export default function CategoryDangerZone({ category }: CategoryDangerZoneProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { refresh } = useCategories();
   const [items, setItems] = useState<ApiLookupItem[] | null>(null);
@@ -38,9 +40,9 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
 
   let disabledReason: string | null = null;
   if (hasChildren) {
-    disabledReason = 'Remove all children before deleting this category.';
+    disabledReason = t('categoryEditor.delete.hasChildren');
   } else if (hasItems) {
-    disabledReason = 'This category has products assigned to it. Remove them first.';
+    disabledReason = t('categoryEditor.delete.hasItems');
   }
 
   async function handleDelete() {
@@ -51,7 +53,7 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
       refresh();
       navigate('/admin/categories');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete this category. Try again.");
+      setError(err instanceof Error ? err.message : t('categoryEditor.delete.error'));
       setShowDeleteModal(false);
     } finally {
       setIsDeleting(false);
@@ -60,7 +62,7 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
 
   return (
     <>
-      <SectionHeader title="Category actions" className="mt-5" />
+      <SectionHeader title={t('categoryEditor.actions')} className="mt-5" />
       {error && (
         <div className="alert alert-danger py-2 small" role="alert">
           {error}
@@ -69,10 +71,9 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
       <div className="list-group border-danger">
         <div className="list-group-item d-flex align-items-center justify-content-between py-3">
           <div className="me-3">
-            <strong>Delete this category</strong>
+            <strong>{t('categoryEditor.delete.title')}</strong>
             <p className="text-body-secondary small mb-0">
-              {disabledReason ??
-                "This will permanently delete this category. This can't be undone."}
+              {disabledReason ?? t('categoryEditor.delete.description')}
             </p>
           </div>
           <Button
@@ -83,22 +84,25 @@ export default function CategoryDangerZone({ category }: CategoryDangerZoneProps
             disabled={!canDelete}
             onClick={() => setShowDeleteModal(true)}
           >
-            Delete category
+            {t('categoryEditor.delete.action')}
           </Button>
         </div>
       </div>
 
       <TypeToConfirmModal
         isOpen={showDeleteModal}
-        title="Delete category"
+        title={t('categoryEditor.delete.modalTitle')}
         message={
           <>
-            This will permanently delete <strong>{category.displayName}</strong>. This action
-            can&apos;t be undone.
+            <Trans
+              i18nKey="categoryEditor.delete.message"
+              values={{ name: category.displayName }}
+              components={{ strong: <strong /> }}
+            />
           </>
         }
         itemName={category.displayName}
-        confirmButtonText="Delete this category"
+        confirmButtonText={t('categoryEditor.delete.confirm')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteModal(false)}
         isLoading={isDeleting}
