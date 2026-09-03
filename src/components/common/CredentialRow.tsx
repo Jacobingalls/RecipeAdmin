@@ -9,8 +9,8 @@ interface CredentialRowProps {
   kind: 'passkey' | 'apiKey';
   name: string;
   keyPrefix?: string;
-  createdAt?: number;
-  expiresAt?: number;
+  createdAt?: number | null;
+  expiresAt?: number | null;
   isTemporary?: boolean;
   isExpired?: boolean;
   onDelete: () => void;
