@@ -5,6 +5,7 @@ interface RuntimeConfig {
   API_DISPLAY_URL?: string;
   VERSION?: string;
   GIT_COMMIT?: string;
+  ENVIRONMENT?: string;
 }
 
 declare global {
