@@ -363,6 +363,7 @@ describe('useHistoryData', () => {
         id: 'log-x',
         timestamp: 1700000000,
         item: {
+          kind: 'product',
           servingSize: { servings: 1 },
         },
       };

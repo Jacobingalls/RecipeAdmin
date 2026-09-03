@@ -21,14 +21,15 @@ export default function PreparationServingSection({
   const massGroups = [unitGroup('unit.group.mass', massUnits, 'mass')];
   const volumeGroups = [unitGroup('unit.group.volume', volumeUnits, 'volume')];
 
-  const prep = product.preparations.find((p) => p.id === preparationId);
+  const preparations = product.preparations ?? [];
+  const prep = preparations.find((p) => p.id === preparationId);
   if (!prep) return null;
 
   function update(partial: Partial<PreparationData>) {
     const updatedPrep: PreparationData = { ...prep, ...partial };
     const updatedProduct: ApiProduct = {
       ...product,
-      preparations: product.preparations.map((p) => (p.id === preparationId ? updatedPrep : p)),
+      preparations: preparations.map((p) => (p.id === preparationId ? updatedPrep : p)),
     };
     onChange(updatedProduct);
   }

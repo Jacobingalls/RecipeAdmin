@@ -1,5 +1,5 @@
 import type { ApiProduct } from '../../api';
-import type { Note } from '../NotesDisplay';
+import type { PreparationData } from '../../domain';
 
 import NotesSection from './NotesSection';
 import PreparationServingSection from './PreparationServingSection';
@@ -21,10 +21,11 @@ export default function PreparationCardBody({
   onChange,
   onPrepDeleted,
 }: PreparationCardBodyProps) {
-  const prep = product.preparations.find((p) => p.id === preparationId);
+  const preparations = product.preparations ?? [];
+  const prep = preparations.find((p) => p.id === preparationId);
   if (!prep) return null;
 
-  const notes = (prep.notes ?? []) as Note[];
+  const notes = prep.notes ?? [];
 
   return (
     <>
@@ -52,8 +53,8 @@ export default function PreparationCardBody({
       <NotesSection
         notes={notes}
         onChange={(updated) => {
-          const updatedPreps = product.preparations.map((p) =>
-            p.id === preparationId ? { ...p, notes: updated } : p,
+          const updatedPreps = preparations.map((p) =>
+            p.id === preparationId ? ({ ...p, notes: updated } as PreparationData) : p,
           );
           onChange({ ...product, preparations: updatedPreps });
         }}

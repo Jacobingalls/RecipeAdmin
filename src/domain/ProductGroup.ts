@@ -1,3 +1,4 @@
+import type { Note } from './Note';
 import { NutritionInformation } from './NutritionInformation';
 import type { NutritionUnitData } from './NutritionUnit';
 import { NutritionUnit } from './NutritionUnit';
@@ -10,7 +11,7 @@ import { Preparation } from './Preparation';
 
 export interface BarcodeData {
   code: string;
-  notes?: unknown[];
+  notes?: Note[];
   servingSize?: ServingSizeData;
   preparationID?: string;
 }
@@ -38,7 +39,7 @@ export interface ProductGroupData {
   barcodes?: BarcodeData[];
   defaultServingSize?: ServingSizeData;
   categories?: string[];
-  notes?: unknown[];
+  notes?: Note[];
 }
 
 interface ItemServing {

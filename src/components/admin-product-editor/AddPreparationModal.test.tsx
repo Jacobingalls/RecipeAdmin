@@ -4,6 +4,9 @@ import type { ApiProduct } from '../../api';
 
 import AddPreparationModal from './AddPreparationModal';
 
+/** These sections always write the full preparation list back, so assertions can rely on it. */
+type EditedProduct = ApiProduct & { preparations: NonNullable<ApiProduct['preparations']> };
+
 const onChange = vi.fn();
 const onClose = vi.fn();
 
@@ -53,7 +56,7 @@ describe('AddPreparationModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.preparations).toHaveLength(2);
     expect(passedProduct.preparations[1].name).toBe('Cooked');
     expect(passedProduct.preparations[1].id).toBeDefined();

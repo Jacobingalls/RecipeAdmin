@@ -217,12 +217,16 @@ export default function PreparationCustomSizesSection({
   onChange,
 }: PreparationCustomSizesSectionProps) {
   const { t } = useTranslation();
-  const prep = product.preparations.find((p) => p.id === preparationId);
+  const preparations = product.preparations ?? [];
+  const prep = preparations.find((p) => p.id === preparationId);
   const customSizes = useMemo(() => prep?.customSizes ?? [], [prep?.customSizes]);
 
   const [modal, setModal] = useState<CustomSizeModal>(null);
 
-  const existingNames = useMemo(() => new Set(customSizes.map((cs) => cs.name)), [customSizes]);
+  const existingNames = useMemo(
+    () => new Set(customSizes.flatMap((cs) => (cs.name === undefined ? [] : [cs.name]))),
+    [customSizes],
+  );
 
   // Build unit option groups: always include servings + mass + volume,
   // plus energy if the prep has calories defined.
@@ -240,7 +244,7 @@ export default function PreparationCustomSizesSection({
   function updateCustomSizes(newSizes: CustomSizeData[]) {
     const updatedProduct: ApiProduct = {
       ...product,
-      preparations: product.preparations.map((p) =>
+      preparations: preparations.map((p) =>
         p.id === preparationId ? { ...p, customSizes: newSizes } : p,
       ),
     };

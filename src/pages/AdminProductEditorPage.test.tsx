@@ -82,7 +82,7 @@ vi.mock('../components/admin-product-editor', () => ({
         onClick={() =>
           onChange({
             ...product,
-            preparations: product.preparations.map((p) =>
+            preparations: (product.preparations ?? []).map((p) =>
               p.id === preparationId ? { ...p, name: 'Edited Prep' } : p,
             ),
           })
@@ -103,7 +103,7 @@ vi.mock('../components/admin-product-editor', () => ({
       <button
         data-testid="add-barcode-btn"
         onClick={() =>
-          onChange({ ...product, barcodes: [...product.barcodes, { code: 'NEW-BC' }] })
+          onChange({ ...product, barcodes: [...(product.barcodes ?? []), { code: 'NEW-BC' }] })
         }
       >
         Add barcode
@@ -126,7 +126,7 @@ vi.mock('../components/admin-product-editor', () => ({
           onChange({
             ...product,
             preparations: [
-              ...product.preparations,
+              ...(product.preparations ?? []),
               { id: 'new-prep', name: 'New Prep', categories: [], customSizes: [] },
             ],
           });

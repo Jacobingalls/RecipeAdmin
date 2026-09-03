@@ -1,3 +1,4 @@
+export type { Note } from './Note';
 export { NutritionUnit } from './NutritionUnit';
 export type { NutritionUnitData } from './NutritionUnit';
 export { NutritionInformation } from './NutritionInformation';

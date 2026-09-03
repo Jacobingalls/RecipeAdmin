@@ -18,6 +18,12 @@ function wrapper(initialEntry: string) {
   };
 }
 
+/** Fails the test when no serving size was parsed, and narrows away the null. */
+function expectServingSize(value: ServingSize | null): ServingSize {
+  expect(value).not.toBeNull();
+  return value as ServingSize;
+}
+
 describe('useServingSizeParams', () => {
   describe('parsing', () => {
     it('returns null when no params present', () => {
@@ -32,7 +38,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=servings&sa=3'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(3);
     });
@@ -41,7 +47,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=servings&sa=0.5'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(0.5);
     });
@@ -50,7 +56,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=servings'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(1);
     });
@@ -59,7 +65,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=servings&sa=abc'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(1);
     });
@@ -68,7 +74,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=mass&sa=100&su=g'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('mass');
       expect(ss.amount).toBe(100);
       expect((ss.value as { unit: string }).unit).toBe('g');
@@ -78,7 +84,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=volume&sa=240&su=mL'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('volume');
       expect(ss.amount).toBe(240);
       expect((ss.value as { unit: string }).unit).toBe('mL');
@@ -88,7 +94,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=energy&sa=200&su=kcal'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('energy');
       expect(ss.amount).toBe(200);
       expect((ss.value as { unit: string }).unit).toBe('kcal');
@@ -98,7 +104,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=customSize&sa=3&sn=Cookie'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('customSize');
       expect(ss.amount).toBe(3);
       expect((ss.value as { name: string }).name).toBe('Cookie');
@@ -108,7 +114,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=mass&sa=100'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(1);
     });
@@ -117,7 +123,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=customSize&sa=3'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(1);
     });
@@ -126,7 +132,7 @@ describe('useServingSizeParams', () => {
       const { result } = renderHook(() => useServingSizeParams(), {
         wrapper: wrapper('/test?st=unknown&sa=5'),
       });
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(1);
     });
@@ -142,7 +148,7 @@ describe('useServingSizeParams', () => {
         result.current[1](ServingSize.servings(2));
       });
 
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(2);
     });
@@ -156,7 +162,7 @@ describe('useServingSizeParams', () => {
         result.current[1](ServingSize.mass(100, 'g'));
       });
 
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('mass');
       expect(ss.amount).toBe(100);
       expect((ss.value as { unit: string }).unit).toBe('g');
@@ -171,7 +177,7 @@ describe('useServingSizeParams', () => {
         result.current[1](ServingSize.volume(8, 'fl oz (US)'));
       });
 
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('volume');
       expect(ss.amount).toBe(8);
       expect((ss.value as { unit: string }).unit).toBe('fl oz (US)');
@@ -186,7 +192,7 @@ describe('useServingSizeParams', () => {
         result.current[1](ServingSize.energy(200, 'kcal'));
       });
 
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('energy');
       expect(ss.amount).toBe(200);
       expect((ss.value as { unit: string }).unit).toBe('kcal');
@@ -201,7 +207,7 @@ describe('useServingSizeParams', () => {
         result.current[1](ServingSize.customSize('Cookie', 3));
       });
 
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('customSize');
       expect(ss.amount).toBe(3);
       expect((ss.value as { name: string }).name).toBe('Cookie');
@@ -216,7 +222,7 @@ describe('useServingSizeParams', () => {
         result.current[1](ServingSize.servings(2));
       });
 
-      const [ss] = result.current;
+      const ss = expectServingSize(result.current[0]);
       expect(ss.type).toBe('servings');
       expect(ss.amount).toBe(2);
     });

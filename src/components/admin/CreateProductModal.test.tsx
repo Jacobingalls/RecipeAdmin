@@ -224,7 +224,7 @@ describe('CreateProductModal', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Add' }));
     });
 
-    const payload = mockUpsert.mock.calls[0][0] as Record<string, unknown>;
+    const payload = mockUpsert.mock.calls[0][0] as unknown as Record<string, unknown>;
     expect(payload).not.toHaveProperty('id');
   });
 });

@@ -48,6 +48,10 @@ function renderWithRoutes(user: { isAdmin: boolean } | null, isLoading = false) 
     loginWithPasskey: vi.fn(),
     logout: vi.fn(),
     updateUser: vi.fn(),
+    apiVersion: null,
+    apiGitCommit: null,
+    apiEnvironment: null,
+    refreshSession: vi.fn(),
   });
 
   return render(

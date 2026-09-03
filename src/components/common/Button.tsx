@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 type ButtonVariant =
   | 'primary'
   | 'secondary'
+  | 'success'
   | 'danger'
   | 'dark'
   | 'outline-primary'

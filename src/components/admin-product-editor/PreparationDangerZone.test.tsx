@@ -4,6 +4,9 @@ import type { ApiProduct } from '../../api';
 
 import PreparationDangerZone from './PreparationDangerZone';
 
+/** These sections always write the full preparation list back, so assertions can rely on it. */
+type EditedProduct = ApiProduct & { preparations: NonNullable<ApiProduct['preparations']> };
+
 const onChange = vi.fn();
 const onPrepDeleted = vi.fn();
 
@@ -70,7 +73,7 @@ describe('PreparationDangerZone', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete preparation' }));
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.preparations).toHaveLength(1);
     expect(passedProduct.preparations[0].id).toBe('prep-1');
     expect(onPrepDeleted).toHaveBeenCalled();
@@ -85,7 +88,7 @@ describe('PreparationDangerZone', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Delete preparation' }));
 
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.defaultPreparationID).toBe('prep-2');
   });
 

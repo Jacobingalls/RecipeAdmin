@@ -171,7 +171,7 @@ describe('resolveEntryBrand', () => {
     const entry: ApiLogEntry = {
       id: 'log3',
       timestamp: nowSeconds(),
-      item: { productID: 'p2', servingSize: { kind: 'servings', amount: 1 } },
+      item: { kind: 'product', productID: 'p2', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
   });
@@ -180,7 +180,7 @@ describe('resolveEntryBrand', () => {
     const entry: ApiLogEntry = {
       id: 'log4',
       timestamp: nowSeconds(),
-      item: { groupID: 'g2', servingSize: { kind: 'servings', amount: 1 } },
+      item: { kind: 'group', groupID: 'g2', servingSize: { kind: 'servings', amount: 1 } },
     };
     expect(resolveEntryBrand(entry, products, groups)).toBeUndefined();
   });

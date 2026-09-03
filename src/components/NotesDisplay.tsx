@@ -1,25 +1,6 @@
-interface SourceNote {
-  source: { url: string; title?: string };
-}
+import type { Note } from '../domain';
 
-interface TextContent {
-  markdown?: string;
-  text?: string;
-}
-
-interface InformationNote {
-  information: TextContent;
-}
-
-interface WarningNote {
-  warning: TextContent;
-}
-
-interface SevereNote {
-  severe: TextContent;
-}
-
-export type Note = SourceNote | InformationNote | WarningNote | SevereNote | string;
+export type { Note };
 
 interface NotesDisplayProps {
   notes?: Note[];

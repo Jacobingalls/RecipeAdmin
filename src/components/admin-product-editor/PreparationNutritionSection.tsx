@@ -35,7 +35,8 @@ export default function PreparationNutritionSection({
   const energyGroups = [unitGroup('unit.group.energy', nutritionEnergyUnits, 'energy')];
   const massGroups = [unitGroup('unit.group.mass', nutritionMassUnits, 'mass')];
 
-  const prep = product.preparations.find((p) => p.id === preparationId);
+  const preparations = product.preparations ?? [];
+  const prep = preparations.find((p) => p.id === preparationId);
   const nutrition = prep?.nutritionalInformation;
 
   const populatedNutrients = useMemo(
@@ -62,7 +63,7 @@ export default function PreparationNutritionSection({
   function updateNutrition(newNutrition: Record<string, NutrientValue>) {
     const updatedProduct: ApiProduct = {
       ...product,
-      preparations: product.preparations.map((p) =>
+      preparations: preparations.map((p) =>
         p.id === preparationId
           ? { ...p, nutritionalInformation: newNutrition as unknown as NutritionInformationData }
           : p,

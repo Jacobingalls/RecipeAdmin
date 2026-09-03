@@ -294,6 +294,7 @@ describe('AuthContext', () => {
     mockTryRefresh.mockResolvedValue(null);
     mockGetStatus.mockResolvedValue({
       version: null,
+      gitCommit: null,
       environment: null,
       debug: false,
       user: updatedUser,

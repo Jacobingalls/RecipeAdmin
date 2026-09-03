@@ -1,9 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import type { ApiProduct } from '../../api';
+import type { BarcodeData } from '../../domain';
 import type * as CommonModule from '../common';
 
 import BarcodesSection from './BarcodesSection';
+
+/** The section always writes the full barcode list back, so assertions can rely on it. */
+type EditedProduct = ApiProduct & { barcodes: BarcodeData[] };
 
 // jsdom does not implement scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
@@ -108,7 +112,7 @@ describe('BarcodesSection', () => {
     fireEvent.click(screen.getByLabelText('Remove barcode 012345678905'));
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.barcodes).toHaveLength(1);
     expect(passedProduct.barcodes[0].code).toBe('987654321098');
   });
@@ -125,7 +129,7 @@ describe('BarcodesSection', () => {
     fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-primary')!);
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.barcodes).toHaveLength(3);
     expect(passedProduct.barcodes[2].code).toBe('111222333444');
   });
@@ -158,7 +162,7 @@ describe('BarcodesSection', () => {
     fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-primary')!);
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const added = passedProduct.barcodes[passedProduct.barcodes.length - 1];
     expect(added.code).toBe('555');
     expect(added.preparationID).toBe('prep-cooked');
@@ -173,7 +177,7 @@ describe('BarcodesSection', () => {
     fireEvent.click(screen.getByRole('dialog').querySelector('button.btn-primary')!);
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const added = passedProduct.barcodes[passedProduct.barcodes.length - 1];
     expect(added.code).toBe('666');
     expect(added.preparationID).toBeUndefined();
@@ -198,7 +202,7 @@ describe('BarcodesSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.barcodes[0].code).toBe('012345678905');
     expect(passedProduct.barcodes[1].code).toBe('EDITED');
     expect(passedProduct.barcodes[1].servingSize).toEqual({ kind: 'servings', amount: 2 });

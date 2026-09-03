@@ -117,7 +117,7 @@ describe('useSearch', () => {
   it('passes results from useApiQuery', () => {
     const items: ApiSearchResult[] = [
       {
-        item: { product: { id: 'p1', name: 'Apple' } },
+        item: { product: { id: 'p1', name: 'Apple', preparations: [] } },
         servingSize: { kind: 'servings', amount: 1 },
         relevance: 1.0,
       },

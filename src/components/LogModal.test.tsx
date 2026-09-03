@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
+import type { ApiLogEntry } from '../api';
 import { Preparation, ServingSize } from '../domain';
 import { logEntry, updateLogEntry } from '../api';
 
@@ -379,7 +380,7 @@ describe('LogModal', () => {
     });
 
     it('shows Saving... while update is in progress', async () => {
-      let resolveUpdate: (value: unknown) => void;
+      let resolveUpdate: (value: ApiLogEntry) => void;
       mockUpdateLogEntry.mockReturnValue(
         new Promise((resolve) => {
           resolveUpdate = resolve;

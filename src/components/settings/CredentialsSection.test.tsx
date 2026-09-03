@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser';
 import { startRegistration } from '@simplewebauthn/browser';
 
 import type { PasskeyInfo, APIKeyInfo } from '../../api';
@@ -143,7 +144,7 @@ describe('CredentialsSection', () => {
   describe('add passkey', () => {
     it('registers a passkey and refetches', async () => {
       mockBegin.mockResolvedValue({
-        options: { challenge: 'abc' },
+        options: { challenge: 'abc' } as PublicKeyCredentialCreationOptionsJSON,
         sessionID: 'sess-1',
       });
       mockFinish.mockResolvedValue({

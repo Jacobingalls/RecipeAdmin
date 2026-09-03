@@ -48,6 +48,10 @@ function renderWithRouter(isAuthenticated: boolean, isLoading: boolean) {
     loginWithPasskey: vi.fn(),
     logout: vi.fn(),
     updateUser: vi.fn(),
+    apiVersion: null,
+    apiGitCommit: null,
+    apiEnvironment: null,
+    refreshSession: vi.fn(),
   });
 
   return render(

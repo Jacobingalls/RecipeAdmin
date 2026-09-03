@@ -44,7 +44,7 @@ const sharedRules = {
   'prefer-destructuring': ['error', { object: true, array: false }],
   'prefer-arrow-callback': 'error',
   'no-param-reassign': ['error', { props: false }],
-  'no-console': 'warn',
+  'no-console': ['warn', { allow: ['warn', 'error'] }],
   'no-nested-ternary': 'error',
   eqeqeq: ['error', 'always', { null: 'ignore' }],
   curly: ['error', 'multi-line'],
@@ -124,6 +124,11 @@ export default [
   },
   {
     files: ['src/**/*.test.{ts,tsx}'],
+    rules: {
+      // Test files grow with the number of cases they cover; splitting them by
+      // line count separates a subject from its own tests.
+      'max-lines': 'off',
+    },
     languageOptions: {
       globals: {
         describe: 'readonly',

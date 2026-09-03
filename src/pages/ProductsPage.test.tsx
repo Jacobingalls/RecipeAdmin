@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
-import type { ApiProductSummary } from '../api';
+import type { ApiProduct } from '../api';
 import { useApiQuery } from '../hooks';
 
 import ProductsPage from './ProductsPage';
@@ -32,21 +32,21 @@ function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
 
-function mockQuery(overrides: Partial<UseApiQueryResult<ApiProductSummary[]>>) {
+function mockQuery(overrides: Partial<UseApiQueryResult<ApiProduct[]>>) {
   mockUseApiQuery.mockReturnValue({
     data: null,
     loading: false,
     error: null,
     refetch: vi.fn(),
     ...overrides,
-  } as UseApiQueryResult<ApiProductSummary[]>);
+  } as UseApiQueryResult<ApiProduct[]>);
 }
 
-const sampleProducts: ApiProductSummary[] = [
-  { id: 'p1', name: 'Apple', brand: 'FreshCo' },
-  { id: 'p2', name: 'Banana', brand: 'FreshCo' },
-  { id: 'p3', name: 'Cereal', brand: 'BreakfastInc' },
-  { id: 'p4', name: 'Water' },
+const sampleProducts: ApiProduct[] = [
+  { id: 'p1', name: 'Apple', brand: 'FreshCo', preparations: [] },
+  { id: 'p2', name: 'Banana', brand: 'FreshCo', preparations: [] },
+  { id: 'p3', name: 'Cereal', brand: 'BreakfastInc', preparations: [] },
+  { id: 'p4', name: 'Water', preparations: [] },
 ];
 
 describe('ProductsPage', () => {

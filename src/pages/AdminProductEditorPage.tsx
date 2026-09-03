@@ -12,7 +12,6 @@ import {
   SectionHeader,
   Button,
 } from '../components/common';
-import type { Note } from '../components/NotesDisplay';
 import {
   ProductProfileForm,
   ProductDangerZone,
@@ -53,16 +52,17 @@ export default function AdminProductEditorPage() {
   }, [data, draftProduct]);
 
   function handleDraftChange(updatedProduct: ApiProduct) {
+    const updatedPreps = updatedProduct.preparations ?? [];
+
     // Auto-detect deleted preparation: reset active tab
-    if (activePrep && !updatedProduct.preparations.some((p) => p.id === activePrep)) {
+    if (activePrep && !updatedPreps.some((p) => p.id === activePrep)) {
       setActivePrep(null);
     }
 
     // Auto-detect new preparation: switch to new tab
     if (draftProduct) {
-      const newPrep = updatedProduct.preparations.find(
-        (p) => !draftProduct.preparations.some((dp) => dp.id === p.id),
-      );
+      const draftPreps = draftProduct.preparations ?? [];
+      const newPrep = updatedPreps.find((p) => !draftPreps.some((dp) => dp.id === p.id));
       if (newPrep?.id) {
         setActivePrep(newPrep.id);
       }
@@ -93,7 +93,7 @@ export default function AdminProductEditorPage() {
   }
 
   const preparations = product?.preparations ?? [];
-  const notes = (product?.notes ?? []) as Note[];
+  const notes = product?.notes ?? [];
   const defaultPrepId = product?.defaultPreparationID ?? preparations[0]?.id;
   const activePrepId = activePrep ?? defaultPrepId;
 

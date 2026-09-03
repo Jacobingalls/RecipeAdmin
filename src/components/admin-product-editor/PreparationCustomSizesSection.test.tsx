@@ -4,6 +4,9 @@ import type { ApiProduct } from '../../api';
 
 import PreparationCustomSizesSection from './PreparationCustomSizesSection';
 
+/** These sections always write the full preparation list back, so assertions can rely on it. */
+type EditedProduct = ApiProduct & { preparations: NonNullable<ApiProduct['preparations']> };
+
 // jsdom does not implement scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
@@ -72,7 +75,7 @@ describe('PreparationCustomSizesSection', () => {
     renderSection();
     fireEvent.click(screen.getByLabelText('Remove Stick'));
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     expect(passedProduct.preparations[0].customSizes).toHaveLength(0);
   });
 
@@ -117,7 +120,7 @@ describe('PreparationCustomSizesSection', () => {
     renderSection();
     fireEvent.change(screen.getByLabelText('Stick amount'), { target: { value: '2.5' } });
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const cs = passedProduct.preparations[0].customSizes![0];
     expect(cs.servingSize).toEqual({ kind: 'servings', amount: 2.5 });
   });
@@ -127,7 +130,7 @@ describe('PreparationCustomSizesSection', () => {
     fireEvent.click(screen.getByLabelText('Stick unit'));
     fireEvent.click(screen.getByText('Grams (g)'));
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const cs = passedProduct.preparations[0].customSizes![0];
     expect(cs.servingSize).toEqual({ kind: 'mass', amount: { amount: 1, unit: 'g' } });
   });
@@ -203,7 +206,7 @@ describe('PreparationCustomSizesSection', () => {
     fireEvent.click(screen.getByLabelText('Stick unit'));
     fireEvent.click(screen.getByText('Ounces (oz)'));
     expect(onChange).toHaveBeenCalled();
-    const passedProduct = onChange.mock.calls[0][0] as ApiProduct;
+    const passedProduct = onChange.mock.calls[0][0] as EditedProduct;
     const cs = passedProduct.preparations[0].customSizes![0];
     expect(cs.servingSize).toEqual({ kind: 'mass', amount: { amount: 113, unit: 'oz' } });
   });

@@ -5,7 +5,6 @@ import type { BarcodeData } from '../domain';
 import { ServingSize } from '../domain';
 
 import { SubsectionTitle } from './common';
-import type { Note } from './NotesDisplay';
 import NotesDisplay from './NotesDisplay';
 
 interface BarcodeSectionProps {
@@ -79,7 +78,7 @@ function BarcodeItem({ barcode, onSelectSize }: BarcodeItemProps) {
 
       {hasNotes && (
         <div className="mt-1">
-          <NotesDisplay notes={notes as Note[]} />
+          <NotesDisplay notes={notes} />
         </div>
       )}
     </div>

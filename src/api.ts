@@ -1,7 +1,13 @@
 import type {
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from '@simplewebauthn/browser';
+
+import type {
   BarcodeData,
   CustomSizeData,
   GroupItem,
+  Note,
   NutritionUnitData,
   PreparationData,
   ProductGroupData,
@@ -11,11 +17,12 @@ import type {
 export interface ApiProduct {
   id: string;
   name: string;
-  brand: string;
-  barcodes: BarcodeData[];
-  preparations: PreparationData[];
+  brand?: string;
+  preparations?: PreparationData[];
   defaultPreparationID?: string;
-  notes: unknown[];
+  // Absent on responses that carry none; every consumer normalises with `?? []`.
+  barcodes?: BarcodeData[];
+  notes?: Note[];
 }
 
 export interface ApiLookupItem {
@@ -569,11 +576,11 @@ export async function authLogin(
 
 export async function authLoginBegin(
   usernameOrEmail?: string,
-): Promise<{ options: unknown; sessionID: string }> {
-  return apiPost<{ usernameOrEmail?: string }, { options: unknown; sessionID: string }>(
-    '/auth/login/begin',
-    { usernameOrEmail },
-  );
+): Promise<{ options: PublicKeyCredentialRequestOptionsJSON; sessionID: string }> {
+  return apiPost<
+    { usernameOrEmail?: string },
+    { options: PublicKeyCredentialRequestOptionsJSON; sessionID: string }
+  >('/auth/login/begin', { usernameOrEmail });
 }
 
 export async function authLoginFinish(
@@ -605,11 +612,14 @@ export async function settingsListPasskeys(): Promise<PasskeyInfo[]> {
   return apiFetch<PasskeyInfo[]>('/settings/passkeys');
 }
 
-export async function settingsAddPasskeyBegin(): Promise<{ options: unknown; sessionID: string }> {
-  return apiPost<Record<string, never>, { options: unknown; sessionID: string }>(
-    '/settings/passkeys/begin',
-    {},
-  );
+export async function settingsAddPasskeyBegin(): Promise<{
+  options: PublicKeyCredentialCreationOptionsJSON;
+  sessionID: string;
+}> {
+  return apiPost<
+    Record<string, never>,
+    { options: PublicKeyCredentialCreationOptionsJSON; sessionID: string }
+  >('/settings/passkeys/begin', {});
 }
 
 export async function settingsAddPasskeyFinish(
@@ -880,7 +890,7 @@ export async function resolveIndirectGroup(indirect: IndirectGroup): Promise<Pro
     mass: indirect.mass,
     volume: indirect.volume,
     customSizes: indirect.customSizes,
-    defaultServingSize: indirect.defaultServingSize,
+    defaultServingSize: indirect.defaultServingSize ?? undefined,
     barcodes: indirect.barcodes,
     categories: indirect.categories,
     notes: indirect.notes,
@@ -908,7 +918,7 @@ export interface IndirectGroup {
   defaultServingSize?: ServingSizeData | null;
   barcodes?: BarcodeData[];
   categories?: string[];
-  notes?: unknown[];
+  notes?: Note[];
 }
 
 function groupItemToIndirect(item: GroupItem): IndirectGroupItem {

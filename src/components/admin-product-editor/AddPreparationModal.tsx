@@ -19,13 +19,15 @@ export default function AddPreparationModal({
   const titleId = useId();
   const [name, setName] = useState('');
 
+  const preparations = product.preparations ?? [];
+
   function handleCreate() {
     if (!name.trim()) return;
     const newPrepId = crypto.randomUUID();
     const updatedProduct: ApiProduct = {
       ...product,
       preparations: [
-        ...product.preparations,
+        ...preparations,
         {
           id: newPrepId,
           name: name.trim(),

@@ -80,6 +80,7 @@ describe('Header', () => {
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
       updateUser: vi.fn(),
+      refreshSession: vi.fn(),
     });
   });
 
@@ -95,6 +96,7 @@ describe('Header', () => {
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
       updateUser: vi.fn(),
+      refreshSession: vi.fn(),
     });
     const { container } = renderWithRouter(<Header />);
     expect(container.innerHTML).toBe('');
@@ -282,6 +284,7 @@ describe('Header', () => {
       loginWithPasskey: vi.fn(),
       logout: mockLogout,
       updateUser: vi.fn(),
+      refreshSession: vi.fn(),
     });
     renderWithRouter(<Header />);
     const adminLink = screen.getByRole('link', { name: /^admin$/i });
@@ -391,6 +394,7 @@ describe('Header', () => {
         loginWithPasskey: vi.fn(),
         logout: mockLogout,
         updateUser: vi.fn(),
+        refreshSession: vi.fn(),
       });
       renderWithRouter(<Header />);
       expect(screen.getByText(/0\.0\.27/)).toBeInTheDocument();
@@ -416,6 +420,7 @@ describe('Header', () => {
         loginWithPasskey: vi.fn(),
         logout: mockLogout,
         updateUser: vi.fn(),
+        refreshSession: vi.fn(),
       });
       renderWithRouter(<Header />);
       const apiRow = document.querySelector('.bi-hdd-network')!.closest('div')!;
