@@ -1,4 +1,4 @@
-/** The settings page: profile, language and the errors shown while loading it. */
+/** The settings page: profile, language, energy and the errors shown while loading it. */
 export const enSettings = {
   'settings.title': 'Settings',
   'settings.error.passkeys': "Couldn't load passkeys.",
@@ -23,4 +23,12 @@ export const enSettings = {
   'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
+
+  'labelStyle.title': 'Nutrition label',
+  'labelStyle.description':
+    "We'll match your language unless you pick one here. European labels measure energy in kilojoules, give amounts per 100 g, and report salt instead of sodium.",
+  'labelStyle.selectLabel': 'Nutrition label',
+  'labelStyle.system': 'Follow your language',
+  'labelStyle.us': 'US (calories, % daily value)',
+  'labelStyle.european': 'European (kilojoules, per 100 g)',
 };

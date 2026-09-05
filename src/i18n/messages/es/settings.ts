@@ -25,4 +25,12 @@ export const esSettings: Translations<typeof enSettings> = {
   'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
+
+  'labelStyle.title': 'Información nutricional',
+  'labelStyle.description':
+    'Seguimos tu idioma a menos que elijas algo aquí. Las etiquetas europeas miden la energía en kilojulios, indican las cantidades por 100 g y declaran sal en lugar de sodio.',
+  'labelStyle.selectLabel': 'Información nutricional',
+  'labelStyle.system': 'Seguir tu idioma',
+  'labelStyle.us': 'Estadounidense (calorías, % del valor diario)',
+  'labelStyle.european': 'Europea (kilojulios, por 100 g)',
 };

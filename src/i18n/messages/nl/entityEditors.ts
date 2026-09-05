@@ -51,7 +51,6 @@ export const nlEntityEditors: Translations<typeof enEntityEditors> = {
   'groupEditor.itemServingAmount': 'Hoeveelheid voor itemportie',
   'groupEditor.itemServingUnit': 'Eenheid voor itemportie',
   'groupEditor.oneServing': '1 portie',
-  'groupEditor.calories': '{{amount}} cal',
   'groupEditor.thisGroup': 'deze groep',
   'groupEditor.actions': 'Groepsacties',
   'groupEditor.delete.title': 'Deze groep verwijderen',

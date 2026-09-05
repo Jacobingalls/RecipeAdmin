@@ -16,6 +16,7 @@ export const esHome: Translations<typeof enHome> = {
   'home.favorites.viewAll': 'Ver todo',
 
   'nutrientShort.calories': 'Calorías',
+  'nutrientShort.energy': 'Energía',
   'nutrientShort.protein': 'Proteínas',
   'nutrientShort.fat': 'Grasas',
   'nutrientShort.carbs': 'Carbohidratos',

@@ -4,7 +4,8 @@ import type { ApiLogEntry, ApiProduct } from '../../api';
 import type { NutritionInformation, ProductGroupData } from '../../domain';
 import { SubsectionTitle } from '../common';
 import HistoryEntryRow from '../HistoryEntryRow';
-import { formatSignificant, resolveEntryName, resolveEntryBrand } from '../../utils';
+import { formatEnergy, resolveEntryName, resolveEntryBrand } from '../../utils';
+import { useNutritionLabelStyle } from '../../hooks';
 
 interface HistoryDayGroupProps {
   dayHeading: string;
@@ -38,6 +39,7 @@ export default function HistoryDayGroup({
   deleteLoadingId,
 }: HistoryDayGroupProps) {
   const { t } = useTranslation();
+  const style = useNutritionLabelStyle();
 
   return (
     <div className="mb-4">
@@ -48,8 +50,8 @@ export default function HistoryDayGroup({
 
         <div className="d-flex align-items-center">
           <span className="text-body-secondary small fw-medium mb-0">
-            {t('history.caloriesTotal', {
-              calories: formatSignificant(dayNutrition?.calories?.amount ?? 0),
+            {t('history.energyTotal', {
+              amount: formatEnergy(dayNutrition?.calories?.amount ?? 0, style),
             })}
             &nbsp;
           </span>

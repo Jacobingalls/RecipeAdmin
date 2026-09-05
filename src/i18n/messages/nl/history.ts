@@ -11,7 +11,7 @@ export const nlHistory: Translations<typeof enHistory> = {
   'history.empty.description': 'Log iets om het hier terug te zien.',
   'history.loadingMore': 'Meer items laden',
   'history.endOfList': 'Je bent helemaal bij.',
-  'history.caloriesTotal': '{{calories}} kcal totaal,',
+  'history.energyTotal': '{{amount}} totaal,',
   'history.viewFullNutrition': 'Volledige voedingswaarde bekijken',
 
   'dayNutrition.title': 'Dagelijkse voeding',

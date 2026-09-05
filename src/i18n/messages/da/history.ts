@@ -11,7 +11,7 @@ export const daHistory: Translations<typeof enHistory> = {
   'history.empty.description': 'Log noget for at se det her.',
   'history.loadingMore': 'Indlæser flere poster',
   'history.endOfList': 'Du er helt med.',
-  'history.caloriesTotal': '{{calories}} kcal i alt,',
+  'history.energyTotal': '{{amount}} i alt,',
   'history.viewFullNutrition': 'Vis hele næringsindholdet',
 
   'dayNutrition.title': 'Dagens næringsindhold',

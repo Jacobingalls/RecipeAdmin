@@ -48,7 +48,6 @@ export const enEntityEditors = {
   'groupEditor.itemServingAmount': 'Item serving amount',
   'groupEditor.itemServingUnit': 'Item serving unit',
   'groupEditor.oneServing': '1 serving',
-  'groupEditor.calories': '{{amount}} cal',
   'groupEditor.thisGroup': 'this group',
   'groupEditor.actions': 'Group actions',
   'groupEditor.delete.title': 'Delete this group',

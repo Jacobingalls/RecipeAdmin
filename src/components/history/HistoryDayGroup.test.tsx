@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import type { ApiLogEntry, ApiProduct } from '../../api';
 import type { ProductGroupData } from '../../domain';
 import { NutritionInformation } from '../../domain';
+import { setLabelStylePreference } from '../../utils';
 
 import HistoryDayGroup from './HistoryDayGroup';
 
@@ -110,6 +111,10 @@ describe('HistoryDayGroup', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
   it('renders the day heading', () => {
     renderWithRouter(<HistoryDayGroup {...defaultProps} />);
     expect(screen.getByText('Today')).toBeInTheDocument();
@@ -118,6 +123,12 @@ describe('HistoryDayGroup', () => {
   it('renders calorie total', () => {
     renderWithRouter(<HistoryDayGroup {...defaultProps} />);
     expect(screen.getByText(/450 kcal total/)).toBeInTheDocument();
+  });
+
+  it('measures the day total in kilojoules when the user reads energy that way', () => {
+    setLabelStylePreference('european');
+    renderWithRouter(<HistoryDayGroup {...defaultProps} />);
+    expect(screen.getByText(/1,883 kJ total/)).toBeInTheDocument();
   });
 
   it('renders 0 kcal when dayNutrition is undefined', () => {

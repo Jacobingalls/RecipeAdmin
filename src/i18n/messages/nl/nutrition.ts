@@ -54,4 +54,29 @@ export const nlNutritionLabel: Translations<typeof enNutritionLabel> = {
   'nutritionLabel.molybdenum': 'Molybdeen',
   'nutritionLabel.chloride': 'Chloride',
   'nutritionLabel.potassium': 'Kalium',
+
+  'euLabel.title': 'Voedingswaarde',
+  'euLabel.typicalValues': 'Gemiddelde waarden',
+  'euLabel.per100g': 'per 100 g',
+  'euLabel.per100ml': 'per 100 ml',
+  'euLabel.perServing': 'per {{amount}}',
+  'euLabel.percentRI': '%RI*',
+  'euLabel.energy': 'Energie',
+  'euLabel.fat': 'Vetten',
+  'euLabel.saturates': 'waarvan verzadigde vetzuren',
+  'euLabel.monounsaturates': 'waarvan enkelvoudig onverzadigd',
+  'euLabel.polyunsaturates': 'waarvan meervoudig onverzadigd',
+  'euLabel.carbohydrate': 'Koolhydraten',
+  'euLabel.sugars': 'waarvan suikers',
+  'euLabel.polyols': 'waarvan polyolen',
+  'euLabel.fibre': 'Vezels',
+  'euLabel.protein': 'Eiwitten',
+  'euLabel.salt': 'Zout',
+  'euLabel.vitaminsAndMinerals': 'Vitaminen en mineralen',
+  'euLabel.referenceIntakeFootnote':
+    '* Referentie-inname van een gemiddelde volwassene ({{energy}}).',
+  'euLabel.nrvFootnote':
+    'Vitaminen en mineralen worden getoond als percentage van de EU-referentiewaarde.',
+  'euLabel.saltFootnote':
+    'Het zoutgehalte komt uit het natrium in het product, niet uit toegevoegd zout.',
 };

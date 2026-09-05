@@ -25,4 +25,12 @@ export const daSettings: Translations<typeof enSettings> = {
   'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
+
+  'labelStyle.title': 'Næringsdeklaration',
+  'labelStyle.description':
+    'Vi følger dit sprog, medmindre du vælger noget her. Europæiske deklarationer måler energi i kilojoule, angiver mængder pr. 100 g og oplyser salt i stedet for natrium.',
+  'labelStyle.selectLabel': 'Næringsdeklaration',
+  'labelStyle.system': 'Følg dit sprog',
+  'labelStyle.us': 'Amerikansk (kalorier, % af daglig værdi)',
+  'labelStyle.european': 'Europæisk (kilojoule, pr. 100 g)',
 };

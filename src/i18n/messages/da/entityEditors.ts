@@ -49,7 +49,6 @@ export const daEntityEditors: Translations<typeof enEntityEditors> = {
   'groupEditor.itemServingAmount': 'Portionsmængde for elementet',
   'groupEditor.itemServingUnit': 'Portionsenhed for elementet',
   'groupEditor.oneServing': '1 portion',
-  'groupEditor.calories': '{{amount}} kcal',
   'groupEditor.thisGroup': 'denne gruppe',
   'groupEditor.actions': 'Gruppehandlinger',
   'groupEditor.delete.title': 'Slet denne gruppe',

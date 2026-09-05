@@ -9,7 +9,7 @@ export const enHistory = {
   'history.empty.description': 'Log something to see it here.',
   'history.loadingMore': 'Loading more entries',
   'history.endOfList': 'You’re all caught up.',
-  'history.caloriesTotal': '{{calories}} kcal total,',
+  'history.energyTotal': '{{amount}} total,',
   'history.viewFullNutrition': 'View full nutrition',
 
   'dayNutrition.title': 'Daily nutrition',

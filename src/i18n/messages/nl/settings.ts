@@ -25,4 +25,12 @@ export const nlSettings: Translations<typeof enSettings> = {
   'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
+
+  'labelStyle.title': 'Voedingswaarde',
+  'labelStyle.description':
+    'We volgen je taal, tenzij je hier iets kiest. Europese etiketten meten energie in kilojoules, geven hoeveelheden per 100 g en vermelden zout in plaats van natrium.',
+  'labelStyle.selectLabel': 'Voedingswaarde',
+  'labelStyle.system': 'Je taal volgen',
+  'labelStyle.us': 'Amerikaans (calorieën, % dagelijkse waarde)',
+  'labelStyle.european': 'Europees (kilojoules, per 100 g)',
 };

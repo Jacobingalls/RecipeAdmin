@@ -51,7 +51,6 @@ export const svEntityEditors: Translations<typeof enEntityEditors> = {
   'groupEditor.itemServingAmount': 'Portionsmängd för objektet',
   'groupEditor.itemServingUnit': 'Portionsenhet för objektet',
   'groupEditor.oneServing': '1 portion',
-  'groupEditor.calories': '{{amount}} kcal',
   'groupEditor.thisGroup': 'den här gruppen',
   'groupEditor.actions': 'Gruppåtgärder',
   'groupEditor.delete.title': 'Ta bort gruppen',
