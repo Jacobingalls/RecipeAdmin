@@ -2,7 +2,6 @@ import type { NutritionInformation, NutritionUnit, Preparation, ProductGroup } f
 import {
   NUTRIENT_REFERENCE_VALUES,
   REFERENCE_INTAKES,
-  SIGNIFICANT_AMOUNT_PERCENT,
   saltFromSodium,
 } from '../config/euNutrition';
 import type { MessageKey } from '../i18n';
@@ -166,14 +165,9 @@ export function buildDeclaration(
       const shareOfNrv = (nutrient: NutritionUnit | null) =>
         nutrient ? (nutrient.converted(toNutritionUnit(nrv.unit)).amount / nrv.amount) * 100 : null;
 
-      // Judged on the per-100 quantity where there is one, since that is what the rule measures.
-      const threshold =
-        perHundred?.unit === 'mL'
-          ? SIGNIFICANT_AMOUNT_PERCENT.liquid
-          : SIGNIFICANT_AMOUNT_PERCENT.solid;
-      const declarable = shareOfNrv(nutrientAt(perHundredNutrition ?? nutritionInfo, key));
-      if (declarable == null || declarable < threshold) return null;
-
+      // A pack may name a vitamin only where a serving carries a significant amount of it. This
+      // shows every figure the product has instead: the rule exists to keep trace amounts off a
+      // printed label, and hiding data someone entered would serve them worse than a small number.
       const servingShare = shareOfNrv(nutrientAt(nutritionInfo, key));
 
       return {

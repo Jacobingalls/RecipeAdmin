@@ -23,9 +23,8 @@ export const REFERENCE_INTAKES: Record<string, DailyValue | null> = {
 /**
  * Nutrient reference values for vitamins and minerals (Annex XIII Part A).
  *
- * A European label may declare a vitamin or mineral only as a percentage of these, and only
- * when a serving carries a significant amount of it. Nutrients the EU sets no value for —
- * choline among them — are absent, and so go undeclared.
+ * A European label states a vitamin or mineral as a percentage of these. Nutrients the EU sets
+ * no value for — choline among them — are absent, so they carry no percentage.
  */
 export const NUTRIENT_REFERENCE_VALUES: Record<string, DailyValue> = {
   vitaminA: { amount: 800, unit: 'mcg' },
@@ -55,15 +54,6 @@ export const NUTRIENT_REFERENCE_VALUES: Record<string, DailyValue> = {
   molybdenum: { amount: 50, unit: 'mcg' },
   iodine: { amount: 150, unit: 'mcg' },
 };
-
-/**
- * The share of a nutrient reference value that counts as a "significant amount".
- *
- * A European label may name a vitamin or mineral only when 100 g of the food supplies at least
- * this much of its reference value — the threshold that keeps trace amounts off the pack.
- * Drinks are dilute, so they carry a lower one (Annex XIII, Article 34).
- */
-export const SIGNIFICANT_AMOUNT_PERCENT = { solid: 15, liquid: 7.5 };
 
 /**
  * A European label declares salt where a US one declares sodium.

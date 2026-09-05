@@ -96,7 +96,7 @@ describe('EuropeanNutritionLabel', () => {
     expect(within(row('Calcium')).getByText('25%')).toBeInTheDocument();
   });
 
-  it('names no vitamins when the food carries too little of any to declare', () => {
+  it('names a nutrient the product barely carries rather than hiding the figure', () => {
     const prep = new Preparation({
       mass: { amount: 42, unit: 'g' },
       nutritionalInformation: {
@@ -107,10 +107,8 @@ describe('EuropeanNutritionLabel', () => {
     });
     renderLabel(prep);
 
-    expect(
-      screen.queryByRole('rowheader', { name: 'Vitamins and minerals' }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText(/nutrient reference value/)).not.toBeInTheDocument();
+    expect(screen.getByRole('rowheader', { name: 'Vitamins and minerals' })).toBeInTheDocument();
+    expect(within(row('Calcium')).getByText('1 mg')).toBeInTheDocument();
   });
 
   it('drops the per-100 column when the product carries no mass or volume', () => {

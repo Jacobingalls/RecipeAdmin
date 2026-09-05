@@ -112,49 +112,29 @@ describe('buildDeclaration', () => {
     }
 
     it('rates them against the EU reference value, not the FDA one', () => {
-      // 200 mg calcium per bar is 476 mg per 100 g — 60% of the 800 mg NRV, so declarable.
       const prep = bar({ calcium: { amount: 200, unit: 'mg' } });
       const declaration = buildDeclaration(prep.nutritionalInformation, prep);
 
       const calcium = declaration.micronutrients.find(
         (row) => row.labelKey === 'nutritionLabel.calcium',
       );
-      // The FDA daily value of 1300 mg would give 15% for the same serving.
+      // 200 mg against an 800 mg NRV; the FDA daily value of 1300 mg would give 15%.
       expect(calcium?.referenceIntake).toBe('25%');
     });
 
-    it('leaves out a nutrient the food carries too little of to name', () => {
-      // 40 mg calcium per bar is 95 mg per 100 g — 12% of the NRV, below the 15% threshold.
-      const prep = bar();
-      expect(labels(buildDeclaration(prep.nutritionalInformation, prep))).not.toContain(
-        'nutritionLabel.calcium',
-      );
+    it('names every nutrient the product carries, however little of it', () => {
+      // A pack may not name calcium at this level, but someone entered the figure and it shows.
+      const prep = bar({ calcium: { amount: 1, unit: 'mg' } });
+      const declaration = buildDeclaration(prep.nutritionalInformation, prep);
+
+      expect(labels(declaration)).toContain('nutritionLabel.calcium');
+      expect(
+        declaration.micronutrients.find((row) => row.labelKey === 'nutritionLabel.calcium')
+          ?.referenceIntake,
+      ).toBe('0%');
     });
 
-    it('holds drinks to the lower threshold they are allowed', () => {
-      const nutrition = {
-        calories: { amount: 50, unit: 'kcal' },
-        vitaminC: { amount: 20, unit: 'mg' },
-      };
-      // 20 mg per 200 ml is 10 mg per 100 ml: 12.5% of the 80 mg NRV — under 15%, over 7.5%.
-      const drink = new Preparation({
-        volume: { amount: 200, unit: 'mL' },
-        nutritionalInformation: nutrition,
-      });
-      const solid = new Preparation({
-        mass: { amount: 200, unit: 'g' },
-        nutritionalInformation: nutrition,
-      });
-
-      expect(labels(buildDeclaration(drink.nutritionalInformation, drink))).toContain(
-        'nutritionLabel.vitaminC',
-      );
-      expect(labels(buildDeclaration(solid.nutritionalInformation, solid))).not.toContain(
-        'nutritionLabel.vitaminC',
-      );
-    });
-
-    it('judges a portion-only product on the portion itself', () => {
+    it('names a nutrient in a portion-only product too', () => {
       const prep = new Preparation({
         nutritionalInformation: {
           calories: { amount: 250, unit: 'kcal' },
