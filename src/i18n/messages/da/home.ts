@@ -16,6 +16,7 @@ export const daHome: Translations<typeof enHome> = {
   'home.favorites.viewAll': 'Vis alle',
 
   'nutrientShort.calories': 'Kalorier',
+  'nutrientShort.energy': 'Energi',
   'nutrientShort.protein': 'Protein',
   'nutrientShort.fat': 'Fedt',
   'nutrientShort.carbs': 'Kulhydrater',

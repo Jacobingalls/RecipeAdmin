@@ -14,6 +14,7 @@ export const enHome = {
   'home.favorites.viewAll': 'View all',
 
   'nutrientShort.calories': 'Calories',
+  'nutrientShort.energy': 'Energy',
   'nutrientShort.protein': 'Protein',
   'nutrientShort.fat': 'Fat',
   'nutrientShort.carbs': 'Carbs',

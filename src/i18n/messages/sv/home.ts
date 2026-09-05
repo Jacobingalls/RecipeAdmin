@@ -16,6 +16,7 @@ export const svHome: Translations<typeof enHome> = {
   'home.favorites.viewAll': 'Visa alla',
 
   'nutrientShort.calories': 'Kalorier',
+  'nutrientShort.energy': 'Energi',
   'nutrientShort.protein': 'Protein',
   'nutrientShort.fat': 'Fett',
   'nutrientShort.carbs': 'Kolhydrater',

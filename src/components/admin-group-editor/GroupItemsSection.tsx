@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import type { GroupItem, ProductGroupData } from '../../domain';
 import { ProductGroup, ServingSize } from '../../domain';
 import i18n from '../../i18n';
-import { formatSignificant } from '../../utils';
+import { useEnergyDisplay } from '../../hooks';
+import { formatEnergy, formatSignificant } from '../../utils';
 import {
   SectionHeader,
   Button,
@@ -43,6 +44,7 @@ function ItemRow({
   onRemove: () => void;
 }) {
   const { t } = useTranslation();
+  const energyDisplay = useEnergyDisplay();
   const isProduct = !!item.product;
   const name = isProduct
     ? (item.product?.name ?? t('groupItem.product'))
@@ -63,9 +65,7 @@ function ItemRow({
         <small className="text-body-secondary">
           {brand && <>{brand} &middot; </>}
           {formatItemServing(item)}
-          {calories != null && (
-            <> &middot; {t('groupEditor.calories', { amount: formatSignificant(calories) })}</>
-          )}
+          {calories != null && <> &middot; {formatEnergy(calories, energyDisplay)}</>}
         </small>
       </div>
       <CircularButtonGroup>

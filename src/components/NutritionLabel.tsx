@@ -12,6 +12,7 @@ import type {
 import { DAILY_VALUES } from '../config/constants';
 import { formatSignificant, formatServingSize } from '../utils';
 
+import NutritionEnergy from './NutritionEnergy';
 import NutritionRow from './NutritionRow';
 import type { NutrientData, NutrientKey } from './NutritionRow';
 
@@ -91,19 +92,7 @@ export default function NutritionLabel({ nutritionInfo, servingSize, prep }: Nut
           <div className="small text-secondary">{prep.servingSizeDescription}</div>
         )}
       </div>
-      <div className="border-bottom border-4 py-1">
-        <div className="d-flex justify-content-between align-items-end">
-          <span className="fw-bold fs-5">{t('nutritionLabel.calories')}</span>
-          <span className="fw-bold" style={{ fontSize: '2rem' }}>
-            {calories !== null ? formatSignificant(calories) : '—'}
-          </span>
-        </div>
-        {caloriesFromFat !== null && (
-          <div className="small text-end">
-            {t('nutritionLabel.caloriesFromFat', { amount: formatSignificant(caloriesFromFat) })}
-          </div>
-        )}
-      </div>
+      <NutritionEnergy calories={calories} caloriesFromFat={caloriesFromFat} />
       <table>
         <thead>
           <tr className="small fw-bold">

@@ -6,6 +6,8 @@ export const daNutritionLabel: Translations<typeof enNutritionLabel> = {
   'nutritionLabel.servingSize': 'Portionsstørrelse',
   'nutritionLabel.calories': 'Kalorier',
   'nutritionLabel.caloriesFromFat': 'Kalorier fra fedt {{amount}}',
+  'nutritionLabel.energy': 'Energi',
+  'nutritionLabel.energyFromFat': 'Energi fra fedt {{amount}}',
   'nutritionLabel.amount': 'Mængde',
   'nutritionLabel.percentDV': '% DV*',
   'nutritionLabel.percentOfDaily': '{{percent}} % af {{amount}}',

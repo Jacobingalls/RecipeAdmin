@@ -22,6 +22,7 @@ import {
   ProfileSection,
   CredentialsSection,
   LanguageSection,
+  EnergySection,
   SessionsSection,
 } from '../components/settings';
 import { useAuth } from '../contexts/AuthContext';
@@ -102,6 +103,8 @@ export default function SettingsPage() {
       />
 
       <LanguageSection />
+
+      <EnergySection />
 
       <SessionsSection
         sessions={sessions}

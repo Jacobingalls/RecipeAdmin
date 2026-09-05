@@ -6,6 +6,8 @@ export const esNutritionLabel: Translations<typeof enNutritionLabel> = {
   'nutritionLabel.servingSize': 'Tamaño de la ración',
   'nutritionLabel.calories': 'Calorías',
   'nutritionLabel.caloriesFromFat': 'Calorías de la grasa {{amount}}',
+  'nutritionLabel.energy': 'Energía',
+  'nutritionLabel.energyFromFat': 'Energía de la grasa {{amount}}',
   'nutritionLabel.amount': 'Cantidad',
   'nutritionLabel.percentDV': '% VD*',
   'nutritionLabel.percentOfDaily': '{{percent}} % de {{amount}}',

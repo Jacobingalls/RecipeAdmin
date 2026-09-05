@@ -29,3 +29,16 @@ export {
 export { buildSearchResultLogTarget } from './searchResultLogTarget';
 export { buildSlugPath, buildAllSlugPaths, resolvePathSegments } from './categoryPaths';
 export { isValidSlug, toSlug } from './slugValidation';
+export {
+  ENERGY_DISPLAY_STORAGE_KEY,
+  isEnergyDisplay,
+  isEnergyDisplayPreference,
+  getEnergyDisplay,
+  getEnergyDisplayPreference,
+  setEnergyDisplayPreference,
+  subscribeEnergyDisplay,
+  energyUnit,
+  energyAmount,
+  formatEnergy,
+} from './energyDisplay';
+export type { EnergyDisplay, EnergyDisplayPreference } from './energyDisplay';

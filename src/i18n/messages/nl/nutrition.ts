@@ -6,6 +6,8 @@ export const nlNutritionLabel: Translations<typeof enNutritionLabel> = {
   'nutritionLabel.servingSize': 'Portiegrootte',
   'nutritionLabel.calories': 'Calorieën',
   'nutritionLabel.caloriesFromFat': 'Calorieën uit vet {{amount}}',
+  'nutritionLabel.energy': 'Energie',
+  'nutritionLabel.energyFromFat': 'Energie uit vet {{amount}}',
   'nutritionLabel.amount': 'Hoeveelheid',
   'nutritionLabel.percentDV': '% DW*',
   'nutritionLabel.percentOfDaily': '{{percent}}% van {{amount}}',

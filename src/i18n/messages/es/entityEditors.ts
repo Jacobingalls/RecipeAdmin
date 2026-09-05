@@ -50,7 +50,6 @@ export const esEntityEditors: Translations<typeof enEntityEditors> = {
   'groupEditor.itemServingAmount': 'Cantidad por ración del elemento',
   'groupEditor.itemServingUnit': 'Unidad de la ración del elemento',
   'groupEditor.oneServing': '1 ración',
-  'groupEditor.calories': '{{amount}} cal',
   'groupEditor.thisGroup': 'este grupo',
   'groupEditor.actions': 'Acciones del grupo',
   'groupEditor.delete.title': 'Eliminar este grupo',

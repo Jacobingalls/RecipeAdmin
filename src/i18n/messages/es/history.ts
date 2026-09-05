@@ -11,7 +11,7 @@ export const esHistory: Translations<typeof enHistory> = {
   'history.empty.description': 'Registra algo para verlo aquí.',
   'history.loadingMore': 'Cargando más entradas',
   'history.endOfList': 'Ya lo has visto todo.',
-  'history.caloriesTotal': '{{calories}} kcal en total,',
+  'history.energyTotal': '{{amount}} en total,',
   'history.viewFullNutrition': 'Ver la nutrición completa',
 
   'dayNutrition.title': 'Nutrición diaria',

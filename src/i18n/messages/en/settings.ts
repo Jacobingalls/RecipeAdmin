@@ -1,4 +1,4 @@
-/** The settings page: profile, language and the errors shown while loading it. */
+/** The settings page: profile, language, energy and the errors shown while loading it. */
 export const enSettings = {
   'settings.title': 'Settings',
   'settings.error.passkeys': "Couldn't load passkeys.",
@@ -23,4 +23,12 @@ export const enSettings = {
   'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
+
+  'energy.title': 'Energy',
+  'energy.description':
+    "We'll match your language unless you pick one here. European languages read energy in kilojoules.",
+  'energy.selectLabel': 'Energy',
+  'energy.system': 'Follow your language',
+  'energy.calories': 'Calories (kcal)',
+  'energy.kilojoules': 'Kilojoules (kJ)',
 };

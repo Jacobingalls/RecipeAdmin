@@ -11,7 +11,7 @@ export const svHistory: Translations<typeof enHistory> = {
   'history.empty.description': 'Logga något för att se det här.',
   'history.loadingMore': 'Laddar fler poster',
   'history.endOfList': 'Du har sett allt.',
-  'history.caloriesTotal': '{{calories}} kcal totalt,',
+  'history.energyTotal': '{{amount}} totalt,',
   'history.viewFullNutrition': 'Visa alla näringsvärden',
 
   'dayNutrition.title': 'Dagens näringsvärden',

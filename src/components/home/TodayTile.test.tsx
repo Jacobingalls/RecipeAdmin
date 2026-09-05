@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { useEnergyDisplay } from '../../hooks';
 import type { UseHistoryDataResult } from '../../hooks/useHistoryData';
 import type { ApiLogEntry, ApiProduct } from '../../api';
 import { NutritionInformation } from '../../domain';
@@ -9,6 +10,7 @@ import TodayTile from './TodayTile';
 
 vi.mock('../../hooks', () => ({
   useHistoryData: vi.fn(),
+  useEnergyDisplay: vi.fn(() => 'calories'),
 }));
 
 vi.mock('../common', () => ({
@@ -253,6 +255,30 @@ describe('TodayTile', () => {
     // 20 + 30 = 50
     const proteinCard = screen.getByTestId('sparkline-card-protein');
     expect(proteinCard).toHaveAttribute('data-amount', '50');
+  });
+
+  it('measures the energy card in kilojoules when the user reads energy that way', () => {
+    vi.mocked(useEnergyDisplay).mockReturnValue('kilojoules');
+    const nutrition = new NutritionInformation({
+      calories: { amount: 1200, unit: 'kcal' },
+      protein: { amount: 50, unit: 'g' },
+    });
+
+    mockHistoryData({
+      logs: [sampleLogs[0]],
+      productDetails: sampleProductDetails,
+      groupDetails: sampleGroupDetails,
+      entryNutritionById: new Map([['log1', nutrition]]),
+    });
+
+    renderTile();
+
+    const energyCard = screen.getByTestId('sparkline-card-energy');
+    expect(energyCard).toHaveAttribute('data-unit', 'kJ');
+    expect(Number(energyCard.getAttribute('data-amount'))).toBeCloseTo(5020.8, 6);
+
+    // Every other nutrient keeps the unit its data carries.
+    expect(screen.getByTestId('sparkline-card-protein')).toHaveAttribute('data-unit', 'g');
   });
 
   it('calls useHistoryData with limitDays: 1', () => {

@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
+import { setEnergyDisplayPreference } from '../../utils';
+
 import FoodItemRow from './FoodItemRow';
 
 function renderFoodItemRow(props: Partial<Parameters<typeof FoodItemRow>[0]> = {}) {
@@ -16,6 +18,10 @@ function renderFoodItemRow(props: Partial<Parameters<typeof FoodItemRow>[0]> = {
 }
 
 describe('FoodItemRow', () => {
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
   it('renders name and subtitle', () => {
     renderFoodItemRow();
     expect(screen.getByText('Test Item')).toBeInTheDocument();
@@ -30,6 +36,18 @@ describe('FoodItemRow', () => {
   it('renders placeholder when calories is null', () => {
     renderFoodItemRow({ calories: null });
     expect(screen.getByText('-- kcal')).toBeInTheDocument();
+  });
+
+  it('measures kilojoules when the user reads energy that way', () => {
+    setEnergyDisplayPreference('kilojoules');
+    renderFoodItemRow({ calories: 320 });
+    expect(screen.getByText('1,339 kJ')).toBeInTheDocument();
+  });
+
+  it('names the measure in the placeholder too', () => {
+    setEnergyDisplayPreference('kilojoules');
+    renderFoodItemRow({ calories: null });
+    expect(screen.getByText('-- kJ')).toBeInTheDocument();
   });
 
   it('renders as a list-group-item with action class', () => {

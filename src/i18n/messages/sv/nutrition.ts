@@ -6,6 +6,8 @@ export const svNutritionLabel: Translations<typeof enNutritionLabel> = {
   'nutritionLabel.servingSize': 'Portionsstorlek',
   'nutritionLabel.calories': 'Kalorier',
   'nutritionLabel.caloriesFromFat': 'Kalorier från fett {{amount}}',
+  'nutritionLabel.energy': 'Energi',
+  'nutritionLabel.energyFromFat': 'Energi från fett {{amount}}',
   'nutritionLabel.amount': 'Mängd',
   'nutritionLabel.percentDV': '% DV*',
   'nutritionLabel.percentOfDaily': '{{percent}} % av {{amount}}',

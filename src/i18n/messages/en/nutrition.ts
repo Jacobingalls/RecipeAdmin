@@ -4,6 +4,8 @@ export const enNutritionLabel = {
   'nutritionLabel.servingSize': 'Serving size',
   'nutritionLabel.calories': 'Calories',
   'nutritionLabel.caloriesFromFat': 'Calories from Fat {{amount}}',
+  'nutritionLabel.energy': 'Energy',
+  'nutritionLabel.energyFromFat': 'Energy from fat {{amount}}',
   'nutritionLabel.amount': 'Amount',
   'nutritionLabel.percentDV': '% DV*',
   'nutritionLabel.percentOfDaily': '{{percent}}% of {{amount}}',

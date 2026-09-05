@@ -25,4 +25,12 @@ export const daSettings: Translations<typeof enSettings> = {
   'language.name.es': 'Español',
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
+
+  'energy.title': 'Energi',
+  'energy.description':
+    'Vi følger dit sprog, medmindre du vælger noget her. Europæiske sprog læser energi i kilojoule.',
+  'energy.selectLabel': 'Energi',
+  'energy.system': 'Følg dit sprog',
+  'energy.calories': 'Kalorier (kcal)',
+  'energy.kilojoules': 'Kilojoule (kJ)',
 };

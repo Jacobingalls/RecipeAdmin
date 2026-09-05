@@ -3,10 +3,10 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useHistoryData } from '../../hooks';
+import { useEnergyDisplay, useHistoryData } from '../../hooks';
 import { NutritionInformation } from '../../domain';
 import { DAILY_VALUES } from '../../config/constants';
-import { resolveEntryName, resolveEntryBrand } from '../../utils';
+import { energyAmount, energyUnit, resolveEntryName, resolveEntryBrand } from '../../utils';
 import { LoadingState, ContentUnavailableView } from '../common';
 import LogModal from '../LogModal';
 import HistoryEntryRow from '../HistoryEntryRow';
@@ -25,12 +25,18 @@ const NUTRIENTS = [
   { key: 'sodium', slug: 'sodium', unit: 'mg', goal: 'less', size: 'default' },
 ] as const;
 
+/** The tile's energy card follows the user's measure; every other nutrient keeps its own unit. */
+function isEnergy(key: string): boolean {
+  return key === 'calories';
+}
+
 interface TodayTileProps {
   refreshSignal?: number;
 }
 
 export default function TodayTile({ refreshSignal }: TodayTileProps) {
   const { t } = useTranslation();
+  const energyDisplay = useEnergyDisplay();
   const {
     logs,
     productDetails,
@@ -99,7 +105,9 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
 
         const nutrient = nutrition[key as keyof NutritionInformation];
         if (nutrient && typeof nutrient === 'object' && 'amount' in nutrient) {
-          runningTotal += nutrient.amount;
+          runningTotal += isEnergy(key)
+            ? energyAmount(nutrient.amount, energyDisplay)
+            : nutrient.amount;
           const date = new Date(entry.timestamp * 1000);
           const hour = date.getHours() + date.getMinutes() / 60;
           cumulative.push({ hour, amount: runningTotal });
@@ -110,7 +118,7 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
     }
 
     return data;
-  }, [todayLogs, entryNutritionById]);
+  }, [todayLogs, entryNutritionById, energyDisplay]);
 
   const currentHour = useMemo(() => {
     const n = new Date();
@@ -169,17 +177,22 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
         <div className="row g-3">
           {NUTRIENTS.map(({ key, slug, unit, goal, size }) => {
             const nutrient = totalNutrition[key as keyof NutritionInformation];
-            const nutrientUnit =
+            const rawUnit =
               nutrient && typeof nutrient === 'object' && 'unit' in nutrient ? nutrient.unit : unit;
-            const nutrientAmount =
+            const rawAmount =
               nutrient && typeof nutrient === 'object' && 'amount' in nutrient
                 ? nutrient.amount
                 : 0;
+            const nutrientUnit = isEnergy(key) ? energyUnit(energyDisplay) : rawUnit;
+            const nutrientAmount = isEnergy(key)
+              ? energyAmount(rawAmount, energyDisplay)
+              : rawAmount;
+            const showsEnergy = isEnergy(key) && energyDisplay === 'kilojoules';
 
             return (
               <div key={key} className={size === 'large' ? 'col-12' : 'col-6'}>
                 <SparklineCard
-                  label={t(`nutrientShort.${slug}`)}
+                  label={showsEnergy ? t('nutrientShort.energy') : t(`nutrientShort.${slug}`)}
                   testId={slug}
                   unit={nutrientUnit}
                   currentAmount={nutrientAmount}

@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 
-import { formatSignificant } from '../../utils';
+import { useEnergyDisplay } from '../../hooks';
+import { energyUnit, formatEnergy } from '../../utils';
 
 interface FoodItemRowProps {
   name: string;
   subtitle: ReactNode;
+  /** Energy in the item's serving, in kilocalories. */
   calories: number | null;
   ariaLabel: string;
   onClick: () => void;
@@ -19,6 +21,8 @@ export default function FoodItemRow({
   onClick,
   children,
 }: FoodItemRowProps) {
+  const display = useEnergyDisplay();
+
   return (
     <div
       role="button"
@@ -40,7 +44,7 @@ export default function FoodItemRow({
         </div>
         <div className="d-flex align-items-center gap-2 flex-shrink-0">
           <div className="text-nowrap text-body-secondary small fw-medium">
-            {calories !== null ? `${formatSignificant(calories)} kcal` : '-- kcal'}
+            {calories !== null ? formatEnergy(calories, display) : `-- ${energyUnit(display)}`}
           </div>
           {children}
         </div>

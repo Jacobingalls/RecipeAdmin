@@ -16,6 +16,7 @@ export const nlHome: Translations<typeof enHome> = {
   'home.favorites.viewAll': 'Alles bekijken',
 
   'nutrientShort.calories': 'Calorieën',
+  'nutrientShort.energy': 'Energie',
   'nutrientShort.protein': 'Eiwit',
   'nutrientShort.fat': 'Vet',
   'nutrientShort.carbs': 'Koolhydraten',

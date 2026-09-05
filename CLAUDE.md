@@ -205,12 +205,14 @@ src/
 │   │   ├── CredentialsSection # Passkey + API key list with add dropdown
 │   │   ├── CreateAPIKeyModal # Key creation form with expiry toggle
 │   │   ├── LanguageSection # Language picker (browser default or an explicit language)
+│   │   ├── EnergySection  # Energy picker (calories or kilojoules)
 │   │   └── SessionsSection # Session list with sign-out controls
 │   ├── BarcodeSection     # Barcode list with serving size links
 │   ├── CustomSizesSection # Custom size buttons
 │   ├── Footer             # App footer
 │   ├── Header             # App header with nav, user dropdown, admin link
 │   ├── NotesDisplay       # Product/barcode notes
+│   ├── NutritionEnergy    # Nutrition label's energy block (calories or kilojoules)
 │   ├── NutritionLabel     # FDA-style nutrition facts label
 │   ├── NutritionRow       # Individual nutrient row for NutritionLabel table
 │   ├── ServingSizeSelector # Serving size input controls
@@ -244,6 +246,7 @@ src/
 ├── hooks/
 │   ├── index.ts           # Barrel exports
 │   ├── useApiQuery.ts     # Data fetching with cancellation
+│   ├── useEnergyDisplay.ts # Subscribes to the calorie/kilojoule preference
 │   ├── useGravatarUrl.ts  # Gravatar avatar URL from email via SHA-256 hash
 │   └── useHistoryData.ts  # Shared history data fetching, nutrition resolution, log actions
 ├── pages/                 # Route components
@@ -261,6 +264,7 @@ src/
 │   └── SettingsPage       # /settings — own passkeys + API keys
 └── utils/
     ├── index.ts           # Barrel exports
+    ├── energyDisplay.ts   # Calorie/kilojoule preference, conversion and formatting
     └── formatters.ts      # formatSignificant, formatServingSize
 ```
 
@@ -432,6 +436,20 @@ value means "follow the browser", so detection is configured with `caches: []` a
 
 `load: 'languageOnly'` maps regional languages (`nl-BE`, `es-MX`) onto their base catalog, and
 `fallbackLng` covers anything unsupported.
+
+### Calories or kilojoules
+
+US labels count calories; European ones measure energy in kilojoules and print calories
+alongside them. `src/utils/energyDisplay.ts` holds that choice: `getEnergyDisplay()` resolves
+the saved preference, or falls back to what the active language reads (English counts
+calories, the European languages measure kilojoules). Users change it in
+**Settings → Energy**, and the preference is stored in `localStorage` under
+`recipeadmin.energyDisplay`, where an absent value means "follow the language".
+
+Components read it through `useEnergyDisplay()`, which re-renders on both a new preference and
+a language change, then format with `formatEnergy(kilocalories, display)`. Nutrition data
+carries kilocalories, so the conversion happens at display time only — nothing about what is
+stored or sent to the API changes.
 
 ### Formatting
 
