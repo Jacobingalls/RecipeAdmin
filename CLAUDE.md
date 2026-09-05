@@ -205,20 +205,24 @@ src/
 │   │   ├── CredentialsSection # Passkey + API key list with add dropdown
 │   │   ├── CreateAPIKeyModal # Key creation form with expiry toggle
 │   │   ├── LanguageSection # Language picker (browser default or an explicit language)
-│   │   ├── EnergySection  # Energy picker (calories or kilojoules)
+│   │   ├── NutritionLabelSection # Label convention picker (US or European)
 │   │   └── SessionsSection # Session list with sign-out controls
 │   ├── BarcodeSection     # Barcode list with serving size links
 │   ├── CustomSizesSection # Custom size buttons
 │   ├── Footer             # App footer
 │   ├── Header             # App header with nav, user dropdown, admin link
 │   ├── NotesDisplay       # Product/barcode notes
-│   ├── NutritionEnergy    # Nutrition label's energy block (calories or kilojoules)
-│   ├── NutritionLabel     # FDA-style nutrition facts label
-│   ├── NutritionRow       # Individual nutrient row for NutritionLabel table
+│   ├── EuropeanNutritionLabel # EU 1169/2011 declaration (per 100 g, salt, reference intakes)
+│   ├── EuropeanNutritionRow # Single nutrient row for the European declaration
+│   ├── NutritionEnergy    # FDA panel's headline calorie block
+│   ├── NutritionLabel     # Picks the US or European label for the reader
+│   ├── NutritionRow       # Individual nutrient row for the FDA panel
+│   ├── USNutritionLabel   # FDA-style nutrition facts panel
 │   ├── ServingSizeSelector # Serving size input controls
 │   └── VersionBadge       # API version display
 ├── config/
 │   ├── constants.ts       # FDA daily values
+│   ├── euNutrition.ts     # EU reference intakes, nutrient reference values, salt conversion
 │   └── unitConfig.ts      # Unit definitions for serving selector
 ├── contexts/
 │   └── AuthContext.tsx     # Auth state, login/logout/passkey methods
@@ -246,7 +250,7 @@ src/
 ├── hooks/
 │   ├── index.ts           # Barrel exports
 │   ├── useApiQuery.ts     # Data fetching with cancellation
-│   ├── useEnergyDisplay.ts # Subscribes to the calorie/kilojoule preference
+│   ├── useNutritionLabelStyle.ts # Subscribes to the US/European label preference
 │   ├── useGravatarUrl.ts  # Gravatar avatar URL from email via SHA-256 hash
 │   └── useHistoryData.ts  # Shared history data fetching, nutrition resolution, log actions
 ├── pages/                 # Route components
@@ -264,8 +268,10 @@ src/
 │   └── SettingsPage       # /settings — own passkeys + API keys
 └── utils/
     ├── index.ts           # Barrel exports
-    ├── energyDisplay.ts   # Calorie/kilojoule preference, conversion and formatting
-    └── formatters.ts      # formatSignificant, formatServingSize
+    ├── europeanDeclaration.ts # Builds the EU declaration (per-100 columns, salt, RI%)
+    ├── formatters.ts      # formatSignificant, formatServingSize
+    ├── nutritionLabelStyle.ts # US/European preference, energy conversion and formatting
+    └── referenceQuantity.ts # Resolves the per-100 g or per-100 ml basis
 ```
 
 ## Authentication
@@ -437,19 +443,34 @@ value means "follow the browser", so detection is configured with `caches: []` a
 `load: 'languageOnly'` maps regional languages (`nl-BE`, `es-MX`) onto their base catalog, and
 `fallbackLng` covers anything unsupported.
 
-### Calories or kilojoules
+### US or European nutrition labels
 
-US labels count calories; European ones measure energy in kilojoules and print calories
-alongside them. `src/utils/energyDisplay.ts` holds that choice: `getEnergyDisplay()` resolves
-the saved preference, or falls back to what the active language reads (English counts
-calories, the European languages measure kilojoules). Users change it in
-**Settings → Energy**, and the preference is stored in `localStorage` under
-`recipeadmin.energyDisplay`, where an absent value means "follow the language".
+The two labelling conventions differ in more than units, so each has its own component and
+`NutritionLabel` picks between them:
 
-Components read it through `useEnergyDisplay()`, which re-renders on both a new preference and
-a language change, then format with `formatEnergy(kilocalories, display)`. Nutrition data
-carries kilocalories, so the conversion happens at display time only — nothing about what is
-stored or sent to the API changes.
+| | US (FDA) | European (Regulation (EU) No 1169/2011) |
+|---|---|---|
+| Energy | Calories | Kilojoules **and** kilocalories |
+| Basis | Per serving | Per 100 g or 100 ml, serving alongside |
+| Sodium | Sodium | Salt (sodium x 2.5) |
+| Rated against | FDA daily values | Adult reference intakes; NRVs for micronutrients |
+| Trans fat, cholesterol | Declared | Not permitted |
+
+`src/utils/nutritionLabelStyle.ts` holds the choice: `getLabelStyle()` resolves the saved
+preference, or falls back to what the active language reads (English is US, the European
+languages European). Users change it in **Settings → Nutrition label**, stored in
+`localStorage` under `recipeadmin.nutritionLabel`, where an absent value means "follow the
+language".
+
+Components read it through `useNutritionLabelStyle()`, which re-renders on both a new
+preference and a language change. Rows that show energy outside a label — history totals, the
+home tile, food rows — format with `formatEnergy(kilocalories, style)`.
+
+`src/utils/europeanDeclaration.ts` builds the European table: it resolves the per-100 basis
+from the preparation's mass or volume, derives salt from sodium, and works out reference-intake
+percentages. Keeping it out of the component makes the regulation's arithmetic testable on its
+own. Nutrition data still carries kilocalories and sodium — every conversion happens at display
+time, and nothing stored or sent to the API changes.
 
 ### Formatting
 

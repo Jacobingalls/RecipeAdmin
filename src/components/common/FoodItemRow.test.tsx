@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
-import { setEnergyDisplayPreference } from '../../utils';
+import { setLabelStylePreference } from '../../utils';
 
 import FoodItemRow from './FoodItemRow';
 
@@ -39,13 +39,13 @@ describe('FoodItemRow', () => {
   });
 
   it('measures kilojoules when the user reads energy that way', () => {
-    setEnergyDisplayPreference('kilojoules');
+    setLabelStylePreference('european');
     renderFoodItemRow({ calories: 320 });
     expect(screen.getByText('1,339 kJ')).toBeInTheDocument();
   });
 
   it('names the measure in the placeholder too', () => {
-    setEnergyDisplayPreference('kilojoules');
+    setLabelStylePreference('european');
     renderFoodItemRow({ calories: null });
     expect(screen.getByText('-- kJ')).toBeInTheDocument();
   });

@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import type { ApiLogEntry, ApiProduct } from '../../api';
 import type { ProductGroupData } from '../../domain';
 import { NutritionInformation } from '../../domain';
-import { setEnergyDisplayPreference } from '../../utils';
+import { setLabelStylePreference } from '../../utils';
 
 import HistoryDayGroup from './HistoryDayGroup';
 
@@ -126,7 +126,7 @@ describe('HistoryDayGroup', () => {
   });
 
   it('measures the day total in kilojoules when the user reads energy that way', () => {
-    setEnergyDisplayPreference('kilojoules');
+    setLabelStylePreference('european');
     renderWithRouter(<HistoryDayGroup {...defaultProps} />);
     expect(screen.getByText(/1,883 kJ total/)).toBeInTheDocument();
   });

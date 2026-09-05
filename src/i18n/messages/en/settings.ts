@@ -24,11 +24,11 @@ export const enSettings = {
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
 
-  'energy.title': 'Energy',
-  'energy.description':
-    "We'll match your language unless you pick one here. European languages read energy in kilojoules.",
-  'energy.selectLabel': 'Energy',
-  'energy.system': 'Follow your language',
-  'energy.calories': 'Calories (kcal)',
-  'energy.kilojoules': 'Kilojoules (kJ)',
+  'labelStyle.title': 'Nutrition label',
+  'labelStyle.description':
+    "We'll match your language unless you pick one here. European labels measure energy in kilojoules, give amounts per 100 g, and report salt instead of sodium.",
+  'labelStyle.selectLabel': 'Nutrition label',
+  'labelStyle.system': 'Follow your language',
+  'labelStyle.us': 'US (calories, % daily value)',
+  'labelStyle.european': 'European (kilojoules, per 100 g)',
 };

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { useEnergyDisplay } from '../../hooks';
+import { useNutritionLabelStyle } from '../../hooks';
 import type { UseHistoryDataResult } from '../../hooks/useHistoryData';
 import type { ApiLogEntry, ApiProduct } from '../../api';
 import { NutritionInformation } from '../../domain';
@@ -10,7 +10,7 @@ import TodayTile from './TodayTile';
 
 vi.mock('../../hooks', () => ({
   useHistoryData: vi.fn(),
-  useEnergyDisplay: vi.fn(() => 'calories'),
+  useNutritionLabelStyle: vi.fn(() => 'us'),
 }));
 
 vi.mock('../common', () => ({
@@ -258,7 +258,7 @@ describe('TodayTile', () => {
   });
 
   it('measures the energy card in kilojoules when the user reads energy that way', () => {
-    vi.mocked(useEnergyDisplay).mockReturnValue('kilojoules');
+    vi.mocked(useNutritionLabelStyle).mockReturnValue('european');
     const nutrition = new NutritionInformation({
       calories: { amount: 1200, unit: 'kcal' },
       protein: { amount: 50, unit: 'g' },

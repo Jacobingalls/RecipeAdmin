@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useEnergyDisplay, useHistoryData } from '../../hooks';
+import { useHistoryData, useNutritionLabelStyle } from '../../hooks';
 import { NutritionInformation } from '../../domain';
 import { DAILY_VALUES } from '../../config/constants';
 import { energyAmount, energyUnit, resolveEntryName, resolveEntryBrand } from '../../utils';
@@ -36,7 +36,7 @@ interface TodayTileProps {
 
 export default function TodayTile({ refreshSignal }: TodayTileProps) {
   const { t } = useTranslation();
-  const energyDisplay = useEnergyDisplay();
+  const labelStyle = useNutritionLabelStyle();
   const {
     logs,
     productDetails,
@@ -106,7 +106,7 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
         const nutrient = nutrition[key as keyof NutritionInformation];
         if (nutrient && typeof nutrient === 'object' && 'amount' in nutrient) {
           runningTotal += isEnergy(key)
-            ? energyAmount(nutrient.amount, energyDisplay)
+            ? energyAmount(nutrient.amount, labelStyle)
             : nutrient.amount;
           const date = new Date(entry.timestamp * 1000);
           const hour = date.getHours() + date.getMinutes() / 60;
@@ -118,7 +118,7 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
     }
 
     return data;
-  }, [todayLogs, entryNutritionById, energyDisplay]);
+  }, [todayLogs, entryNutritionById, labelStyle]);
 
   const currentHour = useMemo(() => {
     const n = new Date();
@@ -183,11 +183,9 @@ export default function TodayTile({ refreshSignal }: TodayTileProps) {
               nutrient && typeof nutrient === 'object' && 'amount' in nutrient
                 ? nutrient.amount
                 : 0;
-            const nutrientUnit = isEnergy(key) ? energyUnit(energyDisplay) : rawUnit;
-            const nutrientAmount = isEnergy(key)
-              ? energyAmount(rawAmount, energyDisplay)
-              : rawAmount;
-            const showsEnergy = isEnergy(key) && energyDisplay === 'kilojoules';
+            const nutrientUnit = isEnergy(key) ? energyUnit(labelStyle) : rawUnit;
+            const nutrientAmount = isEnergy(key) ? energyAmount(rawAmount, labelStyle) : rawAmount;
+            const showsEnergy = isEnergy(key) && labelStyle === 'european';
 
             return (
               <div key={key} className={size === 'large' ? 'col-12' : 'col-6'}>

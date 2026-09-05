@@ -26,11 +26,11 @@ export const svSettings: Translations<typeof enSettings> = {
   'language.name.nl': 'Nederlands',
   'language.name.sv': 'Svenska',
 
-  'energy.title': 'Energi',
-  'energy.description':
-    'Vi följer ditt språk om du inte väljer något här. Europeiska språk läser energi i kilojoule.',
-  'energy.selectLabel': 'Energi',
-  'energy.system': 'Följ ditt språk',
-  'energy.calories': 'Kalorier (kcal)',
-  'energy.kilojoules': 'Kilojoule (kJ)',
+  'labelStyle.title': 'Näringsdeklaration',
+  'labelStyle.description':
+    'Vi följer ditt språk om du inte väljer något här. Europeiska deklarationer mäter energi i kilojoule, anger mängder per 100 g och redovisar salt i stället för natrium.',
+  'labelStyle.selectLabel': 'Näringsdeklaration',
+  'labelStyle.system': 'Följ ditt språk',
+  'labelStyle.us': 'Amerikansk (kalorier, % av dagligt värde)',
+  'labelStyle.european': 'Europeisk (kilojoule, per 100 g)',
 };

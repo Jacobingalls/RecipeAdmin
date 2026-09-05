@@ -1,34 +1,34 @@
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { EnergyDisplayPreference } from '../../utils';
+import type { LabelStylePreference } from '../../utils';
 import {
-  getEnergyDisplayPreference,
-  isEnergyDisplayPreference,
-  setEnergyDisplayPreference,
+  getLabelStylePreference,
+  isLabelStylePreference,
+  setLabelStylePreference,
 } from '../../utils';
 import { SectionHeader } from '../common';
 
-/** Lets the user read energy as calories or kilojoules, or keep following their language. */
-export default function EnergySection() {
+/** Lets the user read nutrition the US or the European way, or keep following their language. */
+export default function NutritionLabelSection() {
   const { t } = useTranslation();
-  const [preference, setPreference] = useState<EnergyDisplayPreference>(getEnergyDisplayPreference);
+  const [preference, setPreference] = useState<LabelStylePreference>(getLabelStylePreference);
   const selectId = useId();
 
   function handleChange(value: string) {
-    if (!isEnergyDisplayPreference(value)) return;
+    if (!isLabelStylePreference(value)) return;
     setPreference(value);
-    setEnergyDisplayPreference(value);
+    setLabelStylePreference(value);
   }
 
   return (
     <>
-      <SectionHeader title={t('energy.title')} className="mt-4" />
+      <SectionHeader title={t('labelStyle.title')} className="mt-4" />
 
       <div className="card mb-5">
         <div className="card-body">
           <label htmlFor={selectId} className="form-label">
-            {t('energy.selectLabel')}
+            {t('labelStyle.selectLabel')}
           </label>
           <select
             className="form-select"
@@ -37,12 +37,12 @@ export default function EnergySection() {
             onChange={(e) => handleChange(e.target.value)}
             aria-describedby={`${selectId}-help`}
           >
-            <option value="system">{t('energy.system')}</option>
-            <option value="calories">{t('energy.calories')}</option>
-            <option value="kilojoules">{t('energy.kilojoules')}</option>
+            <option value="system">{t('labelStyle.system')}</option>
+            <option value="us">{t('labelStyle.us')}</option>
+            <option value="european">{t('labelStyle.european')}</option>
           </select>
           <div id={`${selectId}-help`} className="form-text">
-            {t('energy.description')}
+            {t('labelStyle.description')}
           </div>
         </div>
       </div>

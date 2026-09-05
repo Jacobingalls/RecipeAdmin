@@ -9,4 +9,4 @@ export type { UseSearchResult } from './useSearch';
 export { useGravatarUrl } from './useGravatarUrl';
 export { useServingSizeParams } from './useServingSizeParams';
 export { useTheme } from './useTheme';
-export { useEnergyDisplay } from './useEnergyDisplay';
+export { useNutritionLabelStyle } from './useNutritionLabelStyle';

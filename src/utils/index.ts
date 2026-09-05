@@ -30,15 +30,19 @@ export { buildSearchResultLogTarget } from './searchResultLogTarget';
 export { buildSlugPath, buildAllSlugPaths, resolvePathSegments } from './categoryPaths';
 export { isValidSlug, toSlug } from './slugValidation';
 export {
-  ENERGY_DISPLAY_STORAGE_KEY,
-  isEnergyDisplay,
-  isEnergyDisplayPreference,
-  getEnergyDisplay,
-  getEnergyDisplayPreference,
-  setEnergyDisplayPreference,
-  subscribeEnergyDisplay,
+  LABEL_STYLE_STORAGE_KEY,
+  isLabelStyle,
+  isLabelStylePreference,
+  getLabelStyle,
+  getLabelStylePreference,
+  setLabelStylePreference,
+  subscribeLabelStyle,
   energyUnit,
   energyAmount,
   formatEnergy,
-} from './energyDisplay';
-export type { EnergyDisplay, EnergyDisplayPreference } from './energyDisplay';
+} from './nutritionLabelStyle';
+export type { LabelStyle, LabelStylePreference } from './nutritionLabelStyle';
+export { buildDeclaration, referenceIntakeEnergy } from './europeanDeclaration';
+export type { Declaration, DeclarationRow, DeclaredEnergy } from './europeanDeclaration';
+export { nutritionForServing, referenceQuantity } from './referenceQuantity';
+export type { ReferenceQuantity } from './referenceQuantity';

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { useEnergyDisplay } from '../../hooks';
+import { useNutritionLabelStyle } from '../../hooks';
 import { energyUnit, formatEnergy } from '../../utils';
 
 interface FoodItemRowProps {
@@ -21,7 +21,7 @@ export default function FoodItemRow({
   onClick,
   children,
 }: FoodItemRowProps) {
-  const display = useEnergyDisplay();
+  const style = useNutritionLabelStyle();
 
   return (
     <div
@@ -44,7 +44,7 @@ export default function FoodItemRow({
         </div>
         <div className="d-flex align-items-center gap-2 flex-shrink-0">
           <div className="text-nowrap text-body-secondary small fw-medium">
-            {calories !== null ? formatEnergy(calories, display) : `-- ${energyUnit(display)}`}
+            {calories !== null ? formatEnergy(calories, style) : `-- ${energyUnit(style)}`}
           </div>
           {children}
         </div>
