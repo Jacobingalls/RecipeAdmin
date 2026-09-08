@@ -94,7 +94,7 @@ describe('PreparationCustomSizesSection', () => {
 
   it('renders amount input and unit button for each custom size', () => {
     renderSection();
-    expect(screen.getByLabelText('Stick amount')).toHaveValue(1);
+    expect(screen.getByLabelText('Stick amount')).toHaveValue('1');
     const unitButton = screen.getByLabelText('Stick unit');
     expect(unitButton.tagName).toBe('BUTTON');
     expect(unitButton).toHaveTextContent('Servings');
@@ -112,7 +112,7 @@ describe('PreparationCustomSizesSection', () => {
       ],
     };
     renderSection(product);
-    expect(screen.getByLabelText('Stick amount')).toHaveValue(1);
+    expect(screen.getByLabelText('Stick amount')).toHaveValue('1');
     expect(screen.getByLabelText('Stick unit')).toHaveTextContent('Servings');
   });
 
@@ -155,7 +155,7 @@ describe('PreparationCustomSizesSection', () => {
       ],
     };
     renderSection(product);
-    expect(screen.getByLabelText('Stick amount')).toHaveValue(113);
+    expect(screen.getByLabelText('Stick amount')).toHaveValue('113');
     expect(screen.getByLabelText('Stick unit')).toHaveTextContent('Grams (g)');
   });
 
@@ -179,7 +179,7 @@ describe('PreparationCustomSizesSection', () => {
       ],
     };
     renderSection(product);
-    expect(screen.getByLabelText('Can amount')).toHaveValue(12);
+    expect(screen.getByLabelText('Can amount')).toHaveValue('12');
     expect(screen.getByLabelText('Can unit')).toHaveTextContent('Fluid ounces (fl oz)');
   });
 

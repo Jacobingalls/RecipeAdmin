@@ -13,6 +13,9 @@ import { ServingSize } from '../domain';
 import type { SelectOption, OptionGroup } from '../config/unitConfig';
 import { buildOptionGroups, filterGroups } from '../config/unitConfig';
 
+/** A blank serving amount counts as one, so the amount box can start empty. */
+const BLANK_AMOUNT = 1;
+
 function optionElId(prefix: string, option: SelectOption): string {
   return `${prefix}-option-${option.type}-${option.value.replace(/\s+/g, '-')}`;
 }
@@ -41,6 +44,7 @@ export default function ServingSizeSelector({
   const { t } = useTranslation();
   const instanceId = useId();
   const [isOpen, setIsOpen] = useState(false);
+  const [amountDraft, setAmountDraft] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -102,10 +106,39 @@ export default function ServingSizeSelector({
     }
   };
 
-  const handleAmountChange = (newAmount: number): void => {
+  /**
+   * What the box shows when it is not mid-edit. A serving amount of one is left
+   * blank so the placeholder invites typing over it rather than deleting first.
+   */
+  const committedAmountText = (): string => {
+    if (!value) return '';
+    if (!compact && value.amount === BLANK_AMOUNT) return '';
+    return String(value.amount);
+  };
+
+  const parseAmount = (text: string): number | null => {
+    const normalized = text.trim().replace(',', '.');
+    if (normalized === '') return null;
+    const amount = Number(normalized);
+    if (!Number.isFinite(amount)) return null;
+    if (!compact && amount <= 0) return null;
+    return amount;
+  };
+
+  const handleAmountInput = (text: string): void => {
+    setAmountDraft(text);
     if (!value) return;
-    const amount = compact ? newAmount : Math.max(0.01, newAmount);
-    onChange(createServingSize(value.type, getUnitValue(), amount));
+    const amount = parseAmount(text);
+    if (amount !== null) {
+      onChange(createServingSize(value.type, getUnitValue(), amount));
+    } else if (!compact && text.trim() === '') {
+      onChange(createServingSize(value.type, getUnitValue(), BLANK_AMOUNT));
+    }
+  };
+
+  /** Drop a half-typed or invalid amount, falling back to the one in use. */
+  const handleAmountBlur = (): void => {
+    setAmountDraft(null);
   };
 
   const isOptionSelected = (option: SelectOption): boolean => {
@@ -122,6 +155,7 @@ export default function ServingSizeSelector({
   const handleUnitSelect = (option: SelectOption): void => {
     const currentAmount = value ? value.amount || (compact ? 0 : 1) : 1;
     onChange(createServingSize(option.type, option.value, currentAmount));
+    setAmountDraft(null);
     setIsOpen(false);
     setSearchQuery('');
   };
@@ -129,6 +163,7 @@ export default function ServingSizeSelector({
   const handleNoneSelect = (): void => {
     if (onClear) {
       onClear();
+      setAmountDraft(null);
       setIsOpen(false);
       setSearchQuery('');
     }
@@ -312,12 +347,13 @@ export default function ServingSizeSelector({
       <div className="d-flex align-items-center gap-2 flex-shrink-1" style={{ minWidth: 0 }}>
         {value && (
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="form-control form-control-sm flex-shrink-0"
             style={{ width: '5rem' }}
-            step="any"
-            value={value.amount}
-            onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0)}
+            value={amountDraft ?? committedAmountText()}
+            onChange={(e) => handleAmountInput(e.target.value)}
+            onBlur={handleAmountBlur}
             aria-label={amountAriaLabel ?? t('unit.amount')}
           />
         )}
@@ -346,13 +382,14 @@ export default function ServingSizeSelector({
           </label>
           <input
             id={amountInputId}
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="form-control"
             style={{ width: '6.25rem' }}
-            min="0.01"
-            step="0.25"
-            value={value.amount}
-            onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 1)}
+            placeholder={String(BLANK_AMOUNT)}
+            value={amountDraft ?? committedAmountText()}
+            onChange={(e) => handleAmountInput(e.target.value)}
+            onBlur={handleAmountBlur}
           />
         </div>
       )}

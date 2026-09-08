@@ -192,7 +192,7 @@ describe('BarcodesSection', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Edit barcode')).toBeInTheDocument();
     expect(screen.getByLabelText('Barcode')).toHaveValue('987654321098');
-    expect(screen.getByLabelText('Barcode serving amount')).toHaveValue(2);
+    expect(screen.getByLabelText('Barcode serving amount')).toHaveValue('2');
   });
 
   it('saves edited barcode via onChange', () => {

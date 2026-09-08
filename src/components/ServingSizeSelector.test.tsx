@@ -179,22 +179,75 @@ describe('ServingSizeSelector', () => {
     expect(result.amount).toBe(3);
   });
 
-  it('enforces minimum amount of 0.01', () => {
-    const onChange = vi.fn();
-    renderSelector({ onChange });
-    const input = screen.getByLabelText('Amount');
-    fireEvent.change(input, { target: { value: '-5' } });
-    const result = onChange.mock.calls[0][0] as ServingSize;
-    expect(result.amount).toBe(0.01);
+  it('leaves the box empty for an amount of one', () => {
+    renderSelector({ value: ServingSize.servings(1) });
+    const input = screen.getByLabelText('Amount') as HTMLInputElement;
+    expect(input.value).toBe('');
+    expect(input).toHaveAttribute('placeholder', '1');
   });
 
-  it('defaults to 1 when amount input is empty', () => {
+  it('treats an empty amount as one', () => {
     const onChange = vi.fn();
-    renderSelector({ onChange });
+    renderSelector({ onChange, value: ServingSize.servings(4) });
     const input = screen.getByLabelText('Amount');
     fireEvent.change(input, { target: { value: '' } });
     const result = onChange.mock.calls[0][0] as ServingSize;
     expect(result.amount).toBe(1);
+  });
+
+  it('keeps the box empty after the amount is deleted', () => {
+    const onChange = vi.fn();
+    renderSelector({ onChange, value: ServingSize.servings(1) });
+    const input = screen.getByLabelText('Amount') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '' } });
+    expect(input.value).toBe('');
+    fireEvent.blur(input);
+    expect(input.value).toBe('');
+  });
+
+  it('accepts a new amount typed into an emptied box', () => {
+    const onChange = vi.fn();
+    renderSelector({ onChange, value: ServingSize.servings(1) });
+    const input = screen.getByLabelText('Amount');
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.change(input, { target: { value: '2' } });
+    const result = onChange.mock.calls[onChange.mock.calls.length - 1][0] as ServingSize;
+    expect(result.amount).toBe(2);
+  });
+
+  it('keeps the amount in use while the box holds an invalid value', () => {
+    const onChange = vi.fn();
+    renderSelector({ onChange, value: ServingSize.servings(2) });
+    const input = screen.getByLabelText('Amount') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '1.2.3' } });
+    expect(input.value).toBe('1.2.3');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('restores the amount in use when an invalid box is blurred', () => {
+    const onChange = vi.fn();
+    renderSelector({ onChange, value: ServingSize.servings(2) });
+    const input = screen.getByLabelText('Amount') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'abc' } });
+    fireEvent.blur(input);
+    expect(input.value).toBe('2');
+  });
+
+  it('rejects an amount of zero or less', () => {
+    const onChange = vi.fn();
+    renderSelector({ onChange, value: ServingSize.servings(2) });
+    const input = screen.getByLabelText('Amount');
+    fireEvent.change(input, { target: { value: '-5' } });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('accepts a comma as the decimal separator', () => {
+    const onChange = vi.fn();
+    renderSelector({ onChange });
+    const input = screen.getByLabelText('Amount');
+    fireEvent.change(input, { target: { value: '1,5' } });
+    const result = onChange.mock.calls[0][0] as ServingSize;
+    expect(result.amount).toBe(1.5);
   });
 
   it('closes dropdown on Escape key', () => {
@@ -319,13 +372,20 @@ describe('ServingSizeSelector', () => {
       expect(result.amount).toBe(-5);
     });
 
-    it('defaults to 0 when amount input is empty in compact mode', () => {
+    it('keeps the amount in use when the box is emptied in compact mode', () => {
       const onChange = vi.fn();
-      renderSelector({ size: 'sm', onChange });
-      const input = screen.getByLabelText('Amount');
+      renderSelector({ size: 'sm', onChange, value: ServingSize.servings(3) });
+      const input = screen.getByLabelText('Amount') as HTMLInputElement;
       fireEvent.change(input, { target: { value: '' } });
-      const result = onChange.mock.calls[0][0] as ServingSize;
-      expect(result.amount).toBe(0);
+      expect(input.value).toBe('');
+      expect(onChange).not.toHaveBeenCalled();
+      fireEvent.blur(input);
+      expect(input.value).toBe('3');
+    });
+
+    it('shows an amount of one in compact mode', () => {
+      renderSelector({ size: 'sm', value: ServingSize.servings(1) });
+      expect(screen.getByLabelText('Amount')).toHaveValue('1');
     });
 
     it('opens searchable dropdown in compact mode', () => {

@@ -45,13 +45,13 @@ describe('PreparationServingSection', () => {
 
   it('renders mass fields', () => {
     renderSection();
-    expect(screen.getByLabelText('Mass amount')).toHaveValue(14);
+    expect(screen.getByLabelText('Mass amount')).toHaveValue('14');
     expect(screen.getByLabelText('Mass unit')).toHaveTextContent('Grams (g)');
   });
 
   it('renders volume fields', () => {
     renderSection();
-    expect(screen.getByLabelText('Volume amount')).toHaveValue(1);
+    expect(screen.getByLabelText('Volume amount')).toHaveValue('1');
     // 'tbsp' is not a known unitConfig value, so it falls back to raw unit string
     expect(screen.getByLabelText('Volume unit')).toHaveTextContent('tbsp');
   });
@@ -82,14 +82,13 @@ describe('PreparationServingSection', () => {
     );
   });
 
-  it('sets mass amount to 0 when amount input is cleared', () => {
+  it('keeps the mass amount when the amount input is cleared', () => {
     renderSection();
-    fireEvent.change(screen.getByLabelText('Mass amount'), { target: { value: '' } });
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        preparations: [expect.objectContaining({ mass: { amount: 0, unit: 'g' } })],
-      }),
-    );
+    const input = screen.getByLabelText('Mass amount') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '' } });
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.blur(input);
+    expect(input.value).toBe('14');
   });
 
   it('calls onChange with null mass when "None" is selected', () => {

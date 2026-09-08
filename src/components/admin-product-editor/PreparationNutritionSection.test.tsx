@@ -43,9 +43,9 @@ describe('PreparationNutritionSection', () => {
 
   it('renders populated nutrients', () => {
     renderSection();
-    expect(screen.getByLabelText('Calories amount')).toHaveValue(100);
+    expect(screen.getByLabelText('Calories amount')).toHaveValue('100');
     expect(screen.getByLabelText('Calories unit')).toHaveTextContent('Calories (kcal)');
-    expect(screen.getByLabelText('Total fat amount')).toHaveValue(11);
+    expect(screen.getByLabelText('Total fat amount')).toHaveValue('11');
   });
 
   it('renders energy units for calorie nutrients', () => {
