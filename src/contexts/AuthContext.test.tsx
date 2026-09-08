@@ -360,7 +360,9 @@ describe('AuthContext', () => {
       debug: false,
       user: null,
     });
-    mockGetTokenExpiry.mockReturnValue(1700000900);
+    // Must be in the future: an already-expired token makes the proactive-refresh
+    // effect fire immediately, and the default tryRefresh mock then signs the user out.
+    mockGetTokenExpiry.mockReturnValue(Math.floor(Date.now() / 1000) + 900);
     mockAuthLogin.mockResolvedValue({
       token: 'fake.jwt.token',
       user: testUser,
