@@ -66,7 +66,6 @@ describe('HomePage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
-      mcpURL: null,
       refreshSession: vi.fn(),
     });
     renderWithRouter(<HomePage />);

@@ -1,20 +1,17 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '../../contexts/AuthContext';
+import { MCP_URL } from '../../api';
 import { CopyButton, SectionHeader, SubsectionTitle } from '../common';
 
 const API_KEY_PLACEHOLDER = '<API key>';
 
-/** How to connect an AI assistant over MCP; renders nothing when the server doesn't offer it. */
+/** How to connect an AI assistant to this API over MCP. */
 export default function ConnectAssistantSection() {
   const { t } = useTranslation();
-  const { mcpURL } = useAuth();
   const urlId = useId();
 
-  if (!mcpURL) return null;
-
-  const command = `claude mcp add --transport http recipe ${mcpURL} --header "Authorization: Bearer ${API_KEY_PLACEHOLDER}"`;
+  const command = `claude mcp add --transport http recipe ${MCP_URL} --header "Authorization: Bearer ${API_KEY_PLACEHOLDER}"`;
 
   return (
     <>
@@ -32,11 +29,11 @@ export default function ConnectAssistantSection() {
               id={urlId}
               type="text"
               className="form-control font-monospace"
-              value={mcpURL}
+              value={MCP_URL}
               readOnly
             />
             <CopyButton
-              text={mcpURL}
+              text={MCP_URL}
               label={t('assistant.copyUrl')}
               className="btn btn-outline-secondary"
             />

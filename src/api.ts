@@ -45,8 +45,6 @@ export interface ApiStatus {
   environment: string | null;
   debug: boolean;
   user: AuthUser | null;
-  /** Null when the server doesn't accept MCP connections; absent from older servers. */
-  mcpURL?: string | null;
 }
 
 // Runtime config (Docker) or build-time config (local dev)
@@ -73,6 +71,7 @@ const getApiDisplayUrl = (): string => {
 };
 
 export const API_BASE = getApiBase();
+export const MCP_URL = new URL(`${API_BASE}/mcp`, window.location.href).href;
 export const API_DISPLAY_URL = getApiDisplayUrl();
 
 export const getAdminVersion = (): string | null => {
