@@ -47,6 +47,7 @@ vi.mock('../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../api', () => ({
+  MCP_URL: 'http://localhost:8080/mcp',
   settingsListPasskeys: vi.fn(),
   settingsAddPasskeyBegin: vi.fn(),
   settingsAddPasskeyFinish: vi.fn(),
@@ -173,7 +174,6 @@ describe('SettingsPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
-      mcpURL: null,
     });
   });
 

@@ -71,7 +71,6 @@ function signInOnCall() {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
-      mcpURL: null,
       refreshSession: vi.fn(),
     });
   };
@@ -91,7 +90,6 @@ describe('LoginPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
-      mcpURL: null,
       refreshSession: vi.fn(),
     });
   });
@@ -154,7 +152,6 @@ describe('LoginPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
-      mcpURL: null,
       refreshSession: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
@@ -181,7 +178,6 @@ describe('LoginPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
-      mcpURL: null,
       refreshSession: vi.fn(),
     });
     renderWithRouter(<LoginPage />);

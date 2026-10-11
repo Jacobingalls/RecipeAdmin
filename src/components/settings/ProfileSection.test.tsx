@@ -41,7 +41,6 @@ function setupAuth(user = defaultUser) {
     apiVersion: null,
     apiGitCommit: null,
     apiEnvironment: null,
-    mcpURL: null,
   });
 }
 

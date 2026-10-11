@@ -43,7 +43,6 @@ function TestConsumer() {
     apiVersion,
     apiGitCommit,
     apiEnvironment,
-    mcpURL,
     login,
     logout,
     loginWithPasskey,
@@ -58,7 +57,6 @@ function TestConsumer() {
       <span data-testid="api-version">{apiVersion ?? 'null'}</span>
       <span data-testid="api-git-commit">{apiGitCommit ?? 'null'}</span>
       <span data-testid="api-environment">{apiEnvironment ?? 'null'}</span>
-      <span data-testid="mcp-url">{mcpURL ?? 'null'}</span>
       <button data-testid="login" onClick={() => login('user', 'pass')} type="button" />
       <button data-testid="logout" onClick={() => logout()} type="button" />
       <button data-testid="passkey" onClick={() => loginWithPasskey()} type="button" />
@@ -108,75 +106,6 @@ describe('AuthContext', () => {
     });
     expect(screen.getByTestId('api-version')).toHaveTextContent('2.1.0');
     expect(screen.getByTestId('api-environment')).toHaveTextContent('staging');
-  });
-
-  it('stores mcpURL from status response', async () => {
-    mockGetStatus.mockResolvedValue({
-      version: null,
-      gitCommit: null,
-      environment: null,
-      debug: false,
-      user: testUser,
-      mcpURL: 'https://recipe-api.example.com/mcp',
-    });
-    await act(async () => {
-      render(
-        <AuthProvider>
-          <TestConsumer />
-        </AuthProvider>,
-      );
-    });
-    expect(screen.getByTestId('mcp-url')).toHaveTextContent('https://recipe-api.example.com/mcp');
-  });
-
-  it('leaves mcpURL null when the server omits it', async () => {
-    mockGetStatus.mockResolvedValue({
-      version: null,
-      gitCommit: null,
-      environment: null,
-      debug: false,
-      user: testUser,
-    });
-    await act(async () => {
-      render(
-        <AuthProvider>
-          <TestConsumer />
-        </AuthProvider>,
-      );
-    });
-    expect(screen.getByTestId('mcp-url')).toHaveTextContent('null');
-  });
-
-  it('updates mcpURL when the session is refreshed', async () => {
-    mockGetStatus.mockResolvedValueOnce({
-      version: null,
-      gitCommit: null,
-      environment: null,
-      debug: false,
-      user: testUser,
-      mcpURL: null,
-    });
-    await act(async () => {
-      render(
-        <AuthProvider>
-          <TestConsumer />
-        </AuthProvider>,
-      );
-    });
-    expect(screen.getByTestId('mcp-url')).toHaveTextContent('null');
-
-    mockGetStatus.mockResolvedValueOnce({
-      version: null,
-      gitCommit: null,
-      environment: null,
-      debug: false,
-      user: testUser,
-      mcpURL: 'https://recipe-api.example.com/mcp',
-    });
-    await act(async () => {
-      screen.getByTestId('refresh-session').click();
-    });
-    expect(screen.getByTestId('mcp-url')).toHaveTextContent('https://recipe-api.example.com/mcp');
   });
 
   it('derives environment from debug flag when environment is null', async () => {

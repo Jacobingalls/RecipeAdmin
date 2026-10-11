@@ -56,7 +56,6 @@ function renderWithRouter(isAuthenticated: boolean, isLoading: boolean, path = '
     apiVersion: null,
     apiGitCommit: null,
     apiEnvironment: null,
-    mcpURL: null,
     refreshSession: vi.fn(),
   });
 

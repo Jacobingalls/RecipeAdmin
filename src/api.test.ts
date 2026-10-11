@@ -191,22 +191,6 @@ describe('lookupBarcode', () => {
 });
 
 describe('getStatus', () => {
-  it('returns the MCP URL when the server offers one', async () => {
-    const status = {
-      version: '1.2.3',
-      gitCommit: null,
-      environment: 'production',
-      debug: false,
-      user: null,
-      mcpURL: 'https://recipe-api.example.com/mcp',
-    };
-    mockFetch.mockResolvedValue(mockResponse(status));
-
-    const result = await getStatus();
-
-    expect(result.mcpURL).toBe('https://recipe-api.example.com/mcp');
-  });
-
   it('calls /status endpoint', async () => {
     const status = { version: '1.2.3', environment: 'production', debug: false, user: null };
     mockFetch.mockResolvedValue(mockResponse(status));
