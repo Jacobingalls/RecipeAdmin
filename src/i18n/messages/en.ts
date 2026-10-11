@@ -11,6 +11,7 @@ import { enHome } from './en/home';
 import { enNav } from './en/nav';
 import { enNutrients } from './en/nutrients';
 import { enNutritionLabel } from './en/nutrition';
+import { enOAuth } from './en/oauth';
 import { enSettings } from './en/settings';
 import { enTimePicker } from './en/timePicker';
 import { enUnits } from './en/units';
@@ -38,6 +39,7 @@ export const en = {
   ...enUnits,
   ...enNutrients,
   ...enNutritionLabel,
+  ...enOAuth,
 };
 
 export type MessageKey = keyof typeof en;

@@ -52,40 +52,52 @@ export default function SessionsSection({
       </SectionHeader>
       {sessions && sessions.length > 0 ? (
         <div className="list-group mb-3">
-          {sessions.map((session) => (
-            <ListRow
-              key={session.familyID}
-              icon="bi-display"
-              content={
-                <>
-                  <strong>{session.deviceName}</strong>
-                  <br />
-                  <small className="text-body-secondary">
-                    {t('sessions.created', { time: formatRelativeTime(session.sessionCreatedAt) })}
-                    {session.lastRefreshedAt && (
+          {sessions.map((session) => {
+            const isApp = !!session.clientID;
+            return (
+              <ListRow
+                key={session.familyID}
+                icon={isApp ? 'bi-plug' : 'bi-display'}
+                content={
+                  <>
+                    <strong>{session.deviceName}</strong>
+                    {isApp && (
+                      <span className="badge text-bg-secondary ms-2">
+                        {t('sessions.connectedApp')}
+                      </span>
+                    )}
+                    <br />
+                    <small className="text-body-secondary">
+                      {t('sessions.created', {
+                        time: formatRelativeTime(session.sessionCreatedAt),
+                      })}
+                      {session.lastRefreshedAt && (
+                        <>
+                          {' '}
+                          &middot;{' '}
+                          {t('sessions.lastActive', {
+                            time: formatRelativeTime(session.lastRefreshedAt),
+                          })}
+                        </>
+                      )}
                       <>
                         {' '}
                         &middot;{' '}
-                        {t('sessions.lastActive', {
-                          time: formatRelativeTime(session.lastRefreshedAt),
-                        })}
+                        {t('sessions.expires', { time: formatRelativeTime(session.expiresAt) })}
                       </>
-                    )}
-                    <>
-                      {' '}
-                      &middot;{' '}
-                      {t('sessions.expires', { time: formatRelativeTime(session.expiresAt) })}
-                    </>
-                  </small>
-                </>
-              }
-            >
-              <DeleteButton
-                ariaLabel={t('sessions.revoke', { name: session.deviceName })}
-                onClick={() => onRevokeSession(session.familyID)}
-              />
-            </ListRow>
-          ))}
+                    </small>
+                  </>
+                }
+              >
+                <DeleteButton
+                  ariaLabel={t(isApp ? 'sessions.revokeApp' : 'sessions.revoke', {
+                    name: session.deviceName,
+                  })}
+                  onClick={() => onRevokeSession(session.familyID)}
+                />
+              </ListRow>
+            );
+          })}
         </div>
       ) : (
         <p className="text-body-secondary small">{t('sessions.empty')}</p>

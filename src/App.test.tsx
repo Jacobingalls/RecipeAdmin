@@ -72,6 +72,10 @@ vi.mock('./pages/LoginPage', () => ({
   default: () => <div data-testid="login-page" />,
 }));
 
+vi.mock('./pages/OAuthConsentPage', () => ({
+  default: () => <div data-testid="oauth-consent-page" />,
+}));
+
 vi.mock('./pages/SettingsPage', () => ({
   default: () => <div data-testid="settings-page" />,
 }));
@@ -168,6 +172,12 @@ describe('App', () => {
     window.history.pushState({}, '', '/history');
     render(<App />);
     expect(screen.getByTestId('history-page')).toBeInTheDocument();
+  });
+
+  it('renders OAuth consent page on /oauth/consent', () => {
+    window.history.pushState({}, '', '/oauth/consent?request=abc');
+    render(<App />);
+    expect(screen.getByTestId('oauth-consent-page')).toBeInTheDocument();
   });
 
   it('redirects unknown routes to /', () => {

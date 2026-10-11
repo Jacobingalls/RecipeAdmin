@@ -49,6 +49,8 @@ export const svAuth: Translations<typeof enAuth> = {
   'sessions.lastActive': 'Senast aktiv {{time}}',
   'sessions.expires': 'Går ut {{time}}',
   'sessions.revoke': 'Återkalla sessionen {{name}}',
+  'sessions.revokeApp': 'Återkalla åtkomsten för {{name}}',
+  'sessions.connectedApp': 'Ansluten app',
   'sessions.empty': 'Inga aktiva sessioner',
   'sessions.revokeAll.title': 'Återkalla alla sessioner',
   'sessions.revokeAll.message':

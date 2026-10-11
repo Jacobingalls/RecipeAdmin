@@ -13,6 +13,7 @@ export { default as HistoryPage } from './HistoryPage';
 export { default as HomePage } from './HomePage';
 export { default as LoginPage } from './LoginPage';
 export { default as LookupPage } from './LookupPage';
+export { default as OAuthConsentPage } from './OAuthConsentPage';
 export { default as ProductDetailPage } from './ProductDetailPage';
 export { default as ProductsPage } from './ProductsPage';
 export { default as SearchPage } from './SearchPage';

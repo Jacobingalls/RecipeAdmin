@@ -60,6 +60,7 @@ describe('PasskeySetupPrompt', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
       refreshSession: vi.fn(),
     });
   });
@@ -90,6 +91,7 @@ describe('PasskeySetupPrompt', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
       refreshSession: vi.fn(),
     });
     const { container } = render(<PasskeySetupPrompt />);
@@ -108,6 +110,7 @@ describe('PasskeySetupPrompt', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
       refreshSession: vi.fn(),
     });
     const { container } = render(<PasskeySetupPrompt />);

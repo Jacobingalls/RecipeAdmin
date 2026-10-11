@@ -33,4 +33,18 @@ export const esSettings: Translations<typeof enSettings> = {
   'labelStyle.system': 'Seguir tu idioma',
   'labelStyle.us': 'Estadounidense (calorías, % del valor diario)',
   'labelStyle.european': 'Europea (kilojulios, por 100 g)',
+  'assistant.title': 'Conecta un asistente de IA',
+  'assistant.description':
+    'Usa tus recetas y tu registro de comidas desde un asistente como Claude.',
+  'assistant.urlLabel': 'URL del servidor MCP',
+  'assistant.copyUrl': 'Copiar URL',
+  'assistant.copyCommand': 'Copiar comando',
+  'assistant.claude.title': 'Claude',
+  'assistant.claude.instructions':
+    'En Claude para web, escritorio o móvil, añade un conector personalizado con esta URL. Te pediremos que apruebes el acceso.',
+  'assistant.agents.title': 'Claude Code y otros agentes',
+  'assistant.agents.instructions':
+    'Ejecuta este comando y sustituye {{placeholder}} por una clave que crees en Credenciales, más arriba.',
+  'assistant.sessionsNote':
+    'Las apps conectadas aparecen en Sesiones, donde puedes revocar su acceso cuando quieras.',
 };

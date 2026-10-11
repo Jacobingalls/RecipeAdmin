@@ -1,3 +1,4 @@
+export { default as ConnectAssistantSection } from './ConnectAssistantSection';
 export { default as CreateAPIKeyModal } from './CreateAPIKeyModal';
 export { default as CredentialsSection } from './CredentialsSection';
 export { default as NutritionLabelSection } from './NutritionLabelSection';

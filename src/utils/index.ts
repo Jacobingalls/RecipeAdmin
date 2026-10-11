@@ -46,3 +46,7 @@ export { buildDeclaration, referenceIntakeEnergy } from './europeanDeclaration';
 export type { Declaration, DeclarationRow, DeclaredEnergy } from './europeanDeclaration';
 export { nutritionForServing, referenceQuantity } from './referenceQuantity';
 export type { ReferenceQuantity } from './referenceQuantity';
+export { safeReturnPath, returnPathFromState } from './returnPath';
+export type { ReturnLocationState } from './returnPath';
+export { describeOAuthRedirect } from './oauthRedirect';
+export type { OAuthRedirectTarget } from './oauthRedirect';

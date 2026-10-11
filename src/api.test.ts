@@ -9,6 +9,9 @@ import {
   getTokenExpiry,
   adminUpsertProducts,
   adminDeleteProduct,
+  ApiError,
+  oauthDescribeAuthorization,
+  oauthDecideAuthorization,
   API_BASE,
   API_DISPLAY_URL,
 } from './api';
@@ -188,6 +191,22 @@ describe('lookupBarcode', () => {
 });
 
 describe('getStatus', () => {
+  it('returns the MCP URL when the server offers one', async () => {
+    const status = {
+      version: '1.2.3',
+      gitCommit: null,
+      environment: 'production',
+      debug: false,
+      user: null,
+      mcpURL: 'https://recipe-api.example.com/mcp',
+    };
+    mockFetch.mockResolvedValue(mockResponse(status));
+
+    const result = await getStatus();
+
+    expect(result.mcpURL).toBe('https://recipe-api.example.com/mcp');
+  });
+
   it('calls /status endpoint', async () => {
     const status = { version: '1.2.3', environment: 'production', debug: false, user: null };
     mockFetch.mockResolvedValue(mockResponse(status));
@@ -484,5 +503,86 @@ describe('adminDeleteProduct', () => {
     mockFetch.mockResolvedValue(mockResponse(null, false, 404));
 
     await expect(adminDeleteProduct('p1')).rejects.toThrow('HTTP 404');
+  });
+});
+
+describe('oauthDescribeAuthorization', () => {
+  it('posts the request token and returns the description', async () => {
+    const description = {
+      clientID: 'client-1',
+      clientName: 'Claude',
+      redirectURI: 'https://claude.ai/api/mcp/auth_callback',
+      scopes: [{ name: 'recipes:read', description: 'Read your recipes' }],
+    };
+    mockFetch.mockResolvedValue(mockResponse(description));
+
+    const result = await oauthDescribeAuthorization('signed-token');
+
+    expect(result).toEqual(description);
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/oauth/authorize/describe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request: 'signed-token' }),
+      credentials: 'include',
+    });
+  });
+
+  it("rejects with the server's reason when the request is invalid", async () => {
+    mockFetch.mockResolvedValue(
+      mockResponse({ error: true, reason: 'Authorization request expired' }, false, 400),
+    );
+
+    const error = await oauthDescribeAuthorization('stale').catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({
+      status: 400,
+      reason: 'Authorization request expired',
+      message: 'HTTP 400',
+    });
+  });
+
+  it('rejects without a reason when the error body has none', async () => {
+    mockFetch.mockResolvedValue(mockResponse({ error: true }, false, 500));
+
+    await expect(oauthDescribeAuthorization('x')).rejects.toMatchObject({
+      status: 500,
+      reason: null,
+    });
+  });
+
+  it('rejects without a reason when the error body is not JSON', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: () => Promise.reject(new SyntaxError('Unexpected token')),
+    });
+
+    await expect(oauthDescribeAuthorization('x')).rejects.toMatchObject({
+      status: 502,
+      reason: null,
+    });
+  });
+});
+
+describe('oauthDecideAuthorization', () => {
+  it.each([true, false])('posts the decision approve=%s', async (approve) => {
+    mockFetch.mockResolvedValue(mockResponse({ redirectTo: 'https://claude.ai/cb?code=abc' }));
+
+    const result = await oauthDecideAuthorization('signed-token', approve);
+
+    expect(result).toEqual({ redirectTo: 'https://claude.ai/cb?code=abc' });
+    expect(mockFetch).toHaveBeenCalledWith(`${API_BASE}/oauth/authorize/decision`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request: 'signed-token', approve }),
+      credentials: 'include',
+    });
+  });
+
+  it('throws on non-ok response', async () => {
+    mockFetch.mockResolvedValue(mockResponse({ error: true, reason: 'Bad origin' }, false, 403));
+
+    await expect(oauthDecideAuthorization('t', true)).rejects.toThrow('HTTP 403');
   });
 });

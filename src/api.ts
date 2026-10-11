@@ -45,6 +45,8 @@ export interface ApiStatus {
   environment: string | null;
   debug: boolean;
   user: AuthUser | null;
+  /** Null when the server doesn't accept MCP connections; absent from older servers. */
+  mcpURL?: string | null;
 }
 
 // Runtime config (Docker) or build-time config (local dev)
@@ -191,6 +193,32 @@ async function apiFetchWithMeta<T>(endpoint: string): Promise<{ data: T; meta: A
   return { data, meta: { maxAge: parseMaxAge(res) } };
 }
 
+/** `reason` is the server's explanation, when it sent one. */
+export class ApiError extends Error {
+  readonly status: number;
+
+  readonly reason: string | null;
+
+  constructor(status: number, reason: string | null) {
+    super(`HTTP ${status}`);
+    this.name = 'ApiError';
+    this.status = status;
+    this.reason = reason;
+  }
+}
+
+async function readErrorReason(res: Response): Promise<string | null> {
+  try {
+    const body: unknown = await res.json();
+    if (body && typeof body === 'object' && 'reason' in body && typeof body.reason === 'string') {
+      return body.reason;
+    }
+  } catch {
+    // Not every error has a JSON body
+  }
+  return null;
+}
+
 async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> {
   const res = await fetchWithRefresh(`${API_BASE}${endpoint}`, {
     method: 'POST',
@@ -202,7 +230,7 @@ async function apiPost<TReq, TRes>(endpoint: string, body: TReq): Promise<TRes> 
     if (res.status === 401) {
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
     }
-    throw new Error(`HTTP ${res.status}`);
+    throw new ApiError(res.status, await readErrorReason(res));
   }
   return res.json() as Promise<TRes>;
 }
@@ -661,6 +689,8 @@ export interface SessionInfo {
   sessionCreatedAt: number;
   lastRefreshedAt: number | null;
   expiresAt: number;
+  /** Set when the session belongs to an app connected through OAuth rather than a device. */
+  clientID?: string | null;
 }
 
 export async function settingsListSessions(): Promise<SessionInfo[]> {
@@ -686,6 +716,43 @@ export async function settingsRevokeSessions(): Promise<void> {
     }
     throw new Error(`HTTP ${res.status}`);
   }
+}
+
+// OAuth consent API functions
+
+export interface OAuthScope {
+  name: string;
+  description: string;
+}
+
+export interface OAuthAuthorizationDescription {
+  clientID: string;
+  clientName: string;
+  redirectURI: string;
+  scopes: OAuthScope[];
+}
+
+export interface OAuthDecisionResponse {
+  redirectTo: string;
+}
+
+/** Rejects with an `ApiError` whose `reason` explains an expired or invalid request. */
+export async function oauthDescribeAuthorization(
+  request: string,
+): Promise<OAuthAuthorizationDescription> {
+  return apiPost<{ request: string }, OAuthAuthorizationDescription>('/oauth/authorize/describe', {
+    request,
+  });
+}
+
+export async function oauthDecideAuthorization(
+  request: string,
+  approve: boolean,
+): Promise<OAuthDecisionResponse> {
+  return apiPost<{ request: string; approve: boolean }, OAuthDecisionResponse>(
+    '/oauth/authorize/decision',
+    { request, approve },
+  );
 }
 
 // Admin API functions

@@ -51,6 +51,8 @@ export const nlAuth: Translations<typeof enAuth> = {
   'sessions.lastActive': 'Laatst actief {{time}}',
   'sessions.expires': 'Verloopt {{time}}',
   'sessions.revoke': 'Sessie {{name}} intrekken',
+  'sessions.revokeApp': 'Toegang van {{name}} intrekken',
+  'sessions.connectedApp': 'Gekoppelde app',
   'sessions.empty': 'Geen actieve sessies',
   'sessions.revokeAll.title': 'Alle sessies intrekken',
   'sessions.revokeAll.message': 'Hiermee log je uit op al je apparaten, ook op dit apparaat.',

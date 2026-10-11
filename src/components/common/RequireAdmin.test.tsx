@@ -51,6 +51,7 @@ function renderWithRoutes(user: { isAdmin: boolean } | null, isLoading = false) 
     apiVersion: null,
     apiGitCommit: null,
     apiEnvironment: null,
+    mcpURL: null,
     refreshSession: vi.fn(),
   });
 
