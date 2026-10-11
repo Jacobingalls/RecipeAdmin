@@ -12,6 +12,7 @@ import { daHome } from './da/home';
 import { daNav } from './da/nav';
 import { daNutrients } from './da/nutrients';
 import { daNutritionLabel } from './da/nutrition';
+import { daOAuth } from './da/oauth';
 import { daSettings } from './da/settings';
 import { daTimePicker } from './da/timePicker';
 import { daUnits } from './da/units';
@@ -34,4 +35,5 @@ export const da: Messages = {
   ...daUnits,
   ...daNutrients,
   ...daNutritionLabel,
+  ...daOAuth,
 };

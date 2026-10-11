@@ -12,6 +12,7 @@ import { svHome } from './sv/home';
 import { svNav } from './sv/nav';
 import { svNutrients } from './sv/nutrients';
 import { svNutritionLabel } from './sv/nutrition';
+import { svOAuth } from './sv/oauth';
 import { svSettings } from './sv/settings';
 import { svTimePicker } from './sv/timePicker';
 import { svUnits } from './sv/units';
@@ -34,4 +35,5 @@ export const sv: Messages = {
   ...svUnits,
   ...svNutrients,
   ...svNutritionLabel,
+  ...svOAuth,
 };

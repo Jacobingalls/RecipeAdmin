@@ -33,4 +33,17 @@ export const daSettings: Translations<typeof enSettings> = {
   'labelStyle.system': 'Følg dit sprog',
   'labelStyle.us': 'Amerikansk (kalorier, % af daglig værdi)',
   'labelStyle.european': 'Europæisk (kilojoule, pr. 100 g)',
+  'assistant.title': 'Forbind en AI-assistent',
+  'assistant.description': 'Brug dine opskrifter og din madlog fra en assistent som Claude.',
+  'assistant.urlLabel': 'MCP-serverens URL',
+  'assistant.copyUrl': 'Kopiér URL',
+  'assistant.copyCommand': 'Kopiér kommando',
+  'assistant.claude.title': 'Claude',
+  'assistant.claude.instructions':
+    'Tilføj en brugerdefineret connector med denne URL i Claude på nettet, computeren eller mobilen. Du bliver bedt om at godkende adgangen.',
+  'assistant.agents.title': 'Claude Code og andre agenter',
+  'assistant.agents.instructions':
+    'Kør denne kommando, og erstat {{placeholder}} med en nøgle, du opretter under Loginoplysninger ovenfor.',
+  'assistant.sessionsNote':
+    'Tilknyttede apps vises under Sessioner, hvor du når som helst kan tilbagekalde deres adgang.',
 };

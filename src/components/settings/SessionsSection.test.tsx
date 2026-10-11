@@ -121,4 +121,47 @@ describe('SessionsSection', () => {
     renderSection();
     expect(screen.getByText(/Last active/)).toBeInTheDocument();
   });
+
+  describe('connected apps', () => {
+    const appSession: SessionInfo = {
+      familyID: 'fam-app',
+      deviceName: 'Claude Code',
+      sessionCreatedAt: 1700000000,
+      lastRefreshedAt: null,
+      expiresAt: 1702592000,
+      clientID: 'client-123',
+    };
+    const deviceSession: SessionInfo = { ...sampleSessions[0], clientID: null };
+
+    it('labels an app session and gives it an app icon', () => {
+      const { container } = renderSection({ sessions: [appSession] });
+      const row = screen.getByText('Claude Code').closest('.list-group-item') as HTMLElement;
+      expect(row).toHaveTextContent('Connected app');
+      expect(row.querySelector('.bi-plug')).toBeInTheDocument();
+      expect(container.querySelector('.bi-display')).not.toBeInTheDocument();
+    });
+
+    it('shows a device session without the app label', () => {
+      const { container } = renderSection({ sessions: [deviceSession] });
+      expect(screen.queryByText('Connected app')).not.toBeInTheDocument();
+      expect(container.querySelector('.bi-display')).toBeInTheDocument();
+      expect(container.querySelector('.bi-plug')).not.toBeInTheDocument();
+    });
+
+    it('names the revoke action for apps and devices', () => {
+      renderSection({ sessions: [appSession, deviceSession] });
+      expect(
+        screen.getByRole('button', { name: 'Revoke access for Claude Code' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Revoke session Chrome on macOS' }),
+      ).toBeInTheDocument();
+    });
+
+    it('revokes an app session by its familyID', () => {
+      renderSection({ sessions: [appSession] });
+      fireEvent.click(screen.getByRole('button', { name: 'Revoke access for Claude Code' }));
+      expect(onRevokeSession).toHaveBeenCalledWith('fam-app');
+    });
+  });
 });

@@ -49,6 +49,8 @@ export const daAuth: Translations<typeof enAuth> = {
   'sessions.lastActive': 'Senest aktiv {{time}}',
   'sessions.expires': 'Udløber {{time}}',
   'sessions.revoke': 'Tilbagekald sessionen {{name}}',
+  'sessions.revokeApp': 'Tilbagekald adgangen for {{name}}',
+  'sessions.connectedApp': 'Tilknyttet app',
   'sessions.empty': 'Ingen aktive sessioner',
   'sessions.revokeAll.title': 'Tilbagekald alle sessioner',
   'sessions.revokeAll.message': 'Dette logger dig ud på alle enheder, inklusive denne.',

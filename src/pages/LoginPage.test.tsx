@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
 
@@ -31,6 +31,52 @@ function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
 
+const authenticatedUser = {
+  id: '1',
+  username: 'test',
+  displayName: 'Test User',
+  email: 'test@example.com',
+  isAdmin: false,
+  hasPasskeys: true,
+};
+
+function CurrentLocation() {
+  const location = useLocation();
+  return <div data-testid="current-location">{`${location.pathname}${location.search}`}</div>;
+}
+
+function renderLoginWithReturnState(state: unknown) {
+  const tree = () => (
+    <MemoryRouter initialEntries={[{ pathname: '/login', state }]}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<CurrentLocation />} />
+      </Routes>
+    </MemoryRouter>
+  );
+  const result = render(tree());
+  return { rerender: () => result.rerender(tree()) };
+}
+
+function signInOnCall() {
+  return async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: authenticatedUser,
+      isLoading: false,
+      login: mockLogin,
+      loginWithPasskey: mockLoginWithPasskey,
+      logout: vi.fn(),
+      updateUser: vi.fn(),
+      apiVersion: null,
+      apiGitCommit: null,
+      apiEnvironment: null,
+      mcpURL: null,
+      refreshSession: vi.fn(),
+    });
+  };
+}
+
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -45,6 +91,7 @@ describe('LoginPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
       refreshSession: vi.fn(),
     });
   });
@@ -107,6 +154,7 @@ describe('LoginPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
       refreshSession: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
@@ -133,6 +181,7 @@ describe('LoginPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
       refreshSession: vi.fn(),
     });
     renderWithRouter(<LoginPage />);
@@ -188,5 +237,61 @@ describe('LoginPage', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       "Couldn't sign in. Check your credentials and try again.",
     );
+  });
+
+  describe('returning after sign-in', () => {
+    const consentPath = '/oauth/consent?request=abc.def';
+
+    it('returns to the page that required sign-in after passkey login', async () => {
+      mockLoginWithPasskey.mockImplementation(signInOnCall());
+      const { rerender } = renderLoginWithReturnState({ from: consentPath });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /sign in with passkey/i }));
+      });
+      rerender();
+      expect(screen.getByTestId('current-location')).toHaveTextContent(consentPath);
+    });
+
+    it('returns to the page that required sign-in after API key login', async () => {
+      mockLogin.mockImplementation(signInOnCall());
+      const { rerender } = renderLoginWithReturnState({ from: consentPath });
+      fireEvent.click(screen.getByRole('button', { name: /sign in with api key/i }));
+      fireEvent.change(screen.getByLabelText(/username or email/i), { target: { value: 'u' } });
+      fireEvent.change(screen.getByLabelText(/api key/i), { target: { value: 'k' } });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+      });
+      rerender();
+      expect(screen.getByTestId('current-location')).toHaveTextContent(consentPath);
+    });
+
+    it('goes home when there is no return path', async () => {
+      mockLoginWithPasskey.mockImplementation(signInOnCall());
+      const { rerender } = renderLoginWithReturnState(null);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /sign in with passkey/i }));
+      });
+      rerender();
+      expect(screen.getByTestId('current-location').textContent).toBe('/');
+    });
+
+    it.each(['//evil.example.com/steal', 'https://evil.example.com', '/\\evil.example.com'])(
+      'goes home instead of the unsafe return path %s',
+      async (from) => {
+        mockLoginWithPasskey.mockImplementation(signInOnCall());
+        const { rerender } = renderLoginWithReturnState({ from });
+        await act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: /sign in with passkey/i }));
+        });
+        rerender();
+        expect(screen.getByTestId('current-location').textContent).toBe('/');
+      },
+    );
+
+    it('returns immediately when already signed in', () => {
+      signInOnCall()();
+      renderLoginWithReturnState({ from: consentPath });
+      expect(screen.getByTestId('current-location')).toHaveTextContent(consentPath);
+    });
   });
 });

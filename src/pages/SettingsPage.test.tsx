@@ -173,6 +173,7 @@ describe('SettingsPage', () => {
       apiVersion: null,
       apiGitCommit: null,
       apiEnvironment: null,
+      mcpURL: null,
     });
   });
 

@@ -23,6 +23,7 @@ import {
   HomePage,
   LoginPage,
   LookupPage,
+  OAuthConsentPage,
   ProductDetailPage,
   ProductsPage,
   SearchPage,
@@ -62,6 +63,7 @@ export default function App() {
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/oauth/consent" element={<OAuthConsentPage />} />
             </Route>
           </Route>
           <Route element={<AdminLayout />}>

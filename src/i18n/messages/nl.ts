@@ -12,6 +12,7 @@ import { nlHome } from './nl/home';
 import { nlNav } from './nl/nav';
 import { nlNutrients } from './nl/nutrients';
 import { nlNutritionLabel } from './nl/nutrition';
+import { nlOAuth } from './nl/oauth';
 import { nlSettings } from './nl/settings';
 import { nlTimePicker } from './nl/timePicker';
 import { nlUnits } from './nl/units';
@@ -34,4 +35,5 @@ export const nl: Messages = {
   ...nlUnits,
   ...nlNutrients,
   ...nlNutritionLabel,
+  ...nlOAuth,
 };

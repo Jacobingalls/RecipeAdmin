@@ -12,6 +12,7 @@ import { esHome } from './es/home';
 import { esNav } from './es/nav';
 import { esNutrients } from './es/nutrients';
 import { esNutritionLabel } from './es/nutrition';
+import { esOAuth } from './es/oauth';
 import { esSettings } from './es/settings';
 import { esTimePicker } from './es/timePicker';
 import { esUnits } from './es/units';
@@ -34,4 +35,5 @@ export const es: Messages = {
   ...esUnits,
   ...esNutrients,
   ...esNutritionLabel,
+  ...esOAuth,
 };

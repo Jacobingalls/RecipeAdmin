@@ -50,6 +50,8 @@ export const esAuth: Translations<typeof enAuth> = {
   'sessions.lastActive': 'Actividad más reciente {{time}}',
   'sessions.expires': 'Caduca {{time}}',
   'sessions.revoke': 'Revocar la sesión {{name}}',
+  'sessions.revokeApp': 'Revocar el acceso de {{name}}',
+  'sessions.connectedApp': 'App conectada',
   'sessions.empty': 'Sin sesiones activas',
   'sessions.revokeAll.title': 'Revocar todas las sesiones',
   'sessions.revokeAll.message': 'Esto cerrará tu sesión en todos los dispositivos, incluido este.',

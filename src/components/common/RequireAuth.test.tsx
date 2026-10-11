@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -30,7 +30,12 @@ vi.mock('./LoadingState', () => ({
 
 const mockUseAuth = vi.mocked(useAuth);
 
-function renderWithRouter(isAuthenticated: boolean, isLoading: boolean) {
+function LoginLocation() {
+  const location = useLocation();
+  return <div data-testid="login-page">{JSON.stringify(location.state)}</div>;
+}
+
+function renderWithRouter(isAuthenticated: boolean, isLoading: boolean, path = '/protected') {
   mockUseAuth.mockReturnValue({
     isAuthenticated,
     user: isAuthenticated
@@ -51,13 +56,14 @@ function renderWithRouter(isAuthenticated: boolean, isLoading: boolean) {
     apiVersion: null,
     apiGitCommit: null,
     apiEnvironment: null,
+    mcpURL: null,
     refreshSession: vi.fn(),
   });
 
   return render(
-    <MemoryRouter initialEntries={['/protected']}>
+    <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/login" element={<div data-testid="login-page" />} />
+        <Route path="/login" element={<LoginLocation />} />
         <Route element={<RequireAuth />}>
           <Route path="/protected" element={<div data-testid="protected-content" />} />
         </Route>
@@ -89,5 +95,12 @@ describe('RequireAuth', () => {
   it('does not render PasskeySetupPrompt', () => {
     renderWithRouter(true, false);
     expect(screen.queryByTestId('passkey-setup-prompt')).not.toBeInTheDocument();
+  });
+
+  it('remembers the requested page, including its query, for after sign-in', () => {
+    renderWithRouter(false, false, '/protected?request=abc.def');
+    expect(JSON.parse(screen.getByTestId('login-page').textContent ?? 'null')).toEqual({
+      from: '/protected?request=abc.def',
+    });
   });
 });

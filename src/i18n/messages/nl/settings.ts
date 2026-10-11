@@ -33,4 +33,17 @@ export const nlSettings: Translations<typeof enSettings> = {
   'labelStyle.system': 'Je taal volgen',
   'labelStyle.us': 'Amerikaans (calorieën, % dagelijkse waarde)',
   'labelStyle.european': 'Europees (kilojoules, per 100 g)',
+  'assistant.title': 'Een AI-assistent koppelen',
+  'assistant.description': 'Gebruik je recepten en voedingslog vanuit een assistent zoals Claude.',
+  'assistant.urlLabel': 'URL van de MCP-server',
+  'assistant.copyUrl': 'URL kopiëren',
+  'assistant.copyCommand': 'Opdracht kopiëren',
+  'assistant.claude.title': 'Claude',
+  'assistant.claude.instructions':
+    'Voeg in Claude op het web, de desktop of je telefoon een aangepaste connector toe met deze URL. Je wordt gevraagd de toegang goed te keuren.',
+  'assistant.agents.title': 'Claude Code en andere agents',
+  'assistant.agents.instructions':
+    'Voer deze opdracht uit en vervang {{placeholder}} door een sleutel die je hierboven bij Inloggegevens aanmaakt.',
+  'assistant.sessionsNote':
+    'Gekoppelde apps staan bij Sessies, waar je hun toegang altijd kunt intrekken.',
 };

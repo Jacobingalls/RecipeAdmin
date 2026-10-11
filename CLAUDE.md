@@ -188,6 +188,10 @@ src/
 │   │   ├── AdminCredentialsSection # Credential list + temp key generation
 │   │   ├── TempAPIKeyModal # Temporary API key display
 │   │   └── DangerZoneSection # Revoke sessions + delete user
+│   ├── oauth/             # OAuth consent page sections
+│   │   ├── index.ts       # Barrel exports
+│   │   ├── OAuthConsentSummary # Client, account, redirect host warning, requested scopes
+│   │   └── OAuthConsentActions # Allow/deny buttons that hand the browser back to the client
 │   ├── lookup/            # Barcode lookup components
 │   │   ├── index.ts       # Barrel exports
 │   │   ├── GroupCard      # Group result card
@@ -263,6 +267,7 @@ src/
 │   ├── HomePage           # /
 │   ├── LoginPage          # /login — passkey + API key login
 │   ├── LookupPage         # /lookup/:barcode?
+│   ├── OAuthConsentPage   # /oauth/consent?request= — approve/deny an OAuth client
 │   ├── ProductDetailPage  # /products/:id
 │   ├── ProductsPage       # /products
 │   └── SettingsPage       # /settings — own passkeys + API keys
@@ -271,7 +276,9 @@ src/
     ├── europeanDeclaration.ts # Builds the EU declaration (per-100 columns, salt, RI%)
     ├── formatters.ts      # formatSignificant, formatServingSize
     ├── nutritionLabelStyle.ts # US/European preference, energy conversion and formatting
-    └── referenceQuantity.ts # Resolves the per-100 g or per-100 ml basis
+    ├── oauthRedirect.ts   # describeOAuthRedirect — redirect host + familiar/unfamiliar
+    ├── referenceQuantity.ts # Resolves the per-100 g or per-100 ml basis
+    └── returnPath.ts      # safeReturnPath — same-app return target after sign-in
 ```
 
 ## Authentication
@@ -308,7 +315,7 @@ Routes are protected using layout route components:
 </Route>
 ```
 
-- **RequireAuth** — redirects to `/login` if not authenticated, shows `PasskeySetupPrompt` for users without passkeys
+- **RequireAuth** — redirects to `/login` if not authenticated, passing the requested path + query as router state `{ from }`; `LoginPage` sends the user back there once signed in (via `returnPathFromState`, which only accepts same-app paths starting with a single `/`, so the return target can't become an open redirect)
 - **RequireAdmin** — redirects to `/` if `user.isAdmin` is false
 
 ### PasskeySetupPrompt
@@ -334,6 +341,7 @@ Admin functions: `adminListUsers`, `adminCreateUser`, `adminUpdateUser`, `adminD
 | SettingsPage | `/settings` | Manage own passkeys and API keys |
 | AdminUsersPage | `/admin/users` | List/create users, shows one-time temp API key on create |
 | AdminUserDetailPage | `/admin/users/:id` | Edit user, manage their passkeys and API keys |
+| OAuthConsentPage | `/oauth/consent?request=` | Approve or deny an OAuth client (e.g. claude.ai) the API redirected here; warns when the redirect host isn't claude.ai or loopback |
 
 ### Header
 

@@ -20,6 +20,7 @@ interface AuthContextValue {
   apiVersion: string | null;
   apiGitCommit: string | null;
   apiEnvironment: string | null;
+  mcpURL: string | null;
   login: (usernameOrEmail: string, password: string) => Promise<void>;
   loginWithPasskey: (usernameOrEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [apiVersion, setApiVersion] = useState<string | null>(null);
   const [apiGitCommit, setApiGitCommit] = useState<string | null>(null);
   const [apiEnvironment, setApiEnvironment] = useState<string | null>(null);
+  const [mcpURL, setMcpURL] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setApiVersion(status.version);
       setApiGitCommit(status.gitCommit ?? null);
       setApiEnvironment(status.environment ?? (status.debug ? 'Debug' : 'Production'));
+      setMcpURL(status.mcpURL ?? null);
     } catch {
       setUser(null);
     } finally {
@@ -138,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setApiVersion(status.version);
     setApiGitCommit(status.gitCommit ?? null);
     setApiEnvironment(status.environment ?? (status.debug ? 'Debug' : 'Production'));
+    setMcpURL(status.mcpURL ?? null);
   }, []);
 
   return (
@@ -149,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         apiVersion,
         apiGitCommit,
         apiEnvironment,
+        mcpURL,
         login,
         loginWithPasskey,
         logout: logoutFn,

@@ -47,6 +47,8 @@ export const enAuth = {
   'sessions.lastActive': 'Last active {{time}}',
   'sessions.expires': 'Expires {{time}}',
   'sessions.revoke': 'Revoke session {{name}}',
+  'sessions.revokeApp': 'Revoke access for {{name}}',
+  'sessions.connectedApp': 'Connected app',
   'sessions.empty': 'No active sessions',
   'sessions.revokeAll.title': 'Revoke all sessions',
   'sessions.revokeAll.message': 'This will sign you out of all devices, including this one.',

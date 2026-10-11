@@ -19,6 +19,7 @@ import {
   ModalFooter,
 } from '../components/common';
 import {
+  ConnectAssistantSection,
   ProfileSection,
   CredentialsSection,
   LanguageSection,
@@ -105,6 +106,8 @@ export default function SettingsPage() {
       <LanguageSection />
 
       <NutritionLabelSection />
+
+      <ConnectAssistantSection />
 
       <SessionsSection
         sessions={sessions}

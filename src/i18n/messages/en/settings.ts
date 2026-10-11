@@ -31,4 +31,17 @@ export const enSettings = {
   'labelStyle.system': 'Follow your language',
   'labelStyle.us': 'US (calories, % daily value)',
   'labelStyle.european': 'European (kilojoules, per 100 g)',
+  'assistant.title': 'Connect an AI assistant',
+  'assistant.description': 'Use your recipes and food log from an assistant like Claude.',
+  'assistant.urlLabel': 'MCP server URL',
+  'assistant.copyUrl': 'Copy URL',
+  'assistant.copyCommand': 'Copy command',
+  'assistant.claude.title': 'Claude',
+  'assistant.claude.instructions':
+    "In Claude on the web, desktop or mobile, add a custom connector with this URL. You'll be asked to approve access.",
+  'assistant.agents.title': 'Claude Code and other agents',
+  'assistant.agents.instructions':
+    'Run this command, replacing {{placeholder}} with a key you create under Credentials above.',
+  'assistant.sessionsNote':
+    'Connected apps appear under Sessions, where you can revoke their access at any time.',
 };
