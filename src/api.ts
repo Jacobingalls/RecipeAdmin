@@ -338,11 +338,9 @@ export async function logEntry(entry: LogEntryRequest): Promise<void> {
         preparationID: entry.preparationId,
         servingSize: entry.servingSize,
       };
-  const body: { item: typeof item; timestamp?: number } = { item };
-  if (entry.timestamp !== undefined) {
-    body.timestamp = entry.timestamp;
-  }
-  await apiPost<typeof body, unknown>('/logs', body);
+  // The API requires a timestamp, so an entry without one is logged as eaten now.
+  const timestamp = entry.timestamp ?? Math.floor(Date.now() / 1000);
+  await apiPost<{ item: typeof item; timestamp: number }, unknown>('/logs', { item, timestamp });
 }
 
 export async function updateLogEntryServingSize(

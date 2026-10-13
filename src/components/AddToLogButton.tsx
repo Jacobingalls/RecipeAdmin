@@ -1,78 +1,28 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { ServingSize } from '../domain';
-import { logEntry } from '../api';
+import type { LogTarget } from './LogModal';
+import LogModal from './LogModal';
 
 interface AddToLogButtonProps {
-  productId?: string;
-  groupId?: string;
-  preparationId?: string;
-  servingSize: ServingSize;
+  /** What to log; the modal starts from its serving size and lets the reader pick a time. */
+  target: LogTarget;
 }
 
-type LogState = 'idle' | 'logging' | 'success';
-
-export default function AddToLogButton({
-  productId,
-  groupId,
-  preparationId,
-  servingSize,
-}: AddToLogButtonProps) {
+export default function AddToLogButton({ target }: AddToLogButtonProps) {
   const { t } = useTranslation();
-  const [logState, setLogState] = useState<LogState>('idle');
-  const [logError, setLogError] = useState<string | null>(null);
-
-  const handleLog = useCallback(async () => {
-    setLogState('logging');
-    setLogError(null);
-
-    try {
-      await logEntry({
-        productId,
-        groupId,
-        preparationId,
-        servingSize: servingSize.toObject(),
-      });
-      setLogState('success');
-      setTimeout(() => {
-        setLogState('idle');
-      }, 1500);
-    } catch (e: unknown) {
-      setLogError((e as Error).message);
-      setLogState('idle');
-    }
-  }, [productId, groupId, preparationId, servingSize]);
-
-  let buttonText: string;
-  let buttonClass: string;
-  if (logState === 'logging') {
-    buttonText = t('log.button.logging');
-    buttonClass = 'btn btn-outline-primary btn-sm';
-  } else if (logState === 'success') {
-    buttonText = t('log.button.logged');
-    buttonClass = 'btn btn-success btn-sm';
-  } else {
-    buttonText = t('log.button.add');
-    buttonClass = 'btn btn-outline-primary btn-sm';
-  }
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div>
+    <>
       <button
         type="button"
-        className={buttonClass}
-        onClick={handleLog}
-        disabled={logState !== 'idle'}
-        aria-live="polite"
+        className="btn btn-outline-primary btn-sm"
+        onClick={() => setIsOpen(true)}
       >
-        {buttonText}
+        {t('log.button.add')}
       </button>
-      {logError && (
-        <div className="text-danger small mt-1" role="alert">
-          {logError}
-        </div>
-      )}
-    </div>
+      <LogModal target={isOpen ? target : null} onClose={() => setIsOpen(false)} />
+    </>
   );
 }

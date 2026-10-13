@@ -203,7 +203,19 @@ describe('getStatus', () => {
 });
 
 describe('logEntry', () => {
-  it('POSTs to /logs with product format', async () => {
+  const now = new Date('2026-10-12T12:00:00Z');
+  const nowSeconds = now.getTime() / 1000;
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(now);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('POSTs to /logs with product format, logged now by default', async () => {
     mockFetch.mockResolvedValue(mockResponse(null));
 
     const entry = {
@@ -223,12 +235,13 @@ describe('logEntry', () => {
           preparationID: 'prep1',
           servingSize: { kind: 'servings', amount: 2 },
         },
+        timestamp: nowSeconds,
       }),
       credentials: 'include',
     });
   });
 
-  it('POSTs with group format', async () => {
+  it('POSTs with group format, logged now by default', async () => {
     mockFetch.mockResolvedValue(mockResponse(null));
 
     await logEntry({
@@ -245,9 +258,23 @@ describe('logEntry', () => {
           groupID: 'g1',
           servingSize: { kind: 'servings', amount: 1 },
         },
+        timestamp: nowSeconds,
       }),
       credentials: 'include',
     });
+  });
+
+  it('sends the given timestamp', async () => {
+    mockFetch.mockResolvedValue(mockResponse(null));
+
+    await logEntry({
+      groupId: 'g1',
+      servingSize: { kind: 'servings', amount: 1 },
+      timestamp: 1234,
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string) as { timestamp: number };
+    expect(body.timestamp).toBe(1234);
   });
 
   it('returns void on success', async () => {

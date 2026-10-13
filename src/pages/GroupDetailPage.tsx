@@ -75,7 +75,15 @@ export default function GroupDetailPage() {
                     onChange={setServingSize}
                   />
                   <div className="ms-auto d-flex gap-2">
-                    <AddToLogButton groupId={groupData.id} servingSize={servingSize} />
+                    <AddToLogButton
+                      target={{
+                        name: groupData.name ?? '',
+                        brand: groupData.brand,
+                        prepOrGroup: group!,
+                        initialServingSize: servingSize,
+                        groupId: groupData.id,
+                      }}
+                    />
                     <AddToFavoritesButton groupId={groupData.id} servingSize={servingSize} />
                   </div>
                 </div>

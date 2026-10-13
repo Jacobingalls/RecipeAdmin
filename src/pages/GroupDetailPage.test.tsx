@@ -3,6 +3,7 @@ import type { Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
+import type { LogTarget } from '../components/LogModal';
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ProductGroupData } from '../domain';
 import { ServingSize } from '../domain';
@@ -68,7 +69,15 @@ vi.mock('../components/AddToFavoritesButton', () => ({
 }));
 
 vi.mock('../components/AddToLogButton', () => ({
-  default: () => <div data-testid="add-to-log-button" />,
+  default: ({ target }: { target: LogTarget }) => (
+    <div
+      data-testid="add-to-log-button"
+      data-name={target.name}
+      data-product-id={target.productId}
+      data-group-id={target.groupId}
+      data-preparation-id={target.preparationId}
+    />
+  ),
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -171,6 +180,14 @@ describe('GroupDetailPage', () => {
     mockQuery({ data: sampleGroup });
     renderWithRoute('/groups/g1');
     expect(screen.getByTestId('add-to-log-button')).toBeInTheDocument();
+  });
+
+  it('logs the group', () => {
+    mockQuery({ data: sampleGroup });
+    renderWithRoute('/groups/g1');
+    const button = screen.getByTestId('add-to-log-button');
+    expect(button).toHaveAttribute('data-name', 'Breakfast Bowl');
+    expect(button).toHaveAttribute('data-group-id', 'g1');
   });
 
   it('renders AddToFavoritesButton', () => {

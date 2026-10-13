@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
+import type { LogTarget } from '../components/LogModal';
 import type { UseApiQueryResult } from '../hooks/useApiQuery';
 import type { ApiProduct } from '../api';
 import { ServingSize } from '../domain';
@@ -56,7 +57,15 @@ vi.mock('../components/AddToFavoritesButton', () => ({
 }));
 
 vi.mock('../components/AddToLogButton', () => ({
-  default: () => <div data-testid="add-to-log-button" />,
+  default: ({ target }: { target: LogTarget }) => (
+    <div
+      data-testid="add-to-log-button"
+      data-name={target.name}
+      data-product-id={target.productId}
+      data-group-id={target.groupId}
+      data-preparation-id={target.preparationId}
+    />
+  ),
 }));
 
 const mockUseApiQuery = vi.mocked(useApiQuery);
@@ -242,6 +251,15 @@ describe('ProductDetailPage', () => {
     expect(screen.getByTestId('add-to-log-button')).toBeInTheDocument();
     // Verify it's inside the action slot
     expect(screen.getByTestId('action-slot')).toBeInTheDocument();
+  });
+
+  it('logs the product and its active preparation', () => {
+    mockQuery({ data: sampleProduct });
+    renderWithRoute('/products/p1?prep=prep2');
+    const button = screen.getByTestId('add-to-log-button');
+    expect(button).toHaveAttribute('data-name', 'Peanut Butter');
+    expect(button).toHaveAttribute('data-product-id', 'p1');
+    expect(button).toHaveAttribute('data-preparation-id', 'prep2');
   });
 
   it('renders AddToFavoritesButton inside PreparationDetails', () => {

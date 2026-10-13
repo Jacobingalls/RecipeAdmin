@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { ApiProduct } from '../api';
 import { getProduct } from '../api';
-import { ServingSize } from '../domain';
+import { Preparation, ServingSize } from '../domain';
 import { useApiQuery, useServingSizeParams } from '../hooks';
 import {
   LoadingState,
@@ -117,9 +117,14 @@ export default function ProductDetailPage() {
                       actionSlot={
                         <div className="d-flex gap-2">
                           <AddToLogButton
-                            productId={product.id}
-                            preparationId={currentPrep.id}
-                            servingSize={servingSize}
+                            target={{
+                              name: product.name,
+                              brand: product.brand,
+                              prepOrGroup: new Preparation(currentPrep),
+                              initialServingSize: servingSize,
+                              productId: product.id,
+                              preparationId: currentPrep.id,
+                            }}
                           />
                           <AddToFavoritesButton
                             productId={product.id}
