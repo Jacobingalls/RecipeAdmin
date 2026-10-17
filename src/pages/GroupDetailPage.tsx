@@ -14,6 +14,7 @@ import {
 } from '../components/common';
 import { GroupItemRow } from '../components/group';
 import BarcodeSection from '../components/BarcodeSection';
+import NotesDisplay from '../components/NotesDisplay';
 import NutritionLabel from '../components/NutritionLabel';
 import ServingSizeSelector from '../components/ServingSizeSelector';
 import CustomSizesSection from '../components/CustomSizesSection';
@@ -63,6 +64,12 @@ export default function GroupDetailPage() {
           {groupData.brand && <p className="text-secondary mb-1">{groupData.brand}</p>}
           <h1 className="mb-1">{groupData.name}</h1>
           <CategoryPaths categoryIds={groupData.categories ?? []} />
+
+          {groupData.notes?.length ? (
+            <div className="mb-3">
+              <NotesDisplay notes={groupData.notes} />
+            </div>
+          ) : null}
 
           <section className="mt-4">
             <SubsectionTitle>{t('group.nutritionEstimate')}</SubsectionTitle>
