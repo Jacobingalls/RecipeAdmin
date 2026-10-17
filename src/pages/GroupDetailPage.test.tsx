@@ -64,6 +64,12 @@ vi.mock('../components/BarcodeSection', () => ({
   default: () => <div data-testid="barcode-section" />,
 }));
 
+vi.mock('../components/NotesDisplay', () => ({
+  default: ({ notes }: { notes: unknown[] }) => (
+    <div data-testid="notes-display">{notes.length} notes</div>
+  ),
+}));
+
 vi.mock('../components/AddToFavoritesButton', () => ({
   default: () => <div data-testid="add-to-favorites-button" />,
 }));
@@ -218,6 +224,24 @@ describe('GroupDetailPage', () => {
     mockQuery({ data: { ...sampleGroup, barcodes: [] } });
     renderWithRoute('/groups/g1');
     expect(screen.queryByTestId('barcode-section')).not.toBeInTheDocument();
+  });
+
+  it('renders notes when present', () => {
+    mockQuery({ data: { ...sampleGroup, notes: [{ information: { text: 'Some note' } }] } });
+    renderWithRoute('/groups/g1');
+    expect(screen.getByTestId('notes-display')).toHaveTextContent('1 notes');
+  });
+
+  it('does not render notes when empty', () => {
+    mockQuery({ data: { ...sampleGroup, notes: [] } });
+    renderWithRoute('/groups/g1');
+    expect(screen.queryByTestId('notes-display')).not.toBeInTheDocument();
+  });
+
+  it('does not render notes when absent', () => {
+    mockQuery({ data: sampleGroup });
+    renderWithRoute('/groups/g1');
+    expect(screen.queryByTestId('notes-display')).not.toBeInTheDocument();
   });
 
   it('shows no items message when items array is empty', () => {
