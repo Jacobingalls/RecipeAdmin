@@ -38,8 +38,10 @@ export const daHistory: Translations<typeof enHistory> = {
   'log.button.logged': 'Logget!',
 
   'search.resultsLabel': 'Søgeresultater',
+  'search.categories': 'Kategorier',
+  'search.items': 'Produkter og grupper',
   'search.error': 'Vi kunne ikke indlæse søgeresultaterne. Prøv igen.',
   'search.empty.title': 'Ingen resultater',
-  'search.start.title': 'Søg efter produkter og grupper',
+  'search.start.title': 'Søg efter produkter, grupper og kategorier',
   'search.start.description': 'Brug søgefeltet ovenfor for at komme i gang.',
 };

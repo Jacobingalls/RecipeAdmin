@@ -13,7 +13,7 @@ export default function SearchPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
-  const { results, loading, error } = useSearch(query);
+  const { results, categories, loading, error } = useSearch(query);
   const [logItem, setLogItem] = useState<ApiSearchResult | null>(null);
 
   const logTarget = useMemo(
@@ -35,6 +35,7 @@ export default function SearchPage() {
     <>
       <SearchResults
         results={results}
+        categories={categories}
         loading={loading}
         error={error}
         query={query}

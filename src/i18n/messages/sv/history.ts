@@ -38,8 +38,10 @@ export const svHistory: Translations<typeof enHistory> = {
   'log.button.logged': 'Loggat!',
 
   'search.resultsLabel': 'Sökresultat',
+  'search.categories': 'Kategorier',
+  'search.items': 'Produkter och grupper',
   'search.error': 'Vi kunde inte ladda sökresultaten. Försök igen.',
   'search.empty.title': 'Inga resultat',
-  'search.start.title': 'Sök bland produkter och grupper',
+  'search.start.title': 'Sök bland produkter, grupper och kategorier',
   'search.start.description': 'Använd sökrutan ovan för att komma igång.',
 };

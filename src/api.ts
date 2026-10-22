@@ -293,6 +293,10 @@ export async function searchItems(query: string): Promise<ApiSearchResult[]> {
   return apiPost<{ query: string }, ApiSearchResult[]>('/search', { query });
 }
 
+export async function searchCategories(query: string): Promise<ApiCategorySearchResult[]> {
+  return apiPost<{ query: string }, ApiCategorySearchResult[]>('/search/categories', { query });
+}
+
 export async function listProducts(): Promise<ApiProduct[]> {
   return apiFetch<ApiProduct[]>('/products');
 }
@@ -441,6 +445,15 @@ export interface ApiCategory {
   parents: string[];
   children: string[];
   notes: unknown[];
+}
+
+export interface ApiCategorySearchResult {
+  category: ApiCategory;
+  /** Dot-separated slugs from the top level down, for `/categories/:path` links. */
+  slugPath: string;
+  /** Display names from the top level down, joined with " › ". */
+  path: string;
+  relevance: number;
 }
 
 // Category API functions

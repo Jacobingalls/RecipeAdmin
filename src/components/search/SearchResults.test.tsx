@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import type { ApiSearchResult } from '../../api';
+import type { ApiCategorySearchResult, ApiSearchResult } from '../../api';
 
 import SearchResults from './SearchResults';
 
@@ -10,6 +11,17 @@ vi.mock('../common', () => ({
   ErrorState: ({ message }: { message: string }) => <div data-testid="error-state">{message}</div>,
   ContentUnavailableView: ({ title }: { title: string }) => (
     <div data-testid="content-unavailable-view">{title}</div>
+  ),
+  SubsectionTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
+}));
+
+vi.mock('./CategorySearchResults', () => ({
+  default: ({ categories }: { categories: ApiCategorySearchResult[] }) => (
+    <ul data-testid="category-search-results">
+      {categories.map(({ category }) => (
+        <li key={category.id}>{category.displayName}</li>
+      ))}
+    </ul>
   ),
 }));
 
@@ -37,6 +49,23 @@ const sampleResults: ApiSearchResult[] = [
     item: { group: { id: 'g1', name: 'Fruit Mix' } },
     servingSize: { kind: 'servings', amount: 1 },
     relevance: 0.9,
+  },
+];
+
+const sampleCategories: ApiCategorySearchResult[] = [
+  {
+    category: {
+      id: 'c1',
+      slug: 'fruit',
+      displayName: 'Fruit',
+      description: null,
+      parents: [],
+      children: [],
+      notes: [],
+    },
+    slugPath: 'fruit',
+    path: 'Fruit',
+    relevance: 1,
   },
 ];
 
@@ -99,10 +128,33 @@ describe('SearchResults', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('wraps results in a list-group with aria-label', () => {
+  it('labels the results region', () => {
     renderSearchResults({ results: sampleResults, query: 'fruit' });
     expect(screen.getByRole('region', { name: 'Search results' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Search results' })).toHaveClass('list-group');
+  });
+
+  it('shows items without section headings when no category matches', () => {
+    renderSearchResults({ results: sampleResults, categories: [], query: 'fruit' });
+    expect(screen.queryByTestId('category-search-results')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  it('shows matching categories above items, each under a heading', () => {
+    renderSearchResults({ results: sampleResults, categories: sampleCategories, query: 'fruit' });
+    expect(screen.getByTestId('category-search-results')).toHaveTextContent('Fruit');
+    expect(screen.getByRole('heading', { name: 'Products and groups' })).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('category-search-results')
+        .compareDocumentPosition(screen.getAllByTestId('search-result-row')[0]),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('shows categories alone when no item matches', () => {
+    renderSearchResults({ results: [], categories: sampleCategories, query: 'fruit' });
+    expect(screen.getByTestId('category-search-results')).toBeInTheDocument();
+    expect(screen.queryByTestId('content-unavailable-view')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('search-result-row')).not.toBeInTheDocument();
   });
 
   it('passes onLog to result items', () => {

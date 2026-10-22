@@ -38,8 +38,10 @@ export const esHistory: Translations<typeof enHistory> = {
   'log.button.logged': '¡Registrado!',
 
   'search.resultsLabel': 'Resultados de la búsqueda',
+  'search.categories': 'Categorías',
+  'search.items': 'Productos y grupos',
   'search.error': 'No pudimos cargar los resultados. Inténtalo de nuevo.',
   'search.empty.title': 'Sin resultados',
-  'search.start.title': 'Busca productos y grupos',
+  'search.start.title': 'Busca productos, grupos y categorías',
   'search.start.description': 'Usa el cuadro de búsqueda de arriba para empezar.',
 };
