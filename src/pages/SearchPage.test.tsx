@@ -77,7 +77,7 @@ describe('SearchPage', () => {
   it('shows empty state when no query is provided', () => {
     renderSearchPage();
     expect(screen.getByTestId('content-unavailable-view')).toBeInTheDocument();
-    expect(screen.getByText('Search products and groups')).toBeInTheDocument();
+    expect(screen.getByText('Search products, groups and categories')).toBeInTheDocument();
   });
 
   it('renders SearchResults when query is provided', () => {

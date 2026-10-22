@@ -36,8 +36,10 @@ export const enHistory = {
   'log.button.logged': 'Logged!',
 
   'search.resultsLabel': 'Search results',
+  'search.categories': 'Categories',
+  'search.items': 'Products and groups',
   'search.error': "Couldn't load search results. Try again.",
   'search.empty.title': 'No results',
-  'search.start.title': 'Search products and groups',
+  'search.start.title': 'Search products, groups and categories',
   'search.start.description': 'Use the search box above to get started.',
 };

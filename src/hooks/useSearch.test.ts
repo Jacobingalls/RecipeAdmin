@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 
-import type { ApiSearchResult } from '../api';
+import type { ApiCategorySearchResult, ApiSearchResult } from '../api';
+import { searchCategories, searchItems } from '../api';
 
 import type { UseApiQueryResult } from './useApiQuery';
 import { useApiQuery } from './useApiQuery';
@@ -10,16 +11,55 @@ vi.mock('./useApiQuery', () => ({
   useApiQuery: vi.fn(),
 }));
 
+vi.mock('../api', () => ({
+  searchItems: vi.fn(),
+  searchCategories: vi.fn(),
+}));
+
 const mockUseApiQuery = vi.mocked(useApiQuery);
 
-function mockQuery(overrides: Partial<UseApiQueryResult<ApiSearchResult[]>> = {}) {
+interface SearchData {
+  results: ApiSearchResult[];
+  categories: ApiCategorySearchResult[];
+}
+
+const items: ApiSearchResult[] = [
+  {
+    item: { product: { id: 'p1', name: 'Apple', preparations: [] } },
+    servingSize: { kind: 'servings', amount: 1 },
+    relevance: 1.0,
+  },
+];
+
+const categories: ApiCategorySearchResult[] = [
+  {
+    category: {
+      id: 'c1',
+      slug: 'fruit',
+      displayName: 'Fruit',
+      description: null,
+      parents: [],
+      children: [],
+      notes: [],
+    },
+    slugPath: 'fruit',
+    path: 'Fruit',
+    relevance: 0.9,
+  },
+];
+
+function lastFetcher(): () => Promise<SearchData> {
+  return mockUseApiQuery.mock.lastCall![0] as () => Promise<SearchData>;
+}
+
+function mockQuery(overrides: Partial<UseApiQueryResult<SearchData>> = {}) {
   mockUseApiQuery.mockReturnValue({
     data: null,
     loading: false,
     error: null,
     refetch: vi.fn(),
     ...overrides,
-  } as UseApiQueryResult<ApiSearchResult[]>);
+  } as UseApiQueryResult<unknown>);
 }
 
 describe('useSearch', () => {
@@ -114,17 +154,45 @@ describe('useSearch', () => {
     expect(result.current.error).toBe('Network error');
   });
 
-  it('passes results from useApiQuery', () => {
-    const items: ApiSearchResult[] = [
-      {
-        item: { product: { id: 'p1', name: 'Apple', preparations: [] } },
-        servingSize: { kind: 'servings', amount: 1 },
-        relevance: 1.0,
-      },
-    ];
-    mockQuery({ data: items });
+  it('passes item and category results from useApiQuery', () => {
+    mockQuery({ data: { results: items, categories } });
     const { result } = renderHook(() => useSearch('apple'));
     expect(result.current.results).toEqual(items);
+    expect(result.current.categories).toEqual(categories);
+  });
+
+  it('returns null categories before results arrive', () => {
+    const { result } = renderHook(() => useSearch('apple'));
+    expect(result.current.categories).toBeNull();
+  });
+
+  it('searches items and categories with the same query', async () => {
+    vi.mocked(searchItems).mockResolvedValue(items);
+    vi.mocked(searchCategories).mockResolvedValue(categories);
+    renderHook(() => useSearch('apple'));
+    act(() => vi.advanceTimersByTime(300));
+
+    await expect(lastFetcher()()).resolves.toEqual({ results: items, categories });
+    expect(searchItems).toHaveBeenCalledWith('apple');
+    expect(searchCategories).toHaveBeenCalledWith('apple');
+  });
+
+  it('shows items alone when the category search fails', async () => {
+    vi.mocked(searchItems).mockResolvedValue(items);
+    vi.mocked(searchCategories).mockRejectedValue(new Error('Not found'));
+    renderHook(() => useSearch('apple'));
+    act(() => vi.advanceTimersByTime(300));
+
+    await expect(lastFetcher()()).resolves.toEqual({ results: items, categories: [] });
+  });
+
+  it('fails when the item search fails', async () => {
+    vi.mocked(searchItems).mockRejectedValue(new Error('Network error'));
+    vi.mocked(searchCategories).mockResolvedValue(categories);
+    renderHook(() => useSearch('apple'));
+    act(() => vi.advanceTimersByTime(300));
+
+    await expect(lastFetcher()()).rejects.toThrow('Network error');
   });
 
   it('provides a user-friendly error message', () => {

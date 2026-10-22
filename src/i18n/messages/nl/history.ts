@@ -38,8 +38,10 @@ export const nlHistory: Translations<typeof enHistory> = {
   'log.button.logged': 'Gelogd!',
 
   'search.resultsLabel': 'Zoekresultaten',
+  'search.categories': 'Categorieën',
+  'search.items': 'Producten en groepen',
   'search.error': 'We konden de zoekresultaten niet laden. Probeer het opnieuw.',
   'search.empty.title': 'Geen resultaten',
-  'search.start.title': 'Zoek producten en groepen',
+  'search.start.title': 'Zoek producten, groepen en categorieën',
   'search.start.description': 'Gebruik het zoekvak hierboven om te beginnen.',
 };

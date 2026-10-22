@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { ApiSearchResult } from '../api';
-import { searchItems } from '../api';
+import type { ApiCategorySearchResult, ApiSearchResult } from '../api';
+import { searchCategories, searchItems } from '../api';
 
 import type { UseApiQueryResult } from './useApiQuery';
 import { useApiQuery } from './useApiQuery';
@@ -12,13 +12,31 @@ const MIN_QUERY_LENGTH = 2;
 
 export interface UseSearchResult {
   results: ApiSearchResult[] | null;
+  categories: ApiCategorySearchResult[] | null;
   loading: boolean;
   error: string | null;
 }
 
+interface SearchData {
+  results: ApiSearchResult[];
+  categories: ApiCategorySearchResult[];
+}
+
 /**
- * Debounced search hook. Queries the search API after a short delay
- * once the query reaches the minimum length.
+ * Category matches are a supplement to item results, so a failed category search shows the
+ * items alone rather than an error.
+ */
+async function searchEverything(query: string): Promise<SearchData> {
+  const [results, categories] = await Promise.all([
+    searchItems(query),
+    searchCategories(query).catch(() => []),
+  ]);
+  return { results, categories };
+}
+
+/**
+ * Debounced search hook for products, groups and categories. Queries the search API after a
+ * short delay once the query reaches the minimum length.
  */
 export function useSearch(query: string): UseSearchResult {
   const { t } = useTranslation();
@@ -32,8 +50,8 @@ export function useSearch(query: string): UseSearchResult {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const { data, loading, error }: UseApiQueryResult<ApiSearchResult[]> = useApiQuery(
-    () => searchItems(debouncedQuery),
+  const { data, loading, error }: UseApiQueryResult<SearchData> = useApiQuery(
+    () => searchEverything(debouncedQuery),
     [debouncedQuery],
     {
       enabled: debouncedQuery.length >= MIN_QUERY_LENGTH,
@@ -41,5 +59,10 @@ export function useSearch(query: string): UseSearchResult {
     },
   );
 
-  return { results: data, loading, error };
+  return {
+    results: data?.results ?? null,
+    categories: data?.categories ?? null,
+    loading,
+    error,
+  };
 }
